@@ -68,8 +68,8 @@
                 <div id="overlay-section" class="hidden">
                     <p class="block text-md font-medium mb-1 text-center">Overlay:</p>
                     <div id="overlay-selector" class="grid grid-cols-2 gap-1 text-[12px]">
-                        <input type="radio" id="ov-kamc" name="overlayStyle" value="kamc" checked class="hidden peer/o1">
-                        <label for="ov-kamc" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o1:bg-primary">L3 Large</label>
+                        <input type="radio" id="ov-l3Large" name="overlayStyle" value="l3Large" checked class="hidden peer/o1">
+                        <label for="ov-l3Large" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o1:bg-primary">L3 Large</label>
 
                         <input type="radio" id="ov-colorwave" name="overlayStyle" value="colorwave" class="hidden peer/o2">
                         <label for="ov-colorwave" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o2:bg-primary">Color Wave</label>
@@ -299,9 +299,9 @@
         //   effect:  canvas animation to run (see section 6)
         //   animIn / animOut: fixed animations ('' = none). Hides the Animation picker.
         //   length:  fixed run time in seconds. Hides the Duration field.
-        // "kamc" is the code name for L3 Large. Saved graphics use it, so don't rename it.
+        // "l3Large" is the code name for L3 Large. Saved graphics use it, so don't rename it.
         const OVERLAYS = {
-            kamc:      { label: 'L3 Large',   text: true,  effect: null,        animIn: 'anim-slideLeft', animOut: 'anim-slideOutLeft' },
+            l3Large:      { label: 'L3 Large',   text: true,  effect: null,        animIn: 'anim-slideLeft', animOut: 'anim-slideOutLeft' },
             colorwave: { label: 'Color Wave', text: false, effect: 'colorwave', animIn: 'anim-fade',      animOut: 'anim-hide' },
             confetti:  { label: 'Confetti',   text: false, effect: 'confetti',  animIn: 'anim-slideUp',   animOut: 'anim-hide' },
             fall:      { label: 'Fall',       text: false, effect: 'leaves',    animIn: 'anim-fade',      animOut: 'anim-hide' },
@@ -333,7 +333,7 @@
             blue: 'border-blue-500', green: 'border-green-500', black: 'border-gray-300', red: 'border-red-500',
             space: 'border-purple-400', clouds: 'border-sky-300', tech: 'border-teal-300', finance: 'border-emerald-500',
             sports: 'border-orange-400', politics: 'border-rose-500',
-            kamc: 'border-violet-400', colorwave: 'border-pink-400', confetti: 'border-amber-400', stinger: 'border-cyan-400',
+            l3Large: 'border-violet-400', colorwave: 'border-pink-400', confetti: 'border-amber-400', stinger: 'border-cyan-400',
             fall: 'border-orange-500', snow: 'border-slate-100',
         };
 
@@ -350,8 +350,8 @@
         const loadButtonsFromStorage = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
         const saveButtonsToStorage = (b) => { localStorage.setItem(STORAGE_KEY, JSON.stringify(b)); renderButtons(b); };
 
-        // True for overlays. Older saves stored L3 Large as a lower third with bgStyle "kamc".
-        const isOverlayItem = (data) => data.mode === 'overlay' || data.bgStyle === 'kamc';
+        // True for overlays. Older saves stored L3 Large as a lower third with bgStyle "l3Large".
+        const isOverlayItem = (data) => data.mode === 'overlay' || data.bgStyle === 'l3Large';
 
 
         /* =========================================================
@@ -759,7 +759,7 @@
         const showDisplay = (data) => {
             if (data.mode === 'clear') { hideLowerThird(); hideOverlay(); }
             else if (data.mode === 'overlay') showOverlay(data);
-            else if (data.bgStyle === 'kamc') showOverlay({ ...data, overlay: 'kamc' }); // older L3 Large saves
+            else if (data.bgStyle === 'l3Large') showOverlay({ ...data, overlay: 'l3Large' }); // older L3 Large saves
             else showLowerThird(data);
         };
 
@@ -814,7 +814,7 @@
         // Sends a graphic and shows "Taken: Name  for 5s"
         const flashTake = (data) => {
             if (!sendPayload(data)) return;
-            const ovKey = isOverlayItem(data) ? (data.overlay || 'kamc') : null;
+            const ovKey = isOverlayItem(data) ? (data.overlay || 'l3Large') : null;
             const secs = OVERLAYS[ovKey]?.length ?? (Number(data.duration) || 5);
             const time = secs < 60 ? `${secs}s` : `${Math.floor(secs / 60)}:${String(Math.round(secs % 60)).padStart(2, '0')}`;
             flash(`Taken: ${data.label || OVERLAYS[ovKey]?.label || 'Graphic'}`, false, `for ${time}`);
@@ -921,7 +921,7 @@
             // Sorted by file name so "L3 1A" comes before "L3 2A" and "L3 10A"
             const files = [...fileList].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
             const b = loadButtonsFromStorage();
-            const existing = new Set(b.filter(d => isOverlayItem(d) && (d.overlay || 'kamc') === 'kamc').map(d => importKey(d.label || '', d.title)));
+            const existing = new Set(b.filter(d => isOverlayItem(d) && (d.overlay || 'l3Large') === 'l3Large').map(d => importKey(d.label || '', d.title)));
             const added = [];
             let skipped = 0;
 
@@ -933,7 +933,7 @@
                     const key = importKey(label, title);
                     if (existing.has(key)) { skipped++; return; }
                     existing.add(key);
-                    added.push({ id: Date.now() + added.length, mode: 'overlay', overlay: 'kamc', label, title, duration: IMPORT_DURATION, source });
+                    added.push({ id: Date.now() + added.length, mode: 'overlay', overlay: 'l3Large', label, title, duration: IMPORT_DURATION, source });
                 });
             }
 
@@ -962,7 +962,7 @@
 
             list.forEach(data => {
                 const isOverlay = isOverlayItem(data);
-                const ovKey = data.overlay || 'kamc';
+                const ovKey = data.overlay || 'l3Large';
                 const name = data.label || OVERLAYS[ovKey]?.label || 'Untitled';
                 // Second line: file name for imported L3s, otherwise the style
                 const sub = isOverlay

@@ -205,14 +205,14 @@ body {
   display: block;
 }
 
-/* ---------- L3 Large (named "kamc" in the code) ---------- */
+/* ---------- L3 Large (named "l3Large" in the code) ---------- */
 
 /* Background image */
-#overlay-box.kamc {
-  background: url('../assets/kamc.png') center / 100% 100% no-repeat;
+#overlay-box.l3Large {
+  background: url('../assets/l3Large.png') center / 100% 100% no-repeat;
 }
 
-/* Text area: the padding lines the text up with the bar in kamc.png */
+/* Text area: the padding lines the text up with the bar in l3Large.png */
 #overlay-text {
   position: absolute;
   inset: 0;
@@ -223,34 +223,39 @@ body {
   text-align: left;
   gap: 0.4vh;
   box-sizing: border-box;
-  padding: 74.5vh 26.5vw 12.8vh 9.8vw; /* top right bottom left */
+  padding: 74.5vh 26.5vw 12.8vh 17vw; /* top right bottom left */
   color: white;
 }
-#overlay-box.kamc #overlay-text {
+#overlay-box.l3Large #overlay-text {
   display: flex;
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
   font-style: italic;
   text-transform: uppercase; /* always capitals */
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 3px 3px 5px rgba(0, 0, 0, 1);
+  
 }
 
 /* Name and title. Long text shrinks to fit (see fitText in the page script). */
 #overlay-name {
-  font-size: 82px;
-  line-height: 1.05;
+
+  font-size: 62px;
+  line-height: 1.1;
+
   width: 100%;
   margin: 0;
-  color: white;
+  color: rgb(255, 255, 255);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 #overlay-title {
   font-size: 3.4vh; /* ~37px */
-  line-height: 1.1;
+  line-height: 1;
   width: 100%;
   margin: 0;
+  margin-top: -17px;
+  margin-left: 10px;
   color: #e4dfdf;
   white-space: nowrap;
   overflow: hidden;
