@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,700&family=Bona+Nova+SC:ital,wght@0,400;0,700;1,400&family=Cal+Sans&family=Changa+One:ital@0;1&family=Limelight&family=Lobster&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Oswald:wght@200..700&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/styles.css">
+    <title>FX Wizard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind color names used in the page (bg-primary etc.) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#6D28D9',
+                        'secondary': '#C4A127',
+                        'bg-dark': '#333333',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-bg-dark text-white min-h-screen w-full p-0">
+
+    <div id="app" class="w-full h-full">
+
+        <!-- ===== CONNECTION STATUS (controller only) ===== -->
+        <div id="controller-status" class="mb-1 text-sm p-3 bg-gray-600 w-full">
+            Connection Status: <span id="controller-connection" class="font-medium text-red-400">CLOSED</span>
+        </div>
+
+        <!-- ===== CONTROLLER ===== -->
+        <div id="controller-view" class="mb-5 hidden controller-max-width mx-auto">
+            <div class="space-y-3 p-2 rounded-lg w-full">
+
+                <!-- Tabs: Lower Third / Fullscreen Overlay -->
+                <div id="mode-tabs" class="grid grid-cols-2 gap-1 text-sm">
+                    <input type="radio" id="mode-l3" name="mode" value="l3" checked class="hidden peer/m1">
+                    <label for="mode-l3" class="p-1 border rounded text-center font-bold cursor-pointer hover:bg-violet-400 peer-checked/m1:bg-primary">Lower Third</label>
+                    <input type="radio" id="mode-overlay" name="mode" value="overlay" class="hidden peer/m2">
+                    <label for="mode-overlay" class="p-1 border rounded text-center font-bold cursor-pointer hover:bg-violet-400 peer-checked/m2:bg-primary">Fullscreen Overlay</label>
+                </div>
+
+                <!-- Name and Title (lower thirds and L3 Large) -->
+                <div id="text-fields" class="flex flex-col gap-2">
+                    <div class="w-full">
+                        <label for="button-name-input" class="block text-md font-medium ">Name:</label>
+                        <input type="text" id="button-name-input" placeholder="Name" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm text-violet-300 focus:text-white focus:bg-gray-700" maxlength="50">
+                    </div>
+                    <div class="w-full">
+                        <label for="title-input" class="block text-md font-medium ">Title:</label>
+                        <input type="text" id="title-input" placeholder="Title" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm text-violet-300 focus:text-white focus:bg-gray-700" maxlength="50">
+                    </div>
+                </div>
+
+                <!-- Duration (hidden for the Stinger) -->
+                <div id="duration-field" class="w-full">
+                    <label for="duration-input" class="block text-md font-medium ">Duration (sec):</label>
+                    <input type="number" id="duration-input" value="5" min="1" class="w-full p-1 rounded border-2 border-white bg-transparent text-violet-300 text-sm focus:text-white focus:bg-gray-700">
+                </div>
+
+                <!-- ===== FULLSCREEN OVERLAY TAB ===== -->
+                <div id="overlay-section" class="hidden">
+                    <p class="block text-md font-medium mb-1 text-center">Overlay:</p>
+                    <div id="overlay-selector" class="grid grid-cols-2 gap-1 text-[12px]">
+                        <input type="radio" id="ov-kamc" name="overlayStyle" value="kamc" checked class="hidden peer/o1">
+                        <label for="ov-kamc" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o1:bg-primary">L3 Large</label>
+
+                        <input type="radio" id="ov-colorwave" name="overlayStyle" value="colorwave" class="hidden peer/o2">
+                        <label for="ov-colorwave" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o2:bg-primary">Color Wave</label>
+
+                        <input type="radio" id="ov-confetti" name="overlayStyle" value="confetti" class="hidden peer/o3">
+                        <label for="ov-confetti" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o3:bg-primary">Confetti</label>
+
+                        <input type="radio" id="ov-stinger" name="overlayStyle" value="stinger" class="hidden peer/o4">
+                        <label for="ov-stinger" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o4:bg-primary">Stinger</label>
+
+                        <input type="radio" id="ov-fall" name="overlayStyle" value="fall" class="hidden peer/o5">
+                        <label for="ov-fall" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o5:bg-primary">Fall</label>
+
+                        <input type="radio" id="ov-snow" name="overlayStyle" value="snow" class="hidden peer/o6">
+                        <label for="ov-snow" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o6:bg-primary">Snow</label>
+                    </div>
+
+                    <!-- Import L3s: each line of a .txt file becomes a saved L3 Large ("Name" or "Name | Title") -->
+                    <input type="file" id="import-file" accept=".txt,text/plain" multiple class="hidden">
+                    <button class="mt-2 py-1 w-full hover:bg-teal-600 active:scale-95 bg-teal-700 font-bold rounded text-sm" onclick="$('import-file').click()">📄 IMPORT L3s (.txt)</button>
+                </div>
+
+                <!-- ===== LOWER THIRD TAB ===== -->
+                <div id="l3-section" class="space-y-3">
+                    <!-- Backgrounds -->
+                    <div>
+                        <p class="block text-md font-medium mb-1 text-center">Backgrounds:</p>
+                        <div id="bg-selector" class="grid grid-cols-2 text-[12px] gap-1">
+                            <input type="radio" id="bg-blue" name="bgStyle" value="blue" checked class="hidden peer/b1">
+                            <label for="bg-blue" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b1:bg-blue-600">Blue</label>
+
+                            <input type="radio" id="bg-green" name="bgStyle" value="green" class="hidden peer/b2">
+                            <label for="bg-green" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b2:bg-green-600">Green</label>
+
+                            <input type="radio" id="bg-black" name="bgStyle" value="black" class="hidden peer/b3">
+                            <label for="bg-black" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b3:bg-black">Black</label>
+
+                            <input type="radio" id="bg-red" name="bgStyle" value="red" class="hidden peer/b4">
+                            <label for="bg-red" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b4:bg-red-700">Red</label>
+
+                            <input type="radio" id="bg-space" name="bgStyle" value="space" class="hidden peer/b5">
+                            <label for="bg-space" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b5:bg-purple-700">Space</label>
+
+                            <input type="radio" id="bg-clouds" name="bgStyle" value="clouds" class="hidden peer/b6">
+                            <label for="bg-clouds" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b6:bg-sky-600">Clouds</label>
+
+                            <input type="radio" id="bg-tech" name="bgStyle" value="tech" class="hidden peer/b7">
+                            <label for="bg-tech" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b7:bg-teal-500">Tech</label>
+
+                            <input type="radio" id="bg-finance" name="bgStyle" value="finance" class="hidden peer/b8">
+                            <label for="bg-finance" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b8:bg-emerald-800">Finance</label>
+
+                            <input type="radio" id="bg-sports" name="bgStyle" value="sports" class="hidden peer/b9">
+                            <label for="bg-sports" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b9:bg-orange-600">Sports</label>
+
+                            <input type="radio" id="bg-politics" name="bgStyle" value="politics" class="hidden peer/b10">
+                            <label for="bg-politics" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b10:bg-rose-800">Politics</label>
+                        </div>
+                    </div>
+
+                    <!-- Font Style -->
+                    <div>
+                        <p class="block text-md font-medium mb-1 text-center">Font Style:</p>
+                        <div id="font-selector" class="grid grid-cols-3 gap-1 text-[12px]">
+                            <input type="radio" id="font-default" name="fontStyle" value="font-default" checked class="hidden peer/f1">
+                            <label for="font-default" class="p-1 hover:bg-violet-400 border rounded text-center cursor-pointer peer-checked/f1:bg-primary">Default</label>
+                            <input type="radio" id="font-script" name="fontStyle" value="font-script" class="hidden peer/f2">
+                            <label for="font-script" class="p-1 hover:bg-violet-400 border rounded text-center cursor-pointer peer-checked/f2:bg-primary font-script">Script</label>
+                            <input type="radio" id="font-fun" name="fontStyle" value="font-fun" class="hidden peer/f3">
+                            <label for="font-fun" class="p-1 hover:bg-violet-400 border rounded text-center cursor-pointer peer-checked/f3:bg-primary font-fun">Fun</label>
+                            <input type="radio" id="font-modern" name="fontStyle" value="font-modern" class="hidden peer/f4">
+                            <label for="font-modern" class="p-1 hover:bg-violet-400 border rounded text-center cursor-pointer peer-checked/f4:bg-primary font-modern">Modern</label>
+                            <input type="radio" id="font-classic" name="fontStyle" value="font-classic" class="hidden peer/f5">
+                            <label for="font-classic" class="p-1 hover:bg-violet-400 border rounded text-center cursor-pointer peer-checked/f5:bg-primary font-classic">Classic</label>
+                            <input type="radio" id="font-accent" name="fontStyle" value="font-accent" class="hidden peer/f6">
+                            <label for="font-accent" class="p-1 hover:bg-violet-400 border rounded text-center cursor-pointer peer-checked/f6:bg-primary font-accent">Accent</label>
+                        </div>
+                    </div>
+
+                    <!-- Font Color (White = the default look) -->
+                    <div>
+                        <p class="block text-md font-medium mb-1 text-center">Font Color:</p>
+                        <div id="color-selector" class="grid grid-cols-6 gap-1.5">
+                            <input type="radio" id="fc-white" name="fontColor" value="" checked class="hidden"><label for="fc-white" title="White" style="background:#FFFFFF"></label>
+                            <input type="radio" id="fc-black" name="fontColor" value="#000000" class="hidden"><label for="fc-black" title="Black" style="background:#000000"></label>
+                            <input type="radio" id="fc-silver" name="fontColor" value="#C0C0C0" class="hidden"><label for="fc-silver" title="Silver" style="background:#C0C0C0"></label>
+                            <input type="radio" id="fc-gold" name="fontColor" value="#FFC72C" class="hidden"><label for="fc-gold" title="Gold" style="background:#FFC72C"></label>
+                            <input type="radio" id="fc-yellow" name="fontColor" value="#FFEB3B" class="hidden"><label for="fc-yellow" title="Yellow" style="background:#FFEB3B"></label>
+                            <input type="radio" id="fc-orange" name="fontColor" value="#FF8C1A" class="hidden"><label for="fc-orange" title="Orange" style="background:#FF8C1A"></label>
+                            <input type="radio" id="fc-red" name="fontColor" value="#E53935" class="hidden"><label for="fc-red" title="Red" style="background:#E53935"></label>
+                            <input type="radio" id="fc-pink" name="fontColor" value="#FF4FA3" class="hidden"><label for="fc-pink" title="Pink" style="background:#FF4FA3"></label>
+                            <input type="radio" id="fc-purple" name="fontColor" value="#9B59FF" class="hidden"><label for="fc-purple" title="Purple" style="background:#9B59FF"></label>
+                            <input type="radio" id="fc-blue" name="fontColor" value="#2F80ED" class="hidden"><label for="fc-blue" title="Blue" style="background:#2F80ED"></label>
+                            <input type="radio" id="fc-sky" name="fontColor" value="#4FC3F7" class="hidden"><label for="fc-sky" title="Sky" style="background:#4FC3F7"></label>
+                            <input type="radio" id="fc-green" name="fontColor" value="#2ECC71" class="hidden"><label for="fc-green" title="Green" style="background:#2ECC71"></label>
+                        </div>
+                    </div>
+
+                    <!-- Location -->
+                    <div>
+                        <p class="block text-md font-medium mb-1 text-center">Location:</p>
+                        <div id="location-selector" class="grid grid-cols-3 gap-1 text-[18px]">
+                            <input type="radio" id="loc-TL" name="location" value="Top Left" class="hidden peer/l1"><label for="loc-TL" class="border p-1 text-center cursor-pointer hover:bg-violet-400 peer-checked/l1:bg-primary">↖</label>
+                            <input type="radio" id="loc-TM" name="location" value="Top Middle" class="hidden peer/l2"><label for="loc-TM" class="border hover:bg-violet-400 p-1 text-center cursor-pointer peer-checked/l2:bg-primary">↑</label>
+                            <input type="radio" id="loc-TR" name="location" value="Top Right" class="hidden peer/l3"><label for="loc-TR" class="border hover:bg-violet-400 p-1 text-center cursor-pointer peer-checked/l3:bg-primary">↗</label>
+                            <input type="radio" id="loc-CL" name="location" value="Center Left" class="hidden peer/l4"><label for="loc-CL" class="border p-1 text-center cursor-pointer hover:bg-violet-400 peer-checked/l4:bg-primary">←</label>
+                            <input type="radio" id="loc-CM" name="location" value="Center Middle" class="hidden peer/l5"><label for="loc-CM" class="border p-1 text-center cursor-pointer hover:bg-violet-400 peer-checked/l5:bg-primary">•</label>
+                            <input type="radio" id="loc-CR" name="location" value="Center Right" class="hidden peer/l6"><label for="loc-CR" class="border p-1 text-center cursor-pointer hover:bg-violet-400 peer-checked/l6:bg-primary">→</label>
+                            <input type="radio" id="loc-BL" name="location" value="Bottom Left" class="hidden peer/l7"><label for="loc-BL" class="border p-1 text-center cursor-pointer hover:bg-violet-400 peer-checked/l7:bg-primary">↙</label>
+                            <input type="radio" id="loc-BM" name="location" value="Bottom Middle" class="hidden peer/l8"><label for="loc-BM" class="border p-1 text-center cursor-pointer hover:bg-violet-400 peer-checked/l8:bg-primary">↓</label>
+                            <input type="radio" id="loc-BR" name="location" value="Bottom Right" class="hidden peer/l9"><label for="loc-BR" class="border p-1 text-center cursor-pointer hover:bg-violet-400 peer-checked/l9:bg-primary">↘</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Animation (lower thirds only; every overlay has its own fixed animation) -->
+                <div id="animation-section">
+                    <p class="block text-md font-medium mb-1 text-center">Animation:</p>
+                    <div id="animation-selector" class="grid grid-cols-3 gap-1 text-[12px]">
+                        <input type="radio" id="anim-slideUp" name="animationStyle" value="anim-slideUp" checked class="hidden peer/a1">
+                        <label for="anim-slideUp" class="p-1 flex hover:bg-violet-400 justify-center items-center border rounded text-center cursor-pointer peer-checked/a1:bg-primary">Slide Up</label>
+                        <input type="radio" id="anim-fade" name="animationStyle" value="anim-fade" class="hidden peer/a2">
+                        <label for="anim-fade" class="p-1 hover:bg-violet-400 flex justify-center items-center border rounded text-center cursor-pointer peer-checked/a2:bg-primary">Fade In</label>
+                        <input type="radio" id="anim-slideLeft" name="animationStyle" value="anim-slideLeft" class="hidden peer/a3">
+                        <label for="anim-slideLeft" class="p-1 hover:bg-violet-400 flex justify-center items-center border rounded text-center cursor-pointer peer-checked/a3:bg-primary">Slide Left</label>
+                        <input type="radio" id="spin" name="animationStyle" value="anim-spinIn" class="hidden peer/a4">
+                        <label for="spin" class="p-1 hover:bg-violet-400 flex justify-center items-center border rounded text-center cursor-pointer peer-checked/a4:bg-primary">Spin</label>
+                        <input type="radio" id="slideRight" name="animationStyle" value="anim-slideRight" class="hidden peer/a5">
+                        <label for="slideRight" class="p-1 hover:bg-violet-400 flex justify-center items-center border rounded text-center cursor-pointer peer-checked/a5:bg-primary">Slide Right</label>
+                        <input type="radio" id="slideDown" name="animationStyle" value="anim-slideDown" class="hidden peer/a6">
+                        <label for="slideDown" class="p-1 hover:bg-violet-400 flex justify-center items-center border rounded text-center cursor-pointer peer-checked/a6:bg-primary">Slide Down</label>
+                    </div>
+                </div>
+
+                <!-- TAKE / SAVE / CLEAR ALL -->
+                <div class="grid grid-cols-2 items-center justify-center gap-2 mt-4 pt-2 border-t border-gray-700">
+                    <button class="py-1 hover:bg-indigo-700 w-full m-auto active:scale-95 bg-indigo-600 font-bold rounded" onclick="instantSend()">⚡TAKE</button>
+                    <button class="py-1 hover:bg-rose-600 w-full active:scale-95 m-auto bg-rose-500 font-bold rounded" onclick="saveButton()">💾 SAVE</button>
+                </div>
+                <button class="py-1 w-full hover:bg-gray-500 active:scale-95 bg-gray-700 border-2 border-red-400 text-red-300 font-bold rounded" onclick="clearAll()">✖ CLEAR ALL</button>
+            </div>
+
+            <!-- Status message ("Taken: Name for 5s") -->
+            <p id="controller-feedback" class="text-lg mt-3 text-green-400 h-5"></p>
+            <!-- Saved graphics for the current tab (filled in by the script) -->
+            <h2 id="saved-heading" class="text-base font-bold h-full mt-0 mb-2 border-b border-gray-600 pb-1 w-full text-center">Saved Lower Thirds</h2>
+            <div id="saved-buttons-container" class="grid grid-cols-2 gap-2 p-1 pt-0 w-full"></div>
+        </div>
+
+        <!-- ===== DISPLAY (what OBS shows, opened with #display) ===== -->
+        <div id="display-view" class="hidden">
+            <!-- Lower third -->
+            <div id="display-box" class="shadow-inner">
+                <p id="action-name" class="text-6xl font-black text-center text-white text-shadow break-words max-w-full"></p>
+                <h4 id="action-title" class="text-5xl font-bold text-center text-white text-shadow break-words max-w-full"></h4>
+            </div>
+
+            <!-- Fullscreen overlay (built for 1920x1080) -->
+            <div id="overlay-box">
+                <!-- Color Wave, Confetti, Fall and Snow draw here -->
+                <canvas id="fx-canvas"></canvas>
+                <!-- L3 Large text -->
+                <div id="overlay-text">
+                    <p id="overlay-name" class="text-shadow"></p>
+                    <p id="overlay-title" class="text-shadow"></p>
+                </div>
+                <!-- Stinger stripes: the bottom one leads the sweep -->
+                <div id="stinger">
+                    <div class="stinger-track">
+                        <div class="stinger-accent-2"></div>
+                        <div class="stinger-main"></div>
+                        <div class="stinger-accent-1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        /* =========================================================
+           FX WIZARD SCRIPT
+           One page, two jobs:
+             websocket_demo.html          → Controller (the control panel)
+             websocket_demo.html#display  → Display (what OBS shows)
+
+           1.  Settings
+           2.  Graphic options
+           3.  Small helpers
+           4.  Animations
+           5.  Display: lower third
+           6.  Display: canvas effects (Color Wave, Confetti, Fall, Snow)
+           7.  Display: fullscreen overlays
+           8.  Display: message router
+           9.  Connection to the server
+           10. Controller: status messages
+           11. Controller: tabs and sections
+           12. Controller: TAKE / SAVE / CLEAR ALL
+           13. Controller: Import L3s
+           14. Controller: saved graphics list
+           15. Startup
+           ========================================================= */
+
+
+        /* =========================================================
+           1. SETTINGS
+           ========================================================= */
+        const SOCKET_URL = 'ws://127.0.0.1:8080';   // the server address
+        const STORAGE_KEY = 'studio_buttons';       // where saved graphics are kept in the browser
+        const IMPORT_DURATION = 300;                // imported L3s stay up 5 minutes unless cleared
+
+        let ws = null;
+        let isController = false;
+        let l3Timeout = null;         // timer that hides the lower third
+        let l3Cleanup = null;         // timer that fully hides it after the out animation
+        let overlayTimeout = null;    // timer that hides the overlay
+        let overlayCleanup = null;    // timer that fully hides it after the out animation
+        let currentOverlay = null;    // which overlay is on screen now
+
+
+        /* =========================================================
+           2. GRAPHIC OPTIONS
+           ========================================================= */
+
+        // Fullscreen overlays
+        //   label:   name shown on buttons
+        //   text:    true = uses the Name/Title fields
+        //   effect:  canvas animation to run (see section 6)
+        //   animIn / animOut: fixed animations ('' = none). Hides the Animation picker.
+        //   length:  fixed run time in seconds. Hides the Duration field.
+        // "kamc" is the code name for L3 Large. Saved graphics use it, so don't rename it.
+        const OVERLAYS = {
+            kamc:      { label: 'L3 Large',   text: true,  effect: null,        animIn: 'anim-slideLeft', animOut: 'anim-slideOutLeft' },
+            colorwave: { label: 'Color Wave', text: false, effect: 'colorwave', animIn: 'anim-fade',      animOut: 'anim-hide' },
+            confetti:  { label: 'Confetti',   text: false, effect: 'confetti',  animIn: 'anim-slideUp',   animOut: 'anim-hide' },
+            fall:      { label: 'Fall',       text: false, effect: 'leaves',    animIn: 'anim-fade',      animOut: 'anim-hide' },
+            snow:      { label: 'Snow',       text: false, effect: 'snow',      animIn: 'anim-fade',      animOut: 'anim-hide' },
+            stinger:   { label: 'Stinger',    text: false, effect: null,        animIn: '',               animOut: '',
+                         // Read from --stinger-time in styles.css, so the speed is only set there
+                         get length() { return parseFloat(getComputedStyle($('stinger')).getPropertyValue('--stinger-time')) || 1.8; } },
+        };
+
+        // Lower third positions on screen
+        const LOCATION_MAP = {
+            "Top Left":      { top: '5vh',  bottom: 'auto', left: '5vw',  right: 'auto', margin: '0' },
+            "Top Middle":    { top: '5vh',  bottom: 'auto', left: '0',    right: '0',    margin: '0 auto' },
+            "Top Right":     { top: '5vh',  bottom: 'auto', left: 'auto', right: '5vw',  margin: '0' },
+            "Center Left":   { top: '50%',  bottom: 'auto', left: '5vw',  right: 'auto', margin: '0' },
+            "Center Middle": { top: '50%',  bottom: 'auto', left: '0',    right: '0',    margin: '0 auto' },
+            "Center Right":  { top: '50%',  bottom: 'auto', left: 'auto', right: '5vw',  margin: '0' },
+            "Bottom Left":   { top: 'auto', bottom: '5vh',  left: '5vw',  right: 'auto', margin: '0' },
+            "Bottom Middle": { top: 'auto', bottom: '5vh',  left: '0',    right: '0',    margin: '0 auto' },
+            "Bottom Right":  { top: 'auto', bottom: '5vh',  left: 'auto', right: '5vw',  margin: '0' },
+        };
+
+        // Lower third font styles and backgrounds (must match the classes in styles.css)
+        const FONT_CLASSES = ['font-default', 'font-script', 'font-fun', 'font-modern', 'font-classic', 'font-accent'];
+        const BG_CLASSES = ['blue', 'green', 'black', 'red', 'space', 'clouds', 'tech', 'finance', 'sports', 'politics'];
+
+        // Colored left edge on saved buttons: lower thirds by background, overlays by type
+        const ACCENTS = {
+            blue: 'border-blue-500', green: 'border-green-500', black: 'border-gray-300', red: 'border-red-500',
+            space: 'border-purple-400', clouds: 'border-sky-300', tech: 'border-teal-300', finance: 'border-emerald-500',
+            sports: 'border-orange-400', politics: 'border-rose-500',
+            kamc: 'border-violet-400', colorwave: 'border-pink-400', confetti: 'border-amber-400', stinger: 'border-cyan-400',
+            fall: 'border-orange-500', snow: 'border-slate-100',
+        };
+
+
+        /* =========================================================
+           3. SMALL HELPERS
+           ========================================================= */
+        const $ = (id) => document.getElementById(id);
+
+        // Value of the selected option in a group of buttons
+        const checked = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value;
+
+        // Saved graphics (kept in this browser only)
+        const loadButtonsFromStorage = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const saveButtonsToStorage = (b) => { localStorage.setItem(STORAGE_KEY, JSON.stringify(b)); renderButtons(b); };
+
+        // True for overlays. Older saves stored L3 Large as a lower third with bgStyle "kamc".
+        const isOverlayItem = (data) => data.mode === 'overlay' || data.bgStyle === 'kamc';
+
+
+        /* =========================================================
+           4. ANIMATIONS
+           ========================================================= */
+        const ANIMS = ['anim-slideUp', 'anim-slideDown', 'anim-slideLeft', 'anim-slideRight', 'anim-fade', 'anim-spinIn', 'anim-hide', 'anim-slideOutLeft'];
+        const clearAnimationClasses = (el) => el.classList.remove(...ANIMS);
+
+        // Plays an in animation ('' = just appear)
+        const playIn = (el, anim) => {
+            clearAnimationClasses(el);
+            el.style.opacity = 0;
+            void el.offsetWidth; // restarts the animation
+            el.style.opacity = 1;
+            if (anim) el.classList.add(anim);
+        };
+
+        // Plays an out animation ('' = just disappear)
+        const playOut = (el, anim = 'anim-hide') => {
+            clearAnimationClasses(el);
+            if (anim) el.classList.add(anim);
+            el.style.opacity = 0;
+        };
+
+        // Shrinks text until it fits its box (down to half size) instead of cutting it off
+        const fitText = (el) => {
+            el.style.fontSize = '';
+            const base = parseFloat(getComputedStyle(el).fontSize);
+            let size = base;
+            while (el.scrollWidth > el.clientWidth && size > base * 0.5) {
+                size -= 1;
+                el.style.fontSize = `${size}px`;
+            }
+        };
+
+
+        /* =========================================================
+           5. DISPLAY: LOWER THIRD
+           ========================================================= */
+        const showLowerThird = (data) => {
+            const box = $('display-box');
+            const title = $('action-title');
+            const name = $('action-name');
+            if (l3Timeout) clearTimeout(l3Timeout);
+            if (l3Cleanup) clearTimeout(l3Cleanup);
+
+            // Text
+            name.textContent = data.label;
+            title.textContent = data.title || '';
+            title.style.display = data.title ? 'block' : 'none';
+
+            // Font style
+            [box, title, name].forEach(el => el.classList.remove(...FONT_CLASSES));
+            const font = data.fontStyle || 'font-default';
+            [box, title, name].forEach(el => el.classList.add(font));
+
+            // Font color (none = white name, light grey title)
+            name.style.color = data.fontColor || '';
+            title.style.color = data.fontColor || '';
+
+            // Background
+            box.classList.remove(...BG_CLASSES);
+            if (data.bgStyle) box.classList.add(data.bgStyle);
+
+            // Position
+            const loc = LOCATION_MAP[data.location];
+            if (loc) {
+                box.style.top = loc.top; box.style.bottom = loc.bottom;
+                box.style.left = loc.left; box.style.right = loc.right;
+                box.style.margin = loc.margin;
+            }
+
+            // Show it, then hide it when the duration is up
+            box.style.visibility = 'visible';
+            playIn(box, data.animationStyle || 'anim-slideUp');
+            l3Timeout = setTimeout(hideLowerThird, (Number(data.duration) || 5) * 1000);
+        };
+
+        const hideLowerThird = () => {
+            const box = $('display-box');
+            if (l3Timeout) clearTimeout(l3Timeout);
+            if (l3Cleanup) clearTimeout(l3Cleanup);
+            playOut(box);
+            // Fully hide after the fade so nothing can get stuck on screen
+            l3Cleanup = setTimeout(() => { box.style.visibility = 'hidden'; }, 600);
+        };
+
+
+        /* =========================================================
+           6. DISPLAY: CANVAS EFFECTS (Color Wave, Confetti, Fall, Snow)
+           FX.start(name, seconds) and FX.stop()
+           ========================================================= */
+        const FX = (() => {
+            const canvas = $('fx-canvas');
+            const ctx = canvas.getContext('2d');
+            let W = 0, H = 0, raf = null, effect = null, last = 0, t0 = 0;
+
+            // Matches the canvas to the screen size
+            const resize = () => {
+                const dpr = window.devicePixelRatio || 1;
+                W = window.innerWidth;
+                H = window.innerHeight;
+                canvas.width = Math.round(W * dpr);
+                canvas.height = Math.round(H * dpr);
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            };
+            window.addEventListener('resize', resize);
+
+            const rand = (a, b) => a + Math.random() * (b - a);
+
+            // ---------- Confetti: two bursts from the bottom corners, then light rain from the top ----------
+            const CONFETTI_COLORS = ['#ff3b5c', '#ffcc00', '#2ecc71', '#3fa9f5', '#a64dff', '#ff7a1a', '#ffffff'];
+            const confetti = {
+                init(durationSec) {
+                    this.parts = [];
+                    // Stops adding pieces 1.5s before the end so it clears out naturally
+                    this.emitUntil = performance.now() + Math.max(0, durationSec - 1.5) * 1000;
+                    this.burst(0, H, 1);    // bottom-left
+                    this.burst(W, H, -1);   // bottom-right
+                },
+                // One piece of confetti
+                piece(x, y, vx, vy) {
+                    const s = H / 1080;
+                    return {
+                        x, y, vx, vy,
+                        w: rand(8, 16) * s, h: rand(12, 22) * s,
+                        rot: rand(0, Math.PI * 2), vr: rand(-0.15, 0.15),
+                        tilt: rand(0, Math.PI * 2), vt: rand(0.05, 0.15),
+                        maxFall: rand(2.5, 5) * s,
+                        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+                        circle: Math.random() < 0.25,
+                    };
+                },
+                // A burst of pieces shot up and inward from a corner
+                burst(x, y, dir) {
+                    const s = H / 1080;
+                    for (let i = 0; i < 160; i++) {
+                        const a = rand(55, 80) * Math.PI / 180;
+                        const sp = rand(14, 28) * s;
+                        this.parts.push(this.piece(x, y, Math.cos(a) * sp * dir, -Math.sin(a) * sp));
+                    }
+                },
+                // Moves and draws every piece
+                frame(dt) {
+                    const s = H / 1080;
+                    if (performance.now() < this.emitUntil && this.parts.length < 700) {
+                        const n = Math.round(rand(1, 3) * dt);
+                        for (let i = 0; i < n; i++) {
+                            this.parts.push(this.piece(rand(0, W), -20 * s, rand(-1, 1) * s, rand(1, 3) * s));
+                        }
+                    }
+                    ctx.clearRect(0, 0, W, H);
+                    const drag = Math.pow(0.975, dt);
+                    this.parts = this.parts.filter(p => {
+                        p.vx *= drag;
+                        p.vy = p.vy * drag + 0.45 * s * dt;
+                        if (p.vy > p.maxFall) p.vy = p.maxFall;
+                        p.tilt += p.vt * dt;
+                        p.rot += p.vr * dt;
+                        p.x += (p.vx + Math.sin(p.tilt) * 0.8 * s) * dt;
+                        p.y += p.vy * dt;
+                        if (p.y > H + 60 || p.x < -100 || p.x > W + 100) return false; // off screen
+
+                        ctx.save();
+                        ctx.translate(p.x, p.y);
+                        ctx.rotate(p.rot);
+                        ctx.scale(1, Math.cos(p.tilt)); // paper "flip"
+                        ctx.fillStyle = p.color;
+                        if (p.circle) { ctx.beginPath(); ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2); ctx.fill(); }
+                        else ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                        ctx.restore();
+                        return true;
+                    });
+                },
+            };
+
+            // ---------- Color Wave: drifting, color-changing glows around the edges ----------
+            const CENTER_CLEAR = 0.85; // 0 = color everywhere, 1 = center fully clear
+            const colorwave = {
+                init() {
+                    this.blobs = Array.from({ length: 7 }, (_, i) => ({
+                        px: rand(0, Math.PI * 2), py: rand(0, Math.PI * 2),
+                        sp: rand(0.15, 0.35), r: rand(0.3, 0.5), hue: i * (360 / 7),
+                    }));
+                },
+                frame(dt, t) {
+                    ctx.clearRect(0, 0, W, H);
+                    ctx.globalCompositeOperation = 'lighter';
+                    for (const b of this.blobs) {
+                        const x = W * (0.5 + 0.5 * Math.sin(t * b.sp + b.px));
+                        const y = H * (0.5 + 0.5 * Math.cos(t * b.sp * 0.8 + b.py));
+                        const r = b.r * W;
+                        const h = (b.hue + t * 25) % 360;
+                        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+                        g.addColorStop(0, `hsla(${h}, 95%, 60%, 0.5)`);
+                        g.addColorStop(1, `hsla(${h}, 95%, 60%, 0)`);
+                        ctx.fillStyle = g;
+                        ctx.fillRect(0, 0, W, H);
+                    }
+                    // Clears the middle so people on camera stay visible
+                    ctx.globalCompositeOperation = 'destination-out';
+                    const m = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.6);
+                    m.addColorStop(0, `rgba(0,0,0,${CENTER_CLEAR})`);
+                    m.addColorStop(0.5, `rgba(0,0,0,${CENTER_CLEAR * 0.65})`);
+                    m.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = m;
+                    ctx.fillRect(0, 0, W, H);
+                    ctx.globalCompositeOperation = 'source-over';
+                },
+            };
+
+            // ---------- Fall: autumn leaves that sway, spin and flip as they float down ----------
+            const LEAF_COLORS = ['#b03a2e', '#cb4335', '#d35400', '#e67e22', '#f39c12', '#d4ac0d', '#a04000', '#784212'];
+            const leaves = {
+                init() {
+                    // Start spread over the screen so it's already falling when it fades in
+                    this.leaves = Array.from({ length: 60 }, () => this.leaf(rand(-0.2 * H, H)));
+                },
+                // One leaf. z = depth: bigger, faster leaves look closer.
+                leaf(y) {
+                    const s = H / 1080;
+                    const z = Math.random();
+                    const len = (30 + z * 45) * s;
+                    return {
+                        x: rand(0, W), y, len, wid: len * rand(0.35, 0.55),
+                        vy: (0.8 + z * 1.2) * s,
+                        sway: rand(1, 2.5) * s, freq: rand(0.5, 1.2), phase: rand(0, Math.PI * 2),
+                        rot: rand(0, Math.PI * 2), vr: rand(-0.03, 0.03),
+                        tilt: rand(0, Math.PI * 2), vt: rand(0.02, 0.06),
+                        color: LEAF_COLORS[Math.floor(Math.random() * LEAF_COLORS.length)],
+                    };
+                },
+                frame(dt, t) {
+                    const s = H / 1080;
+                    ctx.clearRect(0, 0, W, H);
+                    for (const l of this.leaves) {
+                        const swing = Math.sin(t * l.freq + l.phase);
+                        l.y += l.vy * dt;
+                        l.x += swing * l.sway * dt;
+                        l.rot += l.vr * dt;
+                        l.tilt += l.vt * dt;
+                        // Off the bottom: start again at the top. Off a side: wrap around.
+                        if (l.y > H + l.len) Object.assign(l, this.leaf(-l.len));
+                        if (l.x < -l.len) l.x = W + l.len; else if (l.x > W + l.len) l.x = -l.len;
+
+                        ctx.save();
+                        ctx.translate(l.x, l.y);
+                        ctx.rotate(l.rot + swing * 0.6); // rocks back and forth
+                        ctx.scale(1, Math.cos(l.tilt));  // flips over
+                        // Leaf shape
+                        ctx.fillStyle = l.color;
+                        ctx.beginPath();
+                        ctx.moveTo(0, -l.len / 2);
+                        ctx.quadraticCurveTo(l.wid, 0, 0, l.len / 2);
+                        ctx.quadraticCurveTo(-l.wid, 0, 0, -l.len / 2);
+                        ctx.fill();
+                        // Center vein and stem
+                        ctx.strokeStyle = 'rgba(60, 20, 0, 0.45)';
+                        ctx.lineWidth = 1.2 * s;
+                        ctx.beginPath();
+                        ctx.moveTo(0, -l.len / 2);
+                        ctx.lineTo(0, l.len / 2 + l.len * 0.12);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                },
+            };
+
+            // ---------- Snow: soft white flakes drifting down ----------
+            // One soft, glowing flake drawn once, then stamped for every flake (fast)
+            const FLAKE = document.createElement('canvas');
+            FLAKE.width = FLAKE.height = 64;
+            (() => {
+                const c = FLAKE.getContext('2d');
+                const g = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+                g.addColorStop(0, 'rgba(255,255,255,1)');
+                g.addColorStop(0.35, 'rgba(255,255,255,0.9)');
+                g.addColorStop(1, 'rgba(255,255,255,0)');
+                c.fillStyle = g;
+                c.fillRect(0, 0, 64, 64);
+            })();
+
+            const snow = {
+                init() {
+                    // Start spread over the screen so it's already snowing when it fades in
+                    this.flakes = Array.from({ length: 320 }, () => this.flake(rand(-0.1 * H, H)));
+                },
+                // One flake. z = depth: bigger, brighter, faster flakes look closer.
+                flake(y) {
+                    const s = H / 1080;
+                    const z = Math.random();
+                    return {
+                        x: rand(0, W), y,
+                        r: (2 + z * 5) * s,
+                        vy: (0.6 + z * 1.6) * s,
+                        sway: rand(0.3, 1.2) * s, freq: rand(0.4, 1.1), phase: rand(0, Math.PI * 2),
+                        alpha: 0.45 + z * 0.5,
+                    };
+                },
+                frame(dt, t) {
+                    ctx.clearRect(0, 0, W, H);
+                    for (const f of this.flakes) {
+                        f.y += f.vy * dt;
+                        f.x += Math.sin(t * f.freq + f.phase) * f.sway * dt;
+                        // Off the bottom: start again at the top. Off a side: wrap around.
+                        if (f.y > H + f.r) Object.assign(f, this.flake(-f.r * 2));
+                        if (f.x < -10) f.x = W + 10; else if (f.x > W + 10) f.x = -10;
+
+                        ctx.globalAlpha = f.alpha;
+                        ctx.drawImage(FLAKE, f.x - f.r * 2, f.y - f.r * 2, f.r * 4, f.r * 4);
+                    }
+                    ctx.globalAlpha = 1;
+                },
+            };
+
+            const EFFECTS = { confetti, colorwave, leaves, snow };
+
+            // Runs every frame while an effect is playing
+            const loop = (now) => {
+                const dt = Math.min((now - last) / (1000 / 60), 3); // 1 = one frame at 60fps
+                last = now;
+                effect.frame(dt, (now - t0) / 1000);
+                raf = requestAnimationFrame(loop);
+            };
+
+            return {
+                start(name, durationSec) {
+                    this.stop();
+                    effect = EFFECTS[name];
+                    if (!effect) return;
+                    resize();
+                    effect.init(durationSec);
+                    last = t0 = performance.now();
+                    raf = requestAnimationFrame(loop);
+                },
+                stop() {
+                    if (raf) cancelAnimationFrame(raf);
+                    raf = null;
+                    effect = null;
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.globalAlpha = 1;
+                    ctx.clearRect(0, 0, W, H);
+                },
+            };
+        })();
+
+
+        /* =========================================================
+           7. DISPLAY: FULLSCREEN OVERLAYS
+           ========================================================= */
+        const showOverlay = (data) => {
+            const cfg = OVERLAYS[data.overlay];
+            if (!cfg) { console.warn('Unknown overlay:', data.overlay); return; }
+
+            const box = $('overlay-box');
+            if (overlayTimeout) clearTimeout(overlayTimeout);
+            if (overlayCleanup) clearTimeout(overlayCleanup);
+            const duration = cfg.length ?? (Number(data.duration) || 5);
+
+            // Switch to this overlay's look
+            box.classList.remove(...Object.keys(OVERLAYS));
+            void box.offsetWidth; // lets the Stinger replay if taken twice in a row
+            box.classList.add(data.overlay);
+            currentOverlay = data.overlay;
+
+            // Name and title (L3 Large)
+            if (cfg.text) {
+                $('overlay-name').textContent = data.label || '';
+                $('overlay-title').textContent = data.title || '';
+                $('overlay-title').style.display = data.title ? 'block' : 'none';
+                const fit = () => { fitText($('overlay-name')); fitText($('overlay-title')); };
+                fit();
+                document.fonts.load('italic 700 82px "Barlow Condensed"').then(fit); // fit again once the font has loaded
+            }
+
+            // Canvas effect (Color Wave, Confetti, Fall, Snow)
+            if (cfg.effect) FX.start(cfg.effect, duration);
+            else FX.stop();
+
+            // Show it, then hide it when the duration is up
+            box.style.visibility = 'visible';
+            playIn(box, cfg.animIn ?? (data.animationStyle || 'anim-slideUp'));
+            overlayTimeout = setTimeout(hideOverlay, duration * 1000);
+        };
+
+        const hideOverlay = () => {
+            const box = $('overlay-box');
+            if (overlayTimeout) clearTimeout(overlayTimeout);
+            if (overlayCleanup) clearTimeout(overlayCleanup);
+            const out = OVERLAYS[currentOverlay]?.animOut ?? 'anim-hide';
+            playOut(box, out);
+            // Fully hide and stop any effect after the out animation so nothing can get stuck on screen
+            const outTime = out === '' ? 0 : out === 'anim-hide' ? 600 : 900;
+            overlayCleanup = setTimeout(() => {
+                box.style.visibility = 'hidden';
+                FX.stop();
+            }, outTime);
+        };
+
+
+        /* =========================================================
+           8. DISPLAY: MESSAGE ROUTER
+           Decides what to show for each message from the controller
+           ========================================================= */
+        const showDisplay = (data) => {
+            if (data.mode === 'clear') { hideLowerThird(); hideOverlay(); }
+            else if (data.mode === 'overlay') showOverlay(data);
+            else if (data.bgStyle === 'kamc') showOverlay({ ...data, overlay: 'kamc' }); // older L3 Large saves
+            else showLowerThird(data);
+        };
+
+
+        /* =========================================================
+           9. CONNECTION TO THE SERVER
+           ========================================================= */
+        const connectWebSocket = () => {
+            ws = new WebSocket(SOCKET_URL);
+            ws.onopen = () => {
+                const el = $('controller-connection');
+                if (el) { el.className = "text-green-400 font-bold"; el.textContent = "OPEN"; }
+            };
+            // Only the display acts on messages
+            ws.onmessage = (e) => { if (!isController) showDisplay(JSON.parse(e.data)); };
+            // Reconnects every 2 seconds if the connection drops
+            ws.onclose = () => {
+                const el = $('controller-connection');
+                if (el) { el.className = "font-medium text-red-400"; el.textContent = "CLOSED"; }
+                setTimeout(connectWebSocket, 2000);
+            };
+        };
+
+        // Sends a message to the display. Returns false (and warns) if not connected.
+        const sendPayload = (payload) => {
+            if (ws && ws.readyState === WebSocket.OPEN) { ws.send(JSON.stringify(payload)); return true; }
+            flash('Not connected', true);
+            return false;
+        };
+
+
+        /* =========================================================
+           10. CONTROLLER: STATUS MESSAGES
+           ========================================================= */
+        let flashTimer = null;
+
+        // Shows a short message under the buttons for 2 seconds (green, or red for errors)
+        const flash = (msg, isError = false, detail = '') => {
+            const el = $('controller-feedback');
+            el.textContent = msg;
+            if (detail) {
+                const d = document.createElement('span');
+                d.className = 'text-xs text-gray-300 ml-1';
+                d.textContent = detail;
+                el.append(d);
+            }
+            el.className = `text-lg mt-3 h-5 ${isError ? 'text-red-400' : 'text-green-400'}`;
+            clearTimeout(flashTimer);
+            flashTimer = setTimeout(() => { el.textContent = ''; }, 2000);
+        };
+
+        // Sends a graphic and shows "Taken: Name  for 5s"
+        const flashTake = (data) => {
+            if (!sendPayload(data)) return;
+            const ovKey = isOverlayItem(data) ? (data.overlay || 'kamc') : null;
+            const secs = OVERLAYS[ovKey]?.length ?? (Number(data.duration) || 5);
+            const time = secs < 60 ? `${secs}s` : `${Math.floor(secs / 60)}:${String(Math.round(secs % 60)).padStart(2, '0')}`;
+            flash(`Taken: ${data.label || OVERLAYS[ovKey]?.label || 'Graphic'}`, false, `for ${time}`);
+        };
+
+
+        /* =========================================================
+           11. CONTROLLER: TABS AND SECTIONS
+           ========================================================= */
+
+        // Shows only the fields the current tab and overlay need
+        const updateSections = () => {
+            const mode = checked('mode');
+            const cfg = mode === 'overlay' ? OVERLAYS[checked('overlayStyle')] : null;
+            $('l3-section').classList.toggle('hidden', mode !== 'l3');
+            $('overlay-section').classList.toggle('hidden', mode !== 'overlay');
+            $('text-fields').classList.toggle('hidden', !(mode === 'l3' || cfg?.text));
+            $('animation-section').classList.toggle('hidden', cfg?.animIn !== undefined);
+            $('duration-field').classList.toggle('hidden', cfg?.length !== undefined);
+        };
+
+        // Switching tabs also switches which saved graphics are listed
+        const updateMode = () => {
+            updateSections();
+            $('saved-heading').textContent = checked('mode') === 'overlay' ? 'Saved Overlays' : 'Saved Lower Thirds';
+            renderButtons(loadButtonsFromStorage());
+        };
+
+
+        /* =========================================================
+           12. CONTROLLER: TAKE / SAVE / CLEAR ALL
+           ========================================================= */
+
+        // Builds a graphic from the current settings. Returns null if something is missing.
+        const buildPayload = () => {
+            const mode = checked('mode');
+            const label = $('button-name-input').value.trim();
+            const title = $('title-input').value.trim();
+            const duration = Number($('duration-input').value) || 5;
+            const animationStyle = checked('animationStyle');
+
+            if (mode === 'overlay') {
+                const overlay = checked('overlayStyle');
+                const cfg = OVERLAYS[overlay];
+                if (cfg.text && !label) { flash('Enter a name', true); return null; }
+                return {
+                    mode: 'overlay',
+                    overlay,
+                    label: cfg.text ? label : '',
+                    title: cfg.text ? title : '',
+                    duration,
+                    animationStyle,
+                };
+            }
+
+            const location = checked('location');
+            if (!label) { flash('Enter a name', true); return null; }
+            if (!location) { flash('Pick a location', true); return null; }
+            return {
+                mode: 'l3',
+                label,
+                title,
+                location,
+                fontStyle: checked('fontStyle'),
+                fontColor: checked('fontColor') || '',
+                bgStyle: checked('bgStyle'),
+                duration,
+                animationStyle,
+            };
+        };
+
+        // ⚡ TAKE
+        const instantSend = () => {
+            const p = buildPayload();
+            if (p) flashTake(p);
+        };
+
+        // 💾 SAVE
+        const saveButton = () => {
+            const p = buildPayload();
+            if (!p) return;
+            const b = loadButtonsFromStorage();
+            b.unshift({ id: Date.now(), ...p });
+            saveButtonsToStorage(b);
+            flash('Saved');
+        };
+
+        // ✖ CLEAR ALL
+        const clearAll = () => {
+            sendPayload({ mode: 'clear' });
+            flash('Cleared');
+        };
+
+
+        /* =========================================================
+           13. CONTROLLER: IMPORT L3s
+           Each line of each .txt file becomes a saved L3 Large.
+           Line format: "Name" or "Name | Title"
+           Skips blank lines and name+title pairs that are already saved.
+           ========================================================= */
+        const importKey = (label, title) => `${label}|${title || ''}`.toLowerCase();
+
+        const importL3s = async (fileList) => {
+            // Sorted by file name so "L3 1A" comes before "L3 2A" and "L3 10A"
+            const files = [...fileList].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+            const b = loadButtonsFromStorage();
+            const existing = new Set(b.filter(d => isOverlayItem(d) && (d.overlay || 'kamc') === 'kamc').map(d => importKey(d.label || '', d.title)));
+            const added = [];
+            let skipped = 0;
+
+            for (const file of files) {
+                const source = file.name.replace(/\.txt$/i, ''); // shown on the saved button
+                (await file.text()).split(/\r?\n/).forEach(line => {
+                    const [label = '', title = ''] = line.split('|').map(s => s.trim());
+                    if (!label) return;
+                    const key = importKey(label, title);
+                    if (existing.has(key)) { skipped++; return; }
+                    existing.add(key);
+                    added.push({ id: Date.now() + added.length, mode: 'overlay', overlay: 'kamc', label, title, duration: IMPORT_DURATION, source });
+                });
+            }
+
+            if (added.length) saveButtonsToStorage([...added, ...b]); // new ones go at the top, in file order
+            flash(`Imported ${added.length}${skipped ? `, skipped ${skipped} duplicate${skipped > 1 ? 's' : ''}` : ''}`, !added.length);
+        };
+
+
+        /* =========================================================
+           14. CONTROLLER: SAVED GRAPHICS LIST
+           Two cards per row. Tap to take, ✕ to delete.
+           ========================================================= */
+        const renderButtons = (buttons) => {
+            const container = $('saved-buttons-container');
+            container.innerHTML = '';
+
+            // Only show graphics for the current tab
+            const showOverlays = checked('mode') === 'overlay';
+            const list = buttons.filter(d => isOverlayItem(d) === showOverlays);
+            if (!list.length) {
+                const empty = document.createElement('p');
+                empty.className = 'col-span-2 text-center text-gray-400 text-sm';
+                empty.textContent = 'Nothing saved yet';
+                container.appendChild(empty);
+            }
+
+            list.forEach(data => {
+                const isOverlay = isOverlayItem(data);
+                const ovKey = data.overlay || 'kamc';
+                const name = data.label || OVERLAYS[ovKey]?.label || 'Untitled';
+                // Second line: file name for imported L3s, otherwise the style
+                const sub = isOverlay
+                    ? (data.source || `OVERLAY | ${OVERLAYS[ovKey]?.label || ovKey}`)
+                    : `${data.bgStyle} | ${data.fontStyle?.replace('font-', '')}`;
+
+                // Card
+                const card = document.createElement('div');
+                card.className = `relative rounded-lg overflow-hidden border-l-4 ${ACCENTS[isOverlay ? ovKey : data.bgStyle] || 'border-gray-400'} bg-gradient-to-br ${isOverlay ? 'from-indigo-950 to-gray-800' : 'from-gray-700 to-gray-800'} shadow-md`;
+
+                // Take button (the whole card)
+                const take = document.createElement('button');
+                take.className = 'w-full h-16 px-2 flex flex-col justify-center text-left text-white hover:bg-white/10 active:bg-white/20 active:scale-[0.97] transition';
+                take.title = `${name}${data.title ? ' | ' + data.title : ''}`;
+                const b = document.createElement('b');
+                b.className = 'block truncate pr-6 text-[14px] leading-tight';
+                b.textContent = name;
+                const small = document.createElement('span');
+                small.className = 'block truncate text-[11px] uppercase tracking-wide text-gray-300 mt-0.5';
+                small.textContent = sub;
+                take.append(b, small);
+                take.onclick = () => flashTake(data);
+
+                // Delete button (top-right ✕)
+                const del = document.createElement('button');
+                del.className = 'absolute top-1 right-1 w-6 h-6 rounded-full bg-black/40 text-gray-300 text-[12px] leading-none hover:bg-red-700 hover:text-white';
+                del.textContent = '✕';
+                del.title = 'Delete';
+                del.onclick = () => {
+                    if (confirm(`Delete ${name}?`)) saveButtonsToStorage(loadButtonsFromStorage().filter(x => x.id !== data.id));
+                };
+
+                card.append(take, del);
+                container.appendChild(card);
+            });
+        };
+
+
+        /* =========================================================
+           15. STARTUP
+           Opens the display if the address ends in #display,
+           otherwise opens the controller.
+           ========================================================= */
+        const initializeView = () => {
+            if (window.location.hash === '#display') {
+                document.body.style.backgroundColor = 'transparent';
+                $('controller-status').style.display = 'none';
+                $('display-view').classList.remove('hidden');
+                $('display-box').style.opacity = 0;
+                $('overlay-box').style.opacity = 0;
+            } else {
+                $('controller-view').classList.remove('hidden');
+                isController = true;
+                document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener('change', updateMode));
+                document.querySelectorAll('input[name="overlayStyle"]').forEach(r => r.addEventListener('change', updateSections));
+                $('import-file').addEventListener('change', (e) => {
+                    if (e.target.files.length) importL3s(e.target.files);
+                    e.target.value = ''; // lets the same file be picked again
+                });
+                updateMode();
+            }
+            connectWebSocket();
+        };
+
+        window.addEventListener('load', initializeView);
+    </script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+/* =========================================================
+   FX WIZARD STYLES
+   1. Page basics
+   2. Controller (the control panel)
+   3. Display: shared
+   4. Display: lower third
+   5. Lower third backgrounds
+   6. Lower third font styles
+   7. Fullscreen overlays (L3 Large, Stinger, Color Wave, Confetti)
+   8. Animations
+   ========================================================= */
+
+
+/* =========================================================
+   1. PAGE BASICS
+   ========================================================= */
+body {
+  font-family: 'Oswald', sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  height: fit-content;
+  width: 300px;
+  scrollbar-width: none;
+}
+
+/* Soft drop shadow behind text */
+.text-shadow {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+
+/* =========================================================
+   2. CONTROLLER (the control panel)
+   ========================================================= */
+
+/* Keeps the panel narrow and centered */
+.controller-max-width {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  max-width: 300px !important;
+  overflow-y: hidden;
+}
+
+/* Outline used on the option buttons */
+.border {
+  border: 1px solid white;
+  border-radius: 10px;
+  padding: 5px;
+}
+
+/* Font color swatches */
+#color-selector label {
+  height: 2rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+#color-selector input:checked + label {
+  outline: 3px solid #a78bfa;
+  outline-offset: 2px;
+}
+
+
+/* =========================================================
+   3. DISPLAY: SHARED
+   The page OBS shows (websocket_demo.html#display)
+   ========================================================= */
+#display-view {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-color: transparent !important;
+  display: flex !important;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+}
+
+
+/* =========================================================
+   4. DISPLAY: LOWER THIRD
+   ========================================================= */
+
+/* The lower third box */
+#display-box {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden; /* shown on TAKE, hidden again after it leaves */
+
+  background-position: center center;
+  background-size: cover;
+  padding: 18px 24px;
+  padding-right: 80px; /* keep equal to the slant in clip-path */
+  gap: 0.6rem;
+  max-width: fit-content;
+  box-sizing: border-box;
+  border-radius: 24px;
+  border: 3px double rgba(255, 255, 255, 0.4) !important;
+  box-shadow:
+    2px 2px 4px rgba(30, 37, 47, 0.6),
+    4px 4px 4px rgba(91, 109, 137, 0.7),
+    6px 6px 4px rgba(31, 40, 49, 0.6);
+  clip-path: polygon(0% 0%, 100% 0%, calc(100% - 80px) 100%, 0% 100%); /* slanted right edge */
+
+  font-family: 'Bona Nova SC', serif; /* name font when "Default" is picked */
+  font-style: normal;
+}
+
+/* Name (top line) */
+#action-name {
+  font-size: 4.5rem; /* ~72px */
+  font-weight: 800;
+  color: white;
+  line-height: 1.1;
+  margin: 0;
+  padding: 0;
+}
+
+/* Title (second line). Always uses Newsreader, whatever font style is picked. */
+#action-title {
+  font-family: 'Newsreader', serif;
+  font-size: 2.6rem; /* ~42px */
+  font-weight: 300;
+  color: #e4dfdf;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* =========================================================
+   5. LOWER THIRD BACKGROUNDS
+   To add one: add a class here, a button in the "Backgrounds"
+   section of websocket_demo.html, and its name in BG_CLASSES.
+   ========================================================= */
+.blue     { background: url('../assets/blueGif.gif'); }
+.green    { background: url('../assets/greenGif.gif'); }
+.black    { background: url('../assets/blackGif.gif'); }
+.red      { background: url('../assets/redGif.gif'); }
+.space    { background: url('../assets/space.gif'); }
+.clouds   { background: url('../assets/clouds.gif'); }
+.tech     { background: url('../assets/tech.gif'); }
+.finance  { background: url('../assets/finance.gif'); }
+.sports   { background: url('../assets/sports.gif'); }
+.politics { background: url('../assets/politics.gif'); }
+
+
+/* =========================================================
+   6. LOWER THIRD FONT STYLES
+   "Default" has no rule here; it uses the box font above.
+   ========================================================= */
+.font-script p {
+  font-family: 'Lobster', sans-serif;
+}
+.font-fun {
+  font-family: 'Changa One', sans-serif;
+}
+.font-accent {
+  font-family: 'Space Grotesk', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+.font-classic {
+  font-family: 'Limelight', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+.font-modern {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+
+/* =========================================================
+   7. FULLSCREEN OVERLAYS (built for 1920x1080)
+   ========================================================= */
+
+/* Full-screen layer that holds every overlay */
+#overlay-box {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0;
+  visibility: hidden; /* shown on TAKE, hidden again after it leaves */
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 10; /* sits above the lower third */
+}
+
+/* ---------- Color Wave / Confetti: drawn on this canvas ---------- */
+#fx-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ---------- L3 Large (named "kamc" in the code) ---------- */
+
+/* Background image */
+#overlay-box.kamc {
+  background: url('../assets/kamc.png') center / 100% 100% no-repeat;
+}
+
+/* Text area: the padding lines the text up with the bar in kamc.png */
+#overlay-text {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  justify-content: center; /* centered top-to-bottom in the bar */
+  align-items: flex-start; /* left aligned */
+  text-align: left;
+  gap: 0.4vh;
+  box-sizing: border-box;
+  padding: 74.5vh 26.5vw 12.8vh 9.8vw; /* top right bottom left */
+  color: white;
+}
+#overlay-box.kamc #overlay-text {
+  display: flex;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-style: italic;
+  text-transform: uppercase; /* always capitals */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Name and title. Long text shrinks to fit (see fitText in the page script). */
+#overlay-name {
+  font-size: 82px;
+  line-height: 1.05;
+  width: 100%;
+  margin: 0;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#overlay-title {
+  font-size: 3.4vh; /* ~37px */
+  line-height: 1.1;
+  width: 100%;
+  margin: 0;
+  color: #e4dfdf;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Stinger: diagonal sweep, top-left to bottom-right ---------- */
+
+/* Change the size, speed and colors here. The page reads --stinger-time,
+   so the speed only needs to be set in this one place. */
+#stinger {
+  --stinger-size: 55vw; /* thickness of the main band (~70% of the screen) */
+  --stinger-time: 1.8s;
+  --stinger-main: linear-gradient(90deg, #0b3d91, #1e6fd9, #0b3d91);
+  --stinger-accent-1: #ffffff; /* leading stripe */
+  --stinger-accent-2: #e0291c; /* trailing stripe */
+  position: absolute;
+  inset: 0;
+  display: none;
+  overflow: hidden;
+}
+#overlay-box.stinger #stinger {
+  display: block;
+}
+
+/* The band of stripes that moves across the screen */
+.stinger-track {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 300vmax;
+  display: flex;
+  flex-direction: column;
+  gap: 1vw;
+}
+#overlay-box.stinger .stinger-track {
+  animation: stingerSweep var(--stinger-time) cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+.stinger-main     { height: var(--stinger-size); background: var(--stinger-main); }
+.stinger-accent-1 { height: 4vw; background: var(--stinger-accent-1); }
+.stinger-accent-2 { height: 2.5vw; background: var(--stinger-accent-2); }
+
+/* Tilted 45°, then moved along the diagonal: in, short pause in the middle, out */
+@keyframes stingerSweep {
+  0%       { transform: translate(-50%, -50%) rotate(-45deg) translateY(-110vw); }
+  45%, 55% { transform: translate(-50%, -50%) rotate(-45deg) translateY(0); }
+  100%     { transform: translate(-50%, -50%) rotate(-45deg) translateY(110vw); }
+}
+
+
+/* =========================================================
+   8. ANIMATIONS
+   Keyframes first, then the classes the page adds to start them.
+   ========================================================= */
+
+/* ---------- Keyframes ---------- */
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-100vw); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(100vw); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideOutLeft {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 1; transform: translateX(-100vw); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes spinIn {
+  from { opacity: 0; transform: rotate(-360deg) scale(0); }
+  to   { opacity: 1; transform: rotate(0deg) scale(1); }
+}
+
+/* ---------- In animations ---------- */
+.anim-slideUp {
+  animation: slideInUp 0.8s ease-out forwards;
+}
+.anim-slideDown {
+  animation: slideInDown 0.8s ease-out forwards;
+}
+.anim-slideLeft {
+  animation: slideInLeft 0.8s ease-out forwards;
+}
+.anim-slideRight {
+  animation: slideInRight 0.8s ease-out forwards;
+}
+.anim-fade {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+.anim-spinIn {
+  animation: spinIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* ---------- Out animations ---------- */
+.anim-hide {
+  animation: fadeOut 0.5s ease-in forwards !important;
+}
+.anim-slideOutLeft {
+  animation: slideOutLeft 0.8s ease-in forwards;
+}

@@ -1,0 +1,24 @@
+{
+  "name": "fxwizard-websocket-server",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "description": "fxwizard websocket",
+  "dependencies": {
+    "ws": "^8.19.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/8BitGinger/obsWebsocket.git"
+  },
+  "bugs": {
+    "url": "https://github.com/8BitGinger/obsWebsocket/issues"
+  },
+  "homepage": "https://github.com/8BitGinger/obsWebsocket#readme"
+}
