@@ -1,4 +1,25 @@
+# Node.js
 node_modules/
+npm-debug.log*
 dist/
 build/
 .env
+
+# Python cache (made when OBS or Python loads server.py)
+__pycache__/
+*.pyc
+
+# Your own files stay on your computer: custom images and saved rundowns.
+# The folders themselves are shared (each has a README.txt).
+custom/*
+!custom/README.txt
+rundowns/*
+!rundowns/README.txt
+
+# Operating system and editor clutter
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.log
