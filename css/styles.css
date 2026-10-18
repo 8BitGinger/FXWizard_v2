@@ -163,17 +163,25 @@ body {
 }
 .fx-section > summary::-webkit-details-marker { display: none; }
 .fx-section > summary:active { background: rgba(255, 255, 255, 0.16); }
+/* Chevron on the right: points down when closed, up when open */
 .fx-section > summary::after {
-  content: '▾';
-  font-size: 16px;
-  transition: transform 0.2s;
+  content: '';
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin: 0 4px 4px 2px;
+  border-right: 2.5px solid currentColor;
+  border-bottom: 2.5px solid currentColor;
+  border-radius: 1px;
+  opacity: 0.75;
+  transform: rotate(45deg);
+  transition: transform 0.2s, margin 0.2s;
 }
 .fx-section[open] > summary { margin-bottom: 6px; }
 /* The Lower Thirds tab's sections are a little smaller */
 #l3-section .fx-section > summary { min-height: 34px; padding: 4px 10px; font-size: 14px; }
-#l3-section .fx-section > summary::after { font-size: 14px; }
 #l3-section.space-y-2 > :not([hidden]) ~ :not([hidden]) { margin-top: 6px; }
-.fx-section[open] > summary::after { transform: rotate(180deg); }
+.fx-section[open] > summary::after { transform: rotate(-135deg); margin-bottom: -4px; }
 .fx-value {
   margin-left: auto;
   display: flex;
@@ -244,6 +252,21 @@ body {
 /* Until Set Order is on, cards don't react like buttons */
 .card-take.show-off { cursor: default; }
 .card-take.show-off:hover, .card-take.show-off:active { background: transparent; transform: none; }
+/* Red ! in front of the name: its custom image isn't in the custom folder */
+.card-missing {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: #dc2626;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  vertical-align: 1px;
+}
 /* Its label in front of the name: block, place, type (A1-L3, B2-OV) */
 .show-code {
   display: inline-block;
@@ -253,7 +276,7 @@ body {
   background: #6D28D9;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
   color: #fff;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   line-height: 16px;
   letter-spacing: 0.03em;
@@ -326,7 +349,7 @@ body {
   border-radius: 9px;
   background: rgba(196, 181, 253, 0.18);
   text-align: center;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0;
 }
 .show-block-head .count:empty { display: none; }
@@ -380,6 +403,184 @@ body {
 /* The small green mark on graphics set for Greenscreen */
 .gs-chip.gs-inline { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 2px; }
 
+/* Outline icons (see ICONS in the script): sized to the text, drawn in its color */
+.icon {
+  display: inline-block; /* Tailwind makes every svg a block; icons sit in the text */
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: -0.2em;
+}
+.icon .icon-fill { fill: currentColor; stroke: none; }
+[data-icon] { display: inline-flex; vertical-align: middle; }
+.saved-side .icon, #show-clear .icon { width: 18px; height: 18px; }
+#help-btn .icon { width: 17px; height: 17px; }
+/* Tiny logo at the right of the connection bar: the bar's height (less a little padding), width from the image's shape
+   (any size or shape works, e.g. a 75x100 portrait). Pixel art stays crisp. */
+.status-logo { position: absolute; top: 3px; right: 5px; height: calc(100% - 6px); width: auto; image-rendering: pixelated; } /* 3px top and bottom, 5px right */
+#theme-icon .icon { width: 15px; height: 15px; }
+.cue-icon .icon { width: 15px; height: 15px; }
+.card-btn .icon { width: 14px; height: 14px; stroke-width: 2.4; }
+.cue-btn, .block-remove { display: grid; place-items: center; }
+.cue-btn .icon, .block-remove .icon { width: 13px; height: 13px; stroke-width: 2.4; }
+.show-offair .icon { width: 11px; height: 11px; margin-right: 3px; vertical-align: -1px; }
+.duration-label .icon, #duration-label .icon { width: 13px; height: 13px; vertical-align: -2px; }
+
+/* Stinger buttons: their length, a little fainter */
+.stinger-len { opacity: 0.7; font-weight: 400; }
+
+/* Saved list search: the spyglass next to the layout switch opens a box under the heading */
+.saved-search-btn { left: 38px; }
+.saved-search-btn.on { background: rgba(167, 139, 250, 0.3); }
+.saved-toggle { padding-left: 76px !important; padding-right: 76px !important; }
+.saved-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 4px 8px;
+  padding: 0 4px 0 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(167, 139, 250, 0.6);
+  background: rgba(255, 255, 255, 0.06);
+}
+.saved-search.hidden { display: none; }
+.saved-search input { flex: 1; min-width: 0; padding: 7px 0; background: transparent; border: 0; outline: none; color: inherit; font-size: 14px; }
+.saved-search button { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; opacity: 0.8; }
+
+/* Message box while idle ("Ready"): smaller and fainter, so it stays out of the way */
+.fx-toast.idle { padding: 3px 10px; font-size: 12px; opacity: 0.45; border-left-width: 1px; }
+
+/* Podcast Rundown while Set Order is on: a red LIVE ORDER bar, so running and editing look different */
+#show-section.show-running::before {
+  content: '● LIVE ORDER';
+  display: block;
+  margin-bottom: 6px;
+  padding: 2px 0;
+  border-top: 2px solid #dc2626;
+  background: linear-gradient(90deg, rgba(220, 38, 38, 0), rgba(220, 38, 38, 0.28), rgba(220, 38, 38, 0));
+  color: #fca5a5;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+#show-section.show-running > div:first-child { border-bottom-color: #dc2626; }
+
+/* Duration: small, on the right above the take buttons. Locked (showing the length) for stingers. */
+.duration-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.duration-row input { width: 64px; text-align: center; }
+.duration-row.is-fixed input { opacity: 0.6; cursor: not-allowed; }
+
+/* Saved list heading: tap it (or the arrow under it) to open or close the list.
+   The layout switch is on the left, the 🗑️ on the right. */
+.saved-head {
+  position: relative;
+  width: 100%;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #4b5563;
+}
+.saved-toggle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0 40px 2px;
+  color: inherit;
+}
+.saved-title { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 16px; font-weight: 700; }
+.saved-count {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 12px;
+  line-height: 18px;
+}
+.saved-count:empty { display: none; }
+.saved-chevron { width: 18px; height: 18px; opacity: 0.7; transition: transform 0.2s; }
+.saved-toggle[aria-expanded="true"] .saved-chevron { transform: rotate(180deg); } /* down when closed, up when open */
+.saved-side {
+  position: absolute;
+  top: 0;
+  width: 32px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+}
+.saved-side:active { transform: scale(0.95); }
+.saved-side svg { width: 18px; height: 18px; fill: currentColor; opacity: 0.8; }
+
+/* Cue buttons in the Podcast Rundown (Note, Clip, SOT, PIC) */
+.cue-row { display: flex; align-items: center; gap: 4px; margin: 0 8px 8px; }
+.cue-add {
+  flex: 1;
+  padding: 4px 2px;
+  border-radius: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.35);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.cue-add:active { transform: scale(0.95); }
+/* A cue in the rundown: thin and greyed out, can't be taken */
+.show-cue {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #9ca3af;
+  font-size: 12px;
+  line-height: 1.3;
+}
+.show-cue.show-unlocked { padding-left: 34px; }
+.show-cue .show-handle { font-size: 16px; }
+.cue-icon { flex: none; font-size: 13px; opacity: 0.8; }
+.cue-code {
+  flex: none;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #d1d5db;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 16px;
+  letter-spacing: 0.03em;
+}
+.cue-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cue-note .cue-text { font-style: italic; white-space: normal; }
+.cue-btn {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.3);
+  color: #d1d5db;
+  font-size: 12px;
+}
+.cue-btn.cue-del:hover { background: #b91c1c; color: #fff; }
+/* Unsorted (from ＋ RUNDOWN): greyer header, at the bottom */
+.show-unsorted .show-block-head { color: #9ca3af; }
+.show-unsorted .unsorted-hint { font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; opacity: 0.8; }
+.show-unsorted .show-code { background: #4b5563; }
+
 /* Socials picker (Like, Follow & Subscribe): small icons, colored when picked */
 .social-icons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
 .social-icon {
@@ -418,7 +619,7 @@ body {
   text-align: left;
 }
 .rundown-file:hover { background: rgba(255, 255, 255, 0.16); }
-.rundown-file span { font-size: 11px; opacity: 0.7; }
+.rundown-file span { font-size: 12px; opacity: 0.7; }
 
 /* Edit dialog for one show item, and the Import a rundown dialog */
 #edit-dialog, #rundown-dialog {
@@ -436,6 +637,26 @@ body {
 }
 #edit-dialog::backdrop, #rundown-dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
 #edit-dialog select { background: #3f3f46; color: #fff; }
+
+/* Scrollbars: thin and dark, purple while you grab one (light grey in light mode).
+   OBS docks are Chromium, so these apply there too. */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  background-clip: padding-box;
+  border: 2px solid transparent; /* keeps it slim, with a little space around it */
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover { background-color: rgba(167, 139, 250, 0.55); }
+::-webkit-scrollbar-thumb:active { background-color: rgba(167, 139, 250, 0.85); }
+html.light ::-webkit-scrollbar-thumb { background-color: rgba(0, 0, 0, 0.22); }
+html.light ::-webkit-scrollbar-thumb:hover { background-color: rgba(109, 40, 217, 0.5); }
+/* Browsers without those (Firefox) */
+@supports not selector(::-webkit-scrollbar) {
+  * { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.2) transparent; }
+  html.light * { scrollbar-color: rgba(0, 0, 0, 0.25) transparent; }
+}
 
 /* ---------- Light mode (controller only; the page adds "light" to <html>) ---------- */
 html.light body { background: #f3f4f6; color: #1f2937; }
@@ -462,6 +683,16 @@ html.light #controller-view .border-gray-600 { border-color: #9ca3af; }
 html.light #edit-dialog, html.light #rundown-dialog { background: #fff; color: #111827; border-color: #d1d5db; }
 html.light .social-icon:not(.on) { border-color: #9ca3af; background: #fff; }
 html.light .rundown-btn { border-color: #9ca3af; background: #fff; }
+html.light .saved-search { background: #fff; border-color: #a78bfa; }
+html.light .saved-search-btn.on { background: rgba(109, 40, 217, 0.15); }
+html.light #show-section.show-running::before { color: #b91c1c; }
+html.light .saved-head { border-color: #9ca3af; }
+html.light .saved-count { background: rgba(0, 0, 0, 0.08); }
+html.light .cue-add { border-color: #9ca3af; background: #fff; }
+html.light .show-cue { border-color: #9ca3af; color: #6b7280; }
+html.light .cue-code { background: rgba(0, 0, 0, 0.07); color: #4b5563; }
+html.light .cue-btn { background: rgba(0, 0, 0, 0.08); color: #4b5563; }
+html.light .show-unsorted .show-block-head { color: #6b7280; }
 html.light .rundown-file { background: #f3f4f6; }
 html.light .rundown-file:hover { background: #e5e7eb; }
 html.light #edit-dialog input, html.light #edit-dialog textarea, html.light #edit-dialog select { border-color: #6b7280; }
@@ -493,7 +724,7 @@ html.light .gs-alert { background: #fef3c7; border-color: #f59e0b; color: #92400
 
 /* =========================================================
    3. DISPLAY: SHARED
-   The page OBS shows (websocket_demo.html#display)
+   The page OBS shows (fx_wizard.html#display)
    ========================================================= */
 #display-view {
   position: absolute;
@@ -565,7 +796,7 @@ html.light .gs-alert { background: #fef3c7; border-color: #f59e0b; color: #92400
 /* =========================================================
    5. LOWER THIRD BACKGROUNDS
    To add one: add a class here, a button in the "Backgrounds"
-   section of websocket_demo.html, and its name in BG_CLASSES.
+   section of fx_wizard.html, and its name in BG_CLASSES.
    ========================================================= */
 .blue     { background: url('../assets/blueGif.gif'); }
 .green    { background: url('../assets/greenGif.gif'); }
@@ -728,13 +959,13 @@ html.light .gs-alert { background: #fef3c7; border-color: #f59e0b; color: #92400
 }
 /* The paragraph (sent as the "name"). Line breaks typed in the Text box are kept. */
 #overlay-box.l3LargeAlt #overlay-name {
-  font-size: calc(var(--alt-width) * 0.027);
+  font-size: calc(var(--alt-width) * 0.033);
   line-height: 1.15;
   color: #e4dfdf;
   white-space: pre-line;
 }
 #overlay-box.l3LargeAlt #overlay-title {
-  font-size: calc(var(--alt-width) * 0.027);
+  font-size: calc(var(--alt-width) * 0.033);
   line-height: 1.15;
 }
 
@@ -792,7 +1023,7 @@ html.light .gs-alert { background: #fef3c7; border-color: #f59e0b; color: #92400
    top-left to bottom-right and covers the whole screen at the halfway point ---------- */
 
 /* Change the speed and colors here. The page reads --stinger-time, so the
-   speed only needs to be set here. Stripe thicknesses are in websocket_demo.html. */
+   speed only needs to be set here. Stripe thicknesses are in fx_wizard.html. */
 #stinger {
   --stinger-time: 2s;
   --stinger-red: #c8102e;
@@ -1224,7 +1455,7 @@ html.light .gs-alert { background: #fef3c7; border-color: #f59e0b; color: #92400
 /* ---------- Bars stinger: TV color bars slide in piece by piece, hold, then fade ---------- */
 
 /* Change the length and slide speed here. The page reads --bars-time. Each piece's
-   color, place, direction and delay are set on it in websocket_demo.html. */
+   color, place, direction and delay are set on it in fx_wizard.html. */
 #colorbars {
   --bars-time: 2.6s;   /* whole stinger, including the fade */
   --bar-slide: 0.7s;   /* how long each piece takes to slide in */

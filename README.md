@@ -6,6 +6,32 @@
 
 ---
 
+## 📑 Index
+
+- [Features](#-features)
+- [How It Works](#-how-it-works)
+- [Setup Option A: Server Inside OBS (Recommended)](#️-setup-option-a-server-inside-obs-recommended)
+- [Setup Option B: Standalone Node.js Server](#️-setup-option-b-standalone-nodejs-server)
+- [Add the Display to OBS](#-add-the-display-to-obs)
+- [Open the Control Panel](#️-open-the-control-panel)
+- [Greenscreen Depth](#-greenscreen-depth)
+- [OBS Recommendations](#️-obs-recommendations)
+- [Using the Control Panel](#-using-the-control-panel)
+  - [Animated L3s tab](#animated-l3s-tab)
+  - [Fullscreen Overlays tab](#fullscreen-overlays-tab)
+  - [Importing L3s](#importing-l3s)
+  - [Running a show](#running-a-show)
+  - [Saving rundowns](#saving-rundowns)
+  - [During the show](#during-the-show)
+- [Customizing](#-customizing)
+- [Advanced Customization](#-advanced-customization) (advanced users only)
+- [Good to Know](#-good-to-know)
+- [Project Files](#-project-files)
+- [What's Next](#-whats-next)
+- [License](#-license) · [Credits](#-credits) · [Contact Me](#-contact-me)
+
+---
+
 ## ✨ Features
 
 ### Animated lower thirds
@@ -33,10 +59,12 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 | **Snow** | Soft white snowflakes drift down; nearer flakes are bigger and faster | Fades in | Fades out |
 | **Fire** | Flames burn along the bottom of the screen while glowing embers float up | Fades in | Fades out |
 | **Underwater** | Blue-green water with swaying light rays, rising bubbles, and small schools of fish swimming by every few seconds | Fades in | Fades out |
-| **Like, Follow & Subscribe** | **Like**, **Follow** and **Subscribe** buttons pop up along the bottom, a cursor clicks each one (they change to **Liked**, **Following** and **Subscribed**) and the bell rings, all in about 3 seconds. Any socials you add (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web) show above the buttons, each with its icon | Pops up | Fades out |
+| **Arrested** | Police lights flash red and blue, then a steel jail cell door slams down over the screen with a shake (the wide gaps between the bars show the scene behind). It lifts away in the last second | Lights flash, door drops | Door lifts, fades out |
+| **Hot Take** | The bottom of the screen catches fire, a flaming **HOT TAKE** badge slams in just above the flames (clear of the host's face) and its heat meter maxes out, with embers flying. Type your own text (for example *Unpopular Opinion*) or leave it blank | Slams in | Fades out |
+| **Like & Subscribe** | **Like**, **Follow** and **Subscribe** buttons pop up along the bottom, a cursor clicks each one (they change to **Liked**, **Following** and **Subscribed**) and the bell rings, all in about 3 seconds. Any socials you add (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web) show above the buttons, each with its icon | Pops up | Fades out |
 | **Breaking News** | **LIVE** in the top-right corner and a red **BREAKING NEWS** bar along the bottom, with your ticker text scrolling across | Bar slides up | Fades out |
 | **Stingers** | | | |
-| **Stinger - Standard** | A wide band of red, white and blue stripes (some with stars) sweeps from top-left to bottom-right, covering the whole screen at the halfway point; the stripes drift slightly (about 2 seconds) | Sweeps in | Sweeps off |
+| **Standard** | A wide band of red, white and blue stripes (some with stars) sweeps from top-left to bottom-right, covering the whole screen at the halfway point; the stripes drift slightly (about 2 seconds) | Sweeps in | Sweeps off |
 | **Storm** | Storm clouds roll down with rain and lightning, cover the screen, then clear (about 2.8 seconds) | Rolls in | Clears |
 | **Ghost** | A big glowing ghost rises from the bottom and floats off the top (about 2.4 seconds) | Rises in | Floats off |
 | **Bars** | TV color bars: each piece slides in from its own direction, they hold, then fade (about 2.6 seconds) | Slides in | Fades out |
@@ -47,7 +75,7 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 
 L3 PNG, L3 Info, L3 Gif and Custom text is always shown in capitals. If text is longer than normal, it shrinks to fit instead of getting cut off.
 
-🟩 **Greenscreen depth:** with Greenscreen on, Color Wave, Confetti, Fall, Snow, Fire and Underwater show partly *behind* you and partly *in front of* you. See [Greenscreen Depth](#-greenscreen-depth).
+🟩 **Greenscreen depth:** with Greenscreen on, Color Wave, Confetti, Fall, Snow, Fire, Underwater, Arrested and Hot Take show partly *behind* you and partly *in front of* you. See [Greenscreen Depth](#-greenscreen-depth).
 
 ### Import L3s
 Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import button shows when **L3 PNG** or **L3 Info** is selected, and the L3s are imported as that type.
@@ -58,24 +86,28 @@ Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import bu
 - Names already saved (same name and title) are skipped.
 
 ### Control panel
-- **Three tabs:** Animated L3's, Fullscreen Overlays, and Podcast Rundown. Animated L3's and Fullscreen Overlays each have their own saved list.
-- **Sections that open and close:** the lower third options (Background, Font Style, Font Color, Location, Animation) and the overlay groups (Fullscreen L3s, Overlays, Stingers) are big bars you tap to open or close. Each bar shows what's picked inside, and the panel remembers which ones you left open. Lower thirds start on Blue, Default, White, Bottom Left and Slide Left.
-- **Saved graphics:** large, touch-friendly cards, two per row. Tap to take, ✕ to delete, ＋ to add it to the Podcast Rundown. A colored edge shows the background or overlay type. The 🗑️ next to the heading deletes everything saved on that tab (it asks first).
+- **Three tabs:** Animated L3s, Fullscreen Overlays, and Podcast Rundown. Animated L3s and Fullscreen Overlays each have their own saved list.
+- **Sections that open and close:** the lower third options (Background, Font Style, Font Color, Location, Animation) and the overlay groups (Fullscreen L3s, Overlays, Stingers) are big bars you tap to open or close. They all start closed. Each bar has a chevron and shows what's picked inside. Lower thirds start on Blue, Default, White, Bottom Left and Slide Left.
+- **Saved graphics:** large, touch-friendly cards, full width (or two per row with the switch on the left of the heading; the panel remembers). The list starts closed: tap the heading, or the chevron under it, to open or close it (each tab separately). Tap a card to take, ✕ to delete, ＋ to add it to the Podcast Rundown. A colored edge shows the background or overlay type. The trash can on the right of the heading deletes everything saved on that tab (it asks first). The spyglass next to the layout switch opens a search box that filters the list by name, title, file or style (Escape closes it).
 - **Podcast Rundown:** the graphics you added with ＋, grouped into **blocks** (A to E to start; tap **+** next to the letters to add F, G and so on). Tap a letter under **Add to** to choose which block ＋ adds to.
   - **Labels:** each card is labeled on the left with its block, number and type: **A1-L3**, **A2-L3**... for lower thirds (animated or fullscreen) and **A1-OV**, **A2-OV**... for overlays and stingers. Lower thirds and overlays are numbered separately in each block, so a graphic in block B is **B1-L3**, **B1-OV** and so on.
   - Each card shows how long it stays on screen (for example **5s** or **5:00**) so you can double-check the rundown.
   - While **Set Order** is off: drag ⠿ to reorder or to move a card to another block, ✎ to edit the text, duration or block (and Greenscreen depth, for effects that support it) for this rundown only, and ✕ to remove. ✕ next to the last block removes it when it's empty. Cards can't be taken yet.
-  - Turn on **Set Order** when the show is ready, then tap a card to take it. While it's on, **Add to** becomes **ALL**: tap **ALL** to see the whole rundown, or a letter to see just that block. Empty blocks are greyed out.
-  - While a card is on screen it's outlined in green, with a floating red **⏹ OFF** button that counts down the time left; tap it to take the graphic down early. A ★ marks the one played last.
-  - The 🗑️ empties the rundown (saved graphics aren't affected, and the blocks stay). **CLEAR ALL** is right at the top.
-  - **💾 Save Rundown / 📂 Import Rundown** (shown while Set Order is off): save the whole rundown, its blocks and a full copy of every graphic, as a file in the `rundowns` folder, and bring it back later, like a template. It still works after those graphics are deleted from Saved, and the files can be copied to another computer. See [Saving rundowns](#saving-rundowns).
+  - Turn on **Set Order** when the show is ready, then tap a card to take it. A red **LIVE ORDER** bar across the top shows the rundown is running, not being edited. While it's on, **Add to** becomes **ALL**: tap **ALL** to see the whole rundown, or a letter to see just that block. Empty blocks are greyed out.
+  - While a card is on screen it's outlined in green, with a floating red **OFF** button that counts down the time left; tap it to take the graphic down early. A ★ marks the one played last.
+  - **Unsorted:** graphics added with **＋ RUNDOWN** (see below) wait at the bottom under **Unsorted**, labeled with just their type, until you drag them into a block (or move them with ✎). They aren't part of the show: they're hidden while Set Order is on, and turning it on tells you how many are left.
+  - **Cues:** producer notes and placeholders for things that aren't graphics. Tap **Note**, **Clip**, **SOT** or **PIC** (while Set Order is off), type the note or an optional description, and pick its block. Cues show as thin, greyed-out rows that can't be tapped, numbered like graphics (**A1-CLIP**, **A2-CLIP**, **A1-SOT**, **B1-PIC**...; notes have no number). Drag, edit and remove them like cards.
+  - The trash can empties the rundown (saved graphics aren't affected, and the blocks stay). **CLEAR ALL** is right at the top.
+  - **Save Rundown / Import Rundown** (shown while Set Order is off): save the whole rundown, its blocks and a full copy of every graphic, as a file in the `rundowns` folder, and bring it back later, like a template. It still works after those graphics are deleted from Saved, and the files can be copied to another computer. See [Saving rundowns](#saving-rundowns).
+- **Duration:** on the right, just above the buttons. Picking an overlay fills in its usual time (for example Snow 15s, Breaking News 30s, Hot Take 7s), which you can still change. The Animated L3s tab keeps whatever you set there. For stingers it shows their fixed length, locked (with a padlock). The stinger buttons show their lengths too, for example **Storm · 2.8s**.
+- **Buttons, two by two:** **TAKE** and **TOGGLE ON** on top, **SAVE** and **＋ RUNDOWN** below. **＋ RUNDOWN** puts what you've set up straight into the Podcast Rundown under **Unsorted**, without saving it first. It only works while Set Order is off; if it's on, it offers to turn it off (or cancel).
 - **TOGGLE ON / TOGGLE OFF:** puts the graphic up with no time limit. The button turns yellow and pulses and reads **TOGGLE OFF** until you press it again, press Clear All, or take something else on the same tab. Stingers play once, so it's greyed out for them.
-- **Message box:** floats at the bottom of the panel on every tab and shows what you just took and how long it will stay up, for example **Taken: Ryan Fann** *for 5:00*. It lights up for each new message, dims after 3 seconds, and goes back to **Ready** after 15 seconds with nothing new.
+- **Message box:** floats at the bottom of the panel on every tab and shows what you just took and how long it will stay up, for example **Taken: Ryan Fann** *for 5:00*. It lights up for each new message, dims after 3 seconds, and goes back to a small, faint **Ready** after 15 seconds with nothing new. The panel leaves room at the bottom so it never covers the last card.
 - **Clear All:** takes everything off screen right away, with its normal out animation.
 - **Toggle bar** (under the connection status):
   - **Greenscreen** on the left: turns on [Greenscreen Depth](#-greenscreen-depth). It's always off when the panel opens. On the Podcast Rundown tab, it pulses amber if the rundown is running (**Set Order** on) and has effects set for Greenscreen while it's off.
-  - **Light mode** on the right: shows 🌙 in dark mode and ☀️ in light mode. Dark is the default, and the browser remembers your choice.
-- **🔧 Connection help:** the wrench in the top bar opens a window with the live connection status and a list of things to check when it isn't **OPEN**.
+  - **Light mode** on the right: shows a moon in dark mode and a sun in light mode. Dark is the default, and the browser remembers your choice.
+- **Connection help:** the wrench in the top bar opens a window with the live connection status and a list of things to check when it isn't **OPEN**.
 
 ---
 
@@ -86,7 +118,7 @@ Control panel  ──►  Server (port 8080)  ──►  Display page in OBS
 (your browser)      (relays messages)       (shows the graphics)
 ```
 
-- **Control panel:** `websocket_demo.html`, opened in any browser.
+- **Control panel:** `fx_wizard.html`, opened in any browser. An OBS dock is recommended (see [Open the Control Panel](#️-open-the-control-panel)).
 - **Display:** the same file with `#display` on the end, added to OBS as a Browser Source.
 - **Underlay** (optional, for Greenscreen): the same file with `#underlay` on the end, added to OBS *below* your keyed camera.
 - **Server:** passes each message from the control panel to the display. It can run inside OBS (Python) or on its own (Node.js).
@@ -139,9 +171,23 @@ _Runs in its own window, separate from OBS._
 ## 📺 Add the Display to OBS
 
 1. Add a **Browser Source**.
-2. Check **Local file** and choose `websocket_demo.html`.
+2. Check **Local file** and choose `fx_wizard.html`.
 3. Add `#display` to the end of the file path.
 4. Set the size to your canvas, for example **1920 x 1080**. Fullscreen overlays are designed for 1920 x 1080.
+
+Using FX Wizard in more than one scene, or with a greenscreen? See [OBS Recommendations](#️-obs-recommendations) for the setup we use.
+
+---
+
+## 🖥️ Open the Control Panel
+
+The control panel works in any browser, so it doesn't have to be an OBS dock, but a dock is **highly recommended**: it sits right next to your scenes and starts with OBS.
+
+1. In OBS, open **Docks > Custom Browser Docks…** (on older versions, **View > Docks > Custom Browser Docks…**).
+2. Name it **FX Wizard** and paste the path to the file as the URL, for example `file:///C:/FXWizard/fx_wizard.html` (no `#display` on the end).
+3. Click **Apply**, then drag the dock where you want it.
+
+👆 FX Wizard is built for a **touchscreen**: big buttons, sections you tap open, and drag-and-drop in the rundown. A touchscreen monitor next to OBS gives the smoothest experience, though a mouse works too.
 
 ---
 
@@ -150,12 +196,12 @@ _Runs in its own window, separate from OBS._
 If you key yourself out of a greenscreen in OBS, FX Wizard can put some of an overlay **behind** you and some **in front of** you, for a deeper, 3D look. Snow falls behind you *and* past the camera; fish swim behind your head and across your face.
 
 ### Set it up in OBS
-1. Add another **Browser Source** with `websocket_demo.html#underlay` (same size as your canvas).
+1. Add another **Browser Source** with `fx_wizard.html#underlay` (same size as your canvas).
 2. Order your sources (top of the list = front):
    ```
-   websocket_demo.html#display    ← in front of you
+   fx_wizard.html#display    ← in front of you
    Your camera (with Chroma Key)
-   websocket_demo.html#underlay   ← behind you
+   fx_wizard.html#underlay   ← behind you
    Your background
    ```
 3. In the control panel, turn on **Greenscreen** in the toggle bar.
@@ -169,6 +215,8 @@ If you key yourself out of a greenscreen in OBS, FX Wizard can put some of an ov
 | **Fire** | The flames and their glow | Big embers drifting up, and a faint warm glow lighting you from below |
 | **Underwater** | Deep water, light rays, ripples, far fish and small bubbles | A light blue tint (so you look underwater too), big bubbles, and close fish swimming past |
 | **Color Wave** | The whole colored glow, like a backlight | Nothing |
+| **Arrested** | The flashing red and blue lights | The jail cell door, with the lights catching its top (so you're behind bars) |
+| **Hot Take** | The flames and the heat glow | The badge and its heat meter, and the embers |
 
 Everything else (lower thirds, the Fullscreen L3s, Breaking News, and all the stingers) stays on `#display` in front, as usual. With Greenscreen off, the underlay stays empty, so you can leave it in your scene.
 
@@ -187,26 +235,63 @@ What gets sent always follows the switch: with Greenscreen off, those effects pl
 
 ---
 
+## 🎛️ OBS Recommendations
+
+Every OBS setup is a little different, but this one works well, especially with one or more greenscreen shots.
+
+### Put FX Wizard in two nested scenes
+In OBS, a scene can be added to another scene like any other source. Make two scenes that hold nothing but FX Wizard:
+
+1. **FX Display:** one Browser Source with `fx_wizard.html#display`, full screen (1920 x 1080).
+2. **FX Underlay** (only needed with a greenscreen): one Browser Source with `fx_wizard.html#underlay`, full screen.
+
+Then, in each of your show scenes:
+
+- **FX Display goes on top** in every scene where graphics should appear. The only things above it should be what's meant to cover everything, like a closer or a full-screen bumper (OBS transitions and stingers already play over the whole scene).
+- **FX Underlay goes behind your keyed camera.** Put it just above the background and below the camera (or shot) that's keyed over that background. With several greenscreen cameras in one scene, put it below all of them.
+
+```
+Closer / full-screen bumper (if any)
+FX Display          ← nested scene, on top
+Camera 2 (Chroma Key)
+Camera 1 (Chroma Key)
+FX Underlay         ← nested scene, behind the people
+Background
+```
+
+### Why nested scenes
+- **One copy of each page, shared by every scene.** OBS runs a separate browser for every Browser Source, even in scenes that aren't on screen, and the animated effects take real work to draw. Nesting means just two pages, so they're always in step: a graphic that's up stays up when you change scenes.
+- **Change it once.** Resize, crop or move FX Display or FX Underlay in its own scene, and every show scene follows.
+- **The layering is always right.** Graphics stay on top, and the behind-you effects stay behind the people, even in a scene with several greenscreen shots.
+
+### Browser Source settings
+- **Width 1920, Height 1080** (or your canvas size).
+- Turn **off** *Shutdown source when not visible* and *Refresh browser when scene becomes active*, so graphics don't reset or vanish when you change scenes.
+- Optional: turn on *Use custom frame rate* and set **60** for smoother effects (this uses a little more of the computer).
+
+---
+
 ## 💻 Using the Control Panel
 
-Open `websocket_demo.html` in a browser (without `#display`). Check that the top bar says **OPEN**.
+Open `fx_wizard.html` in a browser (without `#display`). Check that the top bar says **OPEN**.
 
-### Animated L3's tab
+### Animated L3s tab
 1. Type a **Name** and an optional **Title**.
-2. Set the **Duration** in seconds.
+2. Set the **Duration** in seconds (just above the buttons).
 3. Tap a section to open it and pick a **Background**, **Font Style**, **Font Color**, **Location**, or **Animation**.
    - **Custom background:** put an image (PNG, JPG or GIF) in the `custom` folder next to `assets`, then tap **Custom…**. It uses the first image in the folder by file name, and checks the folder again each time you tap it or the panel connects. (If the server is older and can't read the folder, a file picker opens instead.)
-4. Press **⚡ TAKE** to put it on screen now, **TOGGLE ON** to keep it up until you turn it off, or **💾 SAVE** to add it to Saved Animated Lower Thirds.
+4. Press **TAKE** to put it on screen now, **TOGGLE ON** to keep it up until you turn it off, **SAVE** to add it to Saved L3s, or **＋ RUNDOWN** to put it straight into the Podcast Rundown (under Unsorted).
 
 ### Fullscreen Overlays tab
 1. Open **Fullscreen L3s**, **Overlays** or **Stingers** and pick one.
 2. For L3 PNG, L3 Gif and Custom, type a **Name** and an optional **Title**. For L3 Info, type the paragraph in **Text**.
    - **Custom:** same as the Custom background: tap **Custom…** to use the first PNG, JPG or GIF in the `custom` folder.
-   - **Like, Follow & Subscribe:** under **Socials**, tap an icon (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web) to open a box for that account and type it in. Tap the icon again to leave it out. All of them are optional, and the panel remembers what you typed. Give it at least 4 seconds so the clicks finish.
+   - **Like & Subscribe:** under **Socials**, tap an icon (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web) to open a box for that account and type it in. Tap the icon again to leave it out. All of them are optional, and the panel remembers what you typed. Give it at least 4 seconds so the clicks finish.
+   - **Hot Take:** type your own text in **Text (optional)**, or leave it blank for **HOT TAKE**.
    - **Breaking News:** type the scrolling text in **Ticker text**. **TOGGLE ON** keeps it up until you turn it off.
    - **Sports** (a stinger): pick **Football**, **Basketball**, **Baseball** or **Soccer** under **Sport**.
-3. Set the **Duration**. The stingers have a fixed length, so this field is hidden for them.
-4. Press **⚡ TAKE**, **TOGGLE ON**, or **💾 SAVE**.
+3. Check the **Duration**: it fills in with the overlay's usual time when you pick it. Stingers show their fixed length, locked.
+4. Press **TAKE**, **TOGGLE ON**, **SAVE**, or **＋ RUNDOWN**.
 
 ### Importing L3s
 1. Make a `.txt` file with one name per line:
@@ -215,29 +300,30 @@ Open `websocket_demo.html` in a browser (without `#display`). Check that the top
    Marcus Lee
    Dr. Alicia Gomez | Keynote Speaker
    ```
-2. On the Fullscreen Overlays tab, pick **L3 PNG** or **L3 Info**, then press **📄 IMPORT L3s (.txt)** and choose one or more files.
+2. On the Fullscreen Overlays tab, pick **L3 PNG** or **L3 Info**, then press **IMPORT L3s (.txt)** and choose one or more files.
 3. The names appear under **Saved Overlays**, each labeled with its file name.
 
 ### Running a show
 1. Open **Podcast Rundown** and tap the block you're filling under **Add to** (A to start).
-2. On the Animated L3's and Fullscreen Overlays tabs, tap **＋** on each saved graphic for that block, in show order. Then pick the next block and repeat. Need more than A to E? Tap **+** next to the letters.
-3. Back on **Podcast Rundown**, drag ⠿ to fix the order (or move a card to another block), ✎ to tweak anything for this rundown, and check each card's label and time.
+2. On the Animated L3s and Fullscreen Overlays tabs, tap **＋** on each saved graphic for that block, in show order. Then pick the next block and repeat. Need more than A to E? Tap **+** next to the letters.
+   - Setting up something new? **＋ RUNDOWN** adds it straight to the rundown under **Unsorted**; drag it into its block afterwards.
+3. Back on **Podcast Rundown**, add **Cues** for the clips, SOTs, pictures and notes in each block, drag ⠿ to fix the order (or move a card to another block), ✎ to tweak anything for this rundown, and check each card's label and time.
 4. Turn on **Set Order**. Cards can only be taken once it's on. Tap **ALL** or a block letter to choose what's shown.
-5. During the show, tap each card to take it. It's outlined in green while it's on screen, with a **⏹ OFF** button to take it down early, and ★ marks the one played last.
+5. During the show, tap each card to take it. It's outlined in green while it's on screen, with an **OFF** button to take it down early, and ★ marks the one played last.
 
 ### Saving rundowns
-1. Build the rundown, then press **💾 Save Rundown** (Set Order must be off) and give it a name.
-2. It's saved as `rundowns/<name>.json` next to `websocket_demo.html`. Saving with a name that's already there asks before replacing it.
-3. To use it again, press **📂 Import Rundown** and tap it in the list (newest first), or **Choose a file…** to open a rundown file from anywhere. Importing replaces the current rundown (it asks first) and turns Set Order off so you can check it.
+1. Build the rundown, then press **Save Rundown** (Set Order must be off) and give it a name.
+2. It's saved as `rundowns/<name>.json` next to `fx_wizard.html`. Saving with a name that's already there asks before replacing it.
+3. To use it again, press **Import Rundown** and tap it in the list (newest first), or **Choose a file…** to open a rundown file from anywhere. Importing replaces the current rundown (it asks first) and turns Set Order off so you can check it. It doesn't add anything to your saved graphics, and it works whether or not those graphics are still saved (rundowns with lower thirds from older versions too).
 
 The file holds everything needed, so it works even if those graphics were deleted from Saved. The server does the saving, so it needs the current `server.py` or `server.js` (after updating, reload the script in OBS under **Tools > Scripts**, or restart `node server.js`). With an older server, **Save Rundown** downloads the file instead: move it into the `rundowns` folder.
 
 ### During the show
-- **Tap a saved card** (or a Podcast Rundown card, once Set Order is on) to take it. **⏹ OFF** on a live rundown card takes it down early.
-- **✖ CLEAR ALL** removes everything from the screen, including anything toggled on.
+- **Tap a saved card** (or a Podcast Rundown card, once Set Order is on) to take it. **OFF** on a live rundown card takes it down early.
+- **CLEAR ALL** removes everything from the screen, including anything toggled on.
 - **TOGGLE OFF** takes down the graphic you toggled on.
-- If the top bar says **CLOSED**, press the **🔧** for things to check.
-- Using a greenscreen? Turn on **Greenscreen** before you take Snow, Fall, Confetti, Fire, Underwater or Color Wave. It starts off each time the panel opens.
+- If the top bar says **CLOSED**, press the wrench for things to check.
+- Using a greenscreen? Turn on **Greenscreen** before you take Snow, Fall, Confetti, Fire, Underwater, Arrested, Hot Take or Color Wave. It starts off each time the panel opens.
 - **✕** on a card deletes it (you'll be asked to confirm).
 
 ---
@@ -247,35 +333,129 @@ The file holds everything needed, so it works even if those graphics were delete
 | To change... | Look in | What to edit |
 |---|---|---|
 | Lower third text size | `css/styles.css`, section 4 | `font-size` in `#action-name` and `#action-title` |
-| Add a lower third background | `css/styles.css`, section 5 | Add a class with your GIF from `assets/`, add a button in the **Backgrounds** part of `websocket_demo.html`, and add the name to `BG_CLASSES` in the script |
+| Add a lower third background | `css/styles.css`, section 5 | Add a class with your GIF from `assets/`, add a button in the **Backgrounds** part of `fx_wizard.html`, and add the name to `BG_CLASSES` in the script |
 | L3 PNG image | `assets/l3Large.png` | Replace the image (1920 x 1080) |
 | L3 PNG font or size | `css/styles.css`, section 7 | `#overlay-box.l3Large #overlay-text` and `#overlay-name` |
 | L3 Info image | `assets/l3LargeAlt.png` | Replace the image (1920 x 500). If the box inside moves, adjust `#overlay-box.l3LargeAlt #overlay-text` |
 | L3 Info size or position | `css/styles.css`, section 7 | `--alt-width`, `--alt-left` and `--alt-bottom` in `#overlay-box.l3LargeAlt`. The text follows |
 | L3 Gif GIF | `assets/largeGif.gif` | Replace the GIF |
 | L3 Gif bar size or position | `css/styles.css`, section 7 | `#overlay-gif` |
-| Stinger - Standard speed, colors, or drift | `css/styles.css`, section 7 | The `--stinger-...` settings at the top of `#stinger`. Stripe thicknesses are the `--h` values in `websocket_demo.html` |
-| Like, Follow & Subscribe look or timing | `css/styles.css`, section 7 | `.sc-btn` (colors are `--bg0`/`--bg1`, click times are `--t`), the `scCursor` keyframes, and `.sc-pill` for the socials. Social icon colors are the `.sc-youtube`, `.sc-facebook`... rules |
+| Standard stinger speed, colors, or drift | `css/styles.css`, section 7 | The `--stinger-...` settings at the top of `#stinger`. Stripe thicknesses are the `--h` values in `fx_wizard.html` |
+| Like & Subscribe look or timing | `css/styles.css`, section 7 | `.sc-btn` (colors are `--bg0`/`--bg1`, click times are `--t`), the `scCursor` keyframes, and `.sc-pill` for the socials. Social icon colors are the `.sc-youtube`, `.sc-facebook`... rules |
 | Breaking News look | `css/styles.css`, section 7 | `.bn-live`, `.bn-bar`, `.bn-label` and `#breaking-text`. Scroll speed is `TICKER_SPEED` in the script |
 | Ghost stinger speed or colors | `css/styles.css`, section 7 | The `--ghost-...` settings at the top of `#ghost` |
 | X-mas stinger speed or colors | `css/styles.css`, section 7 | The `--xmas-...` settings at the top of `#xmas` |
-| Storm, Static, Sports or Spring stinger length | `websocket_demo.html`, script section 2 | `length` on `storm`, `tvstatic`, `sportsfx` or `spring` in `OVERLAYS` (in seconds) |
-| Greenscreen split (how much goes behind or in front) | `websocket_demo.html`, script section 6 | `DEPTH` near the top of the canvas effects |
-| Bars stinger length or colors | `css/styles.css` (`--bars-time`, `--bar-slide`) and `websocket_demo.html` (each bar's color, direction and delay) | |
+| Storm, Static, Sports or Spring stinger length | `fx_wizard.html`, script section 2 | `length` on `storm`, `tvstatic`, `sportsfx` or `spring` in `OVERLAYS` (in seconds) |
+| Greenscreen split (how much goes behind or in front) | `fx_wizard.html`, script section 6 | `DEPTH` near the top of the canvas effects |
+| Bars stinger length or colors | `css/styles.css` (`--bars-time`, `--bar-slide`) and `fx_wizard.html` (each bar's color, direction and delay) | |
 | Glitch, Bounce or Slam animation | `css/styles.css`, section 8 | The `glitchIn`, `glitchOut`, `bounceIn` and `slamIn` keyframes |
-| Podcast Rundown blocks to start with | `websocket_demo.html`, script section 15 | `DEFAULT_BLOCKS` |
-| Imported L3 duration | `websocket_demo.html`, script section 1 | `IMPORT_DURATION` (in seconds) |
-| Server address | `websocket_demo.html`, script section 1 | `SOCKET_URL` |
+| An overlay's usual duration | `fx_wizard.html`, script section 2 | `dur` on that overlay in `OVERLAYS` (in seconds) |
+| Arrested look or timing | `fx_wizard.html`, script section 6 | `arrested` in the canvas effects (`POLICE_RED`, `POLICE_BLUE`, `DROP` and `LAND`) |
+| Hot Take look | `fx_wizard.html`, script section 6 | `hottake` in the canvas effects; the default text is `caption` in `OVERLAYS` |
+| Cue types (Note, Clip, SOT, PIC) | `fx_wizard.html`, script section 15 | `CUES` |
+| Podcast Rundown blocks to start with | `fx_wizard.html`, script section 15 | `DEFAULT_BLOCKS` |
+| Imported L3 duration | `fx_wizard.html`, script section 1 | `IMPORT_DURATION` (in seconds) |
+| Server address | `fx_wizard.html`, script section 1 | `SOCKET_URL` |
 
-Both `styles.css` and the script in `websocket_demo.html` start with a numbered list of their sections.
+Both `styles.css` and the script in `fx_wizard.html` start with a numbered list of their sections. For step-by-step changes, see [Advanced Customization](#-advanced-customization).
+
+---
+
+## 🧰 Advanced Customization
+
+> ⚠️ **For advanced users only.** These changes mean editing the project's files. Make a copy of the folder (or commit in Git) first, so you can always go back. If you just want your own look without touching code, use the **Custom** background and **Custom** Fullscreen L3, which take any image you drop in the `custom` folder.
+
+### Before you start
+- Use a plain text editor (VS Code, Notepad++, or similar), not a word processor.
+- Three places hold almost everything:
+  - `assets/`: the images and GIFs.
+  - `css/styles.css`: how everything looks and moves. It starts with a numbered list of its sections.
+  - `fx_wizard.html`: the control panel and the display. Its script also starts with a numbered list of sections.
+- **After every change,** refresh the control panel dock and the browser sources in OBS (right-click the source > **Refresh**, or open its properties and press **Refresh cache of current page**). OBS caches images, so a replaced GIF may not show until you do.
+- **Preview without OBS:** open `fx_wizard.html` in one browser tab and `fx_wizard.html#display` in another, with the server running. Graphics you take show in the second tab.
+
+### Image sizes and formats
+Sizes are for a 1920 x 1080 canvas (for 4K, double them). Images are cropped to fill their space, never stretched, so keep the important part toward the middle.
+
+| Image | Where it goes | Best size | Best format | Good to know |
+|---|---|---|---|---|
+| Lower third backgrounds (Blue, Green, Space...) | `assets/` (see the file names below) | 1200 x 300 or larger (4:1) | Animated GIF, under 10 MB | The box grows with the text (about 700–1100 x 190 for a name and title), so the edges may be cropped |
+| **Custom** background (Animated L3s) | `custom/` | 1200 x 300 (4:1) | GIF, PNG or JPG | Same box and cropping as the backgrounds above |
+| L3 PNG | `assets/l3Large.png` | 1920 x 1080 | PNG with transparency | A full-screen frame: everything except your bar should be transparent |
+| L3 Info | `assets/l3LargeAlt.png` | 1920 x 500 | PNG with transparency | Shown at half the screen width (960 x 250) in the bottom-left. The text fits inside its inner box (see below) |
+| L3 Gif | `assets/largeGif.gif` | 1210 x 178 (about 6.8:1) | Animated GIF, under 10 MB | Gets rounded corners and a thin border |
+| **Custom** Fullscreen L3 | `custom/` | 1210 x 178 (about 6.8:1) | GIF, PNG or JPG | No border; the outer 15% on each side fades out, so keep anything important in the middle |
+
+Which format?
+- **PNG:** when you need transparency or crisp edges and text.
+- **JPG:** for photos. Smallest files, but no transparency.
+- **GIF:** for motion. Short loops keep the file small; big GIFs take a moment to appear the first time.
+
+Both **Custom** items use the same image (the first one in the `custom` folder by name), so pick a size that suits the one you use most.
+
+### Swap a lower third background GIF (no code)
+Each background button uses one file in `assets/`. Replace the file and keep the **same file name**:
+
+| Button | File |
+|---|---|
+| Blue | `blueGif.gif` |
+| Green | `greenGif.gif` |
+| Black | `blackGif.gif` |
+| Red | `redGif.gif` |
+| Space | `space.gif` |
+| Clouds | `clouds.gif` |
+| Tech | `tech.gif` |
+| Finance | `finance.gif` |
+| Sports | `sports.gif` |
+| Politics | `politics.gif` |
+
+Tips:
+- See [Image sizes and formats](#image-sizes-and-formats) for the best size (1200 x 300 or larger, under 10 MB).
+- Want a different name on the button? Change the label text next to that file's button in the **Backgrounds** section of `fx_wizard.html`.
+
+### Add a new background (for example, a show-specific one)
+1. Put your GIF in `assets/`, for example `assets/weather.gif`.
+2. In `css/styles.css`, section 5, add a class with the same pattern as the others:
+   ```css
+   .weather  { background: url('../assets/weather.gif'); }
+   ```
+3. In `fx_wizard.html`, in the **Backgrounds** section, copy the last button pair (the `<input>` and `<label>` for Politics) and change the `id`, `value`, `for`, the text, and the number in `peer/b10` and `peer-checked/b10` to a new one:
+   ```html
+   <input type="radio" id="bg-weather" name="bgStyle" value="weather" class="hidden peer/b11">
+   <label for="bg-weather" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b11:bg-sky-700">Weather</label>
+   ```
+4. In the script (section 2), add `'weather'` to `BG_CLASSES`. Optionally add `weather: 'border-sky-400'` to `ACCENTS` for the colored edge on saved cards.
+
+### Replace the Fullscreen L3 images
+| Overlay | File | Size | Notes |
+|---|---|---|---|
+| L3 PNG | `assets/l3Large.png` | 1920 x 1080 | A transparent PNG with the bar where you want it. The name and title are placed by `#overlay-box.l3Large #overlay-text` in `styles.css`, section 7 |
+| L3 Info | `assets/l3LargeAlt.png` | 1920 x 500 | The text is fitted inside the image's inner box (x 428–1894, y 38–461). If your box is in a different spot, change the four numbers in the `padding` of `#overlay-box.l3LargeAlt #overlay-text`; they're that box's edges as fractions of the image |
+| L3 Gif | `assets/largeGif.gif` | 1210 x 178 | Fills `#overlay-gif` without stretching |
+
+Keep the same file names and the overlays pick up the new images.
+
+### Fonts and colors
+- **Fonts:** the fonts come from Google Fonts (the `<link>` at the top of `fx_wizard.html`). To add one, add its family to that link, add a `.font-yourname` class in `styles.css` section 6, add a button in the **Font Style** section (same pattern as above), and add `'font-yourname'` to `FONT_CLASSES` in the script.
+- **Font colors:** each swatch in the **Font Color** section is one `<input>` and `<label>`. Copy one and change its `id`, the `value` (the color, like `#FF6600`), the `title` (its name) and the `background`.
+- **The panel's accent color** (picked buttons and tabs) is `primary` near the top of `fx_wizard.html`.
+
+### Timing, server port, and other settings
+- Most lengths and timings are in the [Customizing](#-customizing) table above (overlay durations, stinger lengths, animations).
+- **Changing the server port:** it must match in three places: `SOCKET_URL` in `fx_wizard.html` (script section 1), the port in `server.py` (in `start_server_thread`), and the port in `server.js`. After changing `server.py`, restart OBS.
+
+### Things not to change
+- The **code names** of overlays in `OVERLAYS` (like `l3Large`, `snow`, `hottake`) and of backgrounds (like `blue`). Saved graphics and rundown files refer to them by these names; rename one and older saves stop finding it. Change the **label** instead.
+- The `#display` and `#underlay` endings: OBS uses them to know which page to show.
 
 ---
 
 ## 📝 Good to Know
 
-- **Saved graphics and the Podcast Rundown live in the browser.** They're stored on the computer and browser where you saved them. Clearing that browser's data deletes them, and a different computer or browser starts with an empty list. Use **💾 Save Rundown** to keep a rundown as a file.
+- **Saved graphics and the Podcast Rundown live in the browser.** They're stored on the computer and browser where you saved them. Clearing that browser's data deletes them, and a different computer or browser starts with an empty list. Use **Save Rundown** to keep a rundown as a file.
 - **Large GIFs load the first time.** Some backgrounds are 20–50 MB, so a background can take a moment to appear the first time it's used.
 - **Older saves still work.** Graphics saved with earlier versions still open correctly.
+- **Missing custom images:** a card that uses a custom image no longer in the `custom` folder shows a red **!** (saved and rundown cards). Put the file back, or pick a new one with ✎ or by saving it again.
 - **Sharing the project:** `custom/` and `rundowns/` keep your own files out of Git (see `.gitignore`); only their `README.txt` is shared. Python's `__pycache__` is ignored too.
 
 ---
@@ -284,7 +464,7 @@ Both `styles.css` and the script in `websocket_demo.html` start with a numbered 
 
 | File | What it is |
 |---|---|
-| `websocket_demo.html` | The control panel, the display (`#display`) and the greenscreen underlay (`#underlay`), all in one page |
+| `fx_wizard.html` | The control panel, the display (`#display`) and the greenscreen underlay (`#underlay`), all in one page |
 | `css/styles.css` | All the styles and animations |
 | `assets/` | Background GIFs, the L3 images, and logos |
 | `custom/` | Your own image for the **Custom…** background and the **Custom** Fullscreen L3 (the first PNG, JPG or GIF by name is used). Not shared in Git |
@@ -295,21 +475,46 @@ Both `styles.css` and the script in `websocket_demo.html` start with a numbered 
 
 ---
 
+## 🔭 What's Next
+
+FX Wizard keeps growing with the shows we produce. A few things on the horizon (not in this version):
+
+- **A guest-facing view:** a screen outside OBS that everyone in the studio can see, fed by the control panel.
+- **Show timing:** countdowns and running times, built into the Podcast Rundown.
+- **Script cues:** scripts that live in the rundown alongside the graphics.
+- **OBS hotkeys:** take graphics without touching the panel.
+- **Test mode:** a safe way to rehearse a setup, with logs.
+- **Vertical video:** a vertical canvas option (or a separate dock) with lower thirds and overlays made for vertical formats.
+
+Ideas and requests from the shows that use it are always welcome.
+
+---
+
 ## 📜 License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the [MIT License](https://opensource.org/license/mit). See the [LICENSE](LICENSE) file for details.
 
-## 📧 Contact
+## 🌟 Credits
 
-For support, contact the author at **ryan.fann@gmail.com** or visit the GitHub repository: **FXWizard**
-
-## 🌟 Acknowledgements
-
-This project benefited from the assistance of Gemini, a large language model, in the following areas:
-
-- **Architectural Design**: Transitioning to an internal Python WebSocket server for OBS.
-- **UI Refinement**: Implementation of Tailwind CSS and studio-grade color palettes.
-- **Debugging**: Resolving CSS animation conflicts and Python async loop errors.
-- **Branding**: Generation of the FX Wizard Logo.
-- **Gifs**: Used [EzGif](https://ezgif.com/video-to-gif) to transfer content from [Storyblocks](https://www.storyblocks.com/)
+- **Development**: FX Wizard was conceived, directed and tested in-house, with AI-assisted development tools supporting the most technically demanding work, including animation, reliability (keeping graphics from getting stuck on screen) and a cohesive visual design.
+- **Inspiration**: FX Magician, a fun and genuinely handy tool that showed what a simple graphics controller could do, and a demo of a colleague's tool whose fall and snow overlays sparked some of the effects here ([colleague's name]). FX Wizard was then honed and tested on a real-world, fast-paced daily half-hour newscast, broadcast over the air and streamed.
+- **Branding**: FX Wizard logo created with Gemini.
+- **GIFs**: Converted from [Storyblocks](https://www.storyblocks.com/) content with [EzGif](https://ezgif.com/video-to-gif).
 - **Fonts**: [Google Fonts](https://fonts.google.com/)
+
+---
+
+## 📱 Contact Me
+
+<div align="center">
+
+[![8BitGinger](./assets/tinyLogo.png)](https://8bitginger.com)
+
+[![Follow 8BitGinger on GitHub](https://img.shields.io/github/followers/8BitGinger.svg?style=social&label=Follow&maxAge=2592000)](https://github.com/8BitGinger)
+
+[![Built with love](https://forthebadge.com/images/badges/built-with-love.svg)](https://8bitginger.com)
+
+[![GitHub](https://img.shields.io/badge/GitHub-181717.svg?style=for-the-badge&logo=GitHub&logoColor=white)](https://github.com/8BitGinger)
+[![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ryanfanntastic/)
+
+</div>

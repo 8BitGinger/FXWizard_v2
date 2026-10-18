@@ -81,7 +81,7 @@ const wss = new WebSocket.Server({ port: 8080 });
 const clients = new Set(); 
 
 console.log("WebSocket Server started on ws://localhost:8080.");
-console.log("Waiting for connections from websocket_demo.html...");
+console.log("Waiting for connections from fx_wizard.html...");
 
 wss.on('connection', function connection(ws) {
     // 1. Add new client to the set

@@ -30,37 +30,39 @@
     <div id="app" class="w-full h-full">
 
         <!-- ===== CONNECTION STATUS (controller only) ===== -->
-        <div id="controller-status" class="text-sm py-2 px-3 bg-gray-600 w-full flex items-center gap-2">
+        <div id="controller-status" class="relative text-sm py-2 px-3 bg-gray-600 w-full flex items-center gap-2">
             <!-- Wrench: opens a window of things to check when the connection isn't OPEN -->
-            <button id="help-btn" type="button" title="Connection help" onclick="openConnectionHelp()" class="leading-none hover:scale-110 active:scale-95">🔧</button>
+            <button id="help-btn" type="button" title="Connection help" onclick="openConnectionHelp()" class="leading-none hover:scale-110 active:scale-95"><span data-icon="wrench"></span></button>
             <span>Connection Status: <span id="controller-connection" class="font-medium text-red-400">CLOSED</span></span>
+            <!-- Tiny logo on the right: the full height of the bar, width from its shape (hidden if assets/tinyLogo.png is missing) -->
+            <img src="./assets/tinyLogo.png" alt="" class="status-logo" onerror="this.remove()">
         </div>
 
         <!-- ===== TOGGLE BAR (controller only) ===== -->
         <div id="toggle-bar" class="mb-1 text-xs py-1 px-3 bg-gray-700 w-full flex items-center gap-2">
-            <!-- Greenscreen: some overlays also draw on websocket_demo.html#underlay, a second
+            <!-- Greenscreen: some overlays also draw on fx_wizard.html#underlay, a second
                  Browser Source placed behind your keyed camera, for a deeper, 3D look -->
-            <label class="fx-switch gs-switch" title="Greenscreen depth: add websocket_demo.html#underlay as a Browser Source below your keyed camera in OBS. Snow, Fall, Confetti, Fire, Underwater and Color Wave then show partly behind you.">
+            <label class="fx-switch gs-switch" title="Greenscreen depth: add fx_wizard.html#underlay as a Browser Source below your keyed camera in OBS. Snow, Fall, Confetti, Fire, Underwater, Arrested, Hot Take and Color Wave then show partly behind you.">
                 <span class="gs-chip"></span><span>Greenscreen</span>
                 <input type="checkbox" id="gs-toggle">
                 <span class="fx-track"></span>
             </label>
             <!-- Light / dark switch (dark is the default). The icon shows the current mode. -->
             <label class="fx-switch ml-auto" title="Light / dark mode">
-                <span id="theme-icon" class="text-base leading-none">🌙</span>
+                <span id="theme-icon" class="text-base leading-none"></span>
                 <input type="checkbox" id="light-toggle">
                 <span class="fx-track"></span>
             </label>
         </div>
 
         <!-- ===== CONTROLLER ===== -->
-        <div id="controller-view" class="pb-16 hidden controller-max-width mx-auto">
+        <div id="controller-view" class="pb-20 hidden controller-max-width mx-auto">
             <div class="space-y-3 p-2 rounded-lg w-full">
 
-                <!-- Tabs: Animated L3's / Fullscreen Overlays / Podcast Rundown -->
+                <!-- Tabs: Animated L3s / Fullscreen Overlays / Podcast Rundown -->
                 <div id="mode-tabs" class="grid grid-cols-3 gap-1 text-sm">
                     <input type="radio" id="mode-l3" name="mode" value="l3" checked class="hidden peer/m1">
-                    <label for="mode-l3" class="p-1 border rounded font-bold cursor-pointer hover:bg-violet-400 peer-checked/m1:bg-primary flex items-center justify-center text-center leading-tight">Animated L3's</label>
+                    <label for="mode-l3" class="p-1 border rounded font-bold cursor-pointer hover:bg-violet-400 peer-checked/m1:bg-primary flex items-center justify-center text-center leading-tight">Animated L3s</label>
                     <input type="radio" id="mode-overlay" name="mode" value="overlay" class="hidden peer/m2">
                     <label for="mode-overlay" class="p-1 border rounded font-bold cursor-pointer hover:bg-violet-400 peer-checked/m2:bg-primary flex items-center justify-center text-center leading-tight">Fullscreen Overlays</label>
                     <input type="radio" id="mode-show" name="mode" value="show" class="hidden peer/m3">
@@ -93,16 +95,11 @@
                     <div id="social-inputs" class="flex flex-col gap-1 mt-1"></div>
                 </div>
 
-                <!-- Duration (hidden for the stingers) -->
-                <div id="duration-field" class="w-full">
-                    <label for="duration-input" class="block text-md font-medium ">Duration (sec):</label>
-                    <input type="number" id="duration-input" value="5" min="1" class="w-full p-1 rounded border-2 border-white bg-transparent text-violet-300 text-sm focus:text-white focus:bg-gray-700">
-                </div>
 
                 <!-- ===== FULLSCREEN OVERLAY TAB =====
                      Three sections that open and close with a tap. The bar shows what's picked in it. -->
                 <div id="overlay-section" class="hidden space-y-2">
-                    <details class="fx-section" data-key="ov-l3s" open>
+                    <details class="fx-section" data-key="ov-l3s">
                         <summary><span>Fullscreen L3s</span><span class="fx-value"></span></summary>
                         <div class="grid grid-cols-2 gap-1 text-[12px]">
                             <input type="radio" id="ov-l3Large" name="overlayStyle" value="l3Large" checked class="hidden peer/o1">
@@ -117,7 +114,7 @@
                             <!-- Custom: like L3 Gif, with the first image in the "custom" folder (next to "assets") -->
                             <input type="radio" id="ov-l3Custom" name="overlayStyle" value="l3Custom" data-custom="l3" class="hidden peer/o15">
                             <label for="ov-l3Custom" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o15:bg-primary">Custom…</label>
-                            <p id="custom-l3-name" class="col-span-2 text-[11px] text-center opacity-75 hidden"></p>
+                            <p id="custom-l3-name" class="col-span-2 text-[12px] text-center opacity-75 hidden"></p>
                         </div>
                     </details>
 
@@ -142,12 +139,20 @@
                             <input type="radio" id="ov-underwater" name="overlayStyle" value="underwater" class="hidden peer/o16">
                             <label for="ov-underwater" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o16:bg-primary">Underwater</label>
 
+                            <!-- Arrested: police lights, then a jail cell door slams down -->
+                            <input type="radio" id="ov-arrested" name="overlayStyle" value="arrested" class="hidden peer/o21">
+                            <label for="ov-arrested" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o21:bg-primary">Arrested</label>
+
+                            <!-- Hot Take: flames, a slammed-in badge (your own text, optional) and a heat meter -->
+                            <input type="radio" id="ov-hottake" name="overlayStyle" value="hottake" class="hidden peer/o22">
+                            <label for="ov-hottake" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o22:bg-primary">Hot Take</label>
+
                             <input type="radio" id="ov-breaking" name="overlayStyle" value="breaking" class="hidden peer/o17">
                             <label for="ov-breaking" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o17:bg-primary">Breaking News</label>
 
                             <!-- Like, Follow & Subscribe: a cursor clicks each button; optional socials above -->
                             <input type="radio" id="ov-social" name="overlayStyle" value="social" class="hidden peer/o20">
-                            <label for="ov-social" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o20:bg-primary">Like, Follow &amp; Subscribe</label>
+                            <label for="ov-social" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o20:bg-primary">Like &amp; Subscribe</label>
                         </div>
                     </details>
 
@@ -155,7 +160,7 @@
                         <summary><span>Stingers</span><span class="fx-value"></span></summary>
                         <div class="grid grid-cols-2 gap-1 text-[12px]">
                             <input type="radio" id="ov-stinger" name="overlayStyle" value="stinger" class="hidden peer/o4">
-                            <label for="ov-stinger" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o4:bg-primary">Stinger - Standard</label>
+                            <label for="ov-stinger" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o4:bg-primary">Standard</label>
 
                             <input type="radio" id="ov-storm" name="overlayStyle" value="storm" class="hidden peer/o12">
                             <label for="ov-storm" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o12:bg-primary">Storm</label>
@@ -198,7 +203,7 @@
                     <!-- Import L3s: each line of a .txt file becomes a saved L3 ("Name" or "Name | Title";
                          for L3 Info each line is one paragraph). Only shown for L3 PNG and L3 Info. -->
                     <input type="file" id="import-file" accept=".txt,text/plain" multiple class="hidden">
-                    <button id="import-btn" class="py-1 w-full hover:bg-teal-600 active:scale-95 bg-teal-700 font-bold rounded text-sm" onclick="$('import-file').click()">📄 IMPORT L3s (.txt)</button>
+                    <button id="import-btn" class="py-1 w-full hover:bg-teal-600 active:scale-95 bg-teal-700 font-bold rounded text-sm" onclick="$('import-file').click()"><span data-icon="file"></span> IMPORT L3s (.txt)</button>
                 </div>
 
                 <!-- ===== LOWER THIRD TAB =====
@@ -240,7 +245,7 @@
                             <!-- Custom: uses the first image in the "custom" folder (next to "assets") -->
                             <input type="radio" id="bg-custom" name="bgStyle" value="custom" data-custom="bg" class="hidden peer/b11">
                             <label for="bg-custom" class="col-span-2 p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b11:bg-fuchsia-700">Custom…</label>
-                            <p id="custom-name" class="col-span-2 text-[11px] text-center opacity-75 hidden"></p>
+                            <p id="custom-name" class="col-span-2 text-[12px] text-center opacity-75 hidden"></p>
                         </div>
                     </details>
 
@@ -325,28 +330,51 @@
                 <!-- Backup file picker for Custom…, used only if the server can't list the custom folder -->
                 <input type="file" id="custom-file" accept="image/*" class="hidden">
 
-                <!-- TAKE / TOGGLE / SAVE (hidden on Rundown) -->
-                <div id="take-row" class="grid grid-cols-3 items-center justify-center gap-2 mt-4 pt-2 border-t border-gray-700 text-sm">
-                    <button class="py-1 hover:bg-indigo-700 w-full m-auto active:scale-95 bg-indigo-600 font-bold rounded" onclick="instantSend()">⚡TAKE</button>
-                    <!-- Stays on screen until pressed again, cleared, or replaced (classes set by the script) -->
-                    <button id="toggle-btn" class="py-1 w-full m-auto active:scale-95 font-bold rounded" onclick="toggleButton()">TOGGLE ON</button>
-                    <button class="py-1 hover:bg-rose-600 w-full active:scale-95 m-auto bg-rose-500 font-bold rounded" onclick="saveButton()">💾 SAVE</button>
+                <!-- Duration, then TAKE / TOGGLE / SAVE / ＋ RUNDOWN (all hidden on Podcast Rundown) -->
+                <div id="take-row" class="mt-4 pt-2 border-t border-gray-700 text-sm">
+                    <!-- Picking an overlay fills in its usual time; stingers show their fixed length -->
+                    <div id="duration-field" class="duration-row">
+                        <label id="duration-label" for="duration-input">Duration</label>
+                        <input type="number" id="duration-input" value="5" min="1" class="p-1 rounded border-2 border-white bg-transparent text-violet-300 text-sm focus:text-white focus:bg-gray-700">
+                        <span>sec</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button class="py-1.5 hover:bg-indigo-700 w-full active:scale-95 bg-indigo-600 font-bold rounded" onclick="instantSend()"><span data-icon="zap"></span> TAKE</button>
+                        <!-- Stays on screen until pressed again, cleared, or replaced (classes set by the script) -->
+                        <button id="toggle-btn" class="py-1.5 w-full active:scale-95 font-bold rounded" onclick="toggleButton()">TOGGLE ON</button>
+                        <button class="py-1.5 hover:bg-rose-600 w-full active:scale-95 bg-rose-500 font-bold rounded" onclick="saveButton()"><span data-icon="save"></span> SAVE</button>
+                        <!-- Puts it straight into the Podcast Rundown, under Unsorted (only while Set Order is off) -->
+                        <button id="add-rundown-btn" class="py-1.5 hover:bg-emerald-700 w-full active:scale-95 bg-emerald-600 font-bold rounded" onclick="addCurrentToRundown()" title="Add to the Podcast Rundown, under Unsorted">＋ RUNDOWN</button>
+                    </div>
                 </div>
-                <button id="clear-btn" class="py-1 w-full hover:bg-gray-500 active:scale-95 bg-gray-700 border-2 border-red-400 text-red-300 font-bold rounded" onclick="clearAll()">✖ CLEAR ALL</button>
+                <button id="clear-btn" class="py-1 w-full hover:bg-gray-500 active:scale-95 bg-gray-700 border-2 border-red-400 text-red-300 font-bold rounded" onclick="clearAll()"><span data-icon="x"></span> CLEAR ALL</button>
             </div>
 
             <!-- Message box ("Taken: Name for 5s"): floats at the bottom of the panel on every tab,
                  lights up for each new message, then dims but keeps showing the last one -->
-            <div id="controller-feedback" class="fx-toast" role="status" aria-live="polite">Ready</div>
+            <div id="controller-feedback" class="fx-toast idle" role="status" aria-live="polite">Ready</div>
 
             <!-- Saved graphics for the current tab (filled in by the script) -->
             <div id="saved-wrap" class="w-full">
-                <div class="relative w-full mb-2 border-b border-gray-600">
-                    <h2 id="saved-heading" class="text-base font-bold mt-0 pb-1 w-full text-center">Saved Animated Lower Thirds</h2>
+                <div class="saved-head">
+                    <!-- Full width or two per row (remembered) -->
+                    <button id="saved-layout" type="button" class="saved-side left-1" onclick="toggleSavedLayout()"></button>
+                    <!-- Spyglass: opens a search box that filters the list -->
+                    <button id="saved-search-btn" type="button" class="saved-side saved-search-btn" title="Search" onclick="toggleSavedSearch()"><span data-icon="search"></span></button>
+                    <!-- Tap the heading (or the arrow under it) to open or close the list (remembered per tab) -->
+                    <button id="saved-toggle" type="button" class="saved-toggle" onclick="toggleSavedOpen()" aria-expanded="true">
+                        <span class="saved-title"><span id="saved-heading">Saved L3s</span><span id="saved-count" class="saved-count"></span></span>
+                        <svg class="saved-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
                     <!-- Deletes every saved graphic on this tab (asks first) -->
-                    <button id="saved-clear" type="button" title="Delete all saved on this tab" onclick="clearSaved()" class="absolute right-1 top-0 w-8 h-7 rounded hover:bg-red-700 active:scale-95">🗑️</button>
+                    <button id="saved-clear" type="button" title="Delete all saved on this tab" onclick="clearSaved()" class="saved-side right-1 hover:bg-red-700"><span data-icon="trash"></span></button>
                 </div>
-                <div id="saved-buttons-container" class="grid grid-cols-2 gap-2 p-1 pt-0 w-full"></div>
+                <div id="saved-search-row" class="saved-search hidden">
+                    <span data-icon="search"></span>
+                    <input type="text" id="saved-search" placeholder="Search saved" autocomplete="off" spellcheck="false">
+                    <button type="button" title="Close search" onclick="toggleSavedSearch(false)"><span data-icon="x"></span></button>
+                </div>
+                <div id="saved-buttons-container" class="grid grid-cols-1 gap-2 p-1 pt-0 w-full"></div>
             </div>
 
             <!-- ===== PODCAST RUNDOWN TAB =====
@@ -361,17 +389,26 @@
                         <input type="checkbox" id="show-lock">
                         <span class="fx-track"></span>
                     </label>
-                    <button id="show-clear" type="button" title="Remove everything from the rundown (asks first)" onclick="clearShow()" class="w-8 h-7 rounded hover:bg-red-700 active:scale-95">🗑️</button>
+                    <button id="show-clear" type="button" title="Remove everything from the rundown (asks first)" onclick="clearShow()" class="w-8 h-7 rounded hover:bg-red-700 active:scale-95 grid place-items-center"><span data-icon="trash"></span></button>
                 </div>
                 <!-- Save the rundown as a file in the "rundowns" folder, or bring one back (hidden while Set Order is on) -->
                 <div id="rundown-files-row" class="grid grid-cols-2 gap-2 mb-2 px-2">
-                    <button type="button" class="rundown-btn" onclick="saveRundownFile()" title="Save this rundown, with everything in it, to the rundowns folder">💾 Save Rundown</button>
-                    <button type="button" class="rundown-btn" onclick="openRundownPicker()" title="Replace this rundown with one from the rundowns folder">📂 Import Rundown</button>
+                    <button type="button" class="rundown-btn" onclick="saveRundownFile()" title="Save this rundown, with everything in it, to the rundowns folder"><span data-icon="save"></span> Save Rundown</button>
+                    <button type="button" class="rundown-btn" onclick="openRundownPicker()" title="Replace this rundown with one from the rundowns folder"><span data-icon="folder"></span> Import Rundown</button>
                 </div>
                 <!-- Blocks: tap a letter to pick where ＋ adds graphics (and jump to it); + adds a block -->
                 <div class="flex items-center gap-2 mb-2 px-2">
                     <span id="block-chips-label" class="text-xs opacity-75 flex-none">Add to:</span>
                     <div id="block-chips" class="block-chips"></div>
+                </div>
+                <!-- Cues: notes and placeholders for things that aren't graphics (clips, SOTs, pictures).
+                     They show greyed out in the rundown and can't be taken. Only while Set Order is off. -->
+                <div id="cue-row" class="cue-row">
+                    <span class="text-xs opacity-75 flex-none">Cue:</span>
+                    <button type="button" class="cue-add" onclick="addCue('note')" title="Add a producer note"><span data-icon="note"></span> Note</button>
+                    <button type="button" class="cue-add" onclick="addCue('clip')" title="Add a placeholder for a clip"><span data-icon="clip"></span> Clip</button>
+                    <button type="button" class="cue-add" onclick="addCue('sot')" title="Add a placeholder for a SOT (sound on tape)"><span data-icon="sot"></span> SOT</button>
+                    <button type="button" class="cue-add" onclick="addCue('pic')" title="Add a placeholder for a picture"><span data-icon="pic"></span> PIC</button>
                 </div>
                 <!-- Shown when graphics here are set for Greenscreen but Greenscreen is off -->
                 <div id="gs-alert" class="gs-alert hidden" role="alert">
@@ -390,7 +427,7 @@
                     <h3 class="font-bold">Import a rundown</h3>
                     <p id="rundown-note" class="text-xs opacity-75"></p>
                     <div id="rundown-list" class="flex flex-col gap-1 max-h-72 overflow-y-auto"></div>
-                    <button type="button" id="rundown-pick" class="py-2 rounded bg-gray-600 text-white font-bold">📄 Choose a file…</button>
+                    <button type="button" id="rundown-pick" class="py-2 rounded bg-gray-600 text-white font-bold"><span data-icon="file"></span> Choose a file…</button>
                     <button value="cancel" class="py-2 rounded bg-gray-500 font-bold">Cancel</button>
                 </form>
             </dialog>
@@ -398,7 +435,7 @@
 
             <dialog id="edit-dialog">
                 <form method="dialog" class="flex flex-col gap-2">
-                    <h3 class="font-bold">Edit for this rundown</h3>
+                    <h3 id="edit-heading" class="font-bold">Edit for this rundown</h3>
                     <div id="edit-name-wrap">
                         <label for="edit-name" class="block text-sm">Name:</label>
                         <input type="text" id="edit-name" maxlength="50" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm">
@@ -408,7 +445,7 @@
                         <input type="text" id="edit-title" maxlength="50" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm">
                     </div>
                     <div id="edit-para-wrap">
-                        <label for="edit-para" class="block text-sm">Text:</label>
+                        <label id="edit-para-label" for="edit-para" class="block text-sm">Text:</label>
                         <textarea id="edit-para" rows="4" maxlength="400" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm resize-y"></textarea>
                     </div>
                     <div id="edit-socials-wrap" class="flex flex-col gap-1"></div>
@@ -425,7 +462,8 @@
                         <span class="gs-chip"></span><span>Greenscreen depth</span>
                     </label>
                     <div class="grid grid-cols-2 gap-2 mt-1">
-                        <button value="cancel" class="py-2 rounded bg-gray-500 font-bold">Cancel</button>
+                        <!-- Cancel just closes; Save (also Enter in a text box) saves -->
+                        <button type="button" value="cancel" class="py-2 rounded bg-gray-500 font-bold" onclick="this.closest('dialog').close('cancel')">Cancel</button>
                         <button value="save" class="py-2 rounded bg-indigo-600 text-white font-bold">Save</button>
                     </div>
                 </form>
@@ -584,9 +622,9 @@
         /* =========================================================
            FX WIZARD SCRIPT
            One page, two jobs:
-             websocket_demo.html           → Controller (the control panel)
-             websocket_demo.html#display   → Display (what OBS shows)
-             websocket_demo.html#underlay  → Underlay (Greenscreen: what OBS shows behind your keyed camera)
+             fx_wizard.html           → Controller (the control panel)
+             fx_wizard.html#display   → Display (what OBS shows)
+             fx_wizard.html#underlay  → Underlay (Greenscreen: what OBS shows behind your keyed camera)
 
            1.  Settings
            2.  Graphic options
@@ -617,10 +655,11 @@
         const SHOW_KEY = 'fx_show';                 // the Rundown list
         const IMPORT_DURATION = 300;                // imported L3s stay up 5 minutes unless cleared
         const CUSTOM_FOLDER = 'custom';             // custom backgrounds live here, next to "assets"
+        let customFolderFiles = null;               // what the server last said is in it (null = not known yet)
 
         let ws = null;
         let isController = false;
-        let isUnderlay = false;       // true on websocket_demo.html#underlay
+        let isUnderlay = false;       // true on fx_wizard.html#underlay
         let l3Timeout = null;         // timer that hides the lower third
         let l3Cleanup = null;         // timer that fully hides it after the out animation
         let l3Out = 'anim-hide';      // how the lower third on screen leaves
@@ -642,6 +681,8 @@
         //   ticker:  true = one text box, scrolled along the Breaking News bar
         //   sport:   true = shows the Sport picker (Football, Basketball, Baseball, Soccer)
         //   social:  true = shows the Socials picker (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web)
+        //   caption: one optional line of text, with this as the default (Hot Take)
+        //   dur:     usual time in seconds, filled in when it's picked (not for stingers)
         //   depth:   true = with Greenscreen on, splits: the far part shows on #underlay (behind
         //            you) and the near part on #display (in front of you)
         //   effect:  canvas animation to run (see section 6)
@@ -650,20 +691,22 @@
         // The keys are code names saved graphics use, so don't rename them
         // ("l3Large" is L3 PNG, "l3LargeAlt" is L3 Info).
         const OVERLAYS = {
-            l3Large:    { label: 'L3 PNG',   text: true, import: true,                  effect: null, animIn: 'anim-slideLeft', animOut: 'anim-slideOutLeft' },
-            l3LargeAlt: { label: 'L3 Info',  text: true, import: true, paragraph: true, effect: null, animIn: 'anim-slideLeft', animOut: 'anim-slideOutLeft' },
-            l3Gif:      { label: 'L3 Gif',   text: true,                                effect: null, animIn: 'anim-riseUp',    animOut: 'anim-dropDown' },
-            l3Custom:   { label: 'Custom',   text: true, custom: true,                  effect: null, animIn: 'anim-riseUp',    animOut: 'anim-dropDown' },
-            colorwave: { label: 'Color Wave', text: false, effect: 'colorwave', animIn: 'anim-fade',      animOut: 'anim-hide', depth: true },
-            confetti:  { label: 'Confetti',   text: false, effect: 'confetti',  animIn: 'anim-slideUp',   animOut: 'anim-hide', depth: true },
-            fall:      { label: 'Fall',       text: false, effect: 'leaves',    animIn: 'anim-fade',      animOut: 'anim-hide', depth: true },
-            snow:      { label: 'Snow',       text: false, effect: 'snow',      animIn: 'anim-fade',      animOut: 'anim-hide', depth: true },
-            fire:      { label: 'Fire',       text: false, effect: 'fire',      animIn: 'anim-fade',      animOut: 'anim-hide', depth: true },
-            underwater:{ label: 'Underwater', text: false, effect: 'underwater', animIn: 'anim-fade',     animOut: 'anim-hide', depth: true },
-            breaking:  { label: 'Breaking News', text: false, ticker: true, effect: null, animIn: 'anim-fade', animOut: 'anim-hide' },
-            social:    { label: 'Like, Follow & Subscribe', text: false, social: true, effect: null, animIn: 'anim-fade', animOut: 'anim-hide' },
+            l3Large:    { label: 'L3 PNG',   text: true, import: true,                  dur: 8, effect: null, animIn: 'anim-slideLeft', animOut: 'anim-slideOutLeft' },
+            l3LargeAlt: { label: 'L3 Info',  text: true, import: true, paragraph: true, dur: 12, effect: null, animIn: 'anim-slideLeft', animOut: 'anim-slideOutLeft' },
+            l3Gif:      { label: 'L3 Gif',   text: true,                                dur: 8, effect: null, animIn: 'anim-riseUp',    animOut: 'anim-dropDown' },
+            l3Custom:   { label: 'Custom',   text: true, custom: true,                  dur: 8, effect: null, animIn: 'anim-riseUp',    animOut: 'anim-dropDown' },
+            colorwave: { label: 'Color Wave', text: false, dur: 15, effect: 'colorwave', animIn: 'anim-fade',      animOut: 'anim-hide', depth: true },
+            confetti:  { label: 'Confetti',   text: false, dur: 8, effect: 'confetti',  animIn: 'anim-slideUp',   animOut: 'anim-hide', depth: true },
+            fall:      { label: 'Fall',       text: false, dur: 15, effect: 'leaves',    animIn: 'anim-fade',      animOut: 'anim-hide', depth: true },
+            snow:      { label: 'Snow',       text: false, dur: 15, effect: 'snow',      animIn: 'anim-fade',      animOut: 'anim-hide', depth: true },
+            fire:      { label: 'Fire',       text: false, dur: 12, effect: 'fire',      animIn: 'anim-fade',      animOut: 'anim-hide', depth: true },
+            underwater:{ label: 'Underwater', text: false, dur: 15, effect: 'underwater', animIn: 'anim-fade',     animOut: 'anim-hide', depth: true },
+            arrested:  { label: 'Arrested',   text: false, dur: 8, effect: 'arrested', animIn: 'anim-fade', animOut: 'anim-hide', depth: true },
+            hottake:   { label: 'Hot Take',   text: false, dur: 7, caption: 'HOT TAKE', effect: 'hottake', animIn: 'anim-fade', animOut: 'anim-hide', depth: true },
+            breaking:  { label: 'Breaking News', text: false, dur: 30, ticker: true, effect: null, animIn: 'anim-fade', animOut: 'anim-hide' },
+            social:    { label: 'Like & Subscribe', text: false, dur: 6, social: true, effect: null, animIn: 'anim-fade', animOut: 'anim-hide' },
             // Stingers: CSS stinger lengths are read from styles.css, so the speed is only set there
-            stinger:   { label: 'Stinger - Standard', text: false, effect: null, animIn: '', animOut: '',
+            stinger:   { label: 'Standard', text: false, effect: null, animIn: '', animOut: '',
                          get length() { return cssSeconds('stinger', '--stinger-time', 2); } },
             ghost:     { label: 'Ghost',  text: false, effect: null, animIn: '', animOut: '',
                          get length() { return cssSeconds('ghost', '--ghost-time', 2.4); } },
@@ -720,6 +763,7 @@
             ghost: 'border-lime-300', xmas: 'border-red-400', storm: 'border-indigo-300',
             colorbars: 'border-yellow-300', tvstatic: 'border-gray-300', underwater: 'border-sky-400',
             breaking: 'border-red-500', sportsfx: 'border-orange-400', spring: 'border-pink-300', social: 'border-rose-400',
+            arrested: 'border-indigo-400', hottake: 'border-orange-500',
         };
 
 
@@ -747,6 +791,30 @@
 
         // Where a custom background file is, relative to this page
         const customPath = (file) => `${CUSTOM_FOLDER}/${encodeURIComponent(file)}`;
+
+        // Simple outline icons (24x24, drawn in the text color). In the page, <span data-icon="trash"></span>
+        // is filled in at startup; in the script, icon('trash') gives the SVG.
+        const ICONS = {
+            trash:  '<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/>',
+            save:   '<path d="M5 3h11l3 3v15H5z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/>',
+            folder: '<path d="M3 6a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>',
+            file:   '<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',
+            note:   '<path d="M5 3h14v12l-6 6H5z"/><path d="M13 21v-6h6M8 8h8M8 12h5"/>',
+            clip:   '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/>',
+            sot:    '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/>',
+            pic:    '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
+            wrench: '<path d="M15 4a5 5 0 0 0-4.6 6.9L3 18.3 5.7 21l7.4-7.4A5 5 0 0 0 20 9l-3 1-2-2 1-3z"/>',
+            zap:    '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+            moon:   '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+            sun:    '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+            lock:   '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+            search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+            x:      '<path d="M6 6l12 12M18 6L6 18"/>',
+            stop:   '<rect x="6" y="6" width="12" height="12" rx="2" class="icon-fill"/>',
+            pencil: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',
+            plus:   '<path d="M12 5v14M5 12h14"/>',
+        };
+        const icon = (name) => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ''}</svg>`;
 
 
         /* =========================================================
@@ -859,7 +927,7 @@
 
 
         /* =========================================================
-           6. DISPLAY: CANVAS EFFECTS (Color Wave, Confetti, Fall, Snow, Fire, Underwater, Sports, Storm, Static)
+           6. DISPLAY: CANVAS EFFECTS (Color Wave, Confetti, Fall, Snow, Fire, Underwater, Arrested, Hot Take, Sports, Storm, Static)
            FX.start(name, seconds) and FX.stop()
            ========================================================= */
         const FX = (() => {
@@ -2278,7 +2346,249 @@
                 },
             };
 
-            const EFFECTS = { confetti, colorwave, leaves, snow, fire, underwater, sports, spring, storm, tvstatic };
+
+            // ---------- Arrested: police lights flash red and blue, then a jail cell door slams down
+            // over the screen (the wide gaps between the bars show the scene behind). At the end it lifts away.
+            // Greenscreen: the flashing lights are behind the person; the door comes down in front of
+            // them, with the red and blue lighting up its top.
+            const POLICE_RED = '#ff1a2e', POLICE_BLUE = '#1f5bff';
+            const arrested = {
+                init(durationSec, opts) {
+                    this.d = depthOf(opts);
+                    this.T = durationSec;
+                    // The door is drawn once; each frame it's copied, tinted by the lights, and moved
+                    this.door = this.door || document.createElement('canvas');
+                    this.buf = this.buf || document.createElement('canvas');
+                    [this.door, this.buf].forEach(c => { c.width = Math.ceil(W); c.height = Math.ceil(H); });
+                    this.drawDoor(this.door.getContext('2d'));
+                    this.bctx = this.buf.getContext('2d');
+                },
+                drawDoor(c) {
+                    const s = H / 1080;
+                    c.clearRect(0, 0, W, H);
+                    const n = Math.max(5, Math.round(W / (215 * s))); // bars across
+                    const gap = W / n, bw = 28 * s;
+                    const xs = Array.from({ length: n }, (_, i) => gap * (i + 0.5));
+                    // Round steel bars, each with a soft shadow to its right
+                    for (const x of xs) {
+                        const sh = c.createLinearGradient(x + bw / 2, 0, x + bw / 2 + 26 * s, 0);
+                        sh.addColorStop(0, 'rgba(0, 0, 0, 0.45)');
+                        sh.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                        c.fillStyle = sh;
+                        c.fillRect(x + bw / 2, 0, 26 * s, H);
+                        const g = c.createLinearGradient(x - bw / 2, 0, x + bw / 2, 0);
+                        g.addColorStop(0, '#16181c');
+                        g.addColorStop(0.3, '#5d636d');
+                        g.addColorStop(0.45, '#e2e5ea');
+                        g.addColorStop(0.6, '#7b828d');
+                        g.addColorStop(1, '#0e0f12');
+                        c.fillStyle = g;
+                        c.fillRect(x - bw / 2, 0, bw, H);
+                    }
+                    // Flat steel rails across the top, middle and bottom, riveted where the bars cross
+                    const rail = (y, h) => {
+                        c.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                        c.fillRect(0, y + h, W, 10 * s);
+                        const g = c.createLinearGradient(0, y, 0, y + h);
+                        g.addColorStop(0, '#9aa1ab');
+                        g.addColorStop(0.18, '#5b616b');
+                        g.addColorStop(0.55, '#3a3f46');
+                        g.addColorStop(1, '#1a1c20');
+                        c.fillStyle = g;
+                        c.fillRect(0, y, W, h);
+                        c.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                        c.fillRect(0, y, W, 2 * s);
+                        for (const x of xs) {
+                            const r = 7 * s, ry = y + h / 2;
+                            const rg = c.createRadialGradient(x - r * 0.3, ry - r * 0.3, 0, x, ry, r);
+                            rg.addColorStop(0, '#d9dde3');
+                            rg.addColorStop(0.6, '#6b7280');
+                            rg.addColorStop(1, '#22252a');
+                            c.fillStyle = rg;
+                            c.beginPath();
+                            c.arc(x, ry, r, 0, Math.PI * 2);
+                            c.fill();
+                        }
+                    };
+                    const midY = H * 0.46, midH = 40 * s;
+                    rail(0, 70 * s);
+                    rail(midY, midH);
+                    rail(H - 60 * s, 60 * s);
+                    // The lock, on the middle rail between the last two bars
+                    const lw = Math.min(120 * s, gap - bw - 20 * s), lh = 150 * s;
+                    const lx = gap * (n - 1) - lw / 2, ly = midY + midH / 2 - lh / 2;
+                    c.fillStyle = 'rgba(0, 0, 0, 0.45)';
+                    c.fillRect(lx + 10 * s, ly + 10 * s, lw, lh);
+                    const lg = c.createLinearGradient(lx, ly, lx + lw, ly + lh);
+                    lg.addColorStop(0, '#8b929c');
+                    lg.addColorStop(0.5, '#454a52');
+                    lg.addColorStop(1, '#1d2024');
+                    c.fillStyle = lg;
+                    c.fillRect(lx, ly, lw, lh);
+                    c.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                    c.lineWidth = 2 * s;
+                    c.strokeRect(lx + 6 * s, ly + 6 * s, lw - 12 * s, lh - 12 * s);
+                    const kx = lx + lw / 2, ky = ly + lh * 0.45;
+                    c.fillStyle = '#050505';
+                    c.beginPath();
+                    c.arc(kx, ky, 11 * s, 0, Math.PI * 2);
+                    c.moveTo(kx - 6 * s, ky);
+                    c.lineTo(kx + 6 * s, ky);
+                    c.lineTo(kx + 10 * s, ky + 34 * s);
+                    c.lineTo(kx - 10 * s, ky + 34 * s);
+                    c.closePath();
+                    c.fill();
+                },
+                frame(dt, t) {
+                    const s = H / 1080, layer = this.d.layer;
+                    ctx.clearRect(0, 0, W, H);
+                    // The door falls from above (0.55s to 1s), bounces a little, and lifts away in the last second
+                    const DROP = 0.55, LAND = 1;
+                    let y;
+                    if (t < DROP) y = -H * 1.05;
+                    else if (t < LAND) y = -H * 1.05 * (1 - EASE.in3((t - DROP) / (LAND - DROP)));
+                    else y = -H * 0.035 * Math.abs(Math.sin((t - LAND) * 11)) * Math.exp(-(t - LAND) * 9);
+                    const leave = this.T - 1; // never, when toggled on (Infinity)
+                    if (t > leave) y = -H * 1.05 * EASE.in3(Math.min(1, (t - leave) / 0.8));
+                    // The slam: a quick shake and a flash
+                    const since = t - LAND;
+                    const shake = since > 0 && since < 0.4 && t < leave ? (1 - since / 0.4) * 10 * s : 0;
+                    const ox = rand(-1, 1) * shake, oy = rand(-1, 1) * shake;
+                    // Police lights: red, red, blue, blue. Brightest until just after the slam, then calmer.
+                    const cyc = (t * 2.6) % 1;
+                    const red = cyc < 0.5;
+                    const sub = (cyc % 0.5) * 2;
+                    const on = sub < 0.32 || (sub > 0.45 && sub < 0.77) ? 1 : 0.15;
+                    const color = red ? POLICE_RED : POLICE_BLUE;
+                    const k = (t < LAND + 0.3 ? 1 : 0.6) * on * Math.min(1, t / 0.15);
+                    if (layer !== 'front') {
+                        ctx.fillStyle = rgba(color, 0.2 * k);
+                        ctx.fillRect(0, 0, W, H);
+                        const gx = red ? 0 : W; // glow from the top corner on that side
+                        const g = ctx.createRadialGradient(gx, 0, 0, gx, 0, W * 0.75);
+                        g.addColorStop(0, rgba(color, 0.65 * k));
+                        g.addColorStop(1, rgba(color, 0));
+                        ctx.fillStyle = g;
+                        ctx.fillRect(0, 0, W, H);
+                    }
+                    if (layer !== 'back' && y > -H) {
+                        const b = this.bctx;
+                        b.globalCompositeOperation = 'source-over';
+                        b.clearRect(0, 0, W, H);
+                        b.drawImage(this.door, 0, 0, W, H);
+                        // The lights catch the top of the door
+                        b.globalCompositeOperation = 'source-atop';
+                        const tg = b.createLinearGradient(0, 0, 0, H * 0.3);
+                        tg.addColorStop(0, rgba(color, 0.55 * on));
+                        tg.addColorStop(1, rgba(color, 0));
+                        b.fillStyle = tg;
+                        b.fillRect(0, 0, W, H * 0.3);
+                        b.globalCompositeOperation = 'source-over';
+                        ctx.drawImage(this.buf, ox, y + oy, W, H);
+                        if (since > 0 && since < 0.12) {
+                            ctx.fillStyle = `rgba(255, 255, 255, ${0.18 * (1 - since / 0.12)})`;
+                            ctx.fillRect(0, 0, W, H);
+                        }
+                    }
+                },
+            };
+
+            // ---------- Hot Take: the bottom of the screen catches fire, a "HOT TAKE" badge (or your own
+            // text) slams in just above the flames (clear of the host's face), its heat meter maxes out,
+            // and embers fly ----------
+            // Greenscreen: the flames and the heat glow are behind the person; the badge and embers are in front.
+            const hottake = {
+                init(durationSec, opts) {
+                    this.d = depthOf(opts);
+                    this.text = String(opts.label || OVERLAYS.hottake.caption).toUpperCase();
+                    fire.init(durationSec, opts); // the flames and embers come from Fire
+                    document.fonts?.load('italic 700 120px "Barlow Condensed"');
+                },
+                frame(dt, t) {
+                    const s = H / 1080, layer = this.d.layer;
+                    fire.frame(dt, t);
+                    if (layer !== 'front') {
+                        // Heat: a warm glow pulsing in from the edges
+                        const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, W * 0.7);
+                        g.addColorStop(0, 'rgba(255, 80, 0, 0)');
+                        g.addColorStop(1, `rgba(255, 70, 0, ${0.35 * (0.8 + 0.2 * Math.sin(t * 5)) * Math.min(1, t / 0.4)})`);
+                        ctx.fillStyle = g;
+                        ctx.fillRect(0, 0, W, H);
+                    }
+                    if (layer !== 'back') this.badge(t, s);
+                },
+                // The badge: drops in big and hits at HIT with a shake, then the meter fills
+                badge(t, s) {
+                    const IN = 0.25, HIT = 0.55;
+                    if (t < IN) return;
+                    let size = 220 * s;
+                    const font = (px) => `italic 700 ${px}px "Barlow Condensed", Impact, sans-serif`;
+                    ctx.font = font(size);
+                    let w = ctx.measureText(this.text).width;
+                    if (w > W * 0.78) { size *= W * 0.78 / w; ctx.font = font(size); w = W * 0.78; }
+                    let k = 1 + 0.012 * Math.sin(t * 9), a = 1;
+                    if (t < HIT) { const u = (t - IN) / (HIT - IN); k = 3 - 2 * EASE.in3(u); a = u; }
+                    const since = t - HIT;
+                    const sh = since > 0 && since < 0.35 ? (1 - since / 0.35) * 12 * s : 0;
+                    ctx.save();
+                    ctx.translate(W / 2 + rand(-1, 1) * sh, H * 0.66 + rand(-1, 1) * sh);
+                    ctx.scale(k, k);
+                    ctx.rotate(-0.04);
+                    ctx.globalAlpha = Math.min(1, a);
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.lineJoin = 'round';
+                    // Dark outline with a flickering orange glow, a white edge, then the flame-colored letters
+                    ctx.shadowColor = 'rgba(255, 90, 0, 0.9)';
+                    ctx.shadowBlur = 40 * s * (0.8 + 0.2 * Math.sin(t * 12));
+                    ctx.lineWidth = 16 * s;
+                    ctx.strokeStyle = '#1a0500';
+                    ctx.strokeText(this.text, 0, 0);
+                    ctx.shadowColor = 'transparent';
+                    ctx.lineWidth = 7 * s;
+                    ctx.strokeStyle = '#fff';
+                    ctx.strokeText(this.text, 0, 0);
+                    const g = ctx.createLinearGradient(0, -size * 0.45, 0, size * 0.45);
+                    g.addColorStop(0, '#fff3a0');
+                    g.addColorStop(0.35, '#ffc21a');
+                    g.addColorStop(0.7, '#ff5a0a');
+                    g.addColorStop(1, '#d4140b');
+                    ctx.fillStyle = g;
+                    ctx.fillText(this.text, 0, 0);
+                    // Heat meter under the text: fills yellow to red, then pulses at the top
+                    const mw = Math.max(w * 0.8, 360 * s), mh = 26 * s, mx = -mw / 2, my = size * 0.55;
+                    const fill = t < HIT ? 0 : EASE.out3(Math.min(1, (t - HIT) / 0.8));
+                    const pill = (x, y, w2, h2) => {
+                        ctx.beginPath();
+                        if (ctx.roundRect) ctx.roundRect(x, y, w2, h2, h2 / 2);
+                        else ctx.rect(x, y, w2, h2);
+                    };
+                    pill(mx, my, mw, mh);
+                    ctx.fillStyle = 'rgba(20, 8, 0, 0.8)';
+                    ctx.fill();
+                    ctx.lineWidth = 3 * s;
+                    ctx.strokeStyle = '#fff';
+                    ctx.stroke();
+                    if (fill > 0) {
+                        const pad = 5 * s;
+                        const fg = ctx.createLinearGradient(mx, 0, mx + mw, 0);
+                        fg.addColorStop(0, '#ffe14d');
+                        fg.addColorStop(0.5, '#ff8a00');
+                        fg.addColorStop(1, '#ff1a00');
+                        ctx.fillStyle = fg;
+                        if (fill >= 1) { ctx.shadowColor = 'rgba(255, 60, 0, 0.9)'; ctx.shadowBlur = 24 * s * (0.6 + 0.4 * Math.sin(t * 14)); }
+                        pill(mx + pad, my + pad, Math.max(mh - pad * 2, (mw - pad * 2) * fill), mh - pad * 2);
+                        ctx.fill();
+                        ctx.shadowColor = 'transparent';
+                    }
+                    // Tick marks along the meter
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+                    for (let i = 1; i < 10; i++) ctx.fillRect(mx + mw * i / 10 - 1 * s, my + mh * 0.25, 2 * s, mh * 0.5);
+                    ctx.restore();
+                },
+            };
+
+            const EFFECTS = { confetti, colorwave, leaves, snow, fire, underwater, arrested, hottake, sports, spring, storm, tvstatic };
 
             // Runs every frame while an effect is playing
             const loop = () => {
@@ -2507,7 +2817,7 @@
             flashTimer = setTimeout(() => el.classList.remove('fresh'), 3000);
             // Nothing new for a while: back to "Ready" so an old message doesn't sit there
             clearTimeout(idleTimer);
-            idleTimer = setTimeout(() => { el.textContent = 'Ready'; el.className = 'fx-toast'; }, IDLE_RESET);
+            idleTimer = setTimeout(() => { el.textContent = 'Ready'; el.className = 'fx-toast idle'; }, IDLE_RESET); // small and faint
         };
 
         // Sends a graphic and shows "Taken: Name  for 5s"
@@ -2535,14 +2845,22 @@
             const cfg = mode === 'overlay' ? OVERLAYS[checked('overlayStyle')] : null;
             $('l3-section').classList.toggle('hidden', mode !== 'l3');
             $('overlay-section').classList.toggle('hidden', mode !== 'overlay');
-            const oneBox = cfg?.paragraph || cfg?.ticker; // a single text box instead of Name and Title
+            const oneBox = cfg?.paragraph || cfg?.ticker || cfg?.caption; // a single text box instead of Name and Title
             $('text-fields').classList.toggle('hidden', !(mode === 'l3' || cfg?.text || oneBox));
             $('name-fields').classList.toggle('hidden', !!oneBox);
             $('paragraph-field').classList.toggle('hidden', !oneBox);
-            $('paragraph-label').textContent = cfg?.ticker ? 'Ticker text:' : 'Text:';
+            $('paragraph-label').textContent = cfg?.ticker ? 'Ticker text:' : cfg?.caption ? 'Text (optional):' : 'Text:';
+            $('paragraph-input').placeholder = cfg?.caption || 'Type the information to show';
+            $('paragraph-input').rows = cfg?.caption ? 1 : 4;
+            $('paragraph-input').maxLength = cfg?.caption ? 40 : 400;
             $('social-field').classList.toggle('hidden', !cfg?.social);
             $('sport-field').classList.toggle('hidden', !cfg?.sport);
-            $('duration-field').classList.toggle('hidden', show || cfg?.length !== undefined);
+            // Stingers: the duration box shows their fixed length, locked
+            const fixed = cfg?.length !== undefined;
+            $('duration-input').disabled = fixed;
+            $('duration-field').classList.toggle('is-fixed', fixed);
+            $('duration-label').innerHTML = fixed ? `${icon('lock')} Fixed length` : 'Duration';
+            if (fixed) $('duration-input').value = Math.round(cfg.length * 10) / 10;
             $('import-btn').classList.toggle('hidden', !cfg?.import);
             $('take-row').classList.toggle('hidden', show);
             $('saved-wrap').classList.toggle('hidden', show);
@@ -2609,20 +2927,30 @@
             });
         };
 
+        // ---------- Duration ----------
+        // Picking an overlay fills in its usual time (you can still change it). The Animated L3s
+        // tab keeps whatever you set there.
+        let l3Duration = 5;
+        const fillDuration = () => {
+            const mode = checked('mode');
+            const cfg = OVERLAYS[checked('overlayStyle')];
+            if (mode === 'l3') $('duration-input').value = l3Duration;
+            else if (mode === 'overlay' && cfg?.length === undefined) $('duration-input').value = cfg?.dur ?? 8;
+        };
+
         // Switching tabs also switches which list is shown
         const updateMode = () => {
+            fillDuration();
             updateSections();
-            $('saved-heading').textContent = checked('mode') === 'overlay' ? 'Saved Overlays' : 'Saved Animated Lower Thirds';
+            $('saved-heading').textContent = checked('mode') === 'overlay' ? 'Saved Overlays' : 'Saved L3s';
             if (checked('mode') === 'show') renderShow();
             else renderButtons(loadButtonsFromStorage());
             updateGsAlert(); // the Greenscreen switch only pulses on the Podcast Rundown tab
         };
 
         // ---------- Sections that open and close (details.fx-section) ----------
-        // Each one remembers whether it was open. Its bar shows what's picked inside:
+        // They all start closed when the panel opens. Each bar shows what's picked inside:
         // the button text, or data-show="value" (the option's value) or "color" (swatch and name).
-        const OPEN_KEY = 'fx_open';
-
         const updateSummaries = () => {
             document.querySelectorAll('details.fx-section').forEach(d => {
                 const out = d.querySelector('.fx-value');
@@ -2644,15 +2972,6 @@
         };
 
         const initSections = () => {
-            let open = {};
-            try { open = JSON.parse(localStorage.getItem(OPEN_KEY) || '{}'); } catch { /* storage blocked */ }
-            document.querySelectorAll('details.fx-section').forEach(d => {
-                if (d.dataset.key in open) d.open = open[d.dataset.key];
-                d.addEventListener('toggle', () => {
-                    open[d.dataset.key] = d.open;
-                    try { localStorage.setItem(OPEN_KEY, JSON.stringify(open)); } catch { /* storage blocked */ }
-                });
-            });
             document.querySelectorAll('details.fx-section input[type="radio"]').forEach(r => r.addEventListener('change', updateSummaries));
         };
 
@@ -2706,8 +3025,8 @@
             if (mode === 'overlay') {
                 const overlay = checked('overlayStyle');
                 const cfg = OVERLAYS[overlay];
-                // L3 Info and Breaking News send their one text box as the label, with no title
-                const oneBox = cfg.paragraph || cfg.ticker;
+                // L3 Info, Breaking News and Hot Take send their one text box as the label, with no title
+                const oneBox = cfg.paragraph || cfg.ticker || cfg.caption;
                 const text = oneBox ? $('paragraph-input').value.trim() : label;
                 if ((cfg.text || cfg.ticker) && !text) { flash(oneBox ? 'Enter some text' : 'Enter a name', true); return null; }
                 if (cfg.custom && !customFile) { flash(`Put a PNG, JPG or GIF in the "${CUSTOM_FOLDER}" folder, then tap Custom…`, true); return null; }
@@ -2759,6 +3078,19 @@
             b.unshift({ id: Date.now(), ...p });
             saveButtonsToStorage(b);
             flash('Saved');
+        };
+
+        // ＋ RUNDOWN: adds what's set up now straight to the Podcast Rundown, under Unsorted.
+        // Only while Set Order is off (it offers to turn it off).
+        const addCurrentToRundown = () => {
+            const p = buildPayload();
+            if (!p) return;
+            if (showLocked()) {
+                if (!confirm('The Podcast Rundown order is set. Turn off Set Order and add this under Unsorted?')) return;
+                localStorage.setItem(SHOW_LOCK_KEY, '0');
+            }
+            if (greenscreen && p.mode === 'overlay' && OVERLAYS[p.overlay]?.depth) p.gs = true; // like 💾 SAVE
+            addToShow(p, UNSORTED);
         };
 
         // ✖ CLEAR ALL
@@ -2826,7 +3158,7 @@
             const kind = OVERLAYS[ovKey]?.length !== undefined ? 'STINGER' : 'OVERLAY';
             // Second line: file name for imported L3s, otherwise the style
             const sub = isOverlay
-                ? (data.source || `${kind} | ${(OVERLAYS[ovKey]?.label || ovKey).replace(/^Stinger - /, '')}${data.customBg ? `: ${data.customBg}` : ''}${data.sport ? `: ${SPORTS[data.sport] || data.sport}` : ''}`)
+                ? (data.source || `${kind} | ${OVERLAYS[ovKey]?.label || ovKey}${data.customBg ? `: ${data.customBg}` : ''}${data.sport ? `: ${SPORTS[data.sport] || data.sport}` : ''}`)
                 : `${data.bgStyle === 'custom' ? `custom: ${data.customBg}` : data.bgStyle} | ${data.fontStyle?.replace('font-', '')}`;
 
             const card = document.createElement('div');
@@ -2838,6 +3170,15 @@
             const b = document.createElement('b');
             b.className = 'block truncate pr-7 text-[14px] leading-tight';
             b.textContent = name;
+            // Uses a custom image that's no longer in the custom folder: a red !
+            const usesCustom = isOverlay ? OVERLAYS[ovKey]?.custom : data.bgStyle === 'custom';
+            if (usesCustom && (!data.customBg || (customFolderFiles && !customFolderFiles.some(f => f.toLowerCase() === data.customBg.toLowerCase())))) {
+                const warn = document.createElement('span');
+                warn.className = 'card-missing';
+                warn.textContent = '!';
+                warn.title = data.customBg ? `${data.customBg} isn't in the ${CUSTOM_FOLDER} folder` : 'No custom image picked';
+                b.prepend(warn);
+            }
             if (code) {
                 const tag = document.createElement('span');
                 tag.className = 'show-code';
@@ -2845,7 +3186,7 @@
                 b.prepend(tag);
             }
             const small = document.createElement('span');
-            small.className = 'card-sub block truncate pr-7 text-[11px] uppercase tracking-wide text-gray-300 mt-0.5';
+            small.className = 'card-sub block truncate pr-7 text-[12px] uppercase tracking-wide text-gray-300 mt-0.5';
             small.textContent = sub;
             if (data.gs) { // saved for Greenscreen
                 const chip = document.createElement('span');
@@ -2859,13 +3200,53 @@
         };
 
         // A small round button in a card corner
-        const cardButton = (text, title, pos, colors, onclick) => {
+        const cardButton = (iconName, title, pos, colors, onclick) => {
             const btn = document.createElement('button');
-            btn.className = `absolute ${pos} w-7 h-7 rounded-full text-[13px] leading-none ${colors}`;
-            btn.textContent = text;
+            btn.className = `card-btn absolute ${pos} w-7 h-7 rounded-full grid place-items-center leading-none ${colors}`;
+            btn.innerHTML = icon(iconName);
             btn.title = title;
             btn.onclick = onclick;
             return btn;
+        };
+
+        // Saved list: full width or two per row (remembered). Closed when the panel opens;
+        // each tab's list then stays open or closed as you leave it.
+        const SAVED_UI_KEY = 'fx_saved_ui';
+        const savedUi = (() => {
+            try {
+                const ui = JSON.parse(localStorage.getItem(SAVED_UI_KEY));
+                if (ui && ui.layout) return { layout: ui.layout };
+            } catch { /* not saved yet */ }
+            return { layout: 'list' };
+        })();
+        const savedOpen = {}; // per tab, this session only
+        const saveSavedUi = () => { try { localStorage.setItem(SAVED_UI_KEY, JSON.stringify(savedUi)); } catch { /* storage blocked */ } };
+        const LAYOUT_ICONS = {
+            list: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+            grid: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>',
+        };
+        const toggleSavedLayout = () => {
+            savedUi.layout = savedUi.layout === 'grid' ? 'list' : 'grid';
+            saveSavedUi();
+            renderButtons(loadButtonsFromStorage());
+        };
+        // Spyglass: the search box filters the list by name, title, file or style
+        let savedQuery = '';
+        const toggleSavedSearch = (open = $('saved-search-row').classList.contains('hidden')) => {
+            $('saved-search-row').classList.toggle('hidden', !open);
+            $('saved-search-btn').classList.toggle('on', open);
+            if (open) savedOpen[checked('mode')] = true; // searching opens the list
+            else { savedQuery = ''; $('saved-search').value = ''; }
+            renderButtons(loadButtonsFromStorage());
+            if (open) $('saved-search').focus();
+        };
+        const savedSearchText = (d) => [d.label, d.title, d.source, d.customBg, d.bgStyle, OVERLAYS[d.overlay]?.label,
+            ...Object.values(d.socials || {})].filter(Boolean).join(' ').toLowerCase();
+
+        const toggleSavedOpen = () => {
+            const tab = checked('mode');
+            savedOpen[tab] = !savedOpen[tab];
+            renderButtons(loadButtonsFromStorage());
         };
 
         const renderButtons = (buttons) => {
@@ -2874,11 +3255,23 @@
 
             // Only show graphics for the current tab
             const showOverlays = checked('mode') === 'overlay';
-            const list = buttons.filter(d => isOverlayItem(d) === showOverlays);
+            let list = buttons.filter(d => isOverlayItem(d) === showOverlays);
+            const closed = !savedOpen[checked('mode')];
+            const all = list.length;
+            if (savedQuery) list = list.filter(d => savedSearchText(d).includes(savedQuery));
+            const grid = savedUi.layout === 'grid';
+            container.classList.toggle('hidden', closed);
+            container.classList.toggle('grid-cols-2', grid);
+            container.classList.toggle('grid-cols-1', !grid);
+            $('saved-toggle').setAttribute('aria-expanded', String(!closed));
+            $('saved-toggle').title = closed ? 'Show the saved list' : 'Hide the saved list';
+            $('saved-count').textContent = savedQuery ? `${list.length}/${all}` : all || '';
+            $('saved-layout').innerHTML = LAYOUT_ICONS[grid ? 'list' : 'grid'];
+            $('saved-layout').title = grid ? 'Full width' : 'Two per row';
             if (!list.length) {
                 const empty = document.createElement('p');
                 empty.className = 'col-span-2 text-center text-gray-400 text-sm';
-                empty.textContent = 'Nothing saved yet';
+                empty.textContent = savedQuery ? 'No matches' : 'Nothing saved yet';
                 container.appendChild(empty);
             }
 
@@ -2886,10 +3279,10 @@
                 const { card, take, name } = makeCard(data);
                 take.onclick = () => flashTake(data);
                 card.append(
-                    cardButton('✕', 'Delete', 'top-1 right-1', 'bg-black/40 text-gray-300 hover:bg-red-700 hover:text-white', () => {
+                    cardButton('x', 'Delete', 'top-1 right-1', 'bg-black/40 text-gray-300 hover:bg-red-700 hover:text-white', () => {
                         if (confirm(`Delete ${name}?`)) saveButtonsToStorage(loadButtonsFromStorage().filter(x => x.id !== data.id));
                     }),
-                    cardButton('＋', 'Add to rundown', 'bottom-1 right-1', 'bg-emerald-600 text-white hover:bg-emerald-500', () => addToShow(data)),
+                    cardButton('plus', 'Add to rundown', 'bottom-1 right-1', 'bg-emerald-600 text-white hover:bg-emerald-500', () => addToShow(data)),
                 );
                 container.appendChild(card);
             });
@@ -2901,7 +3294,7 @@
             const all = loadButtonsFromStorage();
             const n = all.filter(d => isOverlayItem(d) === overlays).length;
             if (!n) { flash('Nothing to delete', true); return; }
-            if (!confirm(`Delete all ${n} saved ${overlays ? 'overlays' : 'animated lower thirds'}? This can't be undone.`)) return;
+            if (!confirm(`Delete all ${n} saved ${overlays ? 'overlays' : 'L3s'}? This can't be undone.`)) return;
             saveButtonsToStorage(all.filter(d => isOverlayItem(d) !== overlays));
             flash('Deleted all');
         };
@@ -2931,6 +3324,16 @@
         const ADD_BLOCK_KEY = 'fx_block_add'; // the block ＋ adds to
         const VIEW_KEY = 'fx_block_view';     // while Set Order is on: 'ALL' or the one block shown
         const DEFAULT_BLOCKS = ['A', 'B', 'C', 'D', 'E'];
+        const UNSORTED = 'unsorted'; // ＋ RUNDOWN puts graphics here, at the bottom, until they're dragged into a block
+        // Cues: notes and placeholders for things that aren't graphics. Numbered like graphics
+        // (A1-CLIP, A2-CLIP, A1-SOT...), except notes.
+        const CUES = {
+            note: { label: 'Note', icon: 'note', code: '',     hint: 'Note:' },
+            clip: { label: 'Clip', icon: 'clip', code: 'CLIP', hint: 'Which clip? (optional)' },
+            sot:  { label: 'SOT',  icon: 'sot',  code: 'SOT',  hint: 'Which SOT? (optional)' },
+            pic:  { label: 'PIC',  icon: 'pic',  code: 'PIC',  hint: 'Which picture? (optional)' },
+        };
+        const newSid = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
         let lastTakenSid = localStorage.getItem(LAST_PLAYED_KEY); // gets the ★
         const liveByLayer = { l3: null, overlay: null };           // rundown card on screen now, per layer
         const liveEnds = { l3: 0, overlay: 0 };                    // when each one goes off
@@ -2947,35 +3350,42 @@
             const b = localStorage.getItem(ADD_BLOCK_KEY);
             return blocks.includes(b) ? b : blocks[0];
         };
-        // Every item is in a block that exists (rundowns from before blocks go in the first one)
+        // Every item is in a block that exists, or Unsorted (rundowns from before blocks go in the first one)
         const loadShow = () => {
             const blocks = loadBlocks();
-            return JSON.parse(localStorage.getItem(SHOW_KEY) || '[]').map(d => (blocks.includes(d.block) ? d : { ...d, block: blocks[0] }));
+            return JSON.parse(localStorage.getItem(SHOW_KEY) || '[]').map(d => (blocks.includes(d.block) || d.block === UNSORTED ? d : { ...d, block: blocks[0] }));
         };
         const saveShow = (list) => { localStorage.setItem(SHOW_KEY, JSON.stringify(list)); renderShow(); };
         const showLocked = () => localStorage.getItem(SHOW_LOCK_KEY) === '1';
 
-        // L3 for lower thirds (animated or fullscreen), OV for overlays and stingers
-        const itemType = (d) => ((isOverlayItem(d) ? OVERLAYS[d.overlay || 'l3Large']?.text : true) ? 'L3' : 'OV');
-        // Its label, like "A1-L3": its block, then its place among that block's graphics of the same type
+        // L3 for lower thirds (animated or fullscreen), OV for overlays and stingers; cues have their own
+        const itemType = (d) => (d.cue ? CUES[d.cue]?.code || 'NOTE'
+            : (isOverlayItem(d) ? OVERLAYS[d.overlay || 'l3Large']?.text : true) ? 'L3' : 'OV');
+        // Its label, like "A1-L3": its block, then its place among that block's items of the same type.
+        // Unsorted ones just show their type; notes have none.
         const itemCode = (d, list = loadShow()) => {
             const type = itemType(d);
+            if (d.cue === 'note') return '';
+            if (d.block === UNSORTED) return type;
             const same = list.filter(x => x.block === d.block && itemType(x) === type);
             return `${d.block}${same.findIndex(x => x.sid === d.sid) + 1}-${type}`;
         };
 
-        // ＋ on a saved card: it goes at the end of the block picked under "Add to"
-        const addToShow = (data) => {
+        // ＋ on a saved card: it goes at the end of the block picked under "Add to".
+        // ＋ RUNDOWN passes Unsorted instead.
+        const addToShow = (data, block = addBlockTarget()) => {
             const { id, ...copy } = data;
-            const item = { ...copy, block: addBlockTarget(), sid: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}` };
+            const item = { ...copy, block, sid: newSid() };
             const list = [...loadShow(), item];
             saveShow(list);
-            flash(`Added to rundown: ${data.label || OVERLAYS[data.overlay]?.label || 'Graphic'}`, false, itemCode(item, list));
+            const name = data.label || OVERLAYS[data.overlay]?.label || 'Graphic';
+            if (block === UNSORTED) flash(`Added to Unsorted: ${name}`, false, 'drag it into a block');
+            else flash(`Added to rundown: ${name}`, false, itemCode(item, list));
         };
 
-        // Rundown graphics saved for Greenscreen. The warnings only show while the rundown is
-        // running (Set Order on); the switch only pulses while the Podcast Rundown tab is open.
-        const rundownGsCount = (list = loadShow()) => list.filter(d => d.gs).length;
+        // Rundown graphics saved for Greenscreen (Unsorted ones aren't in the show). The warnings only
+        // show while the rundown is running (Set Order on); the switch only pulses on the Podcast Rundown tab.
+        const rundownGsCount = (list = loadShow()) => list.filter(d => d.gs && d.block !== UNSORTED).length;
         const rundownActive = () => showLocked() && checked('mode') === 'show';
         const updateGsAlert = (list = loadShow()) => {
             const n = rundownGsCount(list);
@@ -2999,12 +3409,13 @@
                     off.className = 'show-offair';
                     off.title = 'Take it off screen now';
                     off.onclick = () => takeOff(layer);
+                    off.innerHTML = `${icon('stop')}<span></span>`;
                     c.append(off);
                 } else if (!layer && off) {
                     off.remove();
                     off = null;
                 }
-                if (off) off.textContent = `⏹ OFF ${formatTime(Math.max(0, Math.ceil((liveEnds[layer] - now) / 1000)))}`;
+                if (off) off.lastChild.textContent = `OFF ${formatTime(Math.max(0, Math.ceil((liveEnds[layer] - now) / 1000)))}`;
             });
         };
         // A graphic left the screen on this layer (time up, taken off, replaced, or cleared)
@@ -3103,7 +3514,52 @@
         };
 
         // One rundown card: its label on the left, its time (or the OFF button) on the right
+        // A cue: a thin, greyed-out row that can't be taken. ⠿ ✎ ✕ while Set Order is off.
+        const makeCueRow = (data, code, locked) => {
+            const cue = CUES[data.cue] || CUES.note;
+            const row = document.createElement('div');
+            row.className = `show-card show-cue cue-${data.cue}${locked ? '' : ' show-unlocked'}`;
+            row.dataset.sid = data.sid;
+            const sym = document.createElement('span');
+            sym.className = 'cue-icon';
+            sym.innerHTML = icon(cue.icon);
+            row.append(sym);
+            if (code) {
+                const tag = document.createElement('span');
+                tag.className = 'cue-code';
+                tag.textContent = code;
+                row.append(tag);
+            }
+            const text = document.createElement('span');
+            text.className = 'cue-text';
+            text.textContent = data.text || (data.cue === 'note' ? '' : cue.label);
+            row.append(text);
+            if (!locked) {
+                const handle = document.createElement('div');
+                handle.className = 'show-handle';
+                handle.textContent = '⠿';
+                handle.title = 'Drag to reorder or move to another block';
+                handle.addEventListener('pointerdown', (e) => startDrag(e, row));
+                const edit = document.createElement('button');
+                edit.type = 'button';
+                edit.className = 'cue-btn';
+                edit.innerHTML = icon('pencil');
+                edit.title = 'Edit';
+                edit.onclick = () => editShowItem(data.sid);
+                const del = document.createElement('button');
+                del.type = 'button';
+                del.className = 'cue-btn cue-del';
+                del.innerHTML = icon('x');
+                del.title = 'Remove';
+                del.onclick = () => saveShow(loadShow().filter(x => x.sid !== data.sid));
+                row.prepend(handle);
+                row.append(edit, del);
+            }
+            return row;
+        };
+
         const makeShowCard = (data, code, locked) => {
+            if (data.cue) return makeCueRow(data, code, locked);
             const { card, take } = makeCard(data, code);
             card.classList.add('show-card');
             card.classList.toggle('show-unlocked', !locked);
@@ -3131,10 +3587,10 @@
                 take.classList.add('pl-9');
                 card.append(
                     handle,
-                    cardButton('✕', 'Remove from rundown', 'top-1 right-1', 'bg-black/40 text-gray-300 hover:bg-red-700 hover:text-white', () => {
+                    cardButton('x', 'Remove from rundown', 'top-1 right-1', 'bg-black/40 text-gray-300 hover:bg-red-700 hover:text-white', () => {
                         saveShow(loadShow().filter(x => x.sid !== data.sid));
                     }),
-                    cardButton('✎', 'Edit for this rundown', 'bottom-1 right-1', 'bg-sky-600 text-white hover:bg-sky-500', () => editShowItem(data.sid)),
+                    cardButton('pencil', 'Edit for this rundown', 'bottom-1 right-1', 'bg-sky-600 text-white hover:bg-sky-500', () => editShowItem(data.sid)),
                 );
             }
             return card;
@@ -3146,8 +3602,10 @@
             const blocks = loadBlocks();
             const locked = showLocked();
             $('show-lock').checked = locked;
+            $('show-section').classList.toggle('show-running', locked); // red LIVE ORDER bar while the show runs
             $('show-hint').classList.toggle('hidden', locked || !list.length);
             $('rundown-files-row').classList.toggle('hidden', locked);
+            $('cue-row').classList.toggle('hidden', locked);
             renderBlockChips(blocks, locked, list);
             updateGsAlert(list);
             box.innerHTML = '';
@@ -3174,7 +3632,7 @@
                     const del = document.createElement('button');
                     del.type = 'button';
                     del.className = 'block-remove';
-                    del.textContent = '✕';
+                    del.innerHTML = icon('x');
                     del.title = `Remove block ${block}`;
                     del.onclick = () => {
                         saveBlocks(blocks.slice(0, -1));
@@ -3195,7 +3653,36 @@
                 section.append(head, listEl);
                 box.append(section);
             });
-            if (locked && !list.length) {
+            // Unsorted (from ＋ RUNDOWN): at the bottom while Set Order is off; not part of the show
+            const unsorted = list.filter(d => d.block === UNSORTED);
+            if (!locked && unsorted.length) {
+                const section = document.createElement('section');
+                section.className = 'show-block show-unsorted';
+                section.dataset.block = UNSORTED;
+                const head = document.createElement('div');
+                head.className = 'show-block-head';
+                const title = document.createElement('span');
+                title.textContent = 'Unsorted';
+                const count = document.createElement('span');
+                count.className = 'count';
+                count.textContent = unsorted.length;
+                const line = document.createElement('span');
+                line.className = 'line';
+                const hint = document.createElement('span');
+                hint.className = 'unsorted-hint';
+                hint.textContent = 'drag into a block';
+                head.append(title, count, line, hint);
+                const listEl = document.createElement('div');
+                listEl.className = 'block-list';
+                listEl.dataset.block = UNSORTED;
+                const empty = document.createElement('p');
+                empty.className = 'block-empty hidden';
+                listEl.append(empty);
+                unsorted.forEach(data => listEl.append(makeShowCard(data, itemCode(data, unsorted), locked)));
+                section.append(head, listEl);
+                box.append(section);
+            }
+            if (locked && !list.some(d => d.block !== UNSORTED)) {
                 const none = document.createElement('p');
                 none.className = 'text-center text-gray-400 text-sm';
                 none.textContent = 'Nothing in the rundown yet.';
@@ -3249,13 +3736,63 @@
         // ✎ Edit one rundown item for this rundown only: its text, duration, block, and
         // (for overlays that support it) Greenscreen depth
         let editingSid = null;
+        let newCue = null; // the type of cue being added, while the dialog is open for a new one
+
+        // The dialog's block list: every block, plus Unsorted
+        const fillBlockSelect = (value) => {
+            const sel = $('edit-block');
+            sel.innerHTML = '';
+            loadBlocks().forEach(b => sel.append(new Option(`Block ${b}`, b)));
+            sel.append(new Option('Unsorted', UNSORTED));
+            sel.value = value;
+        };
+        // Shows only the dialog fields that fit
+        const showEditFields = ({ name = false, para = false, duration = false, gs = false } = {}) => {
+            $('edit-name-wrap').classList.toggle('hidden', !name);
+            $('edit-title-wrap').classList.toggle('hidden', !name);
+            $('edit-para-wrap').classList.toggle('hidden', !para);
+            $('edit-duration-wrap').classList.toggle('hidden', !duration);
+            $('edit-gs-wrap').classList.toggle('hidden', !gs);
+        };
+
+        // Cue: buttons: the dialog opens to type it (and pick its block); it's added on Save
+        const addCue = (type) => {
+            if (!CUES[type]) return;
+            editingSid = null;
+            newCue = type;
+            $('edit-heading').textContent = `Add a ${CUES[type].label} cue`;
+            $('edit-socials-wrap').innerHTML = '';
+            $('edit-socials-wrap').classList.add('hidden');
+            showEditFields({ para: true });
+            $('edit-para-label').textContent = CUES[type].hint;
+            $('edit-para').value = '';
+            fillBlockSelect(addBlockTarget());
+            $('edit-dialog').returnValue = '';
+            $('edit-dialog').showModal();
+            $('edit-para').focus();
+        };
+
         const editShowItem = (sid) => {
             const item = loadShow().find(d => d.sid === sid);
             if (!item) return;
             editingSid = sid;
+            newCue = null;
+            $('edit-heading').textContent = 'Edit for this rundown';
+            $('edit-socials-wrap').innerHTML = '';
+            $('edit-socials-wrap').classList.add('hidden');
+            if (item.cue) {
+                showEditFields({ para: true });
+                $('edit-para-label').textContent = (CUES[item.cue] || CUES.note).hint;
+                $('edit-para').value = item.text || '';
+                fillBlockSelect(item.block);
+                $('edit-dialog').returnValue = '';
+                $('edit-dialog').showModal();
+                return;
+            }
             const cfg = isOverlayItem(item) ? OVERLAYS[item.overlay || 'l3Large'] : null;
-            const oneBox = cfg?.paragraph || cfg?.ticker;
+            const oneBox = cfg?.paragraph || cfg?.ticker || cfg?.caption;
             const hasText = !cfg || cfg.text || oneBox;
+            $('edit-para-label').textContent = cfg?.ticker ? 'Ticker text:' : cfg?.caption ? 'Text (optional):' : 'Text:';
             // Like, Follow & Subscribe: a box for each social (older saves had one channel name: YouTube)
             const socialsWrap = $('edit-socials-wrap');
             socialsWrap.innerHTML = '';
@@ -3264,30 +3801,43 @@
                 const socials = item.socials || (item.label ? { youtube: item.label } : {});
                 Object.keys(SOCIALS).forEach(k => socialsWrap.append(socialRow(k, socials[k], `edit-social-${k}`).row));
             }
-            $('edit-name-wrap').classList.toggle('hidden', !hasText || !!oneBox);
-            $('edit-title-wrap').classList.toggle('hidden', !hasText || !!oneBox);
-            $('edit-para-wrap').classList.toggle('hidden', !oneBox);
-            $('edit-duration-wrap').classList.toggle('hidden', cfg?.length !== undefined);
-            $('edit-gs-wrap').classList.toggle('hidden', !cfg?.depth);
+            showEditFields({ name: hasText && !oneBox, para: !!oneBox, duration: cfg?.length === undefined, gs: !!cfg?.depth });
             $('edit-name').value = item.label || '';
             $('edit-title').value = item.title || '';
             $('edit-para').value = item.label || '';
             $('edit-duration').value = item.duration || 5;
             $('edit-gs').checked = !!item.gs;
-            const sel = $('edit-block');
-            sel.innerHTML = '';
-            loadBlocks().forEach(b => sel.append(new Option(`Block ${b}`, b)));
-            sel.value = item.block;
+            fillBlockSelect(item.block);
             $('edit-dialog').returnValue = '';
             $('edit-dialog').showModal();
         };
-        const finishEdit = () => {
-            if ($('edit-dialog').returnValue !== 'save' || !editingSid) return;
+        const finishEdit = (button) => {
+            const saving = button === 'save';
             let list = loadShow();
+            // A new cue
+            if (newCue) {
+                const type = newCue;
+                newCue = null;
+                if (!saving) return;
+                const text = $('edit-para').value.trim();
+                if (type === 'note' && !text) { flash('Type the note first', true); return; }
+                const item = { cue: type, ...(text && { text }), block: $('edit-block').value, sid: newSid() };
+                list.push(item);
+                saveShow(list);
+                flash(`${CUES[type].label} added`, false, item.block === UNSORTED ? 'Unsorted' : itemCode(item, list) || `block ${item.block}`);
+                return;
+            }
+            if (!saving || !editingSid) return;
             const item = list.find(d => d.sid === editingSid);
             if (!item) return;
-            const cfg = isOverlayItem(item) ? OVERLAYS[item.overlay || 'l3Large'] : null;
-            if (cfg?.social) {
+            const cfg = item.cue ? null : isOverlayItem(item) ? OVERLAYS[item.overlay || 'l3Large'] : null;
+            if (item.cue) {
+                const text = $('edit-para').value.trim();
+                if (text) item.text = text;
+                else if (item.cue !== 'note') delete item.text; // a note keeps its text
+            } else if (cfg?.caption) {
+                item.label = $('edit-para').value.trim(); // blank uses the default text
+            } else if (cfg?.social) {
                 item.socials = Object.fromEntries(Object.keys(SOCIALS)
                     .map(k => [k, $(`edit-social-${k}`).value.trim()]).filter(([, v]) => v));
                 item.label = '';
@@ -3297,7 +3847,7 @@
                 item.label = $('edit-name').value.trim() || item.label;
                 item.title = $('edit-title').value.trim();
             }
-            if (cfg?.length === undefined) item.duration = Number($('edit-duration').value) || item.duration || 5;
+            if (!item.cue && cfg?.length === undefined) item.duration = Number($('edit-duration').value) || item.duration || 5;
             if (cfg?.depth) {
                 if ($('edit-gs').checked) item.gs = true;
                 else delete item.gs;
@@ -3316,7 +3866,7 @@
         const clearShow = () => {
             const n = loadShow().length;
             if (!n) { flash('The rundown is already empty', true); return; }
-            if (!confirm(`Remove all ${n} graphics from the rundown? Saved graphics aren't affected.`)) return;
+            if (!confirm(`Remove all ${n} items from the rundown? Saved graphics aren't affected.`)) return;
             lastTakenSid = null;
             localStorage.removeItem(LAST_PLAYED_KEY);
             saveShow([]);
@@ -3381,7 +3931,7 @@
             const files = listing?.files || [];
             note.textContent = !listing ? 'The server can\'t read the rundowns folder (not connected, or an older server). Choose a file instead.'
                 : files.length ? 'Tap one to replace the current rundown with it.'
-                : 'No saved rundowns yet. 💾 Save Rundown puts them in the rundowns folder.';
+                : 'No saved rundowns yet. Save Rundown puts them in the rundowns folder.';
             files.forEach(f => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
@@ -3412,9 +3962,13 @@
         // Replaces the rundown with a file's. Returns true if it did.
         const applyRundown = (data, name) => {
             if (!data || !Array.isArray(data.items)) { flash('That isn\'t a rundown file', true); return false; }
-            // Only graphics this version knows how to show
-            const items = data.items.filter(d => d && typeof d === 'object'
-                && (d.mode === 'l3' || (d.mode === 'overlay' && OVERLAYS[d.overlay])));
+            // Only things this version knows how to show. Lower thirds saved by older versions have
+            // no mode (like everywhere else in the panel, that means a lower third). Saved graphics
+            // aren't touched: the rundown keeps its own copies.
+            const known = (d) => (d.cue ? !!CUES[d.cue]
+                : d.mode === 'overlay' ? !!OVERLAYS[d.overlay]
+                : (d.mode === undefined || d.mode === 'l3') && (d.bgStyle === 'l3Large' || typeof d.label === 'string'));
+            const items = data.items.filter(d => d && typeof d === 'object' && known(d));
             const skipped = data.items.length - items.length;
             const n = loadShow().length;
             if (n && !confirm(`Replace the current rundown (${n} graphic${n === 1 ? '' : 's'}) with "${name}"?`)) return false;
@@ -3423,7 +3977,7 @@
             items.forEach(d => { if (/^[A-Z]$/.test(d.block) && !blocks.includes(d.block)) blocks.push(d.block); });
             blocks = blocks.length ? [...new Set(blocks)].sort() : [...DEFAULT_BLOCKS];
             const stamp = Date.now().toString(36);
-            const show = items.map(({ id, sid, ...d }, i) => ({ ...d, block: blocks.includes(d.block) ? d.block : blocks[0], sid: `${stamp}${i}${Math.random().toString(36).slice(2, 5)}` }));
+            const show = items.map(({ id, sid, ...d }, i) => ({ ...d, block: blocks.includes(d.block) || d.block === UNSORTED ? d.block : blocks[0], sid: `${stamp}${i}${Math.random().toString(36).slice(2, 5)}` }));
             // A fresh start: nothing live, no ★, Set Order off so it can be checked first, showing ALL
             clearLive('l3');
             clearLive('overlay');
@@ -3435,7 +3989,7 @@
             localStorage.setItem(RUNDOWN_NAME_KEY, cleanRundownName(name) || name);
             saveBlocks(blocks);
             saveShow(show);
-            flash(`Imported: ${name}`, skipped > 0, `${show.length} graphic${show.length === 1 ? '' : 's'}${skipped ? `, ${skipped} skipped` : ''}`);
+            flash(`Imported: ${name}`, skipped > 0, `${show.length} item${show.length === 1 ? '' : 's'}${skipped ? `, ${skipped} skipped` : ''}`);
             return true;
         };
 
@@ -3487,6 +4041,10 @@
         // The server's answer: the custom folder's images, sorted by name
         const gotCustomList = (files) => {
             clearTimeout(customListTimer);
+            // Cards using a custom image that's gone get a red ! (redraw the list on screen)
+            customFolderFiles = files;
+            if (checked('mode') === 'show') renderShow();
+            else renderButtons(loadButtonsFromStorage());
             const first = files.find(f => IMAGE_FILE.test(f));
             if (first) setCustomFile(first);
             if (!customTapped) return;
@@ -3516,7 +4074,7 @@
         const setTheme = (light) => {
             document.documentElement.classList.toggle('light', light);
             $('light-toggle').checked = light;
-            $('theme-icon').textContent = light ? '☀️' : '🌙';
+            $('theme-icon').innerHTML = icon(light ? 'sun' : 'moon');
             try { localStorage.setItem(THEME_KEY, light ? 'light' : 'dark'); } catch { /* storage blocked: just don't remember */ }
         };
         const loadTheme = () => {
@@ -3525,7 +4083,7 @@
             setTheme(saved === 'light');
         };
 
-        // Greenscreen: for a keyed camera in OBS with websocket_demo.html#underlay placed behind
+        // Greenscreen: for a keyed camera in OBS with fx_wizard.html#underlay placed behind
         // it (and #display in front, as usual). When on, every graphic is sent with gs: true, and
         // the overlays that support it (depth: true) split between the two: far behind you,
         // near in front. Everything else stays on #display.
@@ -3557,8 +4115,9 @@
   li { margin: 3px 0; }
   code { background: ${light ? '#e5e7eb' : '#1f2937'}; padding: 1px 5px; border-radius: 4px; }
   .muted { opacity: 0.75; font-size: 13px; }
+  h1 .icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -3px; }
 </style></head><body>
-<h1>🔧 Connection Help</h1>
+<h1>${icon('wrench')} Connection Help</h1>
 <div class="status">Connection Status: <span id="status">…</span><br>
   <span class="muted">Connecting to <code>${SOCKET_URL}</code>. The control panel retries every 2 seconds by itself.</span></div>
 
@@ -3572,7 +4131,7 @@
 <h2>2. Do the address and port match?</h2>
 <ul>
   <li>The server uses port <b>8080</b>. The address above must end in <code>:8080</code>.</li>
-  <li>If another program is using port 8080, change the port in the server and in <code>SOCKET_URL</code> in <code>websocket_demo.html</code>.</li>
+  <li>If another program is using port 8080, change the port in the server and in <code>SOCKET_URL</code> in <code>fx_wizard.html</code>.</li>
 </ul>
 
 <h2>3. Is this panel on a different device?</h2>
@@ -3597,10 +4156,10 @@
 
 <h2>Connected, but nothing shows on stream?</h2>
 <ul>
-  <li>The OBS Browser Source must point to <code>websocket_demo.html</code> with <code>#display</code> at the end.</li>
+  <li>The OBS Browser Source must point to <code>fx_wizard.html</code> with <code>#display</code> at the end.</li>
   <li>Set the Browser Source size to your canvas, for example 1920 x 1080.</li>
   <li>Right-click the Browser Source and choose <b>Refresh</b>.</li>
-  <li><b>Greenscreen on?</b> Add <code>websocket_demo.html#underlay</code> as a second Browser Source <i>below</i> your keyed camera, with <code>#display</code> above it.</li>
+  <li><b>Greenscreen on?</b> Add <code>fx_wizard.html#underlay</code> as a second Browser Source <i>below</i> your keyed camera, with <code>#display</code> above it.</li>
 </ul>
 </body></html>`);
             win.document.close();
@@ -3628,6 +4187,7 @@
            ========================================================= */
         const initializeView = () => {
             const hash = window.location.hash;
+            document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = icon(el.dataset.icon); });
             if (hash === '#display' || hash === '#underlay') {
                 isUnderlay = hash === '#underlay';
                 document.body.style.backgroundColor = 'transparent';
@@ -3652,7 +4212,8 @@
                     setGreenscreen(e.target.checked, true);
                 });
                 document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener('change', updateMode));
-                document.querySelectorAll('input[name="overlayStyle"]').forEach(r => r.addEventListener('change', updateSections));
+                document.querySelectorAll('input[name="overlayStyle"]').forEach(r => r.addEventListener('change', () => { fillDuration(); updateSections(); }));
+                $('duration-input').addEventListener('input', (e) => { if (checked('mode') === 'l3') l3Duration = Number(e.target.value) || 5; });
                 $('import-file').addEventListener('change', (e) => {
                     if (e.target.files.length) importL3s(e.target.files);
                     e.target.value = ''; // lets the same file be picked again
@@ -3664,8 +4225,20 @@
                     if (e.target.files.length) useCustomFile(e.target.files[0].name);
                     e.target.value = '';
                 });
-                // Like, Follow & Subscribe socials
+                // Like & Subscribe socials
                 renderSocialField();
+                // Saved list search
+                $('saved-search').addEventListener('input', (e) => { savedQuery = e.target.value.trim().toLowerCase(); renderButtons(loadButtonsFromStorage()); });
+                $('saved-search').addEventListener('keydown', (e) => { if (e.key === 'Escape') toggleSavedSearch(false); });
+                // Stinger buttons show their length (Storm · 2.8s)
+                document.querySelectorAll('[data-key="ov-stingers"] input[name="overlayStyle"]').forEach(r => {
+                    const len = OVERLAYS[r.value]?.length;
+                    if (len === undefined) return;
+                    const tag = document.createElement('span');
+                    tag.className = 'stinger-len';
+                    tag.textContent = ` · ${formatTime(Math.round(len * 10) / 10)}`;
+                    document.querySelector(`label[for="${r.id}"]`).append(tag);
+                });
                 // Importing a rundown from a file
                 $('rundown-pick').addEventListener('click', () => $('rundown-file').click());
                 $('rundown-file').addEventListener('change', (e) => {
@@ -3676,11 +4249,14 @@
                 $('show-lock').addEventListener('change', (e) => {
                     localStorage.setItem(SHOW_LOCK_KEY, e.target.checked ? '1' : '0');
                     renderShow();
+                    const unsorted = loadShow().filter(d => d.block === UNSORTED).length;
+                    if (e.target.checked && unsorted) flash(`${unsorted} unsorted item${unsorted === 1 ? ' isn\'t' : 's aren\'t'} in the show`, true, 'turn off Set Order to drag them into a block');
                     // Setting the order with graphics set for Greenscreen while it's off: offer to turn it on
                     const n = rundownGsCount();
                     if (e.target.checked && n && !greenscreen && confirm(`This rundown has ${n} graphic${n === 1 ? '' : 's'} set for Greenscreen, but Greenscreen is off. Turn it on now?`)) setGreenscreen(true, true);
                 });
-                $('edit-dialog').addEventListener('close', finishEdit);
+                // Saves the moment Save is pressed (not when the dialog's close event arrives later)
+                $('edit-dialog').querySelector('form').addEventListener('submit', (e) => finishEdit(e.submitter?.value || 'save'));
                 initSections();
                 showCustomNames();
                 updateMode();
