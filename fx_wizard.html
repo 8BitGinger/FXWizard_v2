@@ -397,6 +397,8 @@
                     <button type="button" class="show-ctl" onclick="stepCurrent(-1)" title="Back one item (doesn't take anything)"><span data-icon="prev"></span></button>
                     <button type="button" class="show-ctl" onclick="stepCurrent(1)" title="On to the next item (doesn't take anything)"><span data-icon="next"></span></button>
                     <span id="show-clock" class="show-clock" title="Time since the show started"></span>
+                    <span id="countdown-clock" class="show-clock countdown-clock hidden"></span>
+                    <button type="button" id="countdown-btn" class="show-ctl" onclick="handleCountdownClick()" title="Set a countdown to air"><span data-icon="timer"></span></button>
                     <button type="button" id="msg-btn" class="show-ctl" onclick="toggleMsgPanel()" title="Send a message to the projector"><span data-icon="message"></span></button>
                     <button type="button" class="show-ctl" onclick="generateLog()" title="Generate Log: save what ran, and for how long"><span data-icon="log"></span></button>
                 </div>
@@ -513,6 +515,7 @@
                 <span id="pj-block" class="pj-block"></span>
                 <span id="pj-block-time" class="pj-time"></span>
                 <span class="pj-spacer"></span>
+                <span id="pj-countdown" class="pj-time pj-countdown hidden"></span>
                 <span id="pj-show-time" class="pj-time"></span>
             </div>
             <div class="pj-main">
@@ -883,6 +886,7 @@
             log:    '<path d="M6 3h12v18H6z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
             script: '<path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 8h6M9 11h6M9 14h6M9 17h3"/>',
             plus:   '<path d="M12 5v14M5 12h14"/>',
+            timer:  '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>',
         };
         const icon = (name) => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ''}</svg>`;
 
@@ -4529,6 +4533,7 @@
         const BLOCK_LENGTHS_KEY = 'fx_block_lengths'; // planned seconds per block
         const SHOW_STATE_KEY = 'fx_show_state';       // { current, start, blockStarts, message }
         const SHOW_LOG_KEY = 'fx_show_log';
+        const SHOW_COUNTDOWN_KEY = 'fx_show_countdown'; // { duration, startedAt } seconds + epoch ms (null = armed, not running)
         const LOG_LIMIT = 5000;
 
         const readJson = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
@@ -4537,6 +4542,10 @@
         const showState = () => ({ current: null, start: null, blockStarts: {}, message: '', ...readJson(SHOW_STATE_KEY, {}) });
         const saveShowState = (st) => localStorage.setItem(SHOW_STATE_KEY, JSON.stringify(st));
         const loadLog = () => readJson(SHOW_LOG_KEY, []);
+        const loadCountdown = () => readJson(SHOW_COUNTDOWN_KEY, null);
+        const saveCountdown = (cd) => { if (cd) localStorage.setItem(SHOW_COUNTDOWN_KEY, JSON.stringify(cd)); else localStorage.removeItem(SHOW_COUNTDOWN_KEY); };
+        // Seconds left: the full duration while armed (startedAt null), counting down once started
+        const countdownRemaining = (cd, now = Date.now()) => cd.startedAt === null ? cd.duration : Math.max(0, cd.duration - (now - cd.startedAt) / 1000);
 
         // Times as 4:05 or 1:02:30
         const clock = (secs) => {
@@ -4581,6 +4590,7 @@
             const list = loadShow(), d = list.find(x => x.sid === sid);
             if (!d || d.cue === 'note') return;
             const st = showState(), now = Date.now();
+            const firstActivation = !st.current; // nothing taken yet this show
             if (!st.start) st.start = now;
             if (!st.blockStarts[d.block]) { // the show has reached this block
                 st.blockStarts[d.block] = now;
@@ -4592,6 +4602,8 @@
                 saveShowState(st);
                 logEvent('current', d, list);
             }
+            // The countdown starts when you press it, or on its own the first time anything goes active
+            if (firstActivation) maybeAutoStartCountdown();
             updateLiveMarks();
             updateShowClock();
             broadcastProjector();
@@ -4648,6 +4660,55 @@
                 el.classList.toggle('running', !!running);
                 el.classList.toggle('over', !!running && len > 0 && secs > len);
             });
+            updateCountdownUI();
+        };
+
+        // ---------- Show countdown (optional; armed with a duration, then started by hand or by
+        // taking the first item, so it's never left running from a show that already began) ----------
+        const startCountdownNow = () => {
+            const cd = loadCountdown();
+            if (!cd || cd.startedAt !== null) return;
+            cd.startedAt = Date.now();
+            saveCountdown(cd);
+            updateCountdownUI();
+            broadcastProjector();
+        };
+        const maybeAutoStartCountdown = () => {
+            const cd = loadCountdown();
+            if (cd && cd.startedAt === null) startCountdownNow();
+        };
+        const handleCountdownClick = () => {
+            const cd = loadCountdown();
+            if (!cd) {
+                const answer = prompt('Countdown to air (minutes:seconds, like 5:00):', '');
+                if (answer === null || !answer.trim()) return;
+                const secs = parseClock(answer);
+                if (!secs) { flash('Use minutes:seconds, like 5:00', true); return; }
+                saveCountdown({ duration: secs, startedAt: null });
+            } else if (cd.startedAt === null) {
+                startCountdownNow();
+                return;
+            } else if (confirm('Clear the countdown?')) {
+                saveCountdown(null);
+            }
+            updateCountdownUI();
+            broadcastProjector();
+        };
+        const updateCountdownUI = () => {
+            const cd = loadCountdown(), btn = $('countdown-btn'), out = $('countdown-clock');
+            if (!cd) {
+                btn.title = 'Set a countdown to air';
+                btn.classList.remove('armed', 'running');
+                out.classList.add('hidden');
+                return;
+            }
+            const remaining = countdownRemaining(cd);
+            out.classList.remove('hidden');
+            out.textContent = `-${clock(remaining)}`;
+            out.classList.toggle('done', Math.round(remaining) === 0); // matches clock()'s own rounding, so the color flips exactly when the text reads -0:00
+            btn.classList.toggle('armed', cd.startedAt === null);
+            btn.classList.toggle('running', cd.startedAt !== null);
+            btn.title = cd.startedAt === null ? 'Start the countdown (or it starts on its own with the first item)' : 'Clear the countdown';
         };
 
         // ---------- Messages for the projector ----------
@@ -4687,6 +4748,7 @@
             if (!isController || !ws || ws.readyState !== WebSocket.OPEN) return;
             const list = loadShow(), blocks = loadBlocks(), lengths = loadBlockLengths(), st = showState(), now = Date.now();
             const flow = showFlow(list, blocks), cur = list.find(d => d.sid === st.current);
+            const cd = loadCountdown();
             ws.send(JSON.stringify({
                 mode: 'projector',
                 running: showLocked(),
@@ -4700,6 +4762,7 @@
                 blockSoFar: cur && st.blockStarts[cur.block] ? (now - st.blockStarts[cur.block]) / 1000 : null,
                 showSoFar: st.start ? (now - st.start) / 1000 : null,
                 message: st.message || '',
+                countdown: cd ? { remaining: countdownRemaining(cd, now), running: cd.startedAt !== null } : null,
             }));
         };
 
@@ -4774,6 +4837,7 @@
                 localStorage.removeItem(SHOW_LOG_KEY);
                 const st = showState();
                 saveShowState({ current: null, start: null, blockStarts: {}, message: st.message });
+                saveCountdown(null); // clears the countdown too, so it doesn't carry over to the next show
                 if (showLocked()) startShow();
                 renderShow();
             }
@@ -4896,6 +4960,12 @@
             const show = st.running && st.showSoFar !== null ? st.showSoFar + since : null;
             $('pj-show-time').textContent = show === null ? '' : `Show ${clock(show)}${planned ? ` / ${clock(planned)}` : ''}`;
             $('pj-show-time').classList.toggle('over', show !== null && planned > 0 && show > planned);
+            // Countdown to air: shown until it runs out, then it gets out of the way
+            const cd = st.countdown;
+            const remaining = cd ? (cd.running ? Math.max(0, cd.remaining - since) : cd.remaining) : null;
+            const showCountdown = !!cd && remaining > 0;
+            $('pj-countdown').classList.toggle('hidden', !showCountdown);
+            if (showCountdown) $('pj-countdown').textContent = `${cd.running ? 'On air in' : 'Starts in'} ${clock(remaining)}`;
         };
 
         /* =========================================================

@@ -541,7 +541,12 @@ body {
 .show-ctl .icon { width: 18px; height: 18px; }
 .show-ctl:active { transform: scale(0.94); }
 .show-ctl.on { background: #6D28D9; border-color: #a78bfa; color: #fff; }
+.show-ctl.armed { background: #b45309; border-color: #fbbf24; color: #fff; }
+.show-ctl.running { background: #b91c1c; border-color: #f87171; color: #fff; }
 .show-clock { flex: 1; text-align: center; font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 0.03em; }
+.countdown-clock { flex: none; color: #fbbf24; }
+.countdown-clock.hidden { display: none; }
+.countdown-clock.done { color: #4ade80; }
 .msg-panel { margin: 0 8px 8px; padding: 8px; border-radius: 10px; border: 1px solid rgba(167, 139, 250, 0.6); background: rgba(109, 40, 217, 0.12); }
 .msg-panel.hidden { display: none; }
 .msg-presets { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
@@ -756,7 +761,7 @@ html.light #controller-view .border-gray-600 { border-color: #9ca3af; }
 html.light #edit-dialog, html.light #rundown-dialog { background: #fff; color: #111827; border-color: #d1d5db; }
 html.light .social-icon:not(.on) { border-color: #9ca3af; background: #fff; }
 html.light .rundown-btn { border-color: #9ca3af; background: #fff; }
-html.light .show-ctl:not(.on) { border-color: #9ca3af; background: #fff; }
+html.light .show-ctl:not(.on):not(.armed):not(.running) { border-color: #9ca3af; background: #fff; }
 html.light .msg-panel { background: #f5f3ff; }
 html.light .msg-custom input { border-color: #6b7280; }
 html.light .block-time:not(.running):not(.over) { border-color: #a78bfa; }
@@ -1801,6 +1806,8 @@ html.projector, html.projector body { background: #0b0b10; color: #f4f4f5; overf
 .pj-spacer { flex: 1; }
 .pj-time { font-variant-numeric: tabular-nums; }
 .pj-time.over { color: #f87171; }
+.pj-countdown { color: #fbbf24; }
+.pj-countdown.hidden { display: none; }
 .pj-main { flex: 1; min-height: 0; display: flex; }
 /* The rundown: most of the screen */
 .pj-rundown { flex: 1.7; min-width: 0; overflow-y: auto; padding: 1.5vh 1.5vw 30vh; scrollbar-width: none; }
