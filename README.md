@@ -22,6 +22,8 @@
   - [Importing L3s](#importing-l3s)
   - [Running a show](#running-a-show)
   - [Saving rundowns](#saving-rundowns)
+  - [Running the show](#running-the-show)
+  - [The projector (anchor view)](#the-projector-anchor-view)
   - [During the show](#during-the-show)
 - [Customizing](#-customizing)
 - [Advanced Customization](#-advanced-customization) (advanced users only)
@@ -96,7 +98,8 @@ Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import bu
   - Turn on **Set Order** when the show is ready, then tap a card to take it. A red **LIVE ORDER** bar across the top shows the rundown is running, not being edited. While it's on, **Add to** becomes **ALL**: tap **ALL** to see the whole rundown, or a letter to see just that block. Empty blocks are greyed out.
   - While a card is on screen it's outlined in green, with a floating red **OFF** button that counts down the time left; tap it to take the graphic down early. A ★ marks the one played last.
   - **Unsorted:** graphics added with **＋ RUNDOWN** (see below) wait at the bottom under **Unsorted**, labeled with just their type, until you drag them into a block (or move them with ✎). They aren't part of the show: they're hidden while Set Order is on, and turning it on tells you how many are left.
-  - **Cues:** producer notes and placeholders for things that aren't graphics. Tap **Note**, **Clip**, **SOT** or **PIC** (while Set Order is off), type the note or an optional description, and pick its block. Cues show as thin, greyed-out rows that can't be tapped, numbered like graphics (**A1-CLIP**, **A2-CLIP**, **A1-SOT**, **B1-PIC**...; notes have no number). Drag, edit and remove them like cards.
+  - **Cues:** producer notes, placeholders for things that aren't graphics, and scripts. Tap **Note**, **Clip**, **SOT**, **PIC** or **Script** (while Set Order is off), type the note, an optional description or the script (or load the script from a .txt file), and pick its block. Cues show as thin, greyed-out rows, numbered like graphics (**A1-CLIP**, **A2-CLIP**, **A1-SOT**, **B1-SCRIPT**...; notes have no number). Drag, edit and remove them like cards. Scripts show on the [projector](#the-projector-anchor-view); notes are for the crew and don't.
+  - **Block times:** tap **Set time** on a block's header to give it a planned length (like 6:00); the header also shows the total time of its graphics. The planned show length and the graphics' total sit above the blocks. During the show, the current block's time counts up against its plan and turns red when it's over. See [Running the show](#running-the-show).
   - The trash can empties the rundown (saved graphics aren't affected, and the blocks stay). **CLEAR ALL** is right at the top.
   - **Save Rundown / Import Rundown** (shown while Set Order is off): save the whole rundown, its blocks and a full copy of every graphic, as a file in the `rundowns` folder, and bring it back later, like a template. It still works after those graphics are deleted from Saved, and the files can be copied to another computer. See [Saving rundowns](#saving-rundowns).
 - **Duration:** on the right, just above the buttons. Picking an overlay fills in its usual time (for example Snow 15s, Breaking News 30s, Hot Take 7s), which you can still change. The Animated L3s tab keeps whatever you set there. For stingers it shows their fixed length, locked (with a padlock). The stinger buttons show their lengths too, for example **Storm · 2.8s**.
@@ -108,6 +111,7 @@ Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import bu
   - **Greenscreen** on the left: turns on [Greenscreen Depth](#-greenscreen-depth). It's always off when the panel opens. On the Podcast Rundown tab, it pulses amber if the rundown is running (**Set Order** on) and has effects set for Greenscreen while it's off.
   - **Light mode** on the right: shows a moon in dark mode and a sun in light mode. Dark is the default, and the browser remembers your choice.
 - **Connection help:** the wrench in the top bar opens a window with the live connection status and a list of things to check when it isn't **OPEN**.
+- **Tiny logo:** tap the logo on the right of the connection bar to reload the panel (during a show it asks first; nothing on screen changes, and the rundown and log are kept).
 
 ---
 
@@ -121,6 +125,7 @@ Control panel  ──►  Server (port 8080)  ──►  Display page in OBS
 - **Control panel:** `fx_wizard.html`, opened in any browser. An OBS dock is recommended (see [Open the Control Panel](#️-open-the-control-panel)).
 - **Display:** the same file with `#display` on the end, added to OBS as a Browser Source.
 - **Underlay** (optional, for Greenscreen): the same file with `#underlay` on the end, added to OBS *below* your keyed camera.
+- **Projector** (optional): the same file with `#projector` on the end, opened in a browser on a screen the anchor and guests can see.
 - **Server:** passes each message from the control panel to the display. It can run inside OBS (Python) or on its own (Node.js).
 
 ---
@@ -318,6 +323,27 @@ Open `fx_wizard.html` in a browser (without `#display`). Check that the top bar 
 
 The file holds everything needed, so it works even if those graphics were deleted from Saved. The server does the saving, so it needs the current `server.py` or `server.js` (after updating, reload the script in OBS under **Tools > Scripts**, or restart `node server.js`). With an older server, **Save Rundown** downloads the file instead: move it into the `rundowns` folder.
 
+### Running the show
+Turn on **Set Order**. The show clock starts, and a row of show controls appears:
+
+- **The current item:** whatever you take becomes the current item (outlined in amber). Tap a clip, SOT, picture or script to make it current; nothing goes on screen. A graphic can stay on air while something else is current, like an L3 over a SOT.
+- **◀ ▶** move the current item back or on without taking anything (notes are skipped).
+- **The show clock** shows the time since the show started, against the planned length. The current block's header shows its own time, and turns red when it runs over.
+- **Messages for the projector:** tap the message icon for **Toss to Break**, **No Video**, **No L3** and **Center on Camera**, or type your own and press **Send**. It stays on the projector until you send another or clear it (the ✕ on the orange bar).
+- **Generate Log** (the page icon) saves a spreadsheet (`.csv`) of what actually ran: every graphic from take to off, every cue while it was current, each message, and each block's planned and actual time with how far over or under it was. It goes in the `logs` folder (with an older server it downloads instead), then offers to start a fresh log and show clock for the next show.
+
+The show clock and log keep going if you turn Set Order off to fix something, and they survive a reload.
+
+### The projector (anchor view)
+A screen for the anchor and guests, outside OBS. On a computer running the control panel (or any computer that can reach the server), open `fx_wizard.html#projector` in a browser, full screen (F11), on the guest-facing screen.
+
+- **Across the top:** the director's message, flashing when a new one arrives.
+- **Under it:** which block the show is in and its time against the plan, and the show's time.
+- **Most of the screen:** the whole rundown in order, following along: **PREV**, **NOW** and **NEXT** are marked, and anything on air has a green outline.
+- **On the side:** what's on now, what's next, and what's on air. When a script is current, its text fills the side, sized to fit.
+
+It updates by itself as the director works. Producer notes aren't shown.
+
 ### During the show
 - **Tap a saved card** (or a Podcast Rundown card, once Set Order is on) to take it. **OFF** on a live rundown card takes it down early.
 - **CLEAR ALL** removes everything from the screen, including anything toggled on.
@@ -352,7 +378,9 @@ The file holds everything needed, so it works even if those graphics were delete
 | An overlay's usual duration | `fx_wizard.html`, script section 2 | `dur` on that overlay in `OVERLAYS` (in seconds) |
 | Arrested look or timing | `fx_wizard.html`, script section 6 | `arrested` in the canvas effects (`POLICE_RED`, `POLICE_BLUE`, `DROP` and `LAND`) |
 | Hot Take look | `fx_wizard.html`, script section 6 | `hottake` in the canvas effects; the default text is `caption` in `OVERLAYS` |
-| Cue types (Note, Clip, SOT, PIC) | `fx_wizard.html`, script section 15 | `CUES` |
+| Cue types (Note, Clip, SOT, PIC, Script) | `fx_wizard.html`, script section 15 | `CUES` |
+| Message presets | `fx_wizard.html`, in the Podcast Rundown part of the page | The four buttons inside `msg-presets` (copy one to add another) |
+| Projector look | `css/styles.css`, section 9 | The `.pj-...` rules |
 | Podcast Rundown blocks to start with | `fx_wizard.html`, script section 15 | `DEFAULT_BLOCKS` |
 | Imported L3 duration | `fx_wizard.html`, script section 1 | `IMPORT_DURATION` (in seconds) |
 | Server address | `fx_wizard.html`, script section 1 | `SOCKET_URL` |
@@ -456,7 +484,7 @@ Keep the same file names and the overlays pick up the new images.
 - **Large GIFs load the first time.** Some backgrounds are 20–50 MB, so a background can take a moment to appear the first time it's used.
 - **Older saves still work.** Graphics saved with earlier versions still open correctly.
 - **Missing custom images:** a card that uses a custom image no longer in the `custom` folder shows a red **!** (saved and rundown cards). Put the file back, or pick a new one with ✎ or by saving it again.
-- **Sharing the project:** `custom/` and `rundowns/` keep your own files out of Git (see `.gitignore`); only their `README.txt` is shared. Python's `__pycache__` is ignored too.
+- **Sharing the project:** `custom/`, `rundowns/` and `logs/` keep your own files out of Git (see `.gitignore`); only their `README.txt` is shared. Python's `__pycache__` is ignored too.
 
 ---
 
@@ -464,12 +492,13 @@ Keep the same file names and the overlays pick up the new images.
 
 | File | What it is |
 |---|---|
-| `fx_wizard.html` | The control panel, the display (`#display`) and the greenscreen underlay (`#underlay`), all in one page |
+| `fx_wizard.html` | The control panel, the display (`#display`), the greenscreen underlay (`#underlay`) and the projector (`#projector`), all in one page |
 | `css/styles.css` | All the styles and animations |
 | `assets/` | Background GIFs, the L3 images, and logos |
 | `custom/` | Your own image for the **Custom…** background and the **Custom** Fullscreen L3 (the first PNG, JPG or GIF by name is used). Not shared in Git |
 | `rundowns/` | Saved Podcast Rundowns, one `.json` file each. Not shared in Git |
-| `server.py` | Server that runs inside OBS (also lists `custom/`, and saves and opens rundowns in `rundowns/`) |
+| `logs/` | Show logs from **Generate Log**, one `.csv` file each. Not shared in Git |
+| `server.py` | Server that runs inside OBS (also lists `custom/`, saves and opens rundowns in `rundowns/`, and saves logs in `logs/`) |
 | `server.js` | Standalone Node.js server (same as `server.py`, outside OBS) |
 | `launch_server.bat` | Double-click launcher for the Node.js server |
 
@@ -479,9 +508,7 @@ Keep the same file names and the overlays pick up the new images.
 
 FX Wizard keeps growing with the shows we produce. A few things on the horizon (not in this version):
 
-- **A guest-facing view:** a screen outside OBS that everyone in the studio can see, fed by the control panel.
-- **Show timing:** countdowns and running times, built into the Podcast Rundown.
-- **Script cues:** scripts that live in the rundown alongside the graphics.
+- **Show countdown:** a countdown for the whole show, set at the start, with its own window.
 - **OBS hotkeys:** take graphics without touching the panel.
 - **Test mode:** a safe way to rehearse a setup, with logs.
 - **Vertical video:** a vertical canvas option (or a separate dock) with lower thirds and overlays made for vertical formats.

@@ -35,7 +35,7 @@
             <button id="help-btn" type="button" title="Connection help" onclick="openConnectionHelp()" class="leading-none hover:scale-110 active:scale-95"><span data-icon="wrench"></span></button>
             <span>Connection Status: <span id="controller-connection" class="font-medium text-red-400">CLOSED</span></span>
             <!-- Tiny logo on the right: the full height of the bar, width from its shape (hidden if assets/tinyLogo.png is missing) -->
-            <img src="./assets/tinyLogo.png" alt="" class="status-logo" onerror="this.remove()">
+            <img src="./assets/tinyLogo.png" alt="" class="status-logo" title="Reload the panel" onclick="reloadPanel()" onerror="this.remove()">
         </div>
 
         <!-- ===== TOGGLE BAR (controller only) ===== -->
@@ -391,6 +391,34 @@
                     </label>
                     <button id="show-clear" type="button" title="Remove everything from the rundown (asks first)" onclick="clearShow()" class="w-8 h-7 rounded hover:bg-red-700 active:scale-95 grid place-items-center"><span data-icon="trash"></span></button>
                 </div>
+                <!-- During the show (Set Order on): step through the rundown, the show clock, a message to
+                     the projector, and saving the log of what ran -->
+                <div id="show-controls" class="show-controls hidden">
+                    <button type="button" class="show-ctl" onclick="stepCurrent(-1)" title="Back one item (doesn't take anything)"><span data-icon="prev"></span></button>
+                    <button type="button" class="show-ctl" onclick="stepCurrent(1)" title="On to the next item (doesn't take anything)"><span data-icon="next"></span></button>
+                    <span id="show-clock" class="show-clock" title="Time since the show started"></span>
+                    <button type="button" id="msg-btn" class="show-ctl" onclick="toggleMsgPanel()" title="Send a message to the projector"><span data-icon="message"></span></button>
+                    <button type="button" class="show-ctl" onclick="generateLog()" title="Generate Log: save what ran, and for how long"><span data-icon="log"></span></button>
+                </div>
+                <!-- Messages for the projector: presets, or type your own. They stay up until replaced or cleared. -->
+                <div id="msg-panel" class="msg-panel hidden">
+                    <div class="msg-presets">
+                        <button type="button" onclick="sendMessage(this.textContent)">Toss to Break</button>
+                        <button type="button" onclick="sendMessage(this.textContent)">No Video</button>
+                        <button type="button" onclick="sendMessage(this.textContent)">No L3</button>
+                        <button type="button" onclick="sendMessage(this.textContent)">Center on Camera</button>
+                    </div>
+                    <form class="msg-custom" onsubmit="event.preventDefault(); sendMessage($('msg-input').value);">
+                        <input id="msg-input" type="text" maxlength="80" placeholder="Type a message" autocomplete="off">
+                        <button type="submit">Send</button>
+                    </form>
+                </div>
+                <!-- The message showing on the projector now -->
+                <div id="msg-now" class="msg-now hidden">
+                    <span data-icon="message"></span>
+                    <span id="msg-now-text" class="msg-now-text"></span>
+                    <button type="button" onclick="sendMessage('')" title="Clear the message"><span data-icon="x"></span></button>
+                </div>
                 <!-- Save the rundown as a file in the "rundowns" folder, or bring one back (hidden while Set Order is on) -->
                 <div id="rundown-files-row" class="grid grid-cols-2 gap-2 mb-2 px-2">
                     <button type="button" class="rundown-btn" onclick="saveRundownFile()" title="Save this rundown, with everything in it, to the rundowns folder"><span data-icon="save"></span> Save Rundown</button>
@@ -409,6 +437,7 @@
                     <button type="button" class="cue-add" onclick="addCue('clip')" title="Add a placeholder for a clip"><span data-icon="clip"></span> Clip</button>
                     <button type="button" class="cue-add" onclick="addCue('sot')" title="Add a placeholder for a SOT (sound on tape)"><span data-icon="sot"></span> SOT</button>
                     <button type="button" class="cue-add" onclick="addCue('pic')" title="Add a placeholder for a picture"><span data-icon="pic"></span> PIC</button>
+                    <button type="button" class="cue-add" onclick="addCue('script')" title="Add a script (shown on the projector)"><span data-icon="script"></span> Script</button>
                 </div>
                 <!-- Shown when graphics here are set for Greenscreen but Greenscreen is off -->
                 <div id="gs-alert" class="gs-alert hidden" role="alert">
@@ -417,6 +446,8 @@
                     <button type="button" onclick="setGreenscreen(true, true)">Turn on</button>
                 </div>
                 <p id="show-hint" class="text-xs text-center opacity-75 mb-2 px-2">Arrange the rundown, then turn on <b>Set Order</b> to run it. Cards can't be taken until then.</p>
+                <!-- Planned length of the whole show, the graphics' total, and (during the show) the time so far -->
+                <div id="show-totals" class="show-totals"></div>
                 <div id="show-list" class="flex flex-col p-1 pt-0"></div>
             </div>
 
@@ -447,6 +478,8 @@
                     <div id="edit-para-wrap">
                         <label id="edit-para-label" for="edit-para" class="block text-sm">Text:</label>
                         <textarea id="edit-para" rows="4" maxlength="400" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm resize-y"></textarea>
+                        <button type="button" id="edit-load-txt" class="hidden w-full mt-1 py-1 rounded bg-gray-600 text-white text-sm font-bold" onclick="$('edit-txt-file').click()"><span data-icon="file"></span> Load a .txt file</button>
+                        <input type="file" id="edit-txt-file" accept=".txt,text/plain" class="hidden">
                     </div>
                     <div id="edit-socials-wrap" class="flex flex-col gap-1"></div>
                     <div id="edit-duration-wrap">
@@ -471,6 +504,33 @@
         </div>
 
         <!-- ===== DISPLAY (what OBS shows, opened with #display) ===== -->
+        <!-- ===== PROJECTOR (fx_wizard.html#projector) =====
+             The anchor view, on a screen the guests can see (outside OBS): the director's message
+             across the top, then where the show is, the rundown, and the current script. -->
+        <div id="projector-view" class="hidden">
+            <div id="pj-message" class="pj-message"><span id="pj-message-text"></span></div>
+            <div class="pj-status">
+                <span id="pj-block" class="pj-block"></span>
+                <span id="pj-block-time" class="pj-time"></span>
+                <span class="pj-spacer"></span>
+                <span id="pj-show-time" class="pj-time"></span>
+            </div>
+            <div class="pj-main">
+                <div id="pj-rundown" class="pj-rundown"></div>
+                <aside class="pj-side">
+                    <div class="pj-label">Now</div>
+                    <div id="pj-now" class="pj-now"></div>
+                    <div id="pj-script" class="pj-script hidden"><div id="pj-script-text" class="pj-script-text"></div></div>
+                    <div class="pj-label">Next</div>
+                    <div id="pj-next" class="pj-next"></div>
+                    <div id="pj-onair-wrap">
+                        <div class="pj-label">On air</div>
+                        <div id="pj-onair" class="pj-onair"></div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+
         <div id="display-view" class="hidden">
             <!-- Lower third -->
             <div id="display-box" class="shadow-inner">
@@ -643,7 +703,9 @@
            15. Controller: Podcast Rundown (and saving / importing rundowns)
            16. Controller: custom files
            17. Controller: light mode, greenscreen and connection help
-           18. Startup
+           18. Controller: running the show (current item, block times, messages, log)
+           19. Projector (fx_wizard.html#projector)
+           20. Startup
            ========================================================= */
 
 
@@ -660,6 +722,7 @@
         let ws = null;
         let isController = false;
         let isUnderlay = false;       // true on fx_wizard.html#underlay
+        let isProjector = false;      // true on fx_wizard.html#projector
         let l3Timeout = null;         // timer that hides the lower third
         let l3Cleanup = null;         // timer that fully hides it after the out animation
         let l3Out = 'anim-hide';      // how the lower third on screen leaves
@@ -812,6 +875,13 @@
             x:      '<path d="M6 6l12 12M18 6L6 18"/>',
             stop:   '<rect x="6" y="6" width="12" height="12" rx="2" class="icon-fill"/>',
             pencil: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',
+            prev:   '<path d="M15 5l-7 7 7 7"/>',
+            l3:     '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M6 13h9M6 16h6"/>',
+            layers: '<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
+            next:   '<path d="M9 5l7 7-7 7"/>',
+            message: '<path d="M4 5h16v11H10l-5 4v-4H4z"/>',
+            log:    '<path d="M6 3h12v18H6z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+            script: '<path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 8h6M9 11h6M9 14h6M9 17h3"/>',
             plus:   '<path d="M12 5v14M5 12h14"/>',
         };
         const icon = (name) => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ''}</svg>`;
@@ -936,8 +1006,12 @@
             let W = 0, H = 0, raf = null, effect = null, last = 0, t0 = 0;
 
             // Matches the canvas to the screen size
+            // detail: the canvas's resolution for the current effect (1 = full). The heaviest stingers
+            // draw at a little less, which the browser stretches to fill the screen; it looks the same
+            // in motion and is much less work.
+            let detail = 1;
             const resize = () => {
-                const dpr = window.devicePixelRatio || 1;
+                const dpr = (window.devicePixelRatio || 1) * detail;
                 W = window.innerWidth;
                 H = window.innerHeight;
                 canvas.width = Math.round(W * dpr);
@@ -981,6 +1055,61 @@
             const depthOf = (opts = {}) => {
                 const layer = DEPTH[opts.layer] ? opts.layer : 'all';
                 return { layer, ...DEPTH[layer] };
+            };
+
+            // Speed: pieces that have stopped moving (flowers that have popped in, balls in the pile)
+            // are drawn once onto a full-screen layer, which is copied each frame, instead of being
+            // redrawn every frame. OBS often draws browser sources without the graphics card, where
+            // redrawing a hundred pieces a frame is too slow and makes stingers stutter and linger.
+            const makeLayer = (prev) => {
+                const layer = prev && prev.c.width === canvas.width && prev.c.height === canvas.height
+                    ? prev : { c: Object.assign(document.createElement('canvas'), { width: canvas.width, height: canvas.height }) };
+                layer.x = layer.c.getContext('2d');
+                layer.x.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+                layer.x.clearRect(0, 0, W, H);
+                layer.idx = [];
+                layer.saves = []; // copies of the layer along the way: { n: pieces on it, c: canvas }
+                return layer;
+            };
+            // still: the indexes (in drawing order) of the pieces sitting still now. draw(c, i) draws
+            // piece i on c. New pieces on top are just added (with a copy saved every SAVE_EVERY);
+            // when pieces leave from the top, it goes back to the last copy and redraws from there.
+            // Anything else redraws the whole layer.
+            const SAVE_EVERY = 16;
+            const syncLayer = (layer, still, draw) => {
+                const had = layer.idx;
+                const sameStart = (n) => { for (let k = 0; k < n; k++) if (had[k] !== still[k]) return false; return true; };
+                const copy = (from, to) => { // canvas to canvas, pixel for pixel
+                    const x = to.getContext('2d');
+                    x.save();
+                    x.setTransform(1, 0, 0, 1, 0, 0);
+                    x.clearRect(0, 0, to.width, to.height);
+                    x.drawImage(from, 0, 0);
+                    x.restore();
+                };
+                let from;
+                if (still.length >= had.length && sameStart(had.length)) {
+                    if (still.length === had.length) return;
+                    from = had.length;
+                } else if (still.length < had.length && sameStart(still.length)) {
+                    layer.saves = layer.saves.filter(sv => sv.n <= still.length);
+                    const sv = layer.saves.at(-1);
+                    if (sv) copy(sv.c, layer.c); else layer.x.clearRect(0, 0, W, H);
+                    from = sv ? sv.n : 0;
+                } else {
+                    layer.saves = [];
+                    layer.x.clearRect(0, 0, W, H);
+                    from = 0;
+                }
+                for (let k = from; k < still.length; k++) {
+                    draw(layer.x, still[k]);
+                    if ((k + 1) % SAVE_EVERY === 0 && !layer.saves.some(sv => sv.n === k + 1)) {
+                        const c = Object.assign(document.createElement('canvas'), { width: layer.c.width, height: layer.c.height });
+                        copy(layer.c, c);
+                        layer.saves.push({ n: k + 1, c });
+                    }
+                }
+                layer.idx = still;
             };
 
             // ---------- Confetti: two bursts from the bottom corners, then light rain from the top ----------
@@ -1069,6 +1198,19 @@
                 frame(dt, t) {
                     ctx.clearRect(0, 0, W, H);
                     if (this.d.layer === 'front') return; // it's all behind the person
+                    // Only soft glows, so it's drawn at a quarter size and stretched to fill the screen:
+                    // it looks the same and is far less work
+                    const q = 4, sw = Math.ceil(W / q), sh = Math.ceil(H / q);
+                    this.small = this.small || document.createElement('canvas');
+                    if (this.small.width !== sw || this.small.height !== sh) { this.small.width = sw; this.small.height = sh; }
+                    const ctx2 = this.small.getContext('2d');
+                    ctx2.setTransform(1 / q, 0, 0, 1 / q, 0, 0);
+                    ctx2.globalCompositeOperation = 'source-over';
+                    ctx2.clearRect(0, 0, W, H);
+                    this.paint(ctx2, t);
+                    ctx.drawImage(this.small, 0, 0, W, H);
+                },
+                paint(ctx, t) {
                     ctx.globalCompositeOperation = 'lighter';
                     for (const b of this.blobs) {
                         const x = W * (0.5 + 0.5 * Math.sin(t * b.sp + b.px));
@@ -1112,14 +1254,48 @@
                     const s = H / 1080;
                     const z = near ? 1 : rand(this.d.zMin, this.d.zMax);
                     const len = (near ? rand(150, 230) : 30 + z * 45) * s;
+                    const wid = len * rand(0.35, 0.55);
+                    const color = LEAF_COLORS[Math.floor(Math.random() * LEAF_COLORS.length)];
                     return {
-                        x: rand(0, W), y, len, wid: len * rand(0.35, 0.55), near,
+                        x: rand(0, W), y, len, wid, near, color,
+                        ...(near && this.blurredLeaf(len, wid, color)),
                         vy: (near ? rand(2.4, 3.2) : 0.8 + z * 1.2) * s,
                         sway: rand(1, 2.5) * s * (near ? 1.8 : 1), freq: rand(0.5, 1.2), phase: rand(0, Math.PI * 2),
                         rot: rand(0, Math.PI * 2), vr: rand(-0.03, 0.03),
                         tilt: rand(0, Math.PI * 2), vt: rand(0.02, 0.06),
-                        color: LEAF_COLORS[Math.floor(Math.random() * LEAF_COLORS.length)],
                     };
+                },
+                // The leaf shape (and its vein and stem), pointing down from its middle
+                drawLeaf(c, len, wid, color, vein) {
+                    c.fillStyle = color;
+                    c.beginPath();
+                    c.moveTo(0, -len / 2);
+                    c.quadraticCurveTo(wid, 0, 0, len / 2);
+                    c.quadraticCurveTo(-wid, 0, 0, -len / 2);
+                    c.fill();
+                    c.strokeStyle = 'rgba(60, 20, 0, 0.45)';
+                    c.lineWidth = vein;
+                    c.beginPath();
+                    c.moveTo(0, -len / 2);
+                    c.lineTo(0, len / 2 + len * 0.12);
+                    c.stroke();
+                },
+                // A leaf right by the camera is out of focus. It's drawn blurred once, into its own small
+                // canvas, which is then just moved each frame. (Blurring it live every frame is about 90x
+                // slower and made OBS stutter.) The blur comes from a shadow: the leaf is drawn off to
+                // the side and only its soft shadow lands on the canvas.
+                blurredLeaf(len, wid, color) {
+                    const pad = 16;
+                    const sprite = document.createElement('canvas');
+                    sprite.width = Math.ceil(wid * 2 + pad * 2);
+                    sprite.height = Math.ceil(len * 1.12 + pad * 2);
+                    const c = sprite.getContext('2d');
+                    c.shadowColor = color;
+                    c.shadowBlur = 10; // about the same as blur(5px)
+                    c.shadowOffsetX = sprite.width * 2;
+                    c.translate(sprite.width / 2 - sprite.width * 2, pad + len / 2);
+                    this.drawLeaf(c, len, wid, color, 3 * (H / 1080));
+                    return { sprite, spriteY: pad + len / 2 };
                 },
                 frame(dt, t) {
                     const s = H / 1080;
@@ -1135,24 +1311,11 @@
                         if (l.x < -l.len) l.x = W + l.len; else if (l.x > W + l.len) l.x = -l.len;
 
                         ctx.save();
-                        if (l.near) ctx.filter = 'blur(5px)'; // too close to the camera to be in focus
                         ctx.translate(l.x, l.y);
                         ctx.rotate(l.rot + swing * 0.6); // rocks back and forth
                         ctx.scale(1, Math.cos(l.tilt));  // flips over
-                        // Leaf shape
-                        ctx.fillStyle = l.color;
-                        ctx.beginPath();
-                        ctx.moveTo(0, -l.len / 2);
-                        ctx.quadraticCurveTo(l.wid, 0, 0, l.len / 2);
-                        ctx.quadraticCurveTo(-l.wid, 0, 0, -l.len / 2);
-                        ctx.fill();
-                        // Center vein and stem
-                        ctx.strokeStyle = 'rgba(60, 20, 0, 0.45)';
-                        ctx.lineWidth = (l.near ? 3 : 1.2) * s;
-                        ctx.beginPath();
-                        ctx.moveTo(0, -l.len / 2);
-                        ctx.lineTo(0, l.len / 2 + l.len * 0.12);
-                        ctx.stroke();
+                        if (l.near) ctx.drawImage(l.sprite, -l.sprite.width / 2, -l.spriteY); // already blurred
+                        else this.drawLeaf(ctx, l.len, l.wid, l.color, 1.2 * s);
                         ctx.restore();
                     }
                 },
@@ -1645,6 +1808,29 @@
 
             const DUST_SPRITE = glowSprite('#b08a62'); // one soft puff of dust
 
+            // Home plate's soft shadow, blurred once at a small size. It's soft, so stretching it up to
+            // the plate's size looks the same (blurring the full-size plate every frame was very slow).
+            const makePlateShadow = () => {
+                const S = 256, P = 200; // the sprite's size, and the plate's width in it
+                const c = document.createElement('canvas');
+                c.width = c.height = S;
+                const x = c.getContext('2d');
+                x.shadowColor = 'rgba(0, 0, 0, 0.45)';
+                x.shadowBlur = 4;            // about a 40px blur on the full-size plate
+                x.shadowOffsetX = S * 2;     // the plate is drawn off to the side; only its shadow lands here
+                x.translate(S / 2 - S * 2, S / 2);
+                x.beginPath();
+                x.moveTo(-P / 2, -P / 2);
+                x.lineTo(P / 2, -P / 2);
+                x.lineTo(P / 2, 0);
+                x.lineTo(0, P / 2);
+                x.lineTo(-P / 2, 0);
+                x.closePath();
+                x.fill();
+                c.plateW = P;
+                return c;
+            };
+
             // A round patch of infield dirt, drawn once
             const makeDirtSprite = () => {
                 const S = 1024;
@@ -1673,6 +1859,7 @@
             // Baseball: home plate spins in on a patch of dirt. Soccer: a ball flies at the camera
             // and bounces back off it. Each one covers the whole screen between HOLD_START and HOLD_END.
             const sports = {
+                detail: (opts) => (opts.sport === 'basketball' ? 0.75 : 1), // dozens of balls (see "detail" above)
                 init(durationSec, opts) {
                     this.kind = SPORTS[opts.sport] ? opts.sport : 'football';
                     this.T = durationSec;
@@ -1686,6 +1873,7 @@
                         this.basketballInit();
                     } else if (this.kind === 'baseball') {
                         this.dirtSprite = this.dirtSprite || makeDirtSprite();
+                        this.plateShadow = this.plateShadow || makePlateShadow();
                         this.dust = [];
                         this.dusted = false;
                     } else {
@@ -1811,28 +1999,43 @@
                             this.balls.push({
                                 x: x + rand(-0.05, 0.05) * R, y: y + rand(-0.05, 0.05) * R,
                                 from: rand(0.3, 1.1) * H + R,      // how far above its spot it starts
-                                arrive: rand(0, 0.16), leave: rand(0, 0.12),
+                                arrive: rand(0, 0.16), leave: 0, // set below
                                 rot: rand(0, Math.PI * 2), vr: rand(-4, 4),
                             });
                         }
                     }
                     this.balls.sort((m, n) => m.arrive - n.arrive); // later ones land on top
+                    // They fall away top first: the last to land goes first (it keeps the layer cheap)
+                    this.balls.forEach((b, i) => { b.leave = ((this.balls.length - 1 - i) / this.balls.length) * 0.12; });
+                    this.layer = makeLayer(this.layer);
+                },
+                // One ball: it spins; its shading (the light from above) doesn't
+                drawBall(c, x, y, angle) {
+                    const spr = this.ballSprite, half = spr.width / 2;
+                    c.save();
+                    c.translate(x, y);
+                    c.rotate(angle);
+                    c.drawImage(spr, -half, -half);
+                    c.restore();
+                    c.drawImage(spr.shade, x - half, y - half);
                 },
                 basketballFrame(p, t) {
-                    const R = this.ballR, spr = this.ballSprite, half = spr.width / 2, FALL = 0.24;
+                    const R = this.ballR, T = this.T, FALL = 0.24;
+                    // Balls resting in the pile don't move (or spin), so they're kept on a layer
+                    const landed = (b) => b.rot + b.vr * (b.arrive + FALL) * T * 0.5; // its angle once it lands
+                    const still = [];
+                    this.balls.forEach((b, i) => { if (p >= b.arrive + FALL && p < HOLD_END + b.leave) still.push(i); });
+                    syncLayer(this.layer, still, (c, i) => { const b = this.balls[i]; this.drawBall(c, b.x, b.y, landed(b)); });
+                    ctx.drawImage(this.layer.c, 0, 0, W, H);
+                    // Falling in (spinning), and falling away (spinning again)
                     for (const b of this.balls) {
                         if (p < b.arrive) continue;
-                        let y;
-                        if (p < b.arrive + FALL) y = b.y - b.from * (1 - EASE.outBounce((p - b.arrive) / FALL));
-                        else if (p < HOLD_END + b.leave) y = b.y;
-                        else y = b.y + (H + 2.5 * R) * Math.pow(clamp01((p - HOLD_END - b.leave) / (0.98 - HOLD_END - b.leave)), 2);
-                        if (y - R > H) continue;
-                        ctx.save();
-                        ctx.translate(b.x, y);
-                        ctx.rotate(b.rot + b.vr * t * 0.5);
-                        ctx.drawImage(spr, -half, -half);
-                        ctx.restore();
-                        ctx.drawImage(spr.shade, b.x - half, y - half);
+                        if (p < b.arrive + FALL) {
+                            this.drawBall(ctx, b.x, b.y - b.from * (1 - EASE.outBounce((p - b.arrive) / FALL)), b.rot + b.vr * t * 0.5);
+                        } else if (p >= HOLD_END + b.leave) {
+                            const y = b.y + (H + 2.5 * R) * Math.pow(clamp01((p - HOLD_END - b.leave) / (0.98 - HOLD_END - b.leave)), 2);
+                            if (y - R <= H) this.drawBall(ctx, b.x, y, landed(b) + b.vr * (t - (HOLD_END + b.leave) * T) * 0.5);
+                        }
                     }
                 },
 
@@ -1846,9 +2049,9 @@
                     // A puff of dust as it lands
                     if (p >= HOLD_START && !this.dusted) {
                         this.dusted = true;
-                        for (let i = 0; i < 26; i++) {
+                        for (let i = 0; i < 16; i++) { // a few big, soft puffs (each one is a lot of drawing)
                             this.dust.push({
-                                x: rand(0.05, 0.95) * W, y: H * rand(0.82, 1.02), r: rand(25, 60) * s,
+                                x: rand(0.05, 0.95) * W, y: H * rand(0.82, 1.02), r: rand(32, 70) * s,
                                 vx: rand(-2, 2) * s, vy: -rand(0.3, 1.5) * s, life: 0, max: rand(40, 70),
                             });
                         }
@@ -1858,10 +2061,13 @@
                         const pw = 1.15 * W;               // plate width
                         ctx.save();
                         ctx.translate(W / 2, H / 2);
-                        ctx.rotate(turn);
                         ctx.scale(k, k);
+                        // The dirt patch is round and even, so it isn't turned (turning it is twice the work)
                         ctx.drawImage(this.dirtSprite, -rd, -rd, rd * 2, rd * 2);
-                        // Home plate: flat top, straight sides, pointed bottom
+                        ctx.rotate(turn);
+                        // Its shadow, then home plate: flat top, straight sides, pointed bottom
+                        const ps = this.plateShadow, f = pw / ps.plateW;
+                        ctx.drawImage(ps, -ps.width / 2 * f, -ps.height / 2 * f + 12 * s, ps.width * f, ps.height * f);
                         ctx.beginPath();
                         ctx.moveTo(-pw / 2, -pw / 2);
                         ctx.lineTo(pw / 2, -pw / 2);
@@ -1869,15 +2075,11 @@
                         ctx.lineTo(0, pw / 2);
                         ctx.lineTo(-pw / 2, 0);
                         ctx.closePath();
-                        ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-                        ctx.shadowBlur = 40 * s;
-                        ctx.shadowOffsetY = 12 * s;
                         const g = ctx.createLinearGradient(0, -pw / 2, 0, pw / 2);
                         g.addColorStop(0, '#ffffff');
                         g.addColorStop(1, '#dedad2');
                         ctx.fillStyle = g;
                         ctx.fill();
-                        ctx.shadowColor = 'transparent';
                         ctx.lineJoin = 'round';
                         ctx.save();
                         ctx.clip(); // a soft bevel just inside the rubber edge
@@ -1962,7 +2164,9 @@
                     ctx.fillStyle = g;
                     ctx.fill();
                     ctx.save();
-                    ctx.clip();
+                    // Keeps the patches inside the ball. Not needed (and slow) when the ball fills the screen.
+                    const fills = Math.hypot(Math.max(cx, W - cx), Math.max(cy, H - cy)) < r;
+                    if (!fills) ctx.clip();
                     ctx.rotate(spin);
                     const pentagon = (rad, rot) => {
                         ctx.beginPath();
@@ -2135,6 +2339,7 @@
                 return c;
             };
             const spring = {
+                detail: 0.75, // dozens of flowers move at once (see "detail" above)
                 init(durationSec) {
                     this.T = durationSec;
                     const s = H / 1080;
@@ -2164,14 +2369,19 @@
                             ...spot, img: spr.img, color: spr.color,
                             size: R * rand(0.9, 1.3), rot: rand(0, Math.PI * 2), phase: rand(0, Math.PI * 2),
                             leaves: Math.random() < 0.45, leafRot: rand(0, Math.PI * 2),
-                            pop: (Math.floor(i / per) / groups) * 0.34 + rand(0, 0.015),
+                            // A handful at a time, always in this order (it keeps the layer below cheap)
+                            pop: (Math.floor(i / per) / groups) * 0.34 + (i % per) * 0.002,
                             out: 1, blew: false,
                         };
                     });
-                    shuffle([...this.flowers.keys()]).forEach((idx, j) => {
-                        this.flowers[idx].out = HOLD_END + (Math.floor(j / per) / groups) * 0.26 + rand(0, 0.015);
+                    // The breeze takes them in the reverse order: the last to pop in goes first
+                    const n = this.flowers.length;
+                    this.flowers.forEach((f, i) => {
+                        const j = n - 1 - i;
+                        f.out = HOLD_END + (Math.floor(j / per) / groups) * 0.26 + (j % per) * 0.002;
                     });
                     this.petals = [];
+                    this.layer = makeLayer(this.layer);
                     this.butterflies = ['#ff9f1c', '#4cc9f0', '#f72585'].map((color, i) => ({
                         x0: -0.1 * W - i * 0.12 * W, y0: rand(0.2, 0.75) * H, speed: rand(0.38, 0.5) * W, // pixels per second
                         size: rand(40, 60) * s, color, phase: rand(0, Math.PI * 2),
@@ -2191,14 +2401,22 @@
                         ctx.fillRect(0, 0, W, H);
                         ctx.globalAlpha = 1;
                     }
+                    // Flowers that have finished popping in sit still until the breeze takes them, so
+                    // they're kept on a layer (drawn once) instead of being redrawn every frame
+                    const still = [];
+                    this.flowers.forEach((f, i) => { if ((p - f.pop) * T >= 0.3 && p <= f.out) still.push(i); });
+                    syncLayer(this.layer, still, (c, i) => { const f = this.flowers[i]; this.drawFlower(c, f, f.x, f.y, f.rot, f.size, 1); });
+                    ctx.drawImage(this.layer.c, 0, 0, W, H);
+                    // The ones popping in or blowing away
                     for (const f of this.flowers) {
                         const age = (p - f.pop) * T;  // seconds since it popped
                         const gone = (p - f.out) * T; // seconds since the breeze took it
                         if (age < 0 || gone > 0.45) continue;
+                        if (age >= 0.3 && gone <= 0) continue; // on the layer
                         const k = Math.min(age / 0.3, 1);
                         let x = f.x, y = f.y, a = 1;
                         let sc = EASE.outBack(k);
-                        let rot = f.rot - (1 - k) * 0.8 + Math.sin(t * 2 + f.phase) * 0.05;
+                        let rot = f.rot - (1 - k) * 0.8;
                         if (gone > 0) {
                             const e = EASE.in3(gone / 0.45);
                             x += e * 0.7 * W;
@@ -2216,20 +2434,7 @@
                                 }
                             }
                         }
-                        const size = f.size * sc;
-                        ctx.globalAlpha = a;
-                        if (f.leaves) {
-                            ctx.save();
-                            ctx.translate(x, y);
-                            ctx.rotate(f.leafRot + rot * 0.3);
-                            ctx.drawImage(this.leafImg, -size * 1.35, -size * 1.35, size * 2.7, size * 2.7);
-                            ctx.restore();
-                        }
-                        ctx.save();
-                        ctx.translate(x, y);
-                        ctx.rotate(rot);
-                        ctx.drawImage(f.img, -size, -size, size * 2, size * 2);
-                        ctx.restore();
+                        this.drawFlower(ctx, f, x, y, rot, f.size * sc, a);
                         // A little white ring as it pops
                         if (age < 0.3) {
                             ctx.globalAlpha = 0.6 * (1 - age / 0.3);
@@ -2259,6 +2464,23 @@
                     });
                     // Butterflies fluttering across
                     for (const b of this.butterflies) this.drawButterfly(b, t);
+                },
+                // One flower (with its leaves tucked behind, if it has them)
+                drawFlower(c, f, x, y, rot, size, alpha) {
+                    c.globalAlpha = alpha;
+                    if (f.leaves) {
+                        c.save();
+                        c.translate(x, y);
+                        c.rotate(f.leafRot + rot * 0.3);
+                        c.drawImage(this.leafImg, -size * 1.35, -size * 1.35, size * 2.7, size * 2.7);
+                        c.restore();
+                    }
+                    c.save();
+                    c.translate(x, y);
+                    c.rotate(rot);
+                    c.drawImage(f.img, -size, -size, size * 2, size * 2);
+                    c.restore();
+                    c.globalAlpha = 1;
                 },
                 drawButterfly(b, t) {
                     const x = b.x0 + b.speed * t, y = b.y0 + Math.sin(t * 2.2 + b.phase) * 0.06 * H;
@@ -2503,29 +2725,83 @@
                     this.text = String(opts.label || OVERLAYS.hottake.caption).toUpperCase();
                     fire.init(durationSec, opts); // the flames and embers come from Fire
                     document.fonts?.load('italic 700 120px "Barlow Condensed"');
+                    // Heat: a warm glow in from the edges, drawn once at a quarter size (it's soft)
+                    const q = 4;
+                    this.heat = this.heat || document.createElement('canvas');
+                    this.heat.width = Math.ceil(W / q);
+                    this.heat.height = Math.ceil(H / q);
+                    const hx = this.heat.getContext('2d');
+                    hx.scale(1 / q, 1 / q);
+                    const g = hx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, W * 0.7);
+                    g.addColorStop(0, 'rgba(255, 80, 0, 0)');
+                    g.addColorStop(1, 'rgba(255, 70, 0, 0.35)');
+                    hx.fillStyle = g;
+                    hx.fillRect(0, 0, W, H);
+                    this.sprites = null;
                 },
                 frame(dt, t) {
                     const s = H / 1080, layer = this.d.layer;
                     fire.frame(dt, t);
                     if (layer !== 'front') {
-                        // Heat: a warm glow pulsing in from the edges
-                        const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, W * 0.7);
-                        g.addColorStop(0, 'rgba(255, 80, 0, 0)');
-                        g.addColorStop(1, `rgba(255, 70, 0, ${0.35 * (0.8 + 0.2 * Math.sin(t * 5)) * Math.min(1, t / 0.4)})`);
-                        ctx.fillStyle = g;
-                        ctx.fillRect(0, 0, W, H);
+                        ctx.globalAlpha = (0.8 + 0.2 * Math.sin(t * 5)) * Math.min(1, t / 0.4); // it pulses
+                        ctx.drawImage(this.heat, 0, 0, W, H);
+                        ctx.globalAlpha = 1;
                     }
                     if (layer !== 'back') this.badge(t, s);
+                },
+                // The badge text, drawn once: its orange glow, and the letters (dark outline, white edge,
+                // flame colors). Drawn again only if the text, its size or the font changes.
+                badgeSprites(s) {
+                    const font = (px) => `italic 700 ${px}px "Barlow Condensed", Impact, sans-serif`;
+                    let size = 220 * s;
+                    ctx.font = font(size);
+                    let w = ctx.measureText(this.text).width;
+                    if (w > W * 0.78) { size *= W * 0.78 / w; w = W * 0.78; }
+                    const key = `${this.text}|${size}|${document.fonts?.check(font(size)) ?? true}`;
+                    if (this.sprites?.key === key) return this.sprites;
+                    const pad = 80 * s, TILT = -0.04; // the badge's slight tilt is drawn in, so it isn't turned every frame
+                    const make = () => Object.assign(document.createElement('canvas'), { width: Math.ceil(w + size * 0.3 + pad * 2), height: Math.ceil(size * 1.3 + w * 0.04 + pad * 2) });
+                    const glow = make(), text = make();
+                    const setup = (c) => {
+                        c.font = font(size);
+                        c.textAlign = 'center';
+                        c.textBaseline = 'middle';
+                        c.lineJoin = 'round';
+                    };
+                    const gx = glow.getContext('2d');
+                    setup(gx);
+                    gx.shadowColor = 'rgba(255, 90, 0, 0.9)';
+                    gx.shadowBlur = 40 * s;
+                    gx.shadowOffsetX = glow.width * 2; // only the soft glow lands on this canvas
+                    gx.lineWidth = 16 * s;
+                    gx.translate(glow.width / 2 - glow.width * 2, glow.height / 2);
+                    gx.rotate(TILT);
+                    gx.strokeText(this.text, 0, 0);
+                    const tx = text.getContext('2d');
+                    setup(tx);
+                    tx.translate(text.width / 2, text.height / 2);
+                    tx.rotate(TILT);
+                    tx.lineWidth = 16 * s;
+                    tx.strokeStyle = '#1a0500';
+                    tx.strokeText(this.text, 0, 0);
+                    tx.lineWidth = 7 * s;
+                    tx.strokeStyle = '#fff';
+                    tx.strokeText(this.text, 0, 0);
+                    const g = tx.createLinearGradient(0, -size * 0.45, 0, size * 0.45);
+                    g.addColorStop(0, '#fff3a0');
+                    g.addColorStop(0.35, '#ffc21a');
+                    g.addColorStop(0.7, '#ff5a0a');
+                    g.addColorStop(1, '#d4140b');
+                    tx.fillStyle = g;
+                    tx.fillText(this.text, 0, 0);
+                    this.sprites = { key, glow, text, w, size };
+                    return this.sprites;
                 },
                 // The badge: drops in big and hits at HIT with a shake, then the meter fills
                 badge(t, s) {
                     const IN = 0.25, HIT = 0.55;
                     if (t < IN) return;
-                    let size = 220 * s;
-                    const font = (px) => `italic 700 ${px}px "Barlow Condensed", Impact, sans-serif`;
-                    ctx.font = font(size);
-                    let w = ctx.measureText(this.text).width;
-                    if (w > W * 0.78) { size *= W * 0.78 / w; ctx.font = font(size); w = W * 0.78; }
+                    const { glow, text, w, size } = this.badgeSprites(s);
                     let k = 1 + 0.012 * Math.sin(t * 9), a = 1;
                     if (t < HIT) { const u = (t - IN) / (HIT - IN); k = 3 - 2 * EASE.in3(u); a = u; }
                     const since = t - HIT;
@@ -2533,28 +2809,12 @@
                     ctx.save();
                     ctx.translate(W / 2 + rand(-1, 1) * sh, H * 0.66 + rand(-1, 1) * sh);
                     ctx.scale(k, k);
-                    ctx.rotate(-0.04);
+                    // The flickering orange glow, then the letters (both already tilted)
+                    ctx.globalAlpha = Math.min(1, a) * (0.8 + 0.2 * Math.sin(t * 12));
+                    ctx.drawImage(glow, -glow.width / 2, -glow.height / 2);
                     ctx.globalAlpha = Math.min(1, a);
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.lineJoin = 'round';
-                    // Dark outline with a flickering orange glow, a white edge, then the flame-colored letters
-                    ctx.shadowColor = 'rgba(255, 90, 0, 0.9)';
-                    ctx.shadowBlur = 40 * s * (0.8 + 0.2 * Math.sin(t * 12));
-                    ctx.lineWidth = 16 * s;
-                    ctx.strokeStyle = '#1a0500';
-                    ctx.strokeText(this.text, 0, 0);
-                    ctx.shadowColor = 'transparent';
-                    ctx.lineWidth = 7 * s;
-                    ctx.strokeStyle = '#fff';
-                    ctx.strokeText(this.text, 0, 0);
-                    const g = ctx.createLinearGradient(0, -size * 0.45, 0, size * 0.45);
-                    g.addColorStop(0, '#fff3a0');
-                    g.addColorStop(0.35, '#ffc21a');
-                    g.addColorStop(0.7, '#ff5a0a');
-                    g.addColorStop(1, '#d4140b');
-                    ctx.fillStyle = g;
-                    ctx.fillText(this.text, 0, 0);
+                    ctx.drawImage(text, -text.width / 2, -text.height / 2);
+                    ctx.rotate(-0.04); // the meter tilts with it
                     // Heat meter under the text: fills yellow to red, then pulses at the top
                     const mw = Math.max(w * 0.8, 360 * s), mh = 26 * s, mx = -mw / 2, my = size * 0.55;
                     const fill = t < HIT ? 0 : EASE.out3(Math.min(1, (t - HIT) / 0.8));
@@ -2575,11 +2835,25 @@
                         fg.addColorStop(0, '#ffe14d');
                         fg.addColorStop(0.5, '#ff8a00');
                         fg.addColorStop(1, '#ff1a00');
+                        if (fill >= 1) {
+                            // Maxed out: a pulsing glow around the bar (two soft rings, cheaper than a blur)
+                            const pulse = 0.6 + 0.4 * Math.sin(t * 14);
+                            ctx.fillStyle = `rgba(255, 60, 0, ${0.25 * pulse})`;
+                            pill(mx - 8 * s, my - 8 * s, mw + 16 * s, mh + 16 * s);
+                            ctx.fill();
+                            ctx.fillStyle = `rgba(255, 60, 0, ${0.35 * pulse})`;
+                            pill(mx - 3 * s, my - 3 * s, mw + 6 * s, mh + 6 * s);
+                            ctx.fill();
+                            pill(mx, my, mw, mh);
+                            ctx.fillStyle = 'rgba(20, 8, 0, 0.8)';
+                            ctx.fill();
+                            ctx.lineWidth = 3 * s;
+                            ctx.strokeStyle = '#fff';
+                            ctx.stroke();
+                        }
                         ctx.fillStyle = fg;
-                        if (fill >= 1) { ctx.shadowColor = 'rgba(255, 60, 0, 0.9)'; ctx.shadowBlur = 24 * s * (0.6 + 0.4 * Math.sin(t * 14)); }
                         pill(mx + pad, my + pad, Math.max(mh - pad * 2, (mw - pad * 2) * fill), mh - pad * 2);
                         ctx.fill();
-                        ctx.shadowColor = 'transparent';
                     }
                     // Tick marks along the meter
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
@@ -2605,6 +2879,7 @@
                     this.stop();
                     effect = EFFECTS[name];
                     if (!effect) return;
+                    detail = (typeof effect.detail === 'function' ? effect.detail(opts) : effect.detail) || 1;
                     resize();
                     effect.init(durationSec, opts);
                     last = t0 = performance.now();
@@ -2748,7 +3023,8 @@
             ws.onopen = () => {
                 const el = $('controller-connection');
                 if (el) { el.className = "text-green-400 font-bold"; el.textContent = "OPEN"; }
-                if (isController) askCustomList(false); // picks up the current custom image
+                if (isController) { askCustomList(false); broadcastProjector(); } // picks up the current custom image
+                if (isProjector) ws.send(JSON.stringify({ mode: 'projectorHello' }));
             };
             // The display shows graphics. The control panel only listens for the server's
             // replies (the custom images, and saved rundowns).
@@ -2756,7 +3032,9 @@
                 let data;
                 try { data = JSON.parse(e.data); } catch { return; } // not ours
                 if (!data || typeof data !== 'object') return;
-                if (!isController) showDisplay(data);
+                if (isProjector) projectorMessage(data);
+                else if (!isController) showDisplay(data);
+                else if (data.mode === 'projectorHello') broadcastProjector(); // a projector just opened: send it the show
                 else if (data.mode === 'customFiles') gotCustomList(data.files || []);
                 else if (replyWaiters[data.mode]) replyWaiters[data.mode](data);
             };
@@ -3325,13 +3603,14 @@
         const VIEW_KEY = 'fx_block_view';     // while Set Order is on: 'ALL' or the one block shown
         const DEFAULT_BLOCKS = ['A', 'B', 'C', 'D', 'E'];
         const UNSORTED = 'unsorted'; // ＋ RUNDOWN puts graphics here, at the bottom, until they're dragged into a block
-        // Cues: notes and placeholders for things that aren't graphics. Numbered like graphics
-        // (A1-CLIP, A2-CLIP, A1-SOT...), except notes.
+        // Cues: notes and placeholders for things that aren't graphics, and scripts for the projector.
+        // Numbered like graphics (A1-CLIP, A2-CLIP, A1-SOT, A1-SCRIPT...), except notes.
         const CUES = {
             note: { label: 'Note', icon: 'note', code: '',     hint: 'Note:' },
             clip: { label: 'Clip', icon: 'clip', code: 'CLIP', hint: 'Which clip? (optional)' },
             sot:  { label: 'SOT',  icon: 'sot',  code: 'SOT',  hint: 'Which SOT? (optional)' },
             pic:  { label: 'PIC',  icon: 'pic',  code: 'PIC',  hint: 'Which picture? (optional)' },
+            script: { label: 'Script', icon: 'script', code: 'SCRIPT', hint: 'Script (shown on the projector):' },
         };
         const newSid = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
         let lastTakenSid = localStorage.getItem(LAST_PLAYED_KEY); // gets the ★
@@ -3402,6 +3681,7 @@
                 const layer = Object.keys(liveByLayer).find(l => liveByLayer[l] === c.dataset.sid);
                 c.classList.toggle('show-live', !!layer);
                 c.classList.toggle('show-last', c.dataset.sid === lastTakenSid);
+                c.classList.toggle('show-current', showLocked() && c.dataset.sid === showState().current);
                 let off = c.querySelector('.show-offair');
                 if (layer && !off) {
                     off = document.createElement('button');
@@ -3421,6 +3701,11 @@
         // A graphic left the screen on this layer (time up, taken off, replaced, or cleared)
         const clearLive = (layer) => {
             clearTimeout(liveTimers[layer]);
+            if (liveByLayer[layer]) { // for the show log, and the projector's "On air"
+                const list = loadShow(), d = list.find(x => x.sid === liveByLayer[layer]);
+                if (d) logEvent('off', d, list, { layer });
+                broadcastProjector();
+            }
             liveByLayer[layer] = null;
             if (!liveByLayer.l3 && !liveByLayer.overlay) { clearInterval(liveTicker); liveTicker = null; }
             updateLiveMarks();
@@ -3445,7 +3730,8 @@
             if (!liveTicker) liveTicker = setInterval(updateLiveMarks, 250);
             lastTakenSid = data.sid;
             localStorage.setItem(LAST_PLAYED_KEY, data.sid);
-            updateLiveMarks();
+            logEvent('take', data, loadShow(), { layer });
+            setCurrent(data.sid); // what's taken becomes the current item
         };
 
         // While Set Order is on: which block is shown ('ALL' if the saved one is gone or empty)
@@ -3532,8 +3818,14 @@
             }
             const text = document.createElement('span');
             text.className = 'cue-text';
-            text.textContent = data.text || (data.cue === 'note' ? '' : cue.label);
+            text.textContent = data.cue === 'script' ? scriptTitle(data) : data.text || (data.cue === 'note' ? '' : cue.label);
             row.append(text);
+            // During the show: tap a cue (not a note) to make it the current item
+            if (locked && data.cue !== 'note') {
+                row.classList.add('show-tappable');
+                row.title = 'Make this the current item';
+                row.onclick = () => setCurrent(data.sid);
+            }
             if (!locked) {
                 const handle = document.createElement('div');
                 handle.className = 'show-handle';
@@ -3606,6 +3898,9 @@
             $('show-hint').classList.toggle('hidden', locked || !list.length);
             $('rundown-files-row').classList.toggle('hidden', locked);
             $('cue-row').classList.toggle('hidden', locked);
+            $('show-controls').classList.toggle('hidden', !locked);
+            if (!locked) $('msg-panel').classList.add('hidden');
+            renderTotals(list, blocks, locked);
             renderBlockChips(blocks, locked, list);
             updateGsAlert(list);
             box.innerHTML = '';
@@ -3627,7 +3922,29 @@
                 count.textContent = items.length || '';
                 const line = document.createElement('span');
                 line.className = 'line';
-                head.append(title, count, line);
+                head.append(title, count);
+                // Planned length (tap to set while editing) and the graphics' total; during the show the
+                // current block shows its time so far against the plan
+                const planned = loadBlockLengths()[block] || 0;
+                const gfx = items.filter(d => !d.cue && d.block !== UNSORTED).reduce((sum, d) => sum + graphicSeconds(d), 0);
+                const time = document.createElement(locked ? 'span' : 'button');
+                time.className = `block-time${planned ? '' : ' unset'}`;
+                time.dataset.blockTime = block;
+                time.textContent = planned ? clock(planned) : locked ? '' : 'Set time';
+                if (!locked) {
+                    time.type = 'button';
+                    time.title = `Planned length of block ${block}`;
+                    time.onclick = () => setBlockLength(block);
+                }
+                head.append(time);
+                if (gfx && !locked) {
+                    const g = document.createElement('span');
+                    g.className = 'block-gfx';
+                    g.title = 'Total time of the graphics in this block';
+                    g.textContent = `gfx ${clock(gfx)}`;
+                    head.append(g);
+                }
+                head.append(line);
                 if (!locked && !items.length && bi === blocks.length - 1 && blocks.length > 1) {
                     const del = document.createElement('button');
                     del.type = 'button';
@@ -3689,6 +4006,9 @@
                 box.append(none);
             }
             updateLiveMarks();
+            updateMessageNow();
+            startShowTicker(locked);
+            broadcastProjector();
         };
 
         // Drag to reorder, within a block or into another one: works with touch, pen and mouse.
@@ -3746,6 +4066,15 @@
             sel.append(new Option('Unsorted', UNSORTED));
             sel.value = value;
         };
+        // Scripts get a bigger text box (up to 20,000 characters) and a button to load a .txt file
+        const scriptFields = (on) => {
+            $('edit-load-txt').classList.toggle('hidden', !on);
+            $('edit-para').rows = on ? 10 : 4;
+            $('edit-para').maxLength = on ? 20000 : 400;
+        };
+        // A script's first line, as its name in the rundown
+        const scriptTitle = (d) => (d.text || '').split('\n').map(l => l.trim()).find(Boolean) || 'Script';
+
         // Shows only the dialog fields that fit
         const showEditFields = ({ name = false, para = false, duration = false, gs = false } = {}) => {
             $('edit-name-wrap').classList.toggle('hidden', !name);
@@ -3761,6 +4090,7 @@
             editingSid = null;
             newCue = type;
             $('edit-heading').textContent = `Add a ${CUES[type].label} cue`;
+            scriptFields(type === 'script');
             $('edit-socials-wrap').innerHTML = '';
             $('edit-socials-wrap').classList.add('hidden');
             showEditFields({ para: true });
@@ -3780,6 +4110,7 @@
             $('edit-heading').textContent = 'Edit for this rundown';
             $('edit-socials-wrap').innerHTML = '';
             $('edit-socials-wrap').classList.add('hidden');
+            scriptFields(item.cue === 'script');
             if (item.cue) {
                 showEditFields({ para: true });
                 $('edit-para-label').textContent = (CUES[item.cue] || CUES.note).hint;
@@ -3821,6 +4152,7 @@
                 if (!saving) return;
                 const text = $('edit-para').value.trim();
                 if (type === 'note' && !text) { flash('Type the note first', true); return; }
+                if (type === 'script' && !text) { flash('Type or load the script first', true); return; }
                 const item = { cue: type, ...(text && { text }), block: $('edit-block').value, sid: newSid() };
                 list.push(item);
                 saveShow(list);
@@ -3834,7 +4166,7 @@
             if (item.cue) {
                 const text = $('edit-para').value.trim();
                 if (text) item.text = text;
-                else if (item.cue !== 'note') delete item.text; // a note keeps its text
+                else if (item.cue !== 'note' && item.cue !== 'script') delete item.text; // a note or script keeps its text
             } else if (cfg?.caption) {
                 item.label = $('edit-para').value.trim(); // blank uses the default text
             } else if (cfg?.social) {
@@ -3888,6 +4220,7 @@
             name,
             saved: new Date().toISOString(),
             blocks: loadBlocks(),
+            blockLengths: loadBlockLengths(),
             items: loadShow().map(({ sid, ...item }) => item),
         });
         const downloadJson = (name, data) => {
@@ -3988,6 +4321,7 @@
             localStorage.setItem(ADD_BLOCK_KEY, blocks[0]);
             localStorage.setItem(RUNDOWN_NAME_KEY, cleanRundownName(name) || name);
             saveBlocks(blocks);
+            saveBlockLengths(data.blockLengths && typeof data.blockLengths === 'object' ? data.blockLengths : {});
             saveShow(show);
             flash(`Imported: ${name}`, skipped > 0, `${show.length} item${show.length === 1 ? '' : 's'}${skipped ? `, ${skipped} skipped` : ''}`);
             return true;
@@ -4180,15 +4514,408 @@
         };
 
 
+
         /* =========================================================
-           18. STARTUP
+           18. CONTROLLER: RUNNING THE SHOW
+           While Set Order is on:
+           - The current item: whatever was taken last, or a cue tapped (◀ ▶ step through without
+             taking anything). Graphics can be on air at the same time (an L3 over a SOT).
+           - Block times: each block has a planned length (set while editing); the current block
+             shows its time so far against it. The show clock starts when Set Order is first turned on.
+           - Messages for the projector (presets or typed), which stay up until replaced or cleared.
+           - A log of what ran and for how long, saved by Generate Log.
+           All of it is sent to the projector (fx_wizard.html#projector) as it changes.
+           ========================================================= */
+        const BLOCK_LENGTHS_KEY = 'fx_block_lengths'; // planned seconds per block
+        const SHOW_STATE_KEY = 'fx_show_state';       // { current, start, blockStarts, message }
+        const SHOW_LOG_KEY = 'fx_show_log';
+        const LOG_LIMIT = 5000;
+
+        const readJson = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
+        const loadBlockLengths = () => readJson(BLOCK_LENGTHS_KEY, {});
+        const saveBlockLengths = (lengths) => localStorage.setItem(BLOCK_LENGTHS_KEY, JSON.stringify(lengths));
+        const showState = () => ({ current: null, start: null, blockStarts: {}, message: '', ...readJson(SHOW_STATE_KEY, {}) });
+        const saveShowState = (st) => localStorage.setItem(SHOW_STATE_KEY, JSON.stringify(st));
+        const loadLog = () => readJson(SHOW_LOG_KEY, []);
+
+        // Times as 4:05 or 1:02:30
+        const clock = (secs) => {
+            const t = Math.max(0, Math.round(secs)), h = Math.floor(t / 3600), m = Math.floor(t / 60) % 60, sec = String(t % 60).padStart(2, '0');
+            return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
+        };
+        // "6:00", "6", "1:02:30" -> seconds (null if it can't be read)
+        const parseClock = (text) => {
+            const parts = String(text).trim().split(':').map(Number);
+            if (!parts.length || parts.some(n => !Number.isFinite(n) || n < 0)) return null;
+            return parts.length === 1 ? parts[0] * 60 : parts.reduce((total, n) => total * 60 + n, 0);
+        };
+
+        // The rundown in show order: every block, without notes or Unsorted
+        const showFlow = (list = loadShow(), blocks = loadBlocks()) => blocks.flatMap(b => list.filter(d => d.block === b && d.cue !== 'note'));
+        // An item's name, as the rundown and projector show it
+        const itemLabel = (d) => (d.cue ? (d.cue === 'script' ? scriptTitle(d) : d.text || CUES[d.cue]?.label || 'Cue')
+            : d.label || OVERLAYS[d.overlay || 'l3Large']?.label || 'Graphic');
+
+        // ---------- The log ----------
+        const logEvent = (kind, d, list = loadShow(), extra = {}) => {
+            const log = loadLog();
+            log.push({
+                t: Date.now(), kind, ...(d && {
+                    sid: d.sid, code: itemCode(d, list), label: itemLabel(d), type: itemType(d), block: d.block,
+                    cue: d.cue || null, planned: d.cue ? 0 : graphicSeconds(d),
+                }), ...extra,
+            });
+            try { localStorage.setItem(SHOW_LOG_KEY, JSON.stringify(log.slice(-LOG_LIMIT))); } catch { /* storage full: the log stops growing */ }
+        };
+
+        // ---------- The current item ----------
+        // The show starts the first time Set Order is turned on (and again after a fresh log)
+        const startShow = () => {
+            const st = showState();
+            if (st.start) return;
+            st.start = Date.now();
+            saveShowState(st);
+            logEvent('start', null);
+        };
+        const setCurrent = (sid) => {
+            const list = loadShow(), d = list.find(x => x.sid === sid);
+            if (!d || d.cue === 'note') return;
+            const st = showState(), now = Date.now();
+            if (!st.start) st.start = now;
+            if (!st.blockStarts[d.block]) { // the show has reached this block
+                st.blockStarts[d.block] = now;
+                saveShowState(st);
+                logEvent('block', d, list);
+            }
+            if (st.current !== sid) {
+                st.current = sid;
+                saveShowState(st);
+                logEvent('current', d, list);
+            }
+            updateLiveMarks();
+            updateShowClock();
+            broadcastProjector();
+        };
+        // ◀ ▶: move the current item without taking anything
+        const stepCurrent = (dir) => {
+            const flow = showFlow();
+            if (!flow.length) return;
+            const at = flow.findIndex(d => d.sid === showState().current);
+            const next = flow[Math.min(flow.length - 1, Math.max(0, at < 0 ? 0 : at + dir))];
+            setCurrent(next.sid);
+            document.querySelector(`.show-card[data-sid="${next.sid}"]`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        };
+
+        // ---------- Block times ----------
+        const setBlockLength = (block) => {
+            const lengths = loadBlockLengths();
+            const answer = prompt(`Planned length for block ${block} (minutes:seconds, like 6:00). Leave empty for none.`, lengths[block] ? clock(lengths[block]) : '');
+            if (answer === null) return;
+            const secs = answer.trim() ? parseClock(answer) : 0;
+            if (secs === null) { flash('Use minutes:seconds, like 6:00', true); return; }
+            if (secs) lengths[block] = secs; else delete lengths[block];
+            saveBlockLengths(lengths);
+            renderShow();
+        };
+        // The line above the blocks: planned show length and the graphics' total (and the show so far)
+        const renderTotals = (list, blocks, locked) => {
+            const lengths = loadBlockLengths();
+            const planned = blocks.reduce((sum, b) => sum + (lengths[b] || 0), 0);
+            const gfx = list.filter(d => !d.cue && d.block !== UNSORTED).reduce((sum, d) => sum + graphicSeconds(d), 0);
+            const parts = [];
+            if (planned) parts.push(`<b>Show</b> ${clock(planned)} planned`);
+            if (gfx) parts.push(`graphics ${clock(gfx)}`);
+            $('show-totals').innerHTML = parts.join(' · ');
+            $('show-totals').classList.toggle('hidden', !parts.length || !list.length);
+        };
+        // While the show runs: the clock in the controls, and the current block's time (red when over)
+        let showTicker = null;
+        const startShowTicker = (on) => {
+            clearInterval(showTicker);
+            showTicker = on ? setInterval(updateShowClock, 1000) : null;
+            updateShowClock();
+        };
+        const updateShowClock = () => {
+            const st = showState(), now = Date.now(), lengths = loadBlockLengths();
+            const planned = loadBlocks().reduce((sum, b) => sum + (lengths[b] || 0), 0);
+            $('show-clock').textContent = st.start ? `${clock((now - st.start) / 1000)}${planned ? ` / ${clock(planned)}` : ''}` : '';
+            const cur = loadShow().find(d => d.sid === st.current);
+            document.querySelectorAll('[data-block-time]').forEach(el => {
+                const b = el.dataset.blockTime, len = lengths[b] || 0;
+                const running = showLocked() && cur && cur.block === b && st.blockStarts[b];
+                const secs = running ? (now - st.blockStarts[b]) / 1000 : 0;
+                el.textContent = running ? `${clock(secs)}${len ? ` / ${clock(len)}` : ''}` : len ? clock(len) : el.tagName === 'BUTTON' ? 'Set time' : '';
+                el.classList.toggle('running', !!running);
+                el.classList.toggle('over', !!running && len > 0 && secs > len);
+            });
+        };
+
+        // ---------- Messages for the projector ----------
+        const toggleMsgPanel = () => {
+            const open = $('msg-panel').classList.toggle('hidden') === false;
+            $('msg-btn').classList.toggle('on', open);
+            if (open) $('msg-input').focus();
+        };
+        const sendMessage = (text) => {
+            text = String(text || '').trim().slice(0, 80);
+            if (!sendPayload({ mode: 'message', text })) return;
+            const st = showState();
+            st.message = text;
+            saveShowState(st);
+            logEvent('message', null, undefined, { text: text || '(cleared)' });
+            $('msg-input').value = '';
+            $('msg-panel').classList.add('hidden');
+            $('msg-btn').classList.remove('on');
+            updateMessageNow();
+            broadcastProjector();
+            flash(text ? 'Message sent' : 'Message cleared', false, text);
+        };
+        const updateMessageNow = () => {
+            const text = showState().message;
+            $('msg-now').classList.toggle('hidden', !text || !showLocked());
+            $('msg-now-text').textContent = text;
+        };
+
+        // ---------- Tell the projector ----------
+        // Times are sent as "so far" (not clock times), so a projector on another computer stays right
+        let projectorTimer = null;
+        const broadcastProjector = () => {
+            clearTimeout(projectorTimer);
+            projectorTimer = setTimeout(sendProjectorState, 60);
+        };
+        const sendProjectorState = () => {
+            if (!isController || !ws || ws.readyState !== WebSocket.OPEN) return;
+            const list = loadShow(), blocks = loadBlocks(), lengths = loadBlockLengths(), st = showState(), now = Date.now();
+            const flow = showFlow(list, blocks), cur = list.find(d => d.sid === st.current);
+            ws.send(JSON.stringify({
+                mode: 'projector',
+                running: showLocked(),
+                items: flow.map(d => ({
+                    sid: d.sid, block: d.block, code: itemCode(d, list), type: itemType(d), kind: d.cue || 'graphic',
+                    label: itemLabel(d), ...(d.cue === 'script' && { script: d.text || '' }),
+                })),
+                blocks: blocks.filter(b => flow.some(d => d.block === b)).map(b => ({ name: b, planned: lengths[b] || 0 })),
+                current: cur ? cur.sid : null,
+                live: Object.values(liveByLayer).filter(Boolean),
+                blockSoFar: cur && st.blockStarts[cur.block] ? (now - st.blockStarts[cur.block]) / 1000 : null,
+                showSoFar: st.start ? (now - st.start) / 1000 : null,
+                message: st.message || '',
+            }));
+        };
+
+        // ---------- Generate Log ----------
+        // A spreadsheet (CSV) of what ran: every graphic (taken to off), every cue (while it was current),
+        // each director message, then each block's planned and actual time. Saved in the "logs" folder
+        // through the server (or downloaded with an older server).
+        const csvCell = (v) => { const t = String(v ?? ''); return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
+        const timeOfDay = (t) => new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+        const buildLogCsv = (log, end = Date.now()) => {
+            const rows = [];
+            const open = {}; // graphic on air, by layer
+            let cueRow = null; // the cue that's current
+            const endCue = (t) => { if (cueRow) { cueRow.end = t; cueRow = null; } };
+            log.forEach(e => {
+                if (e.kind === 'take') {
+                    if (open[e.layer]) open[e.layer].end ??= e.t;
+                    open[e.layer] = { start: e.t, end: null, planned: e.planned, type: e.type, code: e.code, item: e.label, block: e.block, sid: e.sid };
+                    rows.push(open[e.layer]);
+                } else if (e.kind === 'off') {
+                    const row = open[e.layer];
+                    if (row && row.sid === e.sid) { row.end = e.t; delete open[e.layer]; }
+                } else if (e.kind === 'current') {
+                    endCue(e.t);
+                    if (e.cue) { cueRow = { start: e.t, end: null, planned: '', type: e.type, code: e.code, item: e.label, block: e.block }; rows.push(cueRow); }
+                } else if (e.kind === 'message') {
+                    rows.push({ start: e.t, end: e.t, type: 'MESSAGE', code: '', item: e.text, block: '', message: true });
+                } else if (e.kind === 'start') {
+                    rows.push({ start: e.t, end: e.t, type: 'SHOW', code: '', item: 'Show started', block: '', message: true });
+                }
+            });
+            const lines = [['Started', 'Ended', 'Ran', 'Planned', 'Type', 'Code', 'Item', 'Block'].join(',')];
+            rows.forEach(r => {
+                const ended = r.end ?? end;
+                lines.push([timeOfDay(r.start), r.message ? '' : timeOfDay(ended) + (r.end === null ? ' (still going)' : ''),
+                    r.message ? '' : clock((ended - r.start) / 1000), r.planned ? clock(r.planned) : '',
+                    r.type, r.code, r.item, r.block].map(csvCell).join(','));
+            });
+            // Blocks: from when the show reached each one to when it reached the next (or the end)
+            const blocks = log.filter(e => e.kind === 'block');
+            if (blocks.length) {
+                const lengths = loadBlockLengths();
+                lines.push('', ['Block', 'Started', 'Ran', 'Planned', 'Over / under'].join(','));
+                blocks.forEach((b, i) => {
+                    const ran = ((blocks[i + 1]?.t ?? end) - b.t) / 1000, planned = lengths[b.block] || 0;
+                    const diff = planned ? `${ran > planned ? '+' : '-'}${clock(Math.abs(ran - planned))}` : '';
+                    lines.push([b.block, timeOfDay(b.t), clock(ran), planned ? clock(planned) : '', diff].map(csvCell).join(','));
+                });
+            }
+            return lines.join('\r\n');
+        };
+        const generateLog = async () => {
+            const log = loadLog();
+            if (!log.some(e => e.kind !== 'start')) { flash('Nothing to log yet', true); return; }
+            const now = new Date();
+            const stamp = `${now.toISOString().slice(0, 10)} ${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}`;
+            const show = localStorage.getItem(RUNDOWN_NAME_KEY);
+            const name = cleanRundownName(`Log ${stamp}${show ? ` ${show}` : ''}`);
+            const csv = buildLogCsv(log);
+            const reply = await serverRequest({ mode: 'logSave', name, csv }, 'logSaved');
+            if (reply?.ok) flash('Log saved', false, `logs/${reply.name}.csv`);
+            else {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv' }));
+                a.download = `${name}.csv`;
+                document.body.append(a);
+                a.click();
+                a.remove();
+                flash(`Downloaded ${name}.csv`, true, reply?.error || 'the server can\'t save logs: move it into the logs folder');
+            }
+            if (confirm('Start a fresh log and show clock for the next show?')) {
+                localStorage.removeItem(SHOW_LOG_KEY);
+                const st = showState();
+                saveShowState({ current: null, start: null, blockStarts: {}, message: st.message });
+                if (showLocked()) startShow();
+                renderShow();
+            }
+        };
+
+        // Tapping the tiny logo reloads the panel (asks first during the show; nothing on screen changes)
+        const reloadPanel = () => {
+            if (showLocked() && !confirm('Reload the panel? Graphics on screen stay up, and the rundown and log are kept.')) return;
+            location.reload();
+        };
+
+
+        /* =========================================================
+           19. PROJECTOR (fx_wizard.html#projector)
+           Shows what the control panel sends: the director's message, which block the show is in
+           and its time, the rundown (previous, current and next marked, following along), what's
+           on air, and the current script, sized to fit.
+           ========================================================= */
+        const PJ = { state: null, at: 0, current: null, message: null };
+        const projectorMessage = (data) => {
+            if (data.mode === 'projector') {
+                PJ.state = data;
+                PJ.at = Date.now();
+                renderProjector();
+            } else if (data.mode === 'message') {
+                if (PJ.state) PJ.state.message = data.text;
+                showProjectorMessage(data.text || '');
+            }
+        };
+        const showProjectorMessage = (text) => {
+            if (text === PJ.message) return;
+            PJ.message = text;
+            const bar = $('pj-message');
+            $('pj-message-text').textContent = text || 'No messages';
+            bar.classList.toggle('empty', !text);
+            bar.classList.remove('flash');
+            void bar.offsetWidth; // restarts the flash
+            if (text) bar.classList.add('flash');
+        };
+        const pjRow = (it, cls, tag) => {
+            const row = document.createElement('div');
+            row.className = `pj-row ${cls}`;
+            row.dataset.sid = it.sid;
+            row.innerHTML = '<span class="pj-tag"></span><span class="pj-code"></span><span class="pj-icon"></span><span class="pj-text"></span>';
+            row.querySelector('.pj-tag').textContent = tag || '';
+            row.querySelector('.pj-code').textContent = it.code;
+            row.querySelector('.pj-icon').innerHTML = icon(CUES[it.kind]?.icon || (it.type === 'L3' ? 'l3' : 'layers'));
+            row.querySelector('.pj-text').textContent = it.label;
+            return row;
+        };
+        // Shrinks the script's text until it fits its box
+        const fitScript = () => {
+            const box = $('pj-script'), el = $('pj-script-text');
+            if (box.classList.contains('hidden')) return;
+            let size = 5.2; // vh
+            el.style.fontSize = `${size}vh`;
+            while (el.scrollHeight > box.clientHeight && size > 1.6) {
+                size -= 0.2;
+                el.style.fontSize = `${size}vh`;
+            }
+        };
+        const renderProjector = () => {
+            const st = PJ.state;
+            if (!st) return;
+            showProjectorMessage(st.message || '');
+            const items = st.items, at = items.findIndex(it => it.sid === st.current);
+            const cur = items[at], prev = at > 0 ? items[at - 1] : null, next = at >= 0 ? items[at + 1] : items[0];
+            // The rundown, block by block
+            const list = $('pj-rundown');
+            list.innerHTML = '';
+            if (!items.length) list.innerHTML = '<p class="pj-empty">The rundown is empty.</p>';
+            st.blocks.forEach(b => {
+                const head = document.createElement('div');
+                head.className = `pj-block-head${cur && cur.block === b.name ? ' current' : ''}`;
+                head.textContent = `Block ${b.name}${b.planned ? ` · ${clock(b.planned)}` : ''}`;
+                list.append(head);
+                items.forEach((it, i) => {
+                    if (it.block !== b.name) return;
+                    const live = st.live.includes(it.sid);
+                    const cls = [i === at ? 'current' : '', i === at - 1 ? 'prev' : '', it === next ? 'next' : '', at >= 0 && i < at ? 'done' : '', live ? 'live' : ''].join(' ');
+                    list.append(pjRow(it, cls, i === at ? 'NOW' : it === next ? 'NEXT' : i === at - 1 ? 'PREV' : live ? 'ON AIR' : ''));
+                });
+            });
+            // Follow the show: keep the current item in view
+            if (st.current !== PJ.current) {
+                PJ.current = st.current;
+                list.querySelector('.pj-row.current')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }
+            // Side: now (with its script), next, and what's on air
+            $('pj-now').textContent = cur ? `${cur.code}  ${cur.label}` : st.running ? 'Waiting for the first item' : 'The show hasn\'t started';
+            $('pj-next').textContent = next ? `${next.code}  ${next.label}` : '—';
+            const script = cur?.kind === 'script';
+            $('pj-script').classList.toggle('hidden', !script);
+            $('pj-script-text').textContent = script ? cur.script : '';
+            const onAir = items.filter(it => st.live.includes(it.sid));
+            $('pj-onair-wrap').classList.toggle('hidden', !onAir.length);
+            $('pj-onair').innerHTML = '';
+            onAir.forEach(it => {
+                const chip = document.createElement('span');
+                chip.className = 'pj-chip';
+                chip.textContent = `${it.code}  ${it.label}`;
+                $('pj-onair').append(chip);
+            });
+            if (prev && !cur) $('pj-now').textContent = '—';
+            fitScript();
+            tickProjector();
+        };
+        // The block and show times keep counting between messages
+        const tickProjector = () => {
+            const st = PJ.state;
+            if (!st) return;
+            const since = (Date.now() - PJ.at) / 1000;
+            const cur = st.items.find(it => it.sid === st.current);
+            const block = cur && st.blocks.find(b => b.name === cur.block);
+            $('pj-block').textContent = cur ? `Block ${cur.block}` : st.running ? 'Ready' : 'Not running';
+            const soFar = st.running && st.blockSoFar !== null ? st.blockSoFar + since : null;
+            $('pj-block-time').textContent = soFar === null ? '' : `${clock(soFar)}${block?.planned ? ` / ${clock(block.planned)}` : ''}`;
+            $('pj-block-time').classList.toggle('over', soFar !== null && !!block?.planned && soFar > block.planned);
+            const planned = st.blocks.reduce((sum, b) => sum + b.planned, 0);
+            const show = st.running && st.showSoFar !== null ? st.showSoFar + since : null;
+            $('pj-show-time').textContent = show === null ? '' : `Show ${clock(show)}${planned ? ` / ${clock(planned)}` : ''}`;
+            $('pj-show-time').classList.toggle('over', show !== null && planned > 0 && show > planned);
+        };
+
+        /* =========================================================
+           20. STARTUP
            Opens the display if the address ends in #display (or the
            underlay for #underlay), otherwise opens the controller.
            ========================================================= */
         const initializeView = () => {
             const hash = window.location.hash;
             document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = icon(el.dataset.icon); });
-            if (hash === '#display' || hash === '#underlay') {
+            if (hash === '#projector') {
+                isProjector = true;
+                document.documentElement.classList.add('projector');
+                $('controller-status').style.display = 'none';
+                $('toggle-bar').style.display = 'none';
+                $('projector-view').classList.remove('hidden');
+                showProjectorMessage('');
+                setInterval(tickProjector, 500);
+                window.addEventListener('resize', fitScript);
+            } else if (hash === '#display' || hash === '#underlay') {
                 isUnderlay = hash === '#underlay';
                 document.body.style.backgroundColor = 'transparent';
                 $('controller-status').style.display = 'none';
@@ -4239,6 +4966,15 @@
                     tag.textContent = ` · ${formatTime(Math.round(len * 10) / 10)}`;
                     document.querySelector(`label[for="${r.id}"]`).append(tag);
                 });
+                // Loading a script from a .txt file into the cue dialog
+                $('edit-txt-file').addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    e.target.value = '';
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = () => { $('edit-para').value = String(reader.result).slice(0, 20000); };
+                    reader.readAsText(file);
+                });
                 // Importing a rundown from a file
                 $('rundown-pick').addEventListener('click', () => $('rundown-file').click());
                 $('rundown-file').addEventListener('change', (e) => {
@@ -4248,6 +4984,7 @@
                 // Podcast Rundown
                 $('show-lock').addEventListener('change', (e) => {
                     localStorage.setItem(SHOW_LOCK_KEY, e.target.checked ? '1' : '0');
+                    if (e.target.checked) startShow();
                     renderShow();
                     const unsorted = loadShow().filter(d => d.block === UNSORTED).length;
                     if (e.target.checked && unsorted) flash(`${unsorted} unsorted item${unsorted === 1 ? ' isn\'t' : 's aren\'t'} in the show`, true, 'turn off Set Order to drag them into a block');

@@ -15,8 +15,10 @@ const path = require('path');
 // The folders next to this file:
 //   custom    the control panel asks what images are in it
 //   rundowns  saved Podcast Rundowns (one .json file each), saved and opened from the control panel
+//   logs      show logs (one .csv file each), from Generate Log in the control panel
 const CUSTOM_DIR = path.join(__dirname, 'custom');
 const RUNDOWN_DIR = path.join(__dirname, 'rundowns');
+const LOG_DIR = path.join(__dirname, 'logs');
 function customImages() {
     try {
         return fs.readdirSync(CUSTOM_DIR)
@@ -60,6 +62,17 @@ function answerRequest(request) {
             return { mode: 'rundownSaved', ok: true, name };
         } catch (err) {
             return { mode: 'rundownSaved', ok: false, error: err.message };
+        }
+    }
+    if (request.mode === 'logSave') {
+        const name = rundownName(request.name);
+        if (!name || typeof request.csv !== 'string') return { mode: 'logSaved', ok: false, error: 'Needs a name and a log' };
+        try {
+            fs.mkdirSync(LOG_DIR, { recursive: true });
+            fs.writeFileSync(path.join(LOG_DIR, name + '.csv'), '\ufeff' + request.csv); // the mark helps Excel read it
+            return { mode: 'logSaved', ok: true, name };
+        } catch (err) {
+            return { mode: 'logSaved', ok: false, error: err.message };
         }
     }
     if (request.mode === 'rundownLoad') {

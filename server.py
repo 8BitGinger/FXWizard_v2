@@ -11,12 +11,14 @@ clients = set()
 # The folders next to this script:
 #   custom    the control panel asks what images are in it
 #   rundowns  saved Podcast Rundowns (one .json file each), saved and opened from the control panel
+#   logs      show logs (one .csv file each), from Generate Log in the control panel
 try:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 except NameError:
     BASE_DIR = obs.script_path()
 CUSTOM_DIR = os.path.join(BASE_DIR, "custom")
 RUNDOWN_DIR = os.path.join(BASE_DIR, "rundowns")
+LOG_DIR = os.path.join(BASE_DIR, "logs")
 IMAGE_TYPES = (".png", ".jpg", ".jpeg", ".gif")
 
 def custom_images():
@@ -65,6 +67,17 @@ def answer_request(message):
         except OSError as e:
             return {"mode": "rundownSaved", "ok": False, "error": str(e)}
         return {"mode": "rundownSaved", "ok": True, "name": name}
+    if mode == "logSave":
+        name = rundown_name(request.get("name"))
+        if not name or not isinstance(request.get("csv"), str):
+            return {"mode": "logSaved", "ok": False, "error": "Needs a name and a log"}
+        try:
+            os.makedirs(LOG_DIR, exist_ok=True)
+            with open(os.path.join(LOG_DIR, name + ".csv"), "w", encoding="utf-8-sig", newline="") as f:
+                f.write(request["csv"])
+        except OSError as e:
+            return {"mode": "logSaved", "ok": False, "error": str(e)}
+        return {"mode": "logSaved", "ok": True, "name": name}
     if mode == "rundownLoad":
         name = rundown_name(request.get("name"))
         try:
