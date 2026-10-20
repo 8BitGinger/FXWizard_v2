@@ -23,6 +23,7 @@
   - [Running a show](#running-a-show)
   - [Saving rundowns](#saving-rundowns)
   - [Running the show](#running-the-show)
+  - [Show timing](#show-timing)
   - [The projector (anchor view)](#the-projector-anchor-view)
   - [During the show](#during-the-show)
 - [Customizing](#-customizing)
@@ -37,7 +38,7 @@
 ## ✨ Features
 
 ### Animated lower thirds
-- **10 animated backgrounds:** Blue, Green, Black, Red, Space, Clouds, Tech, Finance, Sports, Politics, plus **Custom** (the first image in the `custom` folder)
+- **10 animated backgrounds:** Blue, Green, Black, Red, Space, Clouds, Tech, Finance, Sports, Politics, plus **Custom** (an image you pick from the `custom` folder)
 - **6 font styles:** Default, Script, Fun, Modern, Classic, Accent
 - **12 font colors:** White (default), Black, Silver, Gold, Yellow, Orange, Red, Pink, Purple, Blue, Sky, Green
 - **9 screen positions:** any corner, any edge, or the center
@@ -51,9 +52,10 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 |---|---|---|---|
 | **Fullscreen L3s** | | | |
 | **L3 PNG** | Full-width name bar (`assets/l3Large.png`) with an optional title | Slides in from the left | Slides back out to the left |
+| **KAMC** | Like L3 PNG, on `assets/kamc.png`, with its own text: a bigger name, further left, with a softer shadow | Slides in from the left | Slides back out to the left |
 | **L3 Info** | One paragraph of information on `assets/l3LargeAlt.png` in the bottom-left corner. The text is centered in the image's box and wraps onto about 5 lines (up to 400 characters). Line breaks you type are kept | Slides in from the left | Slides back out to the left |
 | **L3 Gif** | Name and title on a bar showing `assets/largeGif.gif`, centered across the screen | Rises up from the bottom | Drops back down |
-| **Custom** | Like L3 Gif, with the first PNG, JPG or GIF in the `custom` folder. Square corners, no side borders, and the image fades out at both sides | Rises up from the bottom | Drops back down |
+| **Custom** | Like L3 Gif, with a PNG, JPG or GIF you pick from the `custom` folder. Square corners, no side borders, and the image fades out at both sides | Rises up from the bottom | Drops back down |
 | **Overlays** | | | |
 | **Color Wave** | Soft, color-changing glow around the edges; the center stays clear | Fades in | Fades out |
 | **Confetti** | Bursts from both bottom corners, then light confetti rain | Slides up | Fades out |
@@ -77,10 +79,10 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 
 L3 PNG, L3 Info, L3 Gif and Custom text is always shown in capitals. If text is longer than normal, it shrinks to fit instead of getting cut off.
 
-🟩 **Greenscreen depth:** with Greenscreen on, Color Wave, Confetti, Fall, Snow, Fire, Underwater, Arrested and Hot Take show partly *behind* you and partly *in front of* you. See [Greenscreen Depth](#-greenscreen-depth).
+🟩 **Greenscreen depth:** Color Wave, Confetti, Fall, Snow, Fire, Underwater, Arrested and Hot Take each have a **Greenscreen** switch. With it on, they show partly *behind* you and partly *in front of* you. See [Greenscreen Depth](#-greenscreen-depth).
 
 ### Import L3s
-Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import button shows when **L3 PNG** or **L3 Info** is selected, and the L3s are imported as that type.
+Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import button shows when **L3 PNG**, **KAMC** or **L3 Info** is selected, and the L3s are imported as that type.
 - One name per line, or `Name | Title` to add a title. For **L3 Info**, each line is one paragraph.
 - Pick several files at once; they're added in file-name order.
 - Each button shows the file it came from (for example **L3 1A**), which makes it easy to match a rundown.
@@ -99,17 +101,17 @@ Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import bu
   - While a card is on screen it's outlined in green, with a floating red **OFF** button that counts down the time left; tap it to take the graphic down early. A ★ marks the one played last.
   - **Unsorted:** graphics added with **＋ RUNDOWN** (see below) wait at the bottom under **Unsorted**, labeled with just their type, until you drag them into a block (or move them with ✎). They aren't part of the show: they're hidden while Set Order is on, and turning it on tells you how many are left.
   - **Cues:** producer notes, placeholders for things that aren't graphics, and scripts. Tap **Note**, **Clip**, **SOT**, **PIC** or **Script** (while Set Order is off), type the note, an optional description or the script (or load the script from a .txt file), and pick its block. Cues show as thin, greyed-out rows, numbered like graphics (**A1-CLIP**, **A2-CLIP**, **A1-SOT**, **B1-SCRIPT**...; notes have no number). Drag, edit and remove them like cards. Scripts show on the [projector](#the-projector-anchor-view); notes are for the crew and don't.
-  - **Block times:** tap **Set time** on a block's header to give it a planned length (like 6:00); the header also shows the total time of its graphics. The planned show length and the graphics' total sit above the blocks. During the show, the current block's time counts up against its plan and turns red when it's over. See [Running the show](#running-the-show).
+  - **Block times:** tap **Set time** on a block's header to give it a planned length (like 6:00); the header also shows the total time of its graphics and when the block is due on air. The planned show length (with the breaks) and the graphics' total sit above the blocks. During the show, the block on air counts down its time left and turns red when it runs over. See [Show timing](#show-timing).
+  - **Show timing** (from the OBS Show Timer): the show's start and end times of day, a break after any block, and a timing strip that stays at the top: the clock (red on air), the time left in the block or break on now, **Start Break**, the time to the show's end, and how far over or under the show will run, with **Update** and **÷** to fix it. Breaks can also start from OBS (break scenes and hotkeys) and send AKTA break and return cues. See [Show timing](#show-timing).
   - The trash can empties the rundown (saved graphics aren't affected, and the blocks stay). **CLEAR ALL** is right at the top.
   - **Save Rundown / Import Rundown** (shown while Set Order is off): save the whole rundown, its blocks and a full copy of every graphic, as a file in the `rundowns` folder, and bring it back later, like a template. It still works after those graphics are deleted from Saved, and the files can be copied to another computer. See [Saving rundowns](#saving-rundowns).
 - **Duration:** on the right, just above the buttons. Picking an overlay fills in its usual time (for example Snow 15s, Breaking News 30s, Hot Take 7s), which you can still change. The Animated L3s tab keeps whatever you set there. For stingers it shows their fixed length, locked (with a padlock). The stinger buttons show their lengths too, for example **Storm · 2.8s**.
 - **Buttons, two by two:** **TAKE** and **TOGGLE ON** on top, **SAVE** and **＋ RUNDOWN** below. **＋ RUNDOWN** puts what you've set up straight into the Podcast Rundown under **Unsorted**, without saving it first. It only works while Set Order is off; if it's on, it offers to turn it off (or cancel).
 - **TOGGLE ON / TOGGLE OFF:** puts the graphic up with no time limit. The button turns yellow and pulses and reads **TOGGLE OFF** until you press it again, press Clear All, or take something else on the same tab. Stingers play once, so it's greyed out for them.
-- **Message box:** floats at the bottom of the panel on every tab and shows what you just took and how long it will stay up, for example **Taken: Ryan Fann** *for 5:00*. It lights up for each new message, dims after 3 seconds, and goes back to a small, faint **Ready** after 15 seconds with nothing new. The panel leaves room at the bottom so it never covers the last card.
+- **Message box:** floats at the bottom of the panel on every tab and shows what you just took and how long it will stay up, for example **Taken: Fire** *for 12s*. Then it counts down (*11s left*, *10s left*...) while the graphic is on screen, and says **Off screen: Fire** when it's gone. Any newer message (taking something else, Clear All, OFF, TOGGLE) takes its place. It lights up for each new message (and stays lit while it counts down), dims after 3 seconds, and goes back to a small, faint **Ready** after 15 seconds with nothing new. The panel leaves room at the bottom so it never covers the last card.
 - **Clear All:** takes everything off screen right away, with its normal out animation.
-- **Toggle bar** (under the connection status):
-  - **Greenscreen** on the left: turns on [Greenscreen Depth](#-greenscreen-depth). It's always off when the panel opens. On the Podcast Rundown tab, it pulses amber if the rundown is running (**Set Order** on) and has effects set for Greenscreen while it's off.
-  - **Light mode** on the right: shows a moon in dark mode and a sun in light mode. Dark is the default, and the browser remembers your choice.
+- **Greenscreen:** on the overlays that support [Greenscreen Depth](#-greenscreen-depth), a **Greenscreen** switch sits left of Duration. Each effect remembers its own.
+- **Light mode** (the switch under the connection status): shows a moon in dark mode and a sun in light mode. Dark is the default, and the browser remembers your choice.
 - **Connection help:** the wrench in the top bar opens a window with the live connection status and a list of things to check when it isn't **OPEN**.
 - **Tiny logo:** tap the logo on the right of the connection bar to reload the panel (during a show it asks first; nothing on screen changes, and the rundown and log are kept).
 
@@ -209,7 +211,7 @@ If you key yourself out of a greenscreen in OBS, FX Wizard can put some of an ov
    fx_wizard.html#underlay   ← behind you
    Your background
    ```
-3. In the control panel, turn on **Greenscreen** in the toggle bar.
+3. In the control panel, pick one of the effects below on the Fullscreen Overlays tab and turn on its **Greenscreen** switch (left of Duration).
 
 ### What goes where
 | Overlay | Behind you (`#underlay`) | In front of you (`#display`) |
@@ -223,20 +225,12 @@ If you key yourself out of a greenscreen in OBS, FX Wizard can put some of an ov
 | **Arrested** | The flashing red and blue lights | The jail cell door, with the lights catching its top (so you're behind bars) |
 | **Hot Take** | The flames and the heat glow | The badge and its heat meter, and the embers |
 
-Everything else (lower thirds, the Fullscreen L3s, Breaking News, and all the stingers) stays on `#display` in front, as usual. With Greenscreen off, the underlay stays empty, so you can leave it in your scene.
+Everything else (lower thirds, the Fullscreen L3s, Breaking News, and all the stingers) has no Greenscreen switch and stays on `#display` in front, as usual. When nothing on screen uses Greenscreen, the underlay stays empty, so you can leave it in your scene.
 
-### Effects saved for Greenscreen
-Greenscreen is **off** every time the control panel opens. If you **save** one of the effects above while Greenscreen is on, it remembers that it's meant for Greenscreen and shows a small green mark on its card. You can also tick **Greenscreen depth** with ✎ on a Podcast Rundown card.
+### Each effect has its own switch
+The **Greenscreen** switch only shows on the eight effects above, and each one remembers its own setting: Snow can be on while Confetti stays off. Taking an effect uses its switch, and the message box says **Greenscreen** when it's on.
 
-When a running Podcast Rundown (**Set Order** on) has any of these but Greenscreen is off, FX Wizard warns you:
-- an offer to turn it on when you turn on **Set Order**
-- a yellow banner at the top of the Podcast Rundown, with a **Turn on** button
-- on the Podcast Rundown tab, the **Greenscreen** switch pulses amber, and you're asked before you turn Greenscreen off
-- a warning in the message box if you take one of those rundown cards while it's off
-
-Without a running rundown (or on the other tabs), Greenscreen turns off without asking.
-
-What gets sent always follows the switch: with Greenscreen off, those effects play normally on `#display`.
+**SAVE** and **＋ RUNDOWN** keep the setting with the graphic, and its card shows a small green mark. Saved cards and Podcast Rundown cards always play the way they were saved. To change a rundown card, tick or untick **Greenscreen depth** with ✎.
 
 ---
 
@@ -284,13 +278,13 @@ Open `fx_wizard.html` in a browser (without `#display`). Check that the top bar 
 1. Type a **Name** and an optional **Title**.
 2. Set the **Duration** in seconds (just above the buttons).
 3. Tap a section to open it and pick a **Background**, **Font Style**, **Font Color**, **Location**, or **Animation**.
-   - **Custom background:** put an image (PNG, JPG or GIF) in the `custom` folder next to `assets`, then tap **Custom…**. It uses the first image in the folder by file name, and checks the folder again each time you tap it or the panel connects. (If the server is older and can't read the folder, a file picker opens instead.)
+   - **Custom background:** put your images (PNG, JPG or GIF) in the `custom` folder next to `assets`, then tap **Custom…**. A window shows every image in the folder with a preview: tap the one to use (the one in use is outlined). The panel remembers it; until you pick one, or if it's taken out of the folder, the first image by file name is used. **Choose a file…** in the window picks it by hand instead (for an older server that can't list the folder); pick it from the `custom` folder, because that's where the display looks.
 4. Press **TAKE** to put it on screen now, **TOGGLE ON** to keep it up until you turn it off, **SAVE** to add it to Saved L3s, or **＋ RUNDOWN** to put it straight into the Podcast Rundown (under Unsorted).
 
 ### Fullscreen Overlays tab
 1. Open **Fullscreen L3s**, **Overlays** or **Stingers** and pick one.
 2. For L3 PNG, L3 Gif and Custom, type a **Name** and an optional **Title**. For L3 Info, type the paragraph in **Text**.
-   - **Custom:** same as the Custom background: tap **Custom…** to use the first PNG, JPG or GIF in the `custom` folder.
+   - **Custom:** same as the Custom background: tap **Custom…** and pick the image from the `custom` folder.
    - **Like & Subscribe:** under **Socials**, tap an icon (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web) to open a box for that account and type it in. Tap the icon again to leave it out. All of them are optional, and the panel remembers what you typed. Give it at least 4 seconds so the clicks finish.
    - **Hot Take:** type your own text in **Text (optional)**, or leave it blank for **HOT TAKE**.
    - **Breaking News:** type the scrolling text in **Ticker text**. **TOGGLE ON** keeps it up until you turn it off.
@@ -305,7 +299,7 @@ Open `fx_wizard.html` in a browser (without `#display`). Check that the top bar 
    Marcus Lee
    Dr. Alicia Gomez | Keynote Speaker
    ```
-2. On the Fullscreen Overlays tab, pick **L3 PNG** or **L3 Info**, then press **IMPORT L3s (.txt)** and choose one or more files.
+2. On the Fullscreen Overlays tab, pick **L3 PNG**, **KAMC** or **L3 Info**, then press **IMPORT L3s (.txt)** and choose one or more files.
 3. The names appear under **Saved Overlays**, each labeled with its file name.
 
 ### Running a show
@@ -324,32 +318,66 @@ Open `fx_wizard.html` in a browser (without `#display`). Check that the top bar 
 The file holds everything needed, so it works even if those graphics were deleted from Saved. The server does the saving, so it needs the current `server.py` or `server.js` (after updating, reload the script in OBS under **Tools > Scripts**, or restart `node server.js`). With an older server, **Save Rundown** downloads the file instead: move it into the `rundowns` folder.
 
 ### Running the show
-Turn on **Set Order**. The show clock starts, and a row of show controls appears:
+Turn on **Set Order**. A row of show controls appears:
 
 - **The current item:** whatever you take becomes the current item (outlined in amber). Tap a clip, SOT, picture or script to make it current; nothing goes on screen. A graphic can stay on air while something else is current, like an L3 over a SOT.
 - **◀ ▶** move the current item back or on without taking anything (notes are skipped).
-- **The show clock** shows the time since the show started, against the planned length. The current block's header shows its own time, and turns red when it runs over.
 - **Messages for the projector:** tap the message icon for **Toss to Break**, **No Video**, **No L3** and **Center on Camera**, or type your own and press **Send**. It stays on the projector until you send another or clear it (the ✕ on the orange bar).
-- **Generate Log** (the page icon) saves a spreadsheet (`.csv`) of what actually ran: every graphic from take to off, every cue while it was current, each message, and each block's planned and actual time with how far over or under it was. It goes in the `logs` folder (with an older server it downloads instead), then offers to start a fresh log and show clock for the next show.
+- **Generate Log** (the page icon) saves a spreadsheet (`.csv`) of what actually ran: every graphic from take to off, every cue while it was current, each break (and AKTA cue), each message, and each block's planned and actual time with how far over or under it was. It goes in the `logs` folder (with an older server it downloads instead), then offers to start a fresh log for the next show (that also clears the breaks that were started).
 
-The show clock and log keep going if you turn Set Order off to fix something, and they survive a reload.
+The clock and the time left come from the show's times: see [Show timing](#show-timing). They only show while Set Order is on. The log keeps going if you turn Set Order off to fix something, and breaks that were started are kept: turning Set Order back on picks the timing up from the clock. All of it survives a reload.
+
+### Show timing
+The Podcast Rundown keeps the show on the clock, the way the OBS Show Timer does: each block runs for its length, one after another from the show's start time, with a break after any block that has one.
+
+**Set it up:** tap the show times button (with the clock icon, under the timing strip) and fill in:
+- **Start** and **End:** the times of day the show goes on and off air. A show that ends after midnight is fine.
+- Each block's **Length**, and the **Break after** it, in minutes:seconds (like 10:00 and 2:05). Blocks without a length aren't timed. Under the boxes you'll see the planned length against the time between the start and end.
+- Already have a schedule from the OBS Show Timer? **Use a Show Timer schedule…** brings in its times: its segments become blocks A, B, C… in order, each break goes after the segment before it, and its break scenes come along. Your graphics stay where they are. (**Import Rundown** recognizes Show Timer files too.)
+
+The show times and breaks are saved in rundown files.
+
+**During the show** (while **Set Order** is on, on any tab):
+- **The timing strip** stays at the top while you scroll: the time of day (red while the show is on air) and what's on now, **Block B** or **Break 1**, with the time it has left, in blue for a block and orange for a break. Before the show it counts down to air (**On air in**), so turn on Set Order a little before you go live.
+- Blocks follow on by themselves. A block with a break after it stays on when its time is up, counting up in red (**+0:12**), until the break starts. Everything after a break follows from when it really started.
+- **Start Break** (under the clock) starts the next break. It pulses when the break is due, and asks first if the break isn't due for more than a minute. Each break also has its own orange row in the rundown, after its block, with when it's due, ▶ to start it, and ↺ to reset one started by mistake (it asks first).
+- **End a break early:** while a break is on, the button under the clock becomes **End Break 1 early**, and the break's row gets ⏹. It asks first, then the break is over: the next block starts now, everything after it moves up, and with AKTA on, AKTA gets the return cue. The log marks it **(ended early)**.
+- **Show ends in:** the time left to the show's end time.
+- **Runtime:** how far from its end time the show will finish. **+0:12 under** (blue) is 12 seconds to fill; **-0:20 over** (red) is 20 seconds to cut. It counts a block that's running over right now.
+- **Last block:** the length the last block needs to end on time. **Update** sets it. To share the difference out instead, tap **÷**, pick the blocks (ones that are over are greyed out) and tap **Spread**.
+- Each block's header shows when it's due on air; the block on air shows its time left instead of its length.
+
+**With Set Order off** the show isn't running: the timing strip, the countdowns and the times on the blocks and breaks go away, leaving each block's length and each break's name and length to edit. **Runtime** and **Last block** (with **Update** and **÷**) still work, from the planned lengths against the start and end times, so you can make the plan fit before the show. A break that's already on still ends on time (and still gets its AKTA return).
+
+**Starting breaks from OBS** (this needs `server.py`, the server that runs inside OBS, and works only while Set Order is on). Tap the gear next to the show times:
+- **Break scenes:** tick the OBS scenes that start a break. When OBS goes to one of them, the next break starts (not while a break is already on).
+- **Hotkeys:** in OBS, under **Settings > Hotkeys**, give keys to **FX Wizard: Start Break** (the next break), **Reset Break** (the last one started) and **Toggle AKTA control**. They work while OBS is in the background, so a keyboard or Stream Deck can run the breaks.
+
+**AKTA** (optional): sends AKTA a break cue (a slate for the break's length) when a break starts, and a return when it's over (or when a break that's still on is reset).
+1. Tap the gear, fill in the **Public key**, **Private key** and your **Encoders** (each one's ID, and Local or National), and tap **Save AKTA settings**. The server keeps them in `akta-config.json`, next to it. The private key is never sent back to the panel (leave the box empty to keep the saved one), and the file isn't shared in Git.
+2. Turn on **AKTA** next to the show times (or **Send AKTA cues from this panel** in the gear window, or the hotkey). It's per panel: turn it on in one panel only, or each one sends its own cues.
+3. To line the cue up with a stinger, breaks started by a break scene can wait: a **Delay after the transition starts** (in ms), or **Wait for the transition to end**.
+
+The message box shows whether each cue went through, and the log lists them. Keep the panel showing while a show runs (an OBS dock is ideal): a browser tab in the background slows its timers down, which can hold up a break's return cue.
 
 ### The projector (anchor view)
 A screen for the anchor and guests, outside OBS. On a computer running the control panel (or any computer that can reach the server), open `fx_wizard.html#projector` in a browser, full screen (F11), on the guest-facing screen.
 
 - **Across the top:** the director's message, flashing when a new one arrives.
-- **Under it:** which block the show is in and its time against the plan, and the show's time.
-- **Most of the screen:** the whole rundown in order, following along: **PREV**, **NOW** and **NEXT** are marked, and anything on air has a green outline.
+- **Under it:** what's on now (a block or a break) and its time left, in big numbers: blue for a block, orange for a break, red and counting up when a block runs over. The bar flashes red at 30, 15 and 5 seconds left. On the right, the time to the show's end and the time of day (red while on air). Before the show it counts down to air. The times only run while **Set Order** is on; with it off it says **Not running**. Without [show times](#show-timing), it just shows the current block.
+- **Most of the screen:** the whole rundown in order, with the breaks between the blocks, following along: **PREV**, **NOW** and **NEXT** are marked, and anything on air has a green outline.
 - **On the side:** what's on now, what's next, and what's on air. When a script is current, its text fills the side, sized to fit.
 
 It updates by itself as the director works. Producer notes aren't shown.
+
+**Between shows:** with **Set Order** off, **Clear the projector** (under Save Rundown and Import Rundown) blanks it, back to how it looks when it opens, with nothing counting. The director's message is cleared too. It stays blank until you tap the button again or turn **Set Order** back on. (Turning Set Order off on its own stops the countdowns but leaves the rundown showing.)
 
 ### During the show
 - **Tap a saved card** (or a Podcast Rundown card, once Set Order is on) to take it. **OFF** on a live rundown card takes it down early.
 - **CLEAR ALL** removes everything from the screen, including anything toggled on.
 - **TOGGLE OFF** takes down the graphic you toggled on.
 - If the top bar says **CLOSED**, press the wrench for things to check.
-- Using a greenscreen? Turn on **Greenscreen** before you take Snow, Fall, Confetti, Fire, Underwater, Arrested, Hot Take or Color Wave. It starts off each time the panel opens.
+- Using a greenscreen? Turn on the **Greenscreen** switch on Snow, Fall, Confetti, Fire, Underwater, Arrested, Hot Take or Color Wave before you take it (or save it that way). Each effect remembers its switch.
 - **✕** on a card deletes it (you'll be asked to confirm).
 
 ---
@@ -362,6 +390,8 @@ It updates by itself as the director works. Producer notes aren't shown.
 | Add a lower third background | `css/styles.css`, section 5 | Add a class with your GIF from `assets/`, add a button in the **Backgrounds** part of `fx_wizard.html`, and add the name to `BG_CLASSES` in the script |
 | L3 PNG image | `assets/l3Large.png` | Replace the image (1920 x 1080) |
 | L3 PNG font or size | `css/styles.css`, section 7 | `#overlay-box.l3Large #overlay-text` and `#overlay-name` |
+| KAMC image | `assets/kamc.png` | Replace the image (1920 x 1080). If the bar moves, adjust the `padding` of `#overlay-box.kamc #overlay-text` |
+| KAMC font or size | `css/styles.css`, section 7 | `#overlay-box.kamc #overlay-text`, `#overlay-box.kamc #overlay-name` and `#overlay-box.kamc #overlay-title` |
 | L3 Info image | `assets/l3LargeAlt.png` | Replace the image (1920 x 500). If the box inside moves, adjust `#overlay-box.l3LargeAlt #overlay-text` |
 | L3 Info size or position | `css/styles.css`, section 7 | `--alt-width`, `--alt-left` and `--alt-bottom` in `#overlay-box.l3LargeAlt`. The text follows |
 | L3 Gif GIF | `assets/largeGif.gif` | Replace the GIF |
@@ -410,6 +440,7 @@ Sizes are for a 1920 x 1080 canvas (for 4K, double them). Images are cropped to 
 | Lower third backgrounds (Blue, Green, Space...) | `assets/` (see the file names below) | 1200 x 300 or larger (4:1) | Animated GIF, under 10 MB | The box grows with the text (about 700–1100 x 190 for a name and title), so the edges may be cropped |
 | **Custom** background (Animated L3s) | `custom/` | 1200 x 300 (4:1) | GIF, PNG or JPG | Same box and cropping as the backgrounds above |
 | L3 PNG | `assets/l3Large.png` | 1920 x 1080 | PNG with transparency | A full-screen frame: everything except your bar should be transparent |
+| KAMC | `assets/kamc.png` | 1920 x 1080 | PNG with transparency | Same as L3 PNG |
 | L3 Info | `assets/l3LargeAlt.png` | 1920 x 500 | PNG with transparency | Shown at half the screen width (960 x 250) in the bottom-left. The text fits inside its inner box (see below) |
 | L3 Gif | `assets/largeGif.gif` | 1210 x 178 (about 6.8:1) | Animated GIF, under 10 MB | Gets rounded corners and a thin border |
 | **Custom** Fullscreen L3 | `custom/` | 1210 x 178 (about 6.8:1) | GIF, PNG or JPG | No border; the outer 15% on each side fades out, so keep anything important in the middle |
@@ -419,7 +450,7 @@ Which format?
 - **JPG:** for photos. Smallest files, but no transparency.
 - **GIF:** for motion. Short loops keep the file small; big GIFs take a moment to appear the first time.
 
-Both **Custom** items use the same image (the first one in the `custom` folder by name), so pick a size that suits the one you use most.
+Both **Custom** items use the same image (the one picked with **Custom…**), so pick a size that suits the one you use most.
 
 ### Swap a lower third background GIF (no code)
 Each background button uses one file in `assets/`. Replace the file and keep the **same file name**:
@@ -458,6 +489,7 @@ Tips:
 | Overlay | File | Size | Notes |
 |---|---|---|---|
 | L3 PNG | `assets/l3Large.png` | 1920 x 1080 | A transparent PNG with the bar where you want it. The name and title are placed by `#overlay-box.l3Large #overlay-text` in `styles.css`, section 7 |
+| KAMC | `assets/kamc.png` | 1920 x 1080 | The same, placed by `#overlay-box.kamc #overlay-text` (set for a bar at y 793–929, ending at x 1426) |
 | L3 Info | `assets/l3LargeAlt.png` | 1920 x 500 | The text is fitted inside the image's inner box (x 428–1894, y 38–461). If your box is in a different spot, change the four numbers in the `padding` of `#overlay-box.l3LargeAlt #overlay-text`; they're that box's edges as fractions of the image |
 | L3 Gif | `assets/largeGif.gif` | 1210 x 178 | Fills `#overlay-gif` without stretching |
 
@@ -484,7 +516,7 @@ Keep the same file names and the overlays pick up the new images.
 - **Large GIFs load the first time.** Some backgrounds are 20–50 MB, so a background can take a moment to appear the first time it's used.
 - **Older saves still work.** Graphics saved with earlier versions still open correctly.
 - **Missing custom images:** a card that uses a custom image no longer in the `custom` folder shows a red **!** (saved and rundown cards). Put the file back, or pick a new one with ✎ or by saving it again.
-- **Sharing the project:** `custom/`, `rundowns/` and `logs/` keep your own files out of Git (see `.gitignore`); only their `README.txt` is shared. Python's `__pycache__` is ignored too.
+- **Sharing the project:** `custom/`, `rundowns/` and `logs/` keep your own files out of Git (see `.gitignore`); only their `README.txt` is shared. Python's `__pycache__` and `akta-config.json` (the AKTA keys) are ignored too.
 
 ---
 
@@ -495,11 +527,12 @@ Keep the same file names and the overlays pick up the new images.
 | `fx_wizard.html` | The control panel, the display (`#display`), the greenscreen underlay (`#underlay`) and the projector (`#projector`), all in one page |
 | `css/styles.css` | All the styles and animations |
 | `assets/` | Background GIFs, the L3 images, and logos |
-| `custom/` | Your own image for the **Custom…** background and the **Custom** Fullscreen L3 (the first PNG, JPG or GIF by name is used). Not shared in Git |
+| `custom/` | Your own images for the **Custom…** background and the **Custom** Fullscreen L3 (pick one with **Custom…**). Not shared in Git |
 | `rundowns/` | Saved Podcast Rundowns, one `.json` file each. Not shared in Git |
 | `logs/` | Show logs from **Generate Log**, one `.csv` file each. Not shared in Git |
-| `server.py` | Server that runs inside OBS (also lists `custom/`, saves and opens rundowns in `rundowns/`, and saves logs in `logs/`) |
-| `server.js` | Standalone Node.js server (same as `server.py`, outside OBS) |
+| `server.py` | Server that runs inside OBS (also lists `custom/`, saves and opens rundowns in `rundowns/`, saves logs in `logs/`, sends AKTA cues, adds the break hotkeys, and tells the panel when OBS changes scene, for break scenes) |
+| `server.js` | Standalone Node.js server (same as `server.py`, outside OBS, so without the break hotkeys and break scenes) |
+| `akta-config.json` | Made by the server when you save the AKTA settings. Holds the private key, so it isn't shared in Git |
 | `launch_server.bat` | Double-click launcher for the Node.js server |
 
 ---
@@ -508,7 +541,6 @@ Keep the same file names and the overlays pick up the new images.
 
 FX Wizard keeps growing with the shows we produce. A few things on the horizon (not in this version):
 
-- **Show countdown:** a countdown for the whole show, set at the start, with its own window.
 - **OBS hotkeys:** take graphics without touching the panel.
 - **Test mode:** a safe way to rehearse a setup, with logs.
 - **Vertical video:** a vertical canvas option (or a separate dock) with lower thirds and overlays made for vertical formats.

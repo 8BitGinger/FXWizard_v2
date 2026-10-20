@@ -40,13 +40,6 @@
 
         <!-- ===== TOGGLE BAR (controller only) ===== -->
         <div id="toggle-bar" class="mb-1 text-xs py-1 px-3 bg-gray-700 w-full flex items-center gap-2">
-            <!-- Greenscreen: some overlays also draw on fx_wizard.html#underlay, a second
-                 Browser Source placed behind your keyed camera, for a deeper, 3D look -->
-            <label class="fx-switch gs-switch" title="Greenscreen depth: add fx_wizard.html#underlay as a Browser Source below your keyed camera in OBS. Snow, Fall, Confetti, Fire, Underwater, Arrested, Hot Take and Color Wave then show partly behind you.">
-                <span class="gs-chip"></span><span>Greenscreen</span>
-                <input type="checkbox" id="gs-toggle">
-                <span class="fx-track"></span>
-            </label>
             <!-- Light / dark switch (dark is the default). The icon shows the current mode. -->
             <label class="fx-switch ml-auto" title="Light / dark mode">
                 <span id="theme-icon" class="text-base leading-none"></span>
@@ -104,6 +97,10 @@
                         <div class="grid grid-cols-2 gap-1 text-[12px]">
                             <input type="radio" id="ov-l3Large" name="overlayStyle" value="l3Large" checked class="hidden peer/o1">
                             <label for="ov-l3Large" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o1:bg-primary">L3 PNG</label>
+
+                            <!-- KAMC: like L3 PNG, on assets/kamc.png, with its own bigger text -->
+                            <input type="radio" id="ov-kamc" name="overlayStyle" value="kamc" class="hidden peer/o23">
+                            <label for="ov-kamc" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o23:bg-primary">KAMC</label>
 
                             <input type="radio" id="ov-l3LargeAlt" name="overlayStyle" value="l3LargeAlt" class="hidden peer/o7">
                             <label for="ov-l3LargeAlt" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o7:bg-primary">L3 Info</label>
@@ -327,13 +324,20 @@
                     </details>
                 </div>
 
-                <!-- Backup file picker for Custom…, used only if the server can't list the custom folder -->
+                <!-- File picker for Custom… ("Choose a file…" in the Custom image window) -->
                 <input type="file" id="custom-file" accept="image/*" class="hidden">
 
                 <!-- Duration, then TAKE / TOGGLE / SAVE / ＋ RUNDOWN (all hidden on Podcast Rundown) -->
                 <div id="take-row" class="mt-4 pt-2 border-t border-gray-700 text-sm">
-                    <!-- Picking an overlay fills in its usual time; stingers show their fixed length -->
+                    <!-- Picking an overlay fills in its usual time; stingers show their fixed length.
+                         Greenscreen: only for the overlays that can show partly behind you (on
+                         fx_wizard.html#underlay, a Browser Source below your keyed camera). Each one remembers it. -->
                     <div id="duration-field" class="duration-row">
+                        <label id="gs-field" class="fx-switch gs-switch hidden" title="Greenscreen depth: part of this effect shows behind you, on fx_wizard.html#underlay (a Browser Source below your keyed camera in OBS)">
+                            <span class="gs-chip"></span><span>Greenscreen</span>
+                            <input type="checkbox" id="gs-pick">
+                            <span class="fx-track"></span>
+                        </label>
                         <label id="duration-label" for="duration-input">Duration</label>
                         <input type="number" id="duration-input" value="5" min="1" class="p-1 rounded border-2 border-white bg-transparent text-violet-300 text-sm focus:text-white focus:bg-gray-700">
                         <span>sec</span>
@@ -391,14 +395,44 @@
                     </label>
                     <button id="show-clear" type="button" title="Remove everything from the rundown (asks first)" onclick="clearShow()" class="w-8 h-7 rounded hover:bg-red-700 active:scale-95 grid place-items-center"><span data-icon="trash"></span></button>
                 </div>
-                <!-- During the show (Set Order on): step through the rundown, the show clock, a message to
-                     the projector, and saving the log of what ran -->
+                <!-- Show timing (stays at the top while you scroll): the time of day, red while the show is on air;
+                     what's on now and the time it has left; and Start Break for the next break -->
+                <div id="tm-live" class="tm-live">
+                    <div class="tm-row">
+                        <span id="tm-clock" class="tm-clock" title="Time of day (red while the show is on air)"></span>
+                        <div class="tm-now">
+                            <span id="tm-label" class="tm-label"></span>
+                            <span id="tm-left" class="tm-left"></span>
+                        </div>
+                    </div>
+                    <button type="button" id="tm-break" class="tm-break hidden" onclick="breakButton()"></button>
+                </div>
+                <!-- The show's times (tap to set them, the block lengths and the breaks), AKTA on or off, the break
+                     setup, and whether the show will end on time -->
+                <div id="timing-box" class="timing-box">
+                    <div class="tm-tools">
+                        <button type="button" class="tm-times" onclick="openTimingDialog()" title="Show times, block lengths and breaks"><span data-icon="timer"></span><span id="tm-times-text"></span></button>
+                        <button type="button" id="tm-akta" class="tm-akta" onclick="setAktaOn(!aktaOn(), true)" title="AKTA: send a break cue when a break starts and a return when it ends (from this panel)">AKTA</button>
+                        <button type="button" class="tm-gear" onclick="openBreaksDialog()" title="Break scenes, AKTA settings and hotkeys"><span data-icon="gear"></span></button>
+                    </div>
+                    <div id="tm-stats" class="tm-stats hidden">
+                        <span class="tm-live-only">Show ends in</span><b id="tm-end-in" class="tm-live-only"></b>
+                        <span title="How far from its end time the show will finish: + under, - over">Runtime</span><b id="tm-runtime"></b>
+                        <span id="tm-last-label">Last block</span>
+                        <span class="tm-last">
+                            <b id="tm-last"></b>
+                            <button type="button" id="tm-update" onclick="updateLastBlock()" title="Change the last block's length so the show ends on time"></button>
+                            <button type="button" id="tm-spread-btn" onclick="toggleSpread()" title="Spread the difference over blocks you pick instead">÷</button>
+                        </span>
+                    </div>
+                    <div id="tm-spread" class="tm-spread hidden"></div>
+                </div>
+                <!-- During the show (Set Order on): step through the rundown, a message to the projector,
+                     and saving the log of what ran -->
                 <div id="show-controls" class="show-controls hidden">
                     <button type="button" class="show-ctl" onclick="stepCurrent(-1)" title="Back one item (doesn't take anything)"><span data-icon="prev"></span></button>
                     <button type="button" class="show-ctl" onclick="stepCurrent(1)" title="On to the next item (doesn't take anything)"><span data-icon="next"></span></button>
-                    <span id="show-clock" class="show-clock" title="Time since the show started"></span>
-                    <span id="countdown-clock" class="show-clock countdown-clock hidden"></span>
-                    <button type="button" id="countdown-btn" class="show-ctl" onclick="handleCountdownClick()" title="Set a countdown to air"><span data-icon="timer"></span></button>
+                    <span class="flex-1"></span>
                     <button type="button" id="msg-btn" class="show-ctl" onclick="toggleMsgPanel()" title="Send a message to the projector"><span data-icon="message"></span></button>
                     <button type="button" class="show-ctl" onclick="generateLog()" title="Generate Log: save what ran, and for how long"><span data-icon="log"></span></button>
                 </div>
@@ -421,10 +455,12 @@
                     <span id="msg-now-text" class="msg-now-text"></span>
                     <button type="button" onclick="sendMessage('')" title="Clear the message"><span data-icon="x"></span></button>
                 </div>
-                <!-- Save the rundown as a file in the "rundowns" folder, or bring one back (hidden while Set Order is on) -->
+                <!-- Save the rundown as a file in the "rundowns" folder, or bring one back. Between shows,
+                     blank the projector until Set Order is turned on again. (All hidden while Set Order is on.) -->
                 <div id="rundown-files-row" class="grid grid-cols-2 gap-2 mb-2 px-2">
                     <button type="button" class="rundown-btn" onclick="saveRundownFile()" title="Save this rundown, with everything in it, to the rundowns folder"><span data-icon="save"></span> Save Rundown</button>
                     <button type="button" class="rundown-btn" onclick="openRundownPicker()" title="Replace this rundown with one from the rundowns folder"><span data-icon="folder"></span> Import Rundown</button>
+                    <button type="button" id="pj-clear-btn" class="rundown-btn col-span-2" onclick="toggleProjectorClear()"></button>
                 </div>
                 <!-- Blocks: tap a letter to pick where ＋ adds graphics (and jump to it); + adds a block -->
                 <div class="flex items-center gap-2 mb-2 px-2">
@@ -440,12 +476,6 @@
                     <button type="button" class="cue-add" onclick="addCue('sot')" title="Add a placeholder for a SOT (sound on tape)"><span data-icon="sot"></span> SOT</button>
                     <button type="button" class="cue-add" onclick="addCue('pic')" title="Add a placeholder for a picture"><span data-icon="pic"></span> PIC</button>
                     <button type="button" class="cue-add" onclick="addCue('script')" title="Add a script (shown on the projector)"><span data-icon="script"></span> Script</button>
-                </div>
-                <!-- Shown when graphics here are set for Greenscreen but Greenscreen is off -->
-                <div id="gs-alert" class="gs-alert hidden" role="alert">
-                    <span class="gs-chip flex-none"></span>
-                    <span id="gs-alert-text"></span>
-                    <button type="button" onclick="setGreenscreen(true, true)">Turn on</button>
                 </div>
                 <p id="show-hint" class="text-xs text-center opacity-75 mb-2 px-2">Arrange the rundown, then turn on <b>Set Order</b> to run it. Cards can't be taken until then.</p>
                 <!-- Planned length of the whole show, the graphics' total, and (during the show) the time so far -->
@@ -465,6 +495,17 @@
                 </form>
             </dialog>
             <input type="file" id="rundown-file" accept=".json,application/json" class="hidden">
+
+            <!-- Custom…: the images in the "custom" folder, to pick the one to use (both Custom… options share it) -->
+            <dialog id="custom-dialog">
+                <form method="dialog" class="flex flex-col gap-2">
+                    <h3 class="font-bold">Custom image</h3>
+                    <p id="custom-note" class="text-xs opacity-75"></p>
+                    <div id="custom-list" class="custom-list"></div>
+                    <button type="button" class="py-2 rounded bg-gray-600 text-white font-bold" onclick="$('custom-file').click()" title="Pick the image yourself (it has to be in the custom folder for the display to show it)"><span data-icon="file"></span> Choose a file…</button>
+                    <button value="cancel" class="py-2 rounded bg-gray-500 font-bold">Close</button>
+                </form>
+            </dialog>
 
             <dialog id="edit-dialog">
                 <form method="dialog" class="flex flex-col gap-2">
@@ -503,6 +544,69 @@
                     </div>
                 </form>
             </dialog>
+
+            <!-- Show times and breaks: when the show starts and ends (time of day), and each block's length and
+                 the break after it -->
+            <dialog id="timing-dialog">
+                <form method="dialog" class="flex flex-col gap-2">
+                    <h3 class="font-bold">Show times and breaks</h3>
+                    <div class="tm-times-row">
+                        <label>Start <input type="time" id="tm-start" step="1"></label>
+                        <label>End <input type="time" id="tm-end" step="1"></label>
+                    </div>
+                    <p class="text-xs opacity-75">Each block's length, and the break after it, in minutes:seconds (like 2:05). Leave a box empty for none. Blocks without a length aren't timed.</p>
+                    <div id="tm-format" class="tm-format"></div>
+                    <p id="tm-format-total" class="text-xs text-center"></p>
+                    <button type="button" class="py-1.5 rounded bg-gray-600 text-white text-sm font-bold" onclick="$('showtimer-file').click()" title="Use the times and breaks from a schedule saved by the OBS Show Timer"><span data-icon="file"></span> Use a Show Timer schedule…</button>
+                    <div class="grid grid-cols-2 gap-2 mt-1">
+                        <button type="button" class="py-2 rounded bg-gray-500 font-bold" onclick="this.closest('dialog').close('cancel')">Cancel</button>
+                        <button value="save" class="py-2 rounded bg-indigo-600 text-white font-bold">Save</button>
+                    </div>
+                </form>
+            </dialog>
+            <input type="file" id="showtimer-file" accept=".json,application/json" class="hidden">
+
+            <!-- Breaks: the OBS scenes that start the next break, AKTA (the break slate cues), and the OBS hotkeys -->
+            <dialog id="breaks-dialog">
+                <form method="dialog" class="flex flex-col gap-2">
+                    <h3 class="font-bold">Breaks</h3>
+                    <label class="fx-switch tm-switch">
+                        <span>Send AKTA cues from this panel</span>
+                        <input type="checkbox" id="akta-on">
+                        <span class="fx-track"></span>
+                    </label>
+                    <section class="tm-sec">
+                        <h4>Break scenes</h4>
+                        <p class="text-xs opacity-75">When OBS goes to one of these scenes, the next break starts.</p>
+                        <p id="scene-note" class="text-xs opacity-75"></p>
+                        <div id="scene-list" class="scene-list"></div>
+                        <button type="button" class="tm-small" onclick="loadSceneList()">Refresh the list</button>
+                    </section>
+                    <section class="tm-sec">
+                        <h4>AKTA</h4>
+                        <p id="akta-note" class="text-xs opacity-75"></p>
+                        <label class="tm-field">Public key <input type="text" id="akta-public" maxlength="200" autocomplete="off" spellcheck="false"></label>
+                        <label class="tm-field">Private key <input type="password" id="akta-private" maxlength="200" autocomplete="new-password"></label>
+                        <span class="tm-field">Encoders</span>
+                        <div id="akta-encoders" class="flex flex-col gap-1"></div>
+                        <div class="akta-add">
+                            <input type="text" id="akta-enc-id" placeholder="Encoder ID" maxlength="40" autocomplete="off" spellcheck="false">
+                            <select id="akta-enc-scope"><option value="local">Local</option><option value="national">National</option></select>
+                            <button type="button" onclick="addAktaEncoder()">+ Add</button>
+                        </div>
+                        <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="akta-wait"> Wait for the transition to end</label>
+                        <label class="tm-field">Delay after the transition starts (ms) <input type="number" id="akta-delay" min="0" max="60000" step="1"></label>
+                        <p class="text-xs opacity-75">The wait and the delay only hold back breaks started by a break scene, so the cue lines up with your stinger. A delay is used instead of waiting.</p>
+                        <button type="button" class="py-1.5 rounded bg-indigo-600 text-white text-sm font-bold" onclick="saveAktaSettings()">Save AKTA settings</button>
+                    </section>
+                    <section class="tm-sec">
+                        <h4>Hotkeys</h4>
+                        <p class="text-xs opacity-75">In OBS, under Settings &gt; Hotkeys: <b>FX Wizard: Start Break</b> (the next one), <b>Reset Break</b> (the last one started) and <b>Toggle AKTA control</b>.</p>
+                    </section>
+                    <p class="text-xs opacity-75">Break scenes and hotkeys need server.py (the server that runs in OBS).</p>
+                    <button value="close" class="py-2 rounded bg-gray-500 font-bold">Close</button>
+                </form>
+            </dialog>
         </div>
 
         <!-- ===== DISPLAY (what OBS shows, opened with #display) ===== -->
@@ -511,12 +615,14 @@
              across the top, then where the show is, the rundown, and the current script. -->
         <div id="projector-view" class="hidden">
             <div id="pj-message" class="pj-message"><span id="pj-message-text"></span></div>
-            <div class="pj-status">
+            <!-- What's on now and the time it has left (flashes at 30, 15 and 5 seconds), the time to the
+                 show's end, and the time of day (red while on air) -->
+            <div id="pj-status" class="pj-status">
                 <span id="pj-block" class="pj-block"></span>
-                <span id="pj-block-time" class="pj-time"></span>
+                <span id="pj-block-time" class="pj-time pj-timer"></span>
                 <span class="pj-spacer"></span>
                 <span id="pj-countdown" class="pj-time pj-countdown hidden"></span>
-                <span id="pj-show-time" class="pj-time"></span>
+                <span id="pj-show-time" class="pj-time pj-clock"></span>
             </div>
             <div class="pj-main">
                 <div id="pj-rundown" class="pj-rundown"></div>
@@ -707,8 +813,9 @@
            16. Controller: custom files
            17. Controller: light mode, greenscreen and connection help
            18. Controller: running the show (current item, block times, messages, log)
-           19. Projector (fx_wizard.html#projector)
-           20. Startup
+           19. Controller: show timing (show times, breaks, runtime, AKTA, break scenes, hotkeys)
+           20. Projector (fx_wizard.html#projector)
+           21. Startup
            ========================================================= */
 
 
@@ -749,8 +856,8 @@
         //   social:  true = shows the Socials picker (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web)
         //   caption: one optional line of text, with this as the default (Hot Take)
         //   dur:     usual time in seconds, filled in when it's picked (not for stingers)
-        //   depth:   true = with Greenscreen on, splits: the far part shows on #underlay (behind
-        //            you) and the near part on #display (in front of you)
+        //   depth:   true = shows a Greenscreen switch; taken with it on, it splits: the far part shows
+        //            on #underlay (behind you) and the near part on #display (in front of you)
         //   effect:  canvas animation to run (see section 6)
         //   animIn / animOut: fixed animations ('' = none). Hides the Animation picker.
         //   length:  fixed run time in seconds. Hides the Duration field.
@@ -758,6 +865,7 @@
         // ("l3Large" is L3 PNG, "l3LargeAlt" is L3 Info).
         const OVERLAYS = {
             l3Large:    { label: 'L3 PNG',   text: true, import: true,                  dur: 8, effect: null, animIn: 'anim-slideLeft', animOut: 'anim-slideOutLeft' },
+            kamc:       { label: 'KAMC',     text: true, import: true,                  dur: 8, effect: null, animIn: 'anim-slideLeft', animOut: 'anim-slideOutLeft' },
             l3LargeAlt: { label: 'L3 Info',  text: true, import: true, paragraph: true, dur: 12, effect: null, animIn: 'anim-slideLeft', animOut: 'anim-slideOutLeft' },
             l3Gif:      { label: 'L3 Gif',   text: true,                                dur: 8, effect: null, animIn: 'anim-riseUp',    animOut: 'anim-dropDown' },
             l3Custom:   { label: 'Custom',   text: true, custom: true,                  dur: 8, effect: null, animIn: 'anim-riseUp',    animOut: 'anim-dropDown' },
@@ -823,7 +931,7 @@
             blue: 'border-blue-500', green: 'border-green-500', black: 'border-gray-300', red: 'border-red-500',
             space: 'border-purple-400', clouds: 'border-sky-300', tech: 'border-teal-300', finance: 'border-emerald-500',
             sports: 'border-orange-400', politics: 'border-rose-500', custom: 'border-fuchsia-300',
-            l3Large: 'border-violet-400', l3LargeAlt: 'border-emerald-400', l3Gif: 'border-fuchsia-400', l3Custom: 'border-pink-300',
+            l3Large: 'border-violet-400', kamc: 'border-blue-600', l3LargeAlt: 'border-emerald-400', l3Gif: 'border-fuchsia-400', l3Custom: 'border-pink-300',
             colorwave: 'border-pink-400', confetti: 'border-amber-400', stinger: 'border-cyan-400',
             fall: 'border-orange-500', snow: 'border-slate-100', fire: 'border-orange-600',
             ghost: 'border-lime-300', xmas: 'border-red-400', storm: 'border-indigo-300',
@@ -887,6 +995,10 @@
             script: '<path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 8h6M9 11h6M9 14h6M9 17h3"/>',
             plus:   '<path d="M12 5v14M5 12h14"/>',
             timer:  '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>',
+            play:   '<path d="M8 5v14l11-7z" class="icon-fill"/>',
+            pause:  '<rect x="6" y="5" width="4" height="14" rx="1" class="icon-fill"/><rect x="14" y="5" width="4" height="14" rx="1" class="icon-fill"/>',
+            reset:  '<path d="M3 4v6h6"/><path d="M5.6 15a7.5 7.5 0 1 0 1.7-7.8L3 10"/>',
+            gear:   '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
         };
         const icon = (name) => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ''}</svg>`;
 
@@ -3027,11 +3139,12 @@
             ws.onopen = () => {
                 const el = $('controller-connection');
                 if (el) { el.className = "text-green-400 font-bold"; el.textContent = "OPEN"; }
-                if (isController) { askCustomList(false); broadcastProjector(); } // picks up the current custom image
+                if (isController) { askCustomList(); broadcastProjector(); loadAktaSettings(); } // checks the custom image is still there
                 if (isProjector) ws.send(JSON.stringify({ mode: 'projectorHello' }));
             };
-            // The display shows graphics. The control panel only listens for the server's
-            // replies (the custom images, and saved rundowns).
+            // The display shows graphics. The control panel listens for the server's replies (the
+            // custom images, saved rundowns, AKTA), and for what server.py hears from OBS: the
+            // break hotkeys, scene changes and the end of each transition.
             ws.onmessage = (e) => {
                 let data;
                 try { data = JSON.parse(e.data); } catch { return; } // not ours
@@ -3040,6 +3153,9 @@
                 else if (!isController) showDisplay(data);
                 else if (data.mode === 'projectorHello') broadcastProjector(); // a projector just opened: send it the show
                 else if (data.mode === 'customFiles') gotCustomList(data.files || []);
+                else if (data.mode === 'timerCommand') timerCommand(data.action);
+                else if (data.mode === 'obsScene') obsSceneChanged(data.scene);
+                else if (data.mode === 'obsTransitionEnd') obsTransitionEnded();
                 else if (replyWaiters[data.mode]) replyWaiters[data.mode](data);
             };
             // Reconnects every 2 seconds if the connection drops
@@ -3062,12 +3178,12 @@
         });
 
         // Sends a message to the display. Returns false (and warns) if not connected.
-        // With Greenscreen on, graphics carry gs: true so #display and #underlay can split them.
-        // It follows the switch, not what a saved graphic was set for.
+        // An overlay set for Greenscreen carries gs: true, so #display and #underlay can split it.
+        // Only the overlays that support it (depth) keep it.
         const sendPayload = (payload) => {
-            if (payload.mode === 'l3' || payload.mode === 'overlay') {
+            if (payload.gs && !(payload.mode === 'overlay' && OVERLAYS[payload.overlay]?.depth)) {
                 const { gs, ...rest } = payload;
-                payload = greenscreen ? { ...rest, gs: true } : rest;
+                payload = rest;
             }
             if (ws && ws.readyState === WebSocket.OPEN) { ws.send(JSON.stringify(payload)); return true; }
             flash('Not connected', true);
@@ -3086,6 +3202,7 @@
         // for errors) for a few seconds, then dimmed; after 15 seconds with nothing new it goes
         // back to "Ready"
         const flash = (msg, isError = false, detail = '') => {
+            stopTakeCountdown(); // a newer message takes over the box
             const el = $('controller-feedback');
             el.textContent = msg;
             if (detail) {
@@ -3102,7 +3219,32 @@
             idleTimer = setTimeout(() => { el.textContent = 'Ready'; el.className = 'fx-toast idle'; }, IDLE_RESET); // small and faint
         };
 
-        // Sends a graphic and shows "Taken: Name  for 5s"
+        // After a take, the message box counts down its time on screen ("Taken: Fire  for 12s", then
+        // "11s left"...) and says when it's gone. Any newer message takes over the box, and taking
+        // something else, Clear All, OFF and TOGGLE all show one.
+        let takeCountdown = null;
+        const stopTakeCountdown = () => { clearInterval(takeCountdown); takeCountdown = null; };
+        const startTakeCountdown = (name, secs, extra = '') => {
+            const el = $('controller-feedback'), ends = Date.now() + secs * 1000;
+            clearTimeout(flashTimer); // it stays lit while it counts
+            clearTimeout(idleTimer);
+            const tick = () => {
+                const left = (ends - Date.now()) / 1000;
+                if (left <= 0) {
+                    stopTakeCountdown();
+                    el.textContent = `Off screen: ${name}`;
+                    el.className = 'fx-toast';
+                    idleTimer = setTimeout(() => { el.textContent = 'Ready'; el.className = 'fx-toast idle'; }, IDLE_RESET);
+                    return;
+                }
+                const s = Math.ceil(left), detail = el.querySelector('.toast-detail');
+                if (detail) detail.textContent = `${s >= Math.ceil(secs) ? `for ${formatTime(secs)}` : `${formatTime(s)} left`}${extra}`;
+            };
+            takeCountdown = setInterval(tick, 250);
+            tick();
+        };
+
+        // Sends a graphic and shows "Taken: Name  for 5s", counting down until it's off screen
         const flashTake = (data) => {
             if (!sendPayload(data)) return false;
             const layer = isOverlayItem(data) ? 'overlay' : 'l3';
@@ -3110,8 +3252,9 @@
             clearLive(layer);         // ...and any rundown card that was on screen there
             const ovKey = isOverlayItem(data) ? (data.overlay || 'l3Large') : null;
             const name = data.label || OVERLAYS[ovKey]?.label || 'Graphic';
-            if (data.gs && !greenscreen && data.sid) flash(`Taken: ${name}`, true, 'set for Greenscreen, but it\'s off'); // rundown cards only
-            else flash(`Taken: ${name}`, false, `for ${formatTime(graphicSeconds(data))}`);
+            const secs = graphicSeconds(data), extra = data.gs && OVERLAYS[ovKey]?.depth ? ' · Greenscreen' : '';
+            flash(`Taken: ${name}`, false, `for ${formatTime(secs)}${extra}`);
+            startTakeCountdown(name, secs, extra);
             return true;
         };
 
@@ -3143,6 +3286,9 @@
             $('duration-field').classList.toggle('is-fixed', fixed);
             $('duration-label').innerHTML = fixed ? `${icon('lock')} Fixed length` : 'Duration';
             if (fixed) $('duration-input').value = Math.round(cfg.length * 10) / 10;
+            // Greenscreen: only on the overlays that can show partly behind you, as last set for that one
+            $('gs-field').classList.toggle('hidden', !cfg?.depth);
+            if (cfg?.depth) $('gs-pick').checked = loadGsEffects().includes(checked('overlayStyle'));
             $('import-btn').classList.toggle('hidden', !cfg?.import);
             $('take-row').classList.toggle('hidden', show);
             $('saved-wrap').classList.toggle('hidden', show);
@@ -3227,7 +3373,6 @@
             $('saved-heading').textContent = checked('mode') === 'overlay' ? 'Saved Overlays' : 'Saved L3s';
             if (checked('mode') === 'show') renderShow();
             else renderButtons(loadButtonsFromStorage());
-            updateGsAlert(); // the Greenscreen switch only pulses on the Podcast Rundown tab
         };
 
         // ---------- Sections that open and close (details.fx-section) ----------
@@ -3320,6 +3465,7 @@
                     ...(cfg.custom && { customBg: customFile }),
                     ...(cfg.sport && { sport: checked('sportStyle') }),
                     ...(cfg.social && { socials: currentSocials() }),
+                    ...(cfg.depth && $('gs-pick').checked && { gs: true }), // Greenscreen (saved with it too)
                     duration,
                     animationStyle,
                 };
@@ -3354,8 +3500,6 @@
         const saveButton = () => {
             const p = buildPayload();
             if (!p) return;
-            // Saved while Greenscreen is on: remember this effect is meant for it
-            if (greenscreen && p.mode === 'overlay' && OVERLAYS[p.overlay]?.depth) p.gs = true;
             const b = loadButtonsFromStorage();
             b.unshift({ id: Date.now(), ...p });
             saveButtonsToStorage(b);
@@ -3371,7 +3515,6 @@
                 if (!confirm('The Podcast Rundown order is set. Turn off Set Order and add this under Unsorted?')) return;
                 localStorage.setItem(SHOW_LOCK_KEY, '0');
             }
-            if (greenscreen && p.mode === 'overlay' && OVERLAYS[p.overlay]?.depth) p.gs = true; // like 💾 SAVE
             addToShow(p, UNSORTED);
         };
 
@@ -3389,7 +3532,7 @@
         /* =========================================================
            13. CONTROLLER: IMPORT L3s
            Each line of each .txt file becomes a saved L3, using the
-           selected L3 type (L3 PNG or L3 Info; the Import button
+           selected L3 type (L3 PNG, KAMC or L3 Info; the Import button
            only shows for those).
            Line format: "Name" or "Name | Title". For L3 Info, each
            line is one paragraph.
@@ -3666,18 +3809,6 @@
             else flash(`Added to rundown: ${name}`, false, itemCode(item, list));
         };
 
-        // Rundown graphics saved for Greenscreen (Unsorted ones aren't in the show). The warnings only
-        // show while the rundown is running (Set Order on); the switch only pulses on the Podcast Rundown tab.
-        const rundownGsCount = (list = loadShow()) => list.filter(d => d.gs && d.block !== UNSORTED).length;
-        const rundownActive = () => showLocked() && checked('mode') === 'show';
-        const updateGsAlert = (list = loadShow()) => {
-            const n = rundownGsCount(list);
-            const warn = !!n && !greenscreen && showLocked();
-            $('gs-alert').classList.toggle('hidden', !warn);
-            $('gs-toggle').closest('.gs-switch').classList.toggle('gs-needed', warn && checked('mode') === 'show');
-            $('gs-alert-text').textContent = `Greenscreen is off, but ${n} graphic${n === 1 ? ' here is' : 's here are'} set for it.`;
-        };
-
         // Green outline and a floating OFF button (with the time left) while on screen; ★ on the one played last
         const updateLiveMarks = () => {
             const now = Date.now();
@@ -3892,6 +4023,38 @@
             return card;
         };
 
+        // The break after a block: its length, and during the show (Set Order on, show times set) when it's due
+        // or when it's back: ▶ starts it; while it's on, ⏹ ends it early; ↺ resets it. Set Order off: just its
+        // name and length; tap it to change the breaks.
+        const makeBreakRow = (part, ev, locked) => {
+            const row = document.createElement('div');
+            row.className = 'show-break';
+            row.dataset.break = part.block;
+            row.innerHTML = `<span class="brk-icon">${icon('pause')}</span><span class="brk-label"></span><span class="brk-len"></span><span class="brk-at"></span>`;
+            row.querySelector('.brk-label').textContent = part.label;
+            row.querySelector('.brk-len').textContent = clock(part.secs);
+            const button = (cls, iconName, title, onclick) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `brk-btn ${cls}`;
+                btn.innerHTML = icon(iconName);
+                btn.title = title;
+                btn.onclick = (e) => { e.stopPropagation(); onclick(); };
+                row.append(btn);
+            };
+            if (ev && !ev.started) button('', 'play', `Start ${part.label} now`, () => startBreakAsk(part.block));
+            if (ev?.started) {
+                button('end', 'stop', `End ${part.label} early`, () => endBreakEarly(part.block)); // only shows while it's on
+                button('reset', 'reset', `Reset ${part.label}: it waits to be started again`, () => resetBreak(part.block));
+            }
+            if (!locked) {
+                row.classList.add('show-tappable');
+                row.title = 'Change the show times and breaks';
+                row.onclick = () => openTimingDialog();
+            }
+            return row;
+        };
+
         const renderShow = () => {
             const box = $('show-list');
             const list = loadShow();
@@ -3904,14 +4067,16 @@
             $('cue-row').classList.toggle('hidden', locked);
             $('show-controls').classList.toggle('hidden', !locked);
             if (!locked) $('msg-panel').classList.add('hidden');
-            renderTotals(list, blocks, locked);
+            renderTotals(list);
             renderBlockChips(blocks, locked, list);
-            updateGsAlert(list);
             box.innerHTML = '';
             const view = locked ? viewBlock(blocks, list) : 'ALL';
+            const lengths = loadBlockLengths();
+            const tl = buildTimeline();
+            const breaks = Object.fromEntries(showFormat().filter(p => p.kind === 'break').map(p => [p.block, p]));
             blocks.forEach((block, bi) => {
                 const items = list.filter(d => d.block === block);
-                if (locked && !items.length) return; // empty blocks get out of the way during the show
+                if (locked && !items.length && !lengths[block]) return; // empty blocks get out of the way during the show (unless they're timed)
                 if (view !== 'ALL' && block !== view) return; // showing just one block
                 const section = document.createElement('section');
                 section.className = 'show-block';
@@ -3927,9 +4092,9 @@
                 const line = document.createElement('span');
                 line.className = 'line';
                 head.append(title, count);
-                // Planned length (tap to set while editing) and the graphics' total; during the show the
-                // current block shows its time so far against the plan
-                const planned = loadBlockLengths()[block] || 0;
+                // Planned length (tap to set while editing), when it's due on air, and the graphics' total.
+                // While it's on air (by the show's times), the length becomes the time it has left.
+                const planned = lengths[block] || 0;
                 const gfx = items.filter(d => !d.cue && d.block !== UNSORTED).reduce((sum, d) => sum + graphicSeconds(d), 0);
                 const time = document.createElement(locked ? 'span' : 'button');
                 time.className = `block-time${planned ? '' : ' unset'}`;
@@ -3940,7 +4105,11 @@
                     time.title = `Planned length of block ${block}`;
                     time.onclick = () => setBlockLength(block);
                 }
-                head.append(time);
+                const at = document.createElement('span');
+                at.className = 'block-at';
+                at.dataset.blockAt = block;
+                at.title = 'When it\'s due on air';
+                head.append(time, at);
                 if (gfx && !locked) {
                     const g = document.createElement('span');
                     g.className = 'block-gfx';
@@ -3967,11 +4136,12 @@
                 listEl.className = 'block-list';
                 listEl.dataset.block = block;
                 const empty = document.createElement('p');
-                empty.className = `block-empty${items.length ? ' hidden' : ''}`;
+                empty.className = `block-empty${items.length || locked ? ' hidden' : ''}`;
                 empty.textContent = 'Drag graphics here, or pick this block under "Add to" and tap ＋ on a saved graphic.';
                 listEl.append(empty);
                 items.forEach(data => listEl.append(makeShowCard(data, itemCode(data, items), locked)));
                 section.append(head, listEl);
+                if (breaks[block]) section.append(makeBreakRow(breaks[block], locked ? tl?.events.find(e => e.kind === 'break' && e.block === block) : null, locked));
                 box.append(section);
             });
             // Unsorted (from ＋ RUNDOWN): at the bottom while Set Order is off; not part of the show
@@ -4011,7 +4181,9 @@
             }
             updateLiveMarks();
             updateMessageNow();
-            startShowTicker(locked);
+            updateProjectorClearBtn();
+            renderSpread();
+            updateTiming();
             broadcastProjector();
         };
 
@@ -4225,6 +4397,8 @@
             saved: new Date().toISOString(),
             blocks: loadBlocks(),
             blockLengths: loadBlockLengths(),
+            timing: loadTiming(),           // the show's start and end times, and the breaks
+            breakScenes: loadBreakScenes(),
             items: loadShow().map(({ sid, ...item }) => item),
         });
         const downloadJson = (name, data) => {
@@ -4296,8 +4470,10 @@
             reader.readAsText(file);
         };
 
-        // Replaces the rundown with a file's. Returns true if it did.
+        // Replaces the rundown with a file's. Returns true if it did. A schedule saved by the OBS Show Timer
+        // only brings its times and breaks (the graphics stay).
         const applyRundown = (data, name) => {
+            if (isShowTimerFile(data)) return applyShowTimer(data, name);
             if (!data || !Array.isArray(data.items)) { flash('That isn\'t a rundown file', true); return false; }
             // Only things this version knows how to show. Lower thirds saved by older versions have
             // no mode (like everywhere else in the panel, that means a lower third). Saved graphics
@@ -4326,6 +4502,9 @@
             localStorage.setItem(RUNDOWN_NAME_KEY, cleanRundownName(name) || name);
             saveBlocks(blocks);
             saveBlockLengths(data.blockLengths && typeof data.blockLengths === 'object' ? data.blockLengths : {});
+            // Rundowns saved before show timing keep the times and breaks already set here
+            if (data.timing && typeof data.timing === 'object') saveTiming(cleanTiming(data.timing));
+            if (Array.isArray(data.breakScenes) && data.breakScenes.length) saveBreakScenes(data.breakScenes);
             saveShow(show);
             flash(`Imported: ${name}`, skipped > 0, `${show.length} item${show.length === 1 ? '' : 's'}${skipped ? `, ${skipped} skipped` : ''}`);
             return true;
@@ -4335,17 +4514,17 @@
         /* =========================================================
            16. CONTROLLER: CUSTOM FILES
            Both "Custom…" options (the lower third background and the
-           Fullscreen L3) use the first PNG, JPG or GIF, by name, in the
-           "custom" folder next to "assets". The server reads the folder
-           when the panel connects and whenever Custom… is tapped; the
-           display loads the image from there.
-           An older server can't read the folder, so then a file picker
-           opens instead: pick the image from the custom folder.
+           Fullscreen L3) use an image from the "custom" folder next to
+           "assets"; the display loads it from there. Tapping Custom…
+           opens a window of the PNG, JPG and GIF files in that folder
+           (the server lists them): tap one to use it. "Choose a file…"
+           picks one by hand (for an older server that can't list the
+           folder). The pick is remembered; until there is one, or if it's
+           taken out of the folder, the first image by name is used.
            ========================================================= */
         const CUSTOM_KEY = 'fx_custom_file';
         const IMAGE_FILE = /\.(png|jpe?g|gif)$/i;
         let customFile = localStorage.getItem(CUSTOM_KEY) || localStorage.getItem('fx_custom_bg') || '';
-        let customTapped = false;   // true when the answer is for a tap on Custom… (so say what happened)
         let customListTimer = null;
 
         const showCustomNames = () => {
@@ -4363,18 +4542,21 @@
         };
 
         // Asks the server what's in the custom folder (the answer comes to gotCustomList)
-        const askCustomList = (tapped) => {
-            customTapped = tapped;
+        const askCustomList = () => {
             clearTimeout(customListTimer);
-            if (!ws || ws.readyState !== WebSocket.OPEN) {
-                if (tapped) $('custom-file').click(); // not connected: pick it by hand
-                return;
-            }
+            const open = $('custom-dialog').open;
+            const noList = () => { if ($('custom-dialog').open) $('custom-note').textContent = 'The server can\'t list the custom folder (not connected, or an older server). Use Choose a file… and pick the image from the custom folder.'; };
+            if (!ws || ws.readyState !== WebSocket.OPEN) { if (open) noList(); return; }
             ws.send(JSON.stringify({ mode: 'customList' }));
-            // No answer means an older server: pick it by hand
-            if (tapped) customListTimer = setTimeout(() => $('custom-file').click(), 1500);
+            if (open) customListTimer = setTimeout(noList, 1500); // no answer means an older server
         };
-        const pickCustom = () => askCustomList(true);
+        // Custom…: the window of images in the custom folder
+        const pickCustom = () => {
+            $('custom-note').textContent = 'Looking in the custom folder…';
+            renderCustomList();
+            if (!$('custom-dialog').open) $('custom-dialog').showModal();
+            askCustomList();
+        };
 
         // The server's answer: the custom folder's images, sorted by name
         const gotCustomList = (files) => {
@@ -4383,17 +4565,45 @@
             customFolderFiles = files;
             if (checked('mode') === 'show') renderShow();
             else renderButtons(loadButtonsFromStorage());
-            const first = files.find(f => IMAGE_FILE.test(f));
-            if (first) setCustomFile(first);
-            if (!customTapped) return;
-            if (first) flash('Custom image', false, first);
-            else flash(`No PNG, JPG or GIF in the "${CUSTOM_FOLDER}" folder`, true);
+            // Keep the one picked while it's still there; otherwise the first by name
+            const images = files.filter(f => IMAGE_FILE.test(f));
+            if (images.length && !images.some(f => f.toLowerCase() === customFile.toLowerCase())) setCustomFile(images[0]);
+            if ($('custom-dialog').open) {
+                $('custom-note').textContent = images.length ? 'Tap the image to use.' : `No PNG, JPG or GIF in the "${CUSTOM_FOLDER}" folder yet. Put one there (next to "assets"), then open this again.`;
+                renderCustomList();
+            }
         };
 
-        // Backup file picker (older server): checks the file really is in the custom folder
+        // The window's list: a preview and the name of each image; the one in use is marked
+        const renderCustomList = () => {
+            const box = $('custom-list');
+            box.innerHTML = '';
+            (customFolderFiles || []).filter(f => IMAGE_FILE.test(f)).forEach(name => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `custom-pick${name.toLowerCase() === customFile.toLowerCase() ? ' on' : ''}`;
+                btn.title = `Use ${name}`;
+                const img = document.createElement('img');
+                img.src = customPath(name);
+                img.alt = '';
+                img.loading = 'lazy';
+                img.onerror = () => img.remove(); // a panel on another computer can't show the preview
+                const label = document.createElement('span');
+                label.textContent = name;
+                btn.append(img, label);
+                btn.onclick = () => {
+                    setCustomFile(name);
+                    flash('Custom image', false, name);
+                    $('custom-dialog').close();
+                };
+                box.append(btn);
+            });
+        };
+
+        // Choose a file…: checks the file really is in the custom folder
         const useCustomFile = (name) => {
             if (!IMAGE_FILE.test(name)) { flash('Custom images must be PNG, JPG or GIF', true, name); return; }
-            const accept = () => { setCustomFile(name); flash('Custom image', false, name); };
+            const accept = () => { setCustomFile(name); flash('Custom image', false, name); if ($('custom-dialog').open) $('custom-dialog').close(); };
             const img = new Image();
             img.onload = accept;
             img.onerror = () => {
@@ -4422,17 +4632,19 @@
         };
 
         // Greenscreen: for a keyed camera in OBS with fx_wizard.html#underlay placed behind
-        // it (and #display in front, as usual). When on, every graphic is sent with gs: true, and
-        // the overlays that support it (depth: true) split between the two: far behind you,
-        // near in front. Everything else stays on #display.
-        // It starts off each time. Effects saved while it's on remember it, and a running Podcast
-        // Rundown (Set Order on) warns when it has some of those but Greenscreen is off.
-        let greenscreen = false;
-        const setGreenscreen = (on, announce = false) => {
-            greenscreen = on;
-            $('gs-toggle').checked = on;
-            updateGsAlert();
-            if (announce) flash(on ? 'Greenscreen on' : 'Greenscreen off', false, on ? 'put #underlay behind your camera in OBS' : '');
+        // it (and #display in front, as usual). Only the overlays that support it (depth: true)
+        // have the switch, next to Duration. Taken with it on, they're sent with gs: true and
+        // split between the two: far behind you, near in front. Everything else stays on #display.
+        // Each effect remembers its own switch, and saved graphics and rundown cards keep theirs
+        // (✎ changes it on a rundown card).
+        const GS_EFFECTS_KEY = 'fx_gs_effects'; // the overlays whose Greenscreen switch is on
+        const loadGsEffects = () => { const list = readJson(GS_EFFECTS_KEY, []); return Array.isArray(list) ? list : []; };
+        const setGsPick = (on) => {
+            const overlay = checked('overlayStyle');
+            if (!OVERLAYS[overlay]?.depth) return;
+            const others = loadGsEffects().filter(o => o !== overlay);
+            localStorage.setItem(GS_EFFECTS_KEY, JSON.stringify(on ? [...others, overlay] : others));
+            flash(`Greenscreen ${on ? 'on' : 'off'} for ${OVERLAYS[overlay].label}`, false, on ? 'part of it shows behind you, on #underlay' : 'it all shows in front, on #display');
         };
 
         // 🔧 Opens a small window of things to check, with the live connection status
@@ -4497,7 +4709,7 @@
   <li>The OBS Browser Source must point to <code>fx_wizard.html</code> with <code>#display</code> at the end.</li>
   <li>Set the Browser Source size to your canvas, for example 1920 x 1080.</li>
   <li>Right-click the Browser Source and choose <b>Refresh</b>.</li>
-  <li><b>Greenscreen on?</b> Add <code>fx_wizard.html#underlay</code> as a second Browser Source <i>below</i> your keyed camera, with <code>#display</code> above it.</li>
+  <li><b>Using Greenscreen on an effect?</b> Add <code>fx_wizard.html#underlay</code> as a second Browser Source <i>below</i> your keyed camera, with <code>#display</code> above it.</li>
 </ul>
 </body></html>`);
             win.document.close();
@@ -4524,8 +4736,8 @@
            While Set Order is on:
            - The current item: whatever was taken last, or a cue tapped (◀ ▶ step through without
              taking anything). Graphics can be on air at the same time (an L3 over a SOT).
-           - Block times: each block has a planned length (set while editing); the current block
-             shows its time so far against it. The show clock starts when Set Order is first turned on.
+           - Block times: each block has a planned length (set while editing). The clock and the
+             time each block has left come from the show's start and end times (section 19).
            - Messages for the projector (presets or typed), which stay up until replaced or cleared.
            - A log of what ran and for how long, saved by Generate Log.
            All of it is sent to the projector (fx_wizard.html#projector) as it changes.
@@ -4533,7 +4745,6 @@
         const BLOCK_LENGTHS_KEY = 'fx_block_lengths'; // planned seconds per block
         const SHOW_STATE_KEY = 'fx_show_state';       // { current, start, blockStarts, message }
         const SHOW_LOG_KEY = 'fx_show_log';
-        const SHOW_COUNTDOWN_KEY = 'fx_show_countdown'; // { duration, startedAt } seconds + epoch ms (null = armed, not running)
         const LOG_LIMIT = 5000;
 
         const readJson = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
@@ -4542,10 +4753,6 @@
         const showState = () => ({ current: null, start: null, blockStarts: {}, message: '', ...readJson(SHOW_STATE_KEY, {}) });
         const saveShowState = (st) => localStorage.setItem(SHOW_STATE_KEY, JSON.stringify(st));
         const loadLog = () => readJson(SHOW_LOG_KEY, []);
-        const loadCountdown = () => readJson(SHOW_COUNTDOWN_KEY, null);
-        const saveCountdown = (cd) => { if (cd) localStorage.setItem(SHOW_COUNTDOWN_KEY, JSON.stringify(cd)); else localStorage.removeItem(SHOW_COUNTDOWN_KEY); };
-        // Seconds left: the full duration while armed (startedAt null), counting down once started
-        const countdownRemaining = (cd, now = Date.now()) => cd.startedAt === null ? cd.duration : Math.max(0, cd.duration - (now - cd.startedAt) / 1000);
 
         // Times as 4:05 or 1:02:30
         const clock = (secs) => {
@@ -4590,7 +4797,6 @@
             const list = loadShow(), d = list.find(x => x.sid === sid);
             if (!d || d.cue === 'note') return;
             const st = showState(), now = Date.now();
-            const firstActivation = !st.current; // nothing taken yet this show
             if (!st.start) st.start = now;
             if (!st.blockStarts[d.block]) { // the show has reached this block
                 st.blockStarts[d.block] = now;
@@ -4602,10 +4808,7 @@
                 saveShowState(st);
                 logEvent('current', d, list);
             }
-            // The countdown starts when you press it, or on its own the first time anything goes active
-            if (firstActivation) maybeAutoStartCountdown();
             updateLiveMarks();
-            updateShowClock();
             broadcastProjector();
         };
         // ◀ ▶: move the current item without taking anything
@@ -4629,86 +4832,17 @@
             saveBlockLengths(lengths);
             renderShow();
         };
-        // The line above the blocks: planned show length and the graphics' total (and the show so far)
-        const renderTotals = (list, blocks, locked) => {
-            const lengths = loadBlockLengths();
-            const planned = blocks.reduce((sum, b) => sum + (lengths[b] || 0), 0);
+        // The line above the blocks: planned show length (the timed blocks and their breaks) and the graphics' total
+        const renderTotals = (list) => {
+            const format = showFormat();
+            const planned = format.reduce((sum, p) => sum + p.secs, 0);
+            const breaks = format.filter(p => p.kind === 'break').reduce((sum, p) => sum + p.secs, 0);
             const gfx = list.filter(d => !d.cue && d.block !== UNSORTED).reduce((sum, d) => sum + graphicSeconds(d), 0);
             const parts = [];
-            if (planned) parts.push(`<b>Show</b> ${clock(planned)} planned`);
+            if (planned) parts.push(`<b>Show</b> ${clock(planned)} planned${breaks ? ` (breaks ${clock(breaks)})` : ''}`);
             if (gfx) parts.push(`graphics ${clock(gfx)}`);
             $('show-totals').innerHTML = parts.join(' · ');
             $('show-totals').classList.toggle('hidden', !parts.length || !list.length);
-        };
-        // While the show runs: the clock in the controls, and the current block's time (red when over)
-        let showTicker = null;
-        const startShowTicker = (on) => {
-            clearInterval(showTicker);
-            showTicker = on ? setInterval(updateShowClock, 1000) : null;
-            updateShowClock();
-        };
-        const updateShowClock = () => {
-            const st = showState(), now = Date.now(), lengths = loadBlockLengths();
-            const planned = loadBlocks().reduce((sum, b) => sum + (lengths[b] || 0), 0);
-            $('show-clock').textContent = st.start ? `${clock((now - st.start) / 1000)}${planned ? ` / ${clock(planned)}` : ''}` : '';
-            const cur = loadShow().find(d => d.sid === st.current);
-            document.querySelectorAll('[data-block-time]').forEach(el => {
-                const b = el.dataset.blockTime, len = lengths[b] || 0;
-                const running = showLocked() && cur && cur.block === b && st.blockStarts[b];
-                const secs = running ? (now - st.blockStarts[b]) / 1000 : 0;
-                el.textContent = running ? `${clock(secs)}${len ? ` / ${clock(len)}` : ''}` : len ? clock(len) : el.tagName === 'BUTTON' ? 'Set time' : '';
-                el.classList.toggle('running', !!running);
-                el.classList.toggle('over', !!running && len > 0 && secs > len);
-            });
-            updateCountdownUI();
-        };
-
-        // ---------- Show countdown (optional; armed with a duration, then started by hand or by
-        // taking the first item, so it's never left running from a show that already began) ----------
-        const startCountdownNow = () => {
-            const cd = loadCountdown();
-            if (!cd || cd.startedAt !== null) return;
-            cd.startedAt = Date.now();
-            saveCountdown(cd);
-            updateCountdownUI();
-            broadcastProjector();
-        };
-        const maybeAutoStartCountdown = () => {
-            const cd = loadCountdown();
-            if (cd && cd.startedAt === null) startCountdownNow();
-        };
-        const handleCountdownClick = () => {
-            const cd = loadCountdown();
-            if (!cd) {
-                const answer = prompt('Countdown to air (minutes:seconds, like 5:00):', '');
-                if (answer === null || !answer.trim()) return;
-                const secs = parseClock(answer);
-                if (!secs) { flash('Use minutes:seconds, like 5:00', true); return; }
-                saveCountdown({ duration: secs, startedAt: null });
-            } else if (cd.startedAt === null) {
-                startCountdownNow();
-                return;
-            } else if (confirm('Clear the countdown?')) {
-                saveCountdown(null);
-            }
-            updateCountdownUI();
-            broadcastProjector();
-        };
-        const updateCountdownUI = () => {
-            const cd = loadCountdown(), btn = $('countdown-btn'), out = $('countdown-clock');
-            if (!cd) {
-                btn.title = 'Set a countdown to air';
-                btn.classList.remove('armed', 'running');
-                out.classList.add('hidden');
-                return;
-            }
-            const remaining = countdownRemaining(cd);
-            out.classList.remove('hidden');
-            out.textContent = `-${clock(remaining)}`;
-            out.classList.toggle('done', Math.round(remaining) === 0); // matches clock()'s own rounding, so the color flips exactly when the text reads -0:00
-            btn.classList.toggle('armed', cd.startedAt === null);
-            btn.classList.toggle('running', cd.startedAt !== null);
-            btn.title = cd.startedAt === null ? 'Start the countdown (or it starts on its own with the first item)' : 'Clear the countdown';
         };
 
         // ---------- Messages for the projector ----------
@@ -4737,8 +4871,27 @@
             $('msg-now-text').textContent = text;
         };
 
+        // ---------- Clearing the projector between shows ----------
+        // While Set Order is off, the projector can be blanked: back to how it looks when it opens, with
+        // nothing counting. It stays blank until it's tapped again or Set Order is turned on.
+        const PROJECTOR_CLEAR_KEY = 'fx_projector_clear';
+        const projectorCleared = () => localStorage.getItem(PROJECTOR_CLEAR_KEY) === '1' && !showLocked();
+        const toggleProjectorClear = () => {
+            const clear = !projectorCleared();
+            localStorage.setItem(PROJECTOR_CLEAR_KEY, clear ? '1' : '0');
+            if (clear) { const st = showState(); st.message = ''; saveShowState(st); } // the director's message goes too
+            renderShow();
+            flash(clear ? 'Projector cleared' : 'Projector back on', false, clear ? 'until Set Order is turned on' : 'showing the rundown');
+        };
+        const updateProjectorClearBtn = () => {
+            const clear = projectorCleared(), btn = $('pj-clear-btn');
+            btn.innerHTML = clear ? `${icon('play')} Projector cleared: tap to show it again` : `${icon('x')} Clear the projector`;
+            btn.classList.toggle('on', clear);
+            btn.title = clear ? 'Show the rundown and times on the projector again' : 'Blank the projector until the next show (it comes back when Set Order is turned on)';
+        };
+
         // ---------- Tell the projector ----------
-        // Times are sent as "so far" (not clock times), so a projector on another computer stays right
+        // The show's times go with this panel's clock (now), so a projector on another computer can line its own up
         let projectorTimer = null;
         const broadcastProjector = () => {
             clearTimeout(projectorTimer);
@@ -4746,9 +4899,11 @@
         };
         const sendProjectorState = () => {
             if (!isController || !ws || ws.readyState !== WebSocket.OPEN) return;
+            if (projectorCleared()) { ws.send(JSON.stringify({ mode: 'projector', cleared: true })); return; }
             const list = loadShow(), blocks = loadBlocks(), lengths = loadBlockLengths(), st = showState(), now = Date.now();
             const flow = showFlow(list, blocks), cur = list.find(d => d.sid === st.current);
-            const cd = loadCountdown();
+            const breaks = Object.fromEntries(showFormat().filter(p => p.kind === 'break').map(p => [p.block, p]));
+            const tl = buildTimeline(now), on = activeEvent(tl, now);
             ws.send(JSON.stringify({
                 mode: 'projector',
                 running: showLocked(),
@@ -4756,13 +4911,16 @@
                     sid: d.sid, block: d.block, code: itemCode(d, list), type: itemType(d), kind: d.cue || 'graphic',
                     label: itemLabel(d), ...(d.cue === 'script' && { script: d.text || '' }),
                 })),
-                blocks: blocks.filter(b => flow.some(d => d.block === b)).map(b => ({ name: b, planned: lengths[b] || 0 })),
+                blocks: blocks.filter(b => lengths[b] || flow.some(d => d.block === b)).map(b => ({
+                    name: b, planned: lengths[b] || 0, ...(breaks[b] && { brk: { label: breaks[b].label, secs: breaks[b].secs } }),
+                })),
                 current: cur ? cur.sid : null,
                 live: Object.values(liveByLayer).filter(Boolean),
-                blockSoFar: cur && st.blockStarts[cur.block] ? (now - st.blockStarts[cur.block]) / 1000 : null,
-                showSoFar: st.start ? (now - st.start) / 1000 : null,
                 message: st.message || '',
-                countdown: cd ? { remaining: countdownRemaining(cd, now), running: cd.startedAt !== null } : null,
+                timing: tl && showLocked() ? { // only while the show is running (Set Order on)
+                    now, start: tl.start, end: tl.end, over: now >= Math.max(tl.end, tl.projectedEnd),
+                    active: on ? { kind: on.ev.kind, block: on.ev.block, label: on.ev.label, ends: on.ev.end } : null,
+                } : null,
             }));
         };
 
@@ -4775,6 +4933,7 @@
         const buildLogCsv = (log, end = Date.now()) => {
             const rows = [];
             const open = {}; // graphic on air, by layer
+            const openBreaks = {}; // break running, by the block it follows
             let cueRow = null; // the cue that's current
             const endCue = (t) => { if (cueRow) { cueRow.end = t; cueRow = null; } };
             log.forEach(e => {
@@ -4790,6 +4949,15 @@
                     if (e.cue) { cueRow = { start: e.t, end: null, planned: '', type: e.type, code: e.code, item: e.label, block: e.block }; rows.push(cueRow); }
                 } else if (e.kind === 'message') {
                     rows.push({ start: e.t, end: e.t, type: 'MESSAGE', code: '', item: e.text, block: '', message: true });
+                } else if (e.kind === 'break') {
+                    if (openBreaks[e.block]) openBreaks[e.block].end ??= e.t;
+                    openBreaks[e.block] = { start: e.t, end: null, planned: e.planned, type: 'BREAK', code: '', item: e.label, block: e.block };
+                    rows.push(openBreaks[e.block]);
+                } else if (e.kind === 'breakEnd') {
+                    const row = openBreaks[e.block];
+                    if (row) { row.end = e.t; if (e.reset || e.early) row.item += e.reset ? ' (reset)' : ' (ended early)'; delete openBreaks[e.block]; }
+                } else if (e.kind === 'akta') {
+                    rows.push({ start: e.t, end: e.t, type: 'AKTA', code: '', item: e.text, block: e.block || '', message: true });
                 } else if (e.kind === 'start') {
                     rows.push({ start: e.t, end: e.t, type: 'SHOW', code: '', item: 'Show started', block: '', message: true });
                 }
@@ -4833,11 +5001,11 @@
                 a.remove();
                 flash(`Downloaded ${name}.csv`, true, reply?.error || 'the server can\'t save logs: move it into the logs folder');
             }
-            if (confirm('Start a fresh log and show clock for the next show?')) {
+            if (confirm('Start a fresh log for the next show? The breaks that were started are cleared too.')) {
                 localStorage.removeItem(SHOW_LOG_KEY);
                 const st = showState();
                 saveShowState({ current: null, start: null, blockStarts: {}, message: st.message });
-                saveCountdown(null); // clears the countdown too, so it doesn't carry over to the next show
+                clearStartedBreaks(); // so they don't carry over to the next show
                 if (showLocked()) startShow();
                 renderShow();
             }
@@ -4851,16 +5019,676 @@
 
 
         /* =========================================================
-           19. PROJECTOR (fx_wizard.html#projector)
-           Shows what the control panel sends: the director's message, which block the show is in
-           and its time, the rundown (previous, current and next marked, following along), what's
+           19. CONTROLLER: SHOW TIMING
+           Hard-clock timing, as in the OBS Show Timer. The show has a start and an end (times of day).
+           Each block with a length is timed, one after another from the start, with a break after any
+           block that has one. So everything has a time it's due, and:
+           - The clock is red while the show is on air. Next to it: what's on now and the time it has
+             left (before the show, the time to air). A block whose time is up stays on, counting up in
+             red, until the break after it starts; blocks back to back follow on by themselves.
+           - A break starts with Start Break (or ▶ on its row, or the OBS hotkey), or when OBS goes to
+             a break scene. Everything after it then follows from when it really started. ↺ undoes it.
+           - Runtime: how far from its end time the show will finish (+ under, - over), counting a block
+             that's running over right now. Update puts the difference on the last block; ÷ spreads it
+             over the blocks you pick.
+           - AKTA (switched on per panel): a break cue when a break starts, a return when it's over.
+           All of that is only while Set Order is on (the show is running), on every tab. With it off,
+           only the plan shows (Runtime and Last block from the planned lengths), and break scenes and
+           the break hotkeys do nothing. Started breaks are kept (turning Set Order back on, or a reload,
+           picks up where the show is). The projector gets the same times and counts down by itself.
+           ========================================================= */
+        const TIMING_KEY = 'fx_timing';             // { start: 'HH:MM:SS', end: 'HH:MM:SS', breaks: { block: seconds } }
+        const TIMING_LIVE_KEY = 'fx_timing_live';   // this show's started breaks: { show, breaks: { block: when }, ended: { block: when, if early }, returned: { block: true } }
+        const BREAK_SCENES_KEY = 'fx_break_scenes'; // OBS scenes that start the next break
+        const AKTA_ON_KEY = 'fx_akta_on';           // '1' when this panel sends AKTA cues
+        const BREAK_ASK = 60;           // Start Break asks first when the break isn't due for longer than this (seconds)
+        const TRANSITION_WAIT = 5000;   // waiting for a transition to end: the break starts anyway after this long (ms)
+        const RETURN_LATE = 30000;      // a break that ended longer ago than this (the panel was closed) gets no return cue (ms)
+
+        // A saved length as whole seconds (0 if there's none)
+        const secsOf = (v) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Math.round(Number(v)) : 0);
+        // "HH:MM" or "HH:MM:SS" -> seconds after midnight (null if it isn't a time)
+        const daySeconds = (text) => {
+            const m = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(String(text ?? '').trim());
+            if (!m || +m[1] > 23 || +m[2] > 59 || +(m[3] || 0) > 59) return null;
+            return +m[1] * 3600 + +m[2] * 60 + +(m[3] || 0);
+        };
+        // A time of day the way this computer shows it (1:05:00 PM); short leaves off the AM/PM
+        const dayTime = (t, short = false) => {
+            const text = new Date(t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+            return short ? text.replace(/\s*[AaPp]\.?\s?[Mm]\.?$/, '') : text;
+        };
+        // Time left, counting down (rounded up, so 0:00 shows right at the end), or past it, counting up (+0:05)
+        const leftText = (secs) => (secs > 0 ? clock(Math.ceil(secs)) : `+${clock(Math.floor(-secs))}`);
+
+        // The show times and breaks, from storage or a rundown file, keeping only what makes sense
+        const cleanTiming = (t) => ({
+            start: typeof t?.start === 'string' && daySeconds(t.start) !== null ? t.start : '',
+            end: typeof t?.end === 'string' && daySeconds(t.end) !== null ? t.end : '',
+            breaks: Object.fromEntries(Object.entries(t?.breaks && typeof t.breaks === 'object' ? t.breaks : {})
+                .filter(([b, s]) => /^[A-Z]$/.test(b) && secsOf(s)).map(([b, s]) => [b, secsOf(s)])),
+        });
+        const loadTiming = () => cleanTiming(readJson(TIMING_KEY, {}));
+        const saveTiming = (t) => localStorage.setItem(TIMING_KEY, JSON.stringify(cleanTiming(t)));
+        const loadBreakScenes = () => { const s = readJson(BREAK_SCENES_KEY, []); return Array.isArray(s) ? s.filter(x => typeof x === 'string') : []; };
+        const saveBreakScenes = (s) => localStorage.setItem(BREAK_SCENES_KEY, JSON.stringify([...new Set(s.filter(x => typeof x === 'string'))].slice(0, 100)));
+        const aktaOn = () => localStorage.getItem(AKTA_ON_KEY) === '1';
+
+        // Today's show: when it starts and ends. One that ends before its start time ends the next day,
+        // and just after midnight it's still the show that started the day before.
+        const showWindow = (timing, now) => {
+            const s = daySeconds(timing.start), e = daySeconds(timing.end);
+            if (s === null || e === null || s === e) return null;
+            const d = new Date(now), overnight = e < s;
+            const back = overnight && d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() < e ? 1 : 0;
+            const at = (secs) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - back, 0, 0, secs).getTime();
+            const start = at(s);
+            return { start, end: at(overnight ? e + 86400 : e), show: `${new Date(start).toDateString()} ${timing.start}` };
+        };
+        // This show's started breaks (another day or another start time is another show, which starts with none)
+        const loadLive = (show) => {
+            const live = readJson(TIMING_LIVE_KEY, null);
+            return live && live.show === show ? { breaks: {}, ended: {}, returned: {}, ...live } : { show, breaks: {}, ended: {}, returned: {} };
+        };
+        const saveLive = (live) => localStorage.setItem(TIMING_LIVE_KEY, JSON.stringify(live));
+        const clearStartedBreaks = () => { cancelPendingBreak(); localStorage.removeItem(TIMING_LIVE_KEY); };
+
+        // The show in order: each block with a length, then the break after it (if it has one)
+        const showFormat = (timing = loadTiming(), lengths = loadBlockLengths()) => {
+            const parts = [];
+            let n = 0;
+            loadBlocks().forEach(block => {
+                const secs = secsOf(lengths[block]);
+                if (!secs) return;
+                parts.push({ kind: 'block', block, label: `Block ${block}`, secs });
+                if (timing.breaks[block]) parts.push({ kind: 'break', block, label: `Break ${++n}`, secs: timing.breaks[block] });
+            });
+            return parts;
+        };
+        // The timeline: when each block and break starts and ends (ms). A started break is where it really
+        // started (and ends where it was ended early). While the show is on air, a break that's due but not
+        // started yet sits at now (the block before it is running over), so everything after it, and the
+        // runtime, moves along with it. plan: just the plan (no started breaks, nothing moved), for when
+        // Set Order is off.
+        const buildTimeline = (now = Date.now(), plan = false) => {
+            const timing = loadTiming(), win = showWindow(timing, now);
+            if (!win) return null;
+            const live = plan ? { show: win.show, breaks: {}, ended: {}, returned: {} } : loadLive(win.show);
+            const onAir = !plan && now >= win.start && now < win.end;
+            let t = win.start;
+            const events = showFormat(timing).map(p => {
+                if (p.kind === 'block') {
+                    const ev = { ...p, start: t, end: t + p.secs * 1000 };
+                    t = ev.end;
+                    return ev;
+                }
+                const startedAt = Number(live.breaks[p.block]) || 0;
+                const start = startedAt || (onAir && t < now ? now : t);
+                const endedAt = startedAt ? Number(live.ended[p.block]) || 0 : 0;
+                const end = endedAt > start ? Math.min(endedAt, start + p.secs * 1000) : start + p.secs * 1000;
+                const ev = { ...p, start, end, due: t, started: !!startedAt, endedEarly: endedAt > start };
+                t = ev.end;
+                return ev;
+            });
+            return { ...win, events, projectedEnd: t, live };
+        };
+        // What's on now: { ev, index, left } (left in seconds, below 0 while a block runs over), or null
+        // before and after the show
+        const activeEvent = (tl, now = Date.now()) => {
+            if (!tl || now < tl.start || now >= Math.max(tl.end, tl.projectedEnd)) return null;
+            let at = -1;
+            for (let i = 0; i < tl.events.length; i++) {
+                const ev = tl.events[i];
+                if (ev.start > now) break;
+                if (ev.kind === 'block') { at = i; continue; }
+                if (!ev.started) break;               // the block before it stays on until it's started
+                if (now < ev.end) { at = i; break; }  // the break is on
+                at = -1;                              // the break is over: on to what follows
+            }
+            return at < 0 ? null : { ev: tl.events[at], index: at, left: (tl.events[at].end - now) / 1000 };
+        };
+        // The timeline the panel works from: live while Set Order is on, otherwise just the plan
+        const workingTimeline = (now = Date.now()) => buildTimeline(now, !showLocked());
+        const nextBreak = (tl) => tl?.events.find(e => e.kind === 'break' && !e.started) || null;
+        const breakEvent = (tl, block) => tl?.events.find(e => e.kind === 'break' && e.block === block) || null;
+
+        // ---------- Starting and resetting breaks ----------
+        let pendingBreak = null; // a break from a break scene, held back for the transition or AKTA's delay: { block, timer, wait }
+        const cancelPendingBreak = () => { if (pendingBreak) clearTimeout(pendingBreak.timer); pendingBreak = null; };
+
+        // Starts a break now: everything after it follows from now, and with AKTA on, AKTA gets the break cue
+        const startBreak = (block) => {
+            cancelPendingBreak();
+            const now = Date.now(), tl = buildTimeline(now), ev = breakEvent(tl, block);
+            if (!ev || ev.started) return;
+            tl.live.breaks[block] = now;
+            delete tl.live.returned[block];
+            saveLive(tl.live);
+            logEvent('break', null, undefined, { block, label: ev.label, planned: ev.secs });
+            flash(`${ev.label} started`, false, `back at ${dayTime(now + ev.secs * 1000)}`);
+            if (aktaOn()) aktaCue('break', ev.secs, block);
+            renderShow();
+        };
+        // Start Break and ▶: ask first if the break isn't due for a while, so a stray tap can't start one early
+        const startBreakAsk = (block) => {
+            const now = Date.now(), tl = buildTimeline(now), ev = breakEvent(tl, block);
+            if (!ev || ev.started) return;
+            const on = activeEvent(tl, now);
+            if (on?.ev.kind === 'break') { flash(`${on.ev.label} is on now`, true, 'reset it to start another'); return; }
+            if (now < ev.due - BREAK_ASK * 1000 && !confirm(`Start ${ev.label} now? It isn't due until ${dayTime(ev.due)}.`)) return;
+            startBreak(block);
+        };
+        // The button under the clock: Start Break for the next break, or End Break early while one is on
+        const breakButton = () => {
+            const now = Date.now(), tl = buildTimeline(now), on = activeEvent(tl, now);
+            if (on?.ev.kind === 'break') { endBreakEarly(on.ev.block); return; }
+            const nb = nextBreak(tl);
+            if (nb) startBreakAsk(nb.block);
+        };
+        // End early (asks first): the break is over now, the next block starts now, and with AKTA on,
+        // AKTA gets the return cue
+        const endBreakEarly = (block, ask = true) => {
+            const ev = breakEvent(buildTimeline(), block);
+            if (!ev || !ev.started || Date.now() >= ev.end) return;
+            if (ask && !confirm(`End ${ev.label} now, ${clock(Math.ceil((ev.end - Date.now()) / 1000))} early?${aktaOn() ? ' AKTA gets the return cue.' : ''}`)) return;
+            const now = Date.now(), tl = buildTimeline(now), still = breakEvent(tl, block); // the time moved on while it asked
+            if (!still || !still.started || now >= still.end) return;
+            tl.live.ended[block] = now;
+            tl.live.returned[block] = true;
+            saveLive(tl.live);
+            logEvent('breakEnd', null, undefined, { block, label: still.label, early: true });
+            flash(`${still.label} ended early`, false, `${clock(Math.ceil((still.end - now) / 1000))} early, back on air`);
+            if (aktaOn()) aktaCue('return', 0, block);
+            renderShow();
+        };
+        // ↺ (and the Reset Break hotkey): the break goes back to waiting to be started. If it was still on,
+        // AKTA gets a return cue.
+        const resetBreak = (block, ask = true) => {
+            const now = Date.now(), tl = buildTimeline(now), ev = breakEvent(tl, block);
+            if (!ev || !ev.started) return;
+            const stillOn = !tl.live.returned[block] && now < ev.end;
+            if (ask && !confirm(`Reset ${ev.label}? It goes back to waiting to be started${stillOn && aktaOn() ? ', and AKTA gets a return cue' : ''}.`)) return;
+            delete tl.live.breaks[block];
+            delete tl.live.ended[block];
+            delete tl.live.returned[block];
+            saveLive(tl.live);
+            if (stillOn) logEvent('breakEnd', null, undefined, { block, label: ev.label, reset: true });
+            flash(`${ev.label} reset`, false, 'it waits to be started again');
+            if (stillOn && aktaOn()) aktaCue('return', 0, block);
+            renderShow();
+        };
+        // A break's time is up: AKTA gets its return cue (once, and not for one that ended while the panel was closed)
+        const checkBreakEnds = (tl, now) => {
+            tl.events.forEach(ev => {
+                if (ev.kind !== 'break' || !ev.started || now < ev.end || tl.live.returned[ev.block]) return;
+                tl.live.returned[ev.block] = true;
+                saveLive(tl.live);
+                logEvent('breakEnd', null, undefined, { t: ev.end, block: ev.block, label: ev.label });
+                if (now - ev.end > RETURN_LATE) return;
+                flash(`${ev.label} is over`, false, 'back on air');
+                if (aktaOn()) aktaCue('return', 0, ev.block);
+            });
+        };
+
+        // ---------- AKTA ----------
+        // The server keeps the keys and makes the calls (server.py or server.js): this panel only asks for a
+        // break (for so many seconds) or a return, and shows how it went. aktaSettings is what the server
+        // says it has, without the private key (the wait and delay below need it).
+        let aktaSettings = null;
+        const loadAktaSettings = async () => {
+            const reply = await serverRequest({ mode: 'aktaGet' }, 'aktaConfig');
+            if (reply) aktaSettings = reply.ok ? reply.config : null;
+            return reply;
+        };
+        const aktaReady = (cfg = aktaSettings) => !!cfg && !!cfg.publicKey && !!cfg.hasPrivateKey && (cfg.encoders || []).some(e => e.enabled);
+        const aktaCue = async (kind, seconds, block) => {
+            const mode = kind === 'break' ? 'aktaBreak' : 'aktaReturn';
+            const connected = ws && ws.readyState === WebSocket.OPEN;
+            const reply = await serverRequest({ mode, ...(kind === 'break' && { durationSeconds: seconds }) }, `${mode}Result`, 30000);
+            const ok = !!reply?.ok;
+            const detail = !connected ? 'not connected to the server' : !reply ? 'no answer from the server (it needs the current server.py or server.js)'
+                : ok ? `${reply.results.length} encoder${reply.results.length === 1 ? '' : 's'}` : reply.error || 'it didn\'t go through';
+            logEvent('akta', null, undefined, { block, text: `AKTA ${kind} ${ok ? 'sent' : 'failed'}: ${detail}` });
+            flash(`AKTA ${kind} ${ok ? 'sent' : 'failed'}`, !ok, detail);
+        };
+        // The AKTA switch (here and in the Breaks window), and the Toggle AKTA control hotkey
+        const setAktaOn = (on, say = false) => {
+            localStorage.setItem(AKTA_ON_KEY, on ? '1' : '0');
+            updateAktaUI();
+            if (!say) return;
+            if (on && !aktaReady()) flash('AKTA on', true, 'but it isn\'t set up: add the keys and an encoder with the gear button');
+            else flash(`AKTA ${on ? 'on' : 'off'}`, false, on ? 'breaks send cues to AKTA' : 'breaks don\'t send cues');
+        };
+        const updateAktaUI = () => {
+            $('tm-akta').classList.toggle('on', aktaOn());
+            $('akta-on').checked = aktaOn();
+        };
+
+        // ---------- From OBS: the hotkeys and break scenes (server.py passes them on) ----------
+        const timerCommand = (action) => {
+            if (action === 'toggle-akta') { setAktaOn(!aktaOn(), true); return; }
+            if (action !== 'start-break' && action !== 'reset-break') return;
+            if (!showLocked()) { flash('Set Order is off', true, 'turn it on to run the breaks'); return; }
+            const now = Date.now(), tl = buildTimeline(now);
+            if (!tl) { flash('Set the show times first', true); return; }
+            if (action === 'start-break') {
+                const on = activeEvent(tl, now);
+                if (on?.ev.kind === 'break') { flash(`${on.ev.label} is on now`, true, 'Reset Break first to start another'); return; }
+                const nb = nextBreak(tl);
+                if (nb) startBreak(nb.block);
+                else flash('No breaks left to start', true);
+            } else {
+                const last = [...tl.events].reverse().find(e => e.kind === 'break' && e.started);
+                if (last) resetBreak(last.block, false);
+                else flash('No break to reset', true);
+            }
+        };
+        // OBS went to a scene: if it's a break scene, the next break starts. With AKTA on, its delay (from when
+        // the transition starts) or waiting for the transition to end holds it back, to line the cue up with a stinger.
+        const obsSceneChanged = (scene) => {
+            if (!showLocked() || typeof scene !== 'string' || !loadBreakScenes().includes(scene)) return; // no show running
+            const now = Date.now(), tl = buildTimeline(now), nb = nextBreak(tl);
+            if (!nb || pendingBreak || activeEvent(tl, now)?.ev.kind === 'break') return; // nothing to start, or a break is on
+            const akta = aktaOn() ? aktaSettings : null;
+            if (akta?.delayMs > 0) pendingBreak = { block: nb.block, timer: setTimeout(() => startBreak(nb.block), akta.delayMs) };
+            else if (akta?.waitForTransition) pendingBreak = { block: nb.block, wait: true, timer: setTimeout(() => startBreak(nb.block), TRANSITION_WAIT) };
+            else { startBreak(nb.block); return; }
+            updateTiming();
+        };
+        const obsTransitionEnded = () => { if (pendingBreak?.wait) startBreak(pendingBreak.block); };
+
+        // ---------- What the panel shows (4 times a second, on every tab) ----------
+        let timingSig = ''; // what the projector was last told
+        // Set Order off means the show isn't running: no timing strip, no countdowns and no times on the
+        // blocks and breaks, just the plan (Runtime and Last block, from the planned lengths)
+        const updateTiming = () => {
+            if (!isController) return;
+            const now = Date.now(), live = showLocked(), real = buildTimeline(now);
+            const tl = live ? real : buildTimeline(now, true), on = live ? activeEvent(tl, now) : null;
+            const timed = !!tl && tl.events.length > 0;
+            const airing = live && !!tl && now >= tl.start && now < Math.max(tl.end, tl.projectedEnd);
+            const over = (i) => (on ? i < on.index : !!tl && now >= tl.start); // that part of the show is over
+            $('tm-live').classList.toggle('hidden', !live);
+            $('tm-stats').classList.toggle('planning', !live);
+            // The clock, and what's on now
+            $('tm-clock').textContent = dayTime(now);
+            $('tm-clock').classList.toggle('on-air', airing);
+            let label = 'Set the show times', left = '', kind = '';
+            if (tl && !timed) label = 'Give the blocks a length';
+            else if (tl && now < tl.start) { label = 'On air in'; left = leftText((tl.start - now) / 1000); kind = 'pre'; }
+            else if (on) { label = on.ev.label; left = leftText(on.left); kind = on.left > 0 ? on.ev.kind : 'over'; }
+            else if (tl) label = 'Off air';
+            $('tm-label').textContent = label;
+            $('tm-left').textContent = left;
+            $('tm-left').className = `tm-left ${kind}`;
+            // Under the clock: Start Break for the next break (it pulses when it's due), or, while a break
+            // is on, End Break early
+            const nb = live ? nextBreak(tl) : null, btn = $('tm-break');
+            const onBreak = on?.ev.kind === 'break' ? on.ev : null;
+            btn.classList.toggle('hidden', !onBreak && !nb);
+            if (onBreak || nb) {
+                const waiting = !onBreak && pendingBreak?.block === nb.block;
+                const text = onBreak ? `End ${onBreak.label} early` : waiting ? `${nb.label} starting…` : `Start ${nb.label} · ${clock(nb.secs)}`;
+                if (btn.dataset.text !== text) {
+                    btn.dataset.text = text;
+                    btn.innerHTML = `${icon(onBreak ? 'stop' : 'play')}<span></span>`;
+                    btn.lastChild.textContent = text;
+                }
+                btn.classList.toggle('end', !!onBreak);
+                btn.classList.toggle('due', !onBreak && (waiting || (on?.ev.kind === 'block' && tl.events[on.index + 1] === nb && on.left <= 30)));
+            }
+            // The show's times, and how it's doing against its end time
+            $('tm-times-text').textContent = tl ? `${dayTime(tl.start, true)} – ${dayTime(tl.end)}` : 'Set show times';
+            $('tm-stats').classList.toggle('hidden', !timed);
+            if (timed) {
+                $('tm-end-in').textContent = clock(Math.max(0, Math.ceil((tl.end - now) / 1000)));
+                const diff = Math.round((tl.end - tl.projectedEnd) / 1000);
+                const rt = $('tm-runtime');
+                rt.textContent = diff > 0 ? `+${clock(diff)} under` : diff < 0 ? `-${clock(-diff)} over` : 'on time';
+                rt.className = diff > 0 ? 'under' : diff < 0 ? 'over' : 'ontime';
+                const last = [...tl.events].reverse().find(e => e.kind === 'block'), secs = last.secs + diff;
+                $('tm-last-label').textContent = spreadMode ? 'Difference' : `Last block (${last.block})`;
+                $('tm-last').textContent = spreadMode ? `${diff < 0 ? '-' : '+'}${clock(Math.abs(diff))}` : secs > 0 ? clock(secs) : 'too short';
+                $('tm-last').classList.toggle('bad', !spreadMode && secs <= 0);
+                $('tm-update').textContent = spreadMode ? 'Spread' : 'Update';
+                $('tm-update').classList.toggle('on', spreadMode);
+                $('tm-spread-btn').classList.toggle('on', spreadMode);
+            }
+            // The rundown: the block on air shows its time left; each block and break, when it's due
+            const lengths = loadBlockLengths(), blockAt = {};
+            tl?.events.forEach((e, i) => { if (e.kind === 'block') blockAt[e.block] = { e, i }; });
+            document.querySelectorAll('[data-block-time]').forEach(el => {
+                const b = el.dataset.blockTime, len = secsOf(lengths[b]);
+                const live = on?.ev.kind === 'block' && on.ev.block === b;
+                el.textContent = live ? leftText(on.left) : len ? clock(len) : el.tagName === 'BUTTON' ? 'Set time' : '';
+                el.classList.toggle('running', live && on.left > 0);
+                el.classList.toggle('over', live && on.left <= 0);
+            });
+            document.querySelectorAll('[data-block-at]').forEach(el => {
+                const a = live ? blockAt[el.dataset.blockAt] : null;
+                el.textContent = a ? dayTime(a.e.start, true) : '';
+                el.classList.toggle('done', !!a && over(a.i));
+            });
+            document.querySelectorAll('.show-break[data-break]').forEach(row => {
+                const i = live && tl ? tl.events.findIndex(e => e.kind === 'break' && e.block === row.dataset.break) : -1;
+                const ev = i < 0 ? null : tl.events[i], onNow = !!ev && on?.index === i;
+                row.classList.toggle('on', onNow);
+                row.classList.toggle('done', !!ev && !onNow && ev.started && now >= ev.end);
+                row.querySelector('.brk-at').textContent = !ev ? '' : onNow ? `${leftText(on.left)} left`
+                    : ev.started ? `back ${dayTime(ev.end, true)}` : dayTime(ev.start, true);
+            });
+            if (real) checkBreakEnds(real, now); // a break that was started still gets its return cue
+            // The projector counts down by itself: it only needs telling when what's on changes
+            const sig = [live, tl?.start, tl?.end, on?.ev.kind, on?.ev.block, on?.ev.end, airing, !!tl && now < tl.start].join('|');
+            if (sig !== timingSig) { timingSig = sig; broadcastProjector(); }
+        };
+
+        // ---------- Update and ÷ ----------
+        // Update: the last block takes the difference, so the show ends on time. With ÷ on, the difference is
+        // spread over the blocks picked instead (as evenly as whole seconds allow).
+        let spreadMode = false;
+        const spreadPick = new Set();
+        const updateLastBlock = () => {
+            const tl = workingTimeline(), diff = tl ? Math.round((tl.end - tl.projectedEnd) / 1000) : 0;
+            const timedBlocks = tl ? tl.events.filter(e => e.kind === 'block') : [];
+            if (!timedBlocks.length) { flash('Set the show times and block lengths first', true); return; }
+            if (!diff) { flash('The show is on time'); return; }
+            const picked = spreadMode ? timedBlocks.filter(e => spreadPick.has(e.block)) : timedBlocks.slice(-1);
+            if (!picked.length) { flash('Pick the blocks to spread it over', true); return; }
+            const each = Math.trunc(diff / picked.length), rest = diff - each * picked.length;
+            const changes = picked.map((e, i) => [e.block, e.secs + each + (i < Math.abs(rest) ? Math.sign(rest) : 0)]);
+            const short = changes.find(([, secs]) => secs <= 0);
+            if (short) { flash(`Block ${short[0]} doesn't have that much time`, true, `it would need ${clock(-short[1] + 1)} more`); return; }
+            const lengths = loadBlockLengths();
+            changes.forEach(([b, secs]) => { lengths[b] = secs; });
+            saveBlockLengths(lengths);
+            spreadMode = false;
+            spreadPick.clear();
+            renderShow();
+            changes.forEach(([b]) => {
+                const chip = document.querySelector(`[data-block-time="${b}"]`);
+                chip?.classList.remove('tm-flash');
+                void chip?.offsetWidth; // restarts the flash
+                chip?.classList.add('tm-flash');
+            });
+            const change = `${diff > 0 ? '+' : '-'}${clock(Math.abs(diff))}`;
+            if (changes.length > 1) flash(`Spread ${change} over ${changes.length} blocks`, false, changes.map(([b, s]) => `${b} ${clock(s)}`).join(', '));
+            else flash(`Block ${changes[0][0]} is now ${clock(changes[0][1])}`, false, change);
+        };
+        const toggleSpread = () => {
+            spreadMode = !spreadMode;
+            spreadPick.clear();
+            renderSpread();
+            updateTiming();
+        };
+        // With ÷ on: a letter for each timed block that isn't over yet. Tap to pick it.
+        const renderSpread = () => {
+            const box = $('tm-spread');
+            box.classList.toggle('hidden', !spreadMode);
+            if (!spreadMode) return;
+            const now = Date.now(), live = showLocked(), tl = workingTimeline(now), on = live ? activeEvent(tl, now) : null;
+            box.innerHTML = '<span class="tm-spread-label">Spread over:</span>';
+            const chips = document.createElement('div');
+            chips.className = 'block-chips';
+            (tl?.events || []).forEach((e, i) => {
+                if (e.kind !== 'block') return;
+                const done = on ? i < on.index : live && now >= tl.start; // without a show running, none are over
+                const c = document.createElement('button');
+                c.type = 'button';
+                c.className = `block-chip${spreadPick.has(e.block) ? ' active' : ''}`;
+                c.textContent = e.block;
+                c.disabled = done;
+                c.title = done ? `Block ${e.block} is over` : `Block ${e.block} (${clock(e.secs)})`;
+                c.onclick = () => {
+                    if (spreadPick.has(e.block)) spreadPick.delete(e.block);
+                    else spreadPick.add(e.block);
+                    renderSpread();
+                };
+                chips.append(c);
+            });
+            box.append(chips);
+        };
+
+        // ---------- Show times and breaks (the dialog) ----------
+        const openTimingDialog = () => {
+            const timing = loadTiming(), lengths = loadBlockLengths();
+            $('tm-start').value = timing.start;
+            $('tm-end').value = timing.end;
+            const box = $('tm-format');
+            box.innerHTML = '<span>Block</span><span>Length</span><span>Break after</span>';
+            loadBlocks().forEach(b => {
+                const name = document.createElement('b');
+                name.textContent = b;
+                const box2 = (value, key) => {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.dataset[key] = b;
+                    input.value = value ? clock(value) : '';
+                    input.placeholder = '–';
+                    input.autocomplete = 'off';
+                    return input;
+                };
+                box.append(name, box2(secsOf(lengths[b]), 'len'), box2(timing.breaks[b], 'brk'));
+            });
+            fillTimingTotal();
+            $('timing-dialog').returnValue = '';
+            if (!$('timing-dialog').open) $('timing-dialog').showModal();
+        };
+        // What's typed in the dialog: { timing, lengths }, or { error, input }
+        const readTimingDialog = () => {
+            const start = $('tm-start').value, end = $('tm-end').value;
+            if (!start !== !end) return { error: 'Set both the start and the end time (or neither)', input: $(start ? 'tm-end' : 'tm-start') };
+            if (start && daySeconds(start) === daySeconds(end)) return { error: 'The end time has to be different from the start', input: $('tm-end') };
+            const lengths = {}, breaks = {};
+            for (const input of $('tm-format').querySelectorAll('input')) {
+                const text = input.value.trim(), secs = text ? parseClock(text) : 0;
+                if (secs === null || secs > 86400) return { error: 'Use minutes:seconds, like 2:05', input };
+                if (secs >= 1) (input.dataset.len ? lengths : breaks)[input.dataset.len || input.dataset.brk] = Math.round(secs);
+            }
+            return { timing: { start, end, breaks }, lengths };
+        };
+        // Under the boxes: the planned length against the time from start to end
+        const fillTimingTotal = () => {
+            const r = readTimingDialog(), out = $('tm-format-total');
+            out.classList.toggle('tm-error', !!r.error);
+            if (r.error) { out.textContent = r.error; return; }
+            const planned = showFormat(cleanTiming(r.timing), r.lengths).reduce((sum, p) => sum + p.secs, 0);
+            const win = showWindow(r.timing, Date.now());
+            if (!win) { out.textContent = planned ? `Planned ${clock(planned)}` : ''; return; }
+            const room = Math.round((win.end - win.start) / 1000), diff = room - planned;
+            out.textContent = `Planned ${clock(planned)} of ${clock(room)}: ${diff > 0 ? `${clock(diff)} under` : diff < 0 ? `${clock(-diff)} over` : 'on time'}`;
+        };
+        // Save (also Enter): returns false, and the dialog stays open, if something can't be read
+        const saveTimingDialog = () => {
+            const r = readTimingDialog();
+            if (r.error) { flash(r.error, true); r.input?.focus(); return false; }
+            const lengths = loadBlockLengths();
+            loadBlocks().forEach(b => { if (r.lengths[b]) lengths[b] = r.lengths[b]; else delete lengths[b]; });
+            saveBlockLengths(lengths);
+            saveTiming(r.timing);
+            renderShow();
+            flash('Show times and breaks saved', false, r.timing.start ? `${r.timing.start} to ${r.timing.end}` : 'no show times set');
+            return true;
+        };
+
+        // ---------- Schedules from the OBS Show Timer ----------
+        // { showStart, showEnd, events: [{ type: 'start' | 'segment' | 'break', durationSeconds }], breakTriggers }.
+        // Its segments become blocks A, B, C... in order, each break goes after the segment before it, and
+        // its break scenes come along. The graphics in the rundown stay where they are.
+        const isShowTimerFile = (data) => !!data && typeof data === 'object' && typeof data.showStart === 'string' && Array.isArray(data.events) && !Array.isArray(data.items);
+        const applyShowTimer = (data, name) => {
+            const segs = [];
+            data.events.forEach(ev => {
+                const secs = secsOf(ev?.durationSeconds);
+                if (!secs) return;
+                if (ev.type === 'segment') segs.push({ secs, brk: 0 });
+                else if (ev.type === 'break' && segs.length) segs[segs.length - 1].brk += secs;
+            });
+            const timing = cleanTiming({ start: data.showStart, end: data.showEnd });
+            if (!segs.length || !timing.start || !timing.end) { flash('That Show Timer schedule has no times or segments', true); return false; }
+            if (segs.length > 26) { flash('That schedule has more than 26 segments', true); return false; }
+            const letters = segs.map((_, i) => String.fromCharCode(65 + i));
+            const nBreaks = segs.filter(s => s.brk).length;
+            if (!confirm(`Use the times from the Show Timer schedule "${name}"?\n\n${timing.start} to ${timing.end}, ${segs.length} block${segs.length === 1 ? '' : 's'} (A to ${letters[letters.length - 1]}) and ${nBreaks} break${nBreaks === 1 ? '' : 's'}. The graphics in the rundown stay where they are.`)) return false;
+            const blocks = loadBlocks();
+            letters.forEach(b => { if (!blocks.includes(b)) blocks.push(b); });
+            saveBlocks(blocks.sort());
+            saveBlockLengths(Object.fromEntries(segs.map((s, i) => [letters[i], s.secs])));
+            segs.forEach((s, i) => { if (s.brk) timing.breaks[letters[i]] = s.brk; });
+            saveTiming(timing);
+            const scenes = Array.isArray(data.breakTriggers) ? data.breakTriggers.filter(s => typeof s === 'string') : [];
+            if (scenes.length) saveBreakScenes(scenes);
+            renderShow();
+            flash(`Show times from ${name}`, false, `${segs.length} blocks, ${nBreaks} break${nBreaks === 1 ? '' : 's'}${scenes.length ? `, ${scenes.length} break scene${scenes.length === 1 ? '' : 's'}` : ''}`);
+            return true;
+        };
+        const readShowTimerFile = (file) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                let data = null;
+                try { data = JSON.parse(reader.result); } catch { /* handled below */ }
+                if (!isShowTimerFile(data)) { flash('That isn\'t a Show Timer schedule', true); return; }
+                if (applyShowTimer(data, file.name.replace(/\.json$/i, ''))) openTimingDialog(); // shows what it brought in
+            };
+            reader.readAsText(file);
+        };
+
+        // ---------- Breaks (the dialog): break scenes and AKTA settings ----------
+        let obsSceneNames = null; // the scenes server.py last sent (null: it couldn't say)
+        let aktaDraft = [];       // the encoders, while they're being changed
+        const openBreaksDialog = () => {
+            updateAktaUI();
+            if (!$('breaks-dialog').open) $('breaks-dialog').showModal();
+            renderSceneList();
+            loadSceneList();
+            if (aktaSettings) fillAktaForm(aktaSettings);
+            $('akta-note').textContent = 'Asking the server for the AKTA settings…';
+            loadAktaSettings().then(reply => {
+                if (!reply) $('akta-note').textContent = 'No answer from the server: AKTA needs the current server.py or server.js.';
+                else if (!reply.ok) $('akta-note').textContent = reply.error || 'The server couldn\'t read the AKTA settings.';
+                else fillAktaForm(reply.config);
+            });
+        };
+        const loadSceneList = async () => {
+            $('scene-note').textContent = 'Asking OBS for its scenes…';
+            const reply = await serverRequest({ mode: 'obsScenes' }, 'obsSceneList');
+            obsSceneNames = reply?.ok && Array.isArray(reply.scenes) ? reply.scenes.filter(s => typeof s === 'string') : null;
+            $('scene-note').textContent = !reply ? 'No answer from the server: break scenes need the current server.py, running in OBS.'
+                : !reply.ok ? reply.error || 'The server can\'t see OBS\'s scenes.'
+                : obsSceneNames.length ? 'Tick the scenes that start a break.' : 'OBS doesn\'t have any scenes yet.';
+            renderSceneList();
+        };
+        // A tick box for each of OBS's scenes, plus any break scene OBS doesn't have (now), so it can be taken off
+        const renderSceneList = () => {
+            const box = $('scene-list'), picked = loadBreakScenes(), known = obsSceneNames || [];
+            box.innerHTML = '';
+            [...known, ...picked.filter(s => !known.includes(s))].forEach(name => {
+                const row = document.createElement('label');
+                row.className = 'scene-row';
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = picked.includes(name);
+                cb.onchange = () => {
+                    const others = loadBreakScenes().filter(s => s !== name);
+                    saveBreakScenes(cb.checked ? [...others, name] : others);
+                };
+                const text = document.createElement('span');
+                text.textContent = name;
+                row.append(cb, text);
+                if (obsSceneNames && !known.includes(name)) {
+                    row.classList.add('missing');
+                    row.title = 'OBS doesn\'t have a scene called this now';
+                }
+                box.append(row);
+            });
+        };
+        const fillAktaForm = (cfg) => {
+            $('akta-public').value = cfg.publicKey || '';
+            $('akta-private').value = '';
+            $('akta-private').placeholder = cfg.hasPrivateKey ? 'Saved (leave empty to keep it)' : 'Not set yet';
+            $('akta-wait').checked = !!cfg.waitForTransition;
+            $('akta-delay').value = cfg.delayMs || 0;
+            aktaDraft = (cfg.encoders || []).map(e => ({ id: e.id, scope: e.scope, enabled: e.enabled }));
+            renderAktaEncoders();
+            $('akta-note').textContent = aktaReady(cfg) ? 'Ready. The keys stay on the server, in akta-config.json.' : 'Add both keys and at least one encoder, then save.';
+        };
+        const renderAktaEncoders = () => {
+            const box = $('akta-encoders');
+            box.innerHTML = '';
+            aktaDraft.forEach((enc, i) => {
+                const row = document.createElement('label');
+                row.className = 'akta-enc';
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = enc.enabled;
+                cb.title = 'Send cues to this encoder';
+                cb.onchange = () => { enc.enabled = cb.checked; };
+                const id = document.createElement('span');
+                id.textContent = enc.id;
+                const scope = document.createElement('small');
+                scope.textContent = enc.scope;
+                const del = document.createElement('button');
+                del.type = 'button';
+                del.className = 'cue-btn cue-del';
+                del.innerHTML = icon('x');
+                del.title = 'Remove this encoder';
+                del.onclick = (e) => { e.preventDefault(); aktaDraft.splice(i, 1); renderAktaEncoders(); };
+                row.append(cb, id, scope, del);
+                box.append(row);
+            });
+        };
+        const addAktaEncoder = () => {
+            const id = $('akta-enc-id').value.trim();
+            if (!/^[A-Za-z0-9_.-]{1,40}$/.test(id)) { flash('An encoder ID is letters, numbers, _ - or .', true); return false; }
+            if (aktaDraft.some(e => e.id === id)) { flash('That encoder is already in the list', true); return false; }
+            aktaDraft.push({ id, scope: $('akta-enc-scope').value, enabled: true });
+            $('akta-enc-id').value = '';
+            renderAktaEncoders();
+            return true;
+        };
+        const saveAktaSettings = async () => {
+            if ($('akta-enc-id').value.trim() && !addAktaEncoder()) return; // an ID typed but not added yet
+            const delay = Number($('akta-delay').value || 0);
+            if (!Number.isInteger(delay) || delay < 0 || delay > 60000) { flash('The delay is a whole number of ms, from 0 to 60000', true); return; }
+            const config = {
+                publicKey: $('akta-public').value.trim(), privateKey: $('akta-private').value.trim(), // empty keeps the saved key
+                encoders: aktaDraft, waitForTransition: $('akta-wait').checked, delayMs: delay,
+            };
+            const reply = await serverRequest({ mode: 'aktaSave', config }, 'aktaSaved', 5000);
+            if (!reply) { flash('AKTA settings not saved', true, 'no answer from the server'); return; }
+            if (!reply.ok) { flash('AKTA settings not saved', true, reply.error || ''); return; }
+            aktaSettings = reply.config;
+            fillAktaForm(reply.config);
+            flash('AKTA settings saved');
+        };
+
+
+        /* =========================================================
+           20. PROJECTOR (fx_wizard.html#projector)
+           Shows what the control panel sends: the director's message, what's on now (a block or a
+           break) and the time it has left, the time to the show's end and the time of day (on the
+           panel's clock), the rundown (previous, current and next marked, following along), what's
            on air, and the current script, sized to fit.
            ========================================================= */
-        const PJ = { state: null, at: 0, current: null, message: null };
+        const PJ = { state: null, at: 0, current: null, message: null, offset: 0, left: null };
+        // Cleared from the panel between shows: back to how it looks when it opens
+        const blankProjector = () => {
+            PJ.state = null;
+            PJ.current = null;
+            PJ.left = null;
+            showProjectorMessage('');
+            ['pj-block', 'pj-block-time', 'pj-show-time', 'pj-now', 'pj-next', 'pj-script-text'].forEach(id => { $(id).textContent = ''; });
+            $('pj-block-time').className = 'pj-time pj-timer';
+            $('pj-rundown').innerHTML = '';
+            $('pj-onair').innerHTML = '';
+            ['pj-countdown', 'pj-script', 'pj-onair-wrap'].forEach(id => $(id).classList.add('hidden'));
+        };
         const projectorMessage = (data) => {
-            if (data.mode === 'projector') {
+            if (data.mode === 'projector' && data.cleared) blankProjector();
+            else if (data.mode === 'projector') {
                 PJ.state = data;
                 PJ.at = Date.now();
+                if (data.timing) PJ.offset = data.timing.now - PJ.at; // the panel's clock against this computer's
                 renderProjector();
             } else if (data.mode === 'message') {
                 if (PJ.state) PJ.state.message = data.text;
@@ -4920,6 +5748,14 @@
                     const cls = [i === at ? 'current' : '', i === at - 1 ? 'prev' : '', it === next ? 'next' : '', at >= 0 && i < at ? 'done' : '', live ? 'live' : ''].join(' ');
                     list.append(pjRow(it, cls, i === at ? 'NOW' : it === next ? 'NEXT' : i === at - 1 ? 'PREV' : live ? 'ON AIR' : ''));
                 });
+                // The break after the block
+                if (b.brk) {
+                    const row = document.createElement('div');
+                    row.className = 'pj-break';
+                    row.dataset.break = b.name;
+                    row.textContent = `${b.brk.label} · ${clock(b.brk.secs)}`;
+                    list.append(row);
+                }
             });
             // Follow the show: keep the current item in view
             if (st.current !== PJ.current) {
@@ -4945,31 +5781,42 @@
             fitScript();
             tickProjector();
         };
-        // The block and show times keep counting between messages
+        // The time left and the clock keep counting between messages, on the panel's clock. Without show
+        // times it just shows the current item's block.
         const tickProjector = () => {
             const st = PJ.state;
             if (!st) return;
-            const since = (Date.now() - PJ.at) / 1000;
+            const now = Date.now() + PJ.offset, tm = st.timing;
             const cur = st.items.find(it => it.sid === st.current);
-            const block = cur && st.blocks.find(b => b.name === cur.block);
-            $('pj-block').textContent = cur ? `Block ${cur.block}` : st.running ? 'Ready' : 'Not running';
-            const soFar = st.running && st.blockSoFar !== null ? st.blockSoFar + since : null;
-            $('pj-block-time').textContent = soFar === null ? '' : `${clock(soFar)}${block?.planned ? ` / ${clock(block.planned)}` : ''}`;
-            $('pj-block-time').classList.toggle('over', soFar !== null && !!block?.planned && soFar > block.planned);
-            const planned = st.blocks.reduce((sum, b) => sum + b.planned, 0);
-            const show = st.running && st.showSoFar !== null ? st.showSoFar + since : null;
-            $('pj-show-time').textContent = show === null ? '' : `Show ${clock(show)}${planned ? ` / ${clock(planned)}` : ''}`;
-            $('pj-show-time').classList.toggle('over', show !== null && planned > 0 && show > planned);
-            // Countdown to air: shown until it runs out, then it gets out of the way
-            const cd = st.countdown;
-            const remaining = cd ? (cd.running ? Math.max(0, cd.remaining - since) : cd.remaining) : null;
-            const showCountdown = !!cd && remaining > 0;
-            $('pj-countdown').classList.toggle('hidden', !showCountdown);
-            if (showCountdown) $('pj-countdown').textContent = `${cd.running ? 'On air in' : 'Starts in'} ${clock(remaining)}`;
+            let label = !st.running ? 'Not running' : cur ? `Block ${cur.block}` : 'Ready', left = null, kind = '';
+            if (tm) {
+                if (now < tm.start) { label = 'On air in'; left = (tm.start - now) / 1000; kind = 'pre'; }
+                else if (tm.active) { label = tm.active.label; left = (tm.active.ends - now) / 1000; kind = left > 0 ? tm.active.kind : 'over'; }
+                else if (tm.over || now >= tm.end) label = 'Off air';
+            }
+            $('pj-block').textContent = label;
+            $('pj-block-time').textContent = left === null ? '' : leftText(left);
+            $('pj-block-time').className = `pj-time pj-timer ${kind}`;
+            // A flash at 30, 15 and 5 seconds left
+            const whole = left === null || left <= 0 ? null : Math.ceil(left);
+            if (whole !== PJ.left && [30, 15, 5].includes(whole)) {
+                const bar = $('pj-status');
+                bar.classList.remove('alert');
+                void bar.offsetWidth; // restarts the flash
+                bar.classList.add('alert');
+            }
+            PJ.left = whole;
+            // The time to the show's end (while it's on air), and the time of day, red while on air
+            const onAir = !!tm && !tm.over && now >= tm.start;
+            $('pj-countdown').classList.toggle('hidden', !onAir);
+            if (onAir) $('pj-countdown').textContent = now < tm.end ? `Ends in ${clock(Math.ceil((tm.end - now) / 1000))}` : `Past the end by ${clock(Math.floor((now - tm.end) / 1000))}`;
+            $('pj-show-time').textContent = dayTime(now);
+            $('pj-show-time').classList.toggle('on-air', onAir);
+            document.querySelectorAll('.pj-break').forEach(r => r.classList.toggle('on', kind === 'break' && tm.active.block === r.dataset.break));
         };
 
         /* =========================================================
-           20. STARTUP
+           21. STARTUP
            Opens the display if the address ends in #display (or the
            underlay for #underlay), otherwise opens the controller.
            ========================================================= */
@@ -4983,7 +5830,7 @@
                 $('toggle-bar').style.display = 'none';
                 $('projector-view').classList.remove('hidden');
                 showProjectorMessage('');
-                setInterval(tickProjector, 500);
+                setInterval(tickProjector, 250);
                 window.addEventListener('resize', fitScript);
             } else if (hash === '#display' || hash === '#underlay') {
                 isUnderlay = hash === '#underlay';
@@ -4998,16 +5845,7 @@
                 isController = true;
                 loadTheme();
                 $('light-toggle').addEventListener('change', (e) => setTheme(e.target.checked));
-                setGreenscreen(false);
-                $('gs-toggle').addEventListener('change', (e) => {
-                    // Turning it off on the Podcast Rundown tab while a running rundown has graphics set for Greenscreen: check first
-                    const n = rundownGsCount();
-                    if (!e.target.checked && n && rundownActive() && !confirm(`${n} graphic${n === 1 ? ' in your rundown is' : 's in your rundown are'} set for Greenscreen. Turn Greenscreen off anyway?`)) {
-                        e.target.checked = true;
-                        return;
-                    }
-                    setGreenscreen(e.target.checked, true);
-                });
+                $('gs-pick').addEventListener('change', (e) => setGsPick(e.target.checked));
                 document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener('change', updateMode));
                 document.querySelectorAll('input[name="overlayStyle"]').forEach(r => r.addEventListener('change', () => { fillDuration(); updateSections(); }));
                 $('duration-input').addEventListener('input', (e) => { if (checked('mode') === 'l3') l3Duration = Number(e.target.value) || 5; });
@@ -5054,16 +5892,36 @@
                 // Podcast Rundown
                 $('show-lock').addEventListener('change', (e) => {
                     localStorage.setItem(SHOW_LOCK_KEY, e.target.checked ? '1' : '0');
-                    if (e.target.checked) startShow();
+                    if (e.target.checked) {
+                        startShow();
+                        localStorage.setItem(PROJECTOR_CLEAR_KEY, '0'); // a cleared projector comes back for the show
+                    } else {
+                        cancelPendingBreak(); // a break scene's break waiting for its transition: no show now
+                    }
                     renderShow();
                     const unsorted = loadShow().filter(d => d.block === UNSORTED).length;
                     if (e.target.checked && unsorted) flash(`${unsorted} unsorted item${unsorted === 1 ? ' isn\'t' : 's aren\'t'} in the show`, true, 'turn off Set Order to drag them into a block');
-                    // Setting the order with graphics set for Greenscreen while it's off: offer to turn it on
-                    const n = rundownGsCount();
-                    if (e.target.checked && n && !greenscreen && confirm(`This rundown has ${n} graphic${n === 1 ? '' : 's'} set for Greenscreen, but Greenscreen is off. Turn it on now?`)) setGreenscreen(true, true);
                 });
                 // Saves the moment Save is pressed (not when the dialog's close event arrives later)
                 $('edit-dialog').querySelector('form').addEventListener('submit', (e) => finishEdit(e.submitter?.value || 'save'));
+                // Show timing: its dialogs, a Show Timer schedule, the AKTA switch, and the clock (always running)
+                $('timing-dialog').querySelector('form').addEventListener('submit', (e) => {
+                    if ((e.submitter?.value || 'save') === 'save' && !saveTimingDialog()) e.preventDefault(); // stays open to fix it
+                });
+                ['tm-start', 'tm-end', 'tm-format'].forEach(id => $(id).addEventListener('input', fillTimingTotal));
+                $('showtimer-file').addEventListener('change', (e) => {
+                    if (e.target.files.length) readShowTimerFile(e.target.files[0]);
+                    e.target.value = '';
+                });
+                $('akta-on').addEventListener('change', (e) => setAktaOn(e.target.checked, true));
+                // Enter in the Breaks window adds the encoder typed, instead of closing the window
+                $('breaks-dialog').addEventListener('keydown', (e) => {
+                    if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+                    e.preventDefault();
+                    if (e.target.id === 'akta-enc-id') addAktaEncoder();
+                });
+                updateAktaUI();
+                setInterval(updateTiming, 250);
                 initSections();
                 showCustomNames();
                 updateMode();

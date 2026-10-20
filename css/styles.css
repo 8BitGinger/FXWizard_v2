@@ -33,7 +33,8 @@ body {
    2. CONTROLLER (the control panel)
    ========================================================= */
 
-/* Keeps the panel narrow and centered */
+/* Keeps the panel narrow and centered. Clipped rather than hidden, so the show timing strip on the
+   Podcast Rundown can stay at the top of the window while you scroll (hidden would stop that). */
 .controller-max-width {
   display: flex;
   flex-direction: column;
@@ -41,6 +42,7 @@ body {
   align-items: center;
   max-width: 300px !important;
   overflow-y: hidden;
+  overflow: clip;
 }
 
 /* Outline used on the option buttons */
@@ -99,14 +101,10 @@ body {
 .fx-switch input:checked + .fx-track { background: #f59e0b; }
 .fx-switch input:checked + .fx-track::after { transform: translateX(14px); background: #fff; }
 .fx-switch input:focus-visible + .fx-track { outline: 2px solid #a78bfa; outline-offset: 2px; }
-/* The Greenscreen switch turns green when on, and pulses amber while the rundown has
-   graphics set for it but it's off */
+/* Greenscreen switch, on the overlays that support it (left of Duration): green when on */
 .fx-switch.gs-switch input:checked + .fx-track { background: #16a34a; }
-.fx-switch.gs-switch.gs-needed .fx-track { animation: gsNeeded 1.2s ease-in-out infinite; }
-@keyframes gsNeeded {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
-  50%      { box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.85); }
-}
+#gs-field { margin-right: auto; font-weight: 600; }
+#gs-field.hidden { display: none; }
 .gs-chip {
   width: 10px;
   height: 10px;
@@ -375,31 +373,6 @@ body {
 }
 .block-empty.hidden { display: none; }
 
-/* Shown when rundown graphics are set for Greenscreen but it's off */
-.gs-alert {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 8px 8px;
-  padding: 6px 8px;
-  border-radius: 10px;
-  border: 1px solid rgba(250, 204, 21, 0.6);
-  background: rgba(250, 204, 21, 0.12);
-  color: #fde68a;
-  font-size: 12px;
-  line-height: 1.3;
-}
-.gs-alert.hidden { display: none; }
-.gs-alert button {
-  flex: none;
-  margin-left: auto;
-  padding: 5px 10px;
-  border-radius: 8px;
-  background: #16a34a;
-  color: #fff;
-  font-weight: 700;
-}
-.gs-alert button:active { transform: scale(0.95); }
 /* The small green mark on graphics set for Greenscreen */
 .gs-chip.gs-inline { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 2px; }
 
@@ -541,12 +514,6 @@ body {
 .show-ctl .icon { width: 18px; height: 18px; }
 .show-ctl:active { transform: scale(0.94); }
 .show-ctl.on { background: #6D28D9; border-color: #a78bfa; color: #fff; }
-.show-ctl.armed { background: #b45309; border-color: #fbbf24; color: #fff; }
-.show-ctl.running { background: #b91c1c; border-color: #f87171; color: #fff; }
-.show-clock { flex: 1; text-align: center; font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 0.03em; }
-.countdown-clock { flex: none; color: #fbbf24; }
-.countdown-clock.hidden { display: none; }
-.countdown-clock.done { color: #4ade80; }
 .msg-panel { margin: 0 8px 8px; padding: 8px; border-radius: 10px; border: 1px solid rgba(167, 139, 250, 0.6); background: rgba(109, 40, 217, 0.12); }
 .msg-panel.hidden { display: none; }
 .msg-presets { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
@@ -595,6 +562,185 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
 .block-time.running { background: #15803d; border-color: #22c55e; color: #fff; }
 .block-time.over { background: #b91c1c; border-color: #ef4444; color: #fff; }
 .block-gfx { font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; opacity: 0.7; }
+/* When the block is due on air (from the show times); faded once it's over */
+.block-at { font-size: 12px; font-weight: 700; letter-spacing: 0; opacity: 0.8; font-variant-numeric: tabular-nums; }
+.block-at:empty { display: none; }
+.block-at.done { opacity: 0.4; }
+/* A block's length after Update or ÷ changed it */
+.block-time.tm-flash { animation: tmFlash 2.4s ease-out; }
+@keyframes tmFlash {
+  0%, 30% { background: #facc15; border-color: #facc15; color: #111; }
+  15% { background: transparent; color: inherit; }
+  100% { background: transparent; }
+}
+
+/* ---------- Show timing (Podcast Rundown) ----------
+   Colors follow the OBS Show Timer: blue for a block, orange for a break, red when a block runs over,
+   purple before the show, and the clock red while the show is on air. */
+.tm-live {
+  position: sticky; /* stays at the top of the window while the rundown scrolls */
+  top: 0;
+  z-index: 30;
+  margin: 0 8px 6px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: #27272a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+.tm-live.hidden { display: none; } /* only while Set Order is on */
+.tm-stats.planning .tm-live-only { display: none; }
+.tm-row { display: flex; align-items: center; gap: 8px; }
+.tm-clock { font-size: 19px; font-weight: 800; color: #9ca3af; font-variant-numeric: tabular-nums; white-space: nowrap; transition: color 0.5s; }
+.tm-clock.on-air { color: #f87171; }
+.tm-now { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; min-width: 0; line-height: 1.05; }
+.tm-label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; }
+.tm-left { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.tm-left:empty { display: none; }
+.tm-left.block { color: #60a5fa; }
+.tm-left.break { color: #fb923c; }
+.tm-left.over { color: #f87171; }
+.tm-left.pre { color: #c4b5fd; }
+.tm-break {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 6px;
+  padding: 6px;
+  border-radius: 8px;
+  background: #c2410c;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+.tm-break.hidden { display: none; }
+.tm-break:active { transform: scale(0.97); }
+.tm-break .icon { width: 13px; height: 13px; }
+.tm-break.due { animation: breakDue 1.2s ease-in-out infinite; }
+/* While a break is on, it ends the break early: outlined, so it doesn't look like Start */
+.tm-break.end { padding: 4px; border: 2px solid #fb923c; background: transparent; color: #fdba74; }
+@keyframes breakDue {
+  0%, 100% { background: #c2410c; box-shadow: 0 0 0 0 rgba(251, 146, 60, 0.7); }
+  50% { background: #ea580c; box-shadow: 0 0 0 5px rgba(251, 146, 60, 0); }
+}
+.timing-box { margin: 0 8px 8px; padding: 6px 8px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(255, 255, 255, 0.04); }
+.tm-tools { display: flex; align-items: center; gap: 6px; }
+.tm-times {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.tm-times .icon { width: 15px; height: 15px; }
+.tm-akta, .tm-gear {
+  flex: none;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+.tm-akta { padding: 0 8px; opacity: 0.6; }
+.tm-akta.on { background: #ea580c; border-color: #fb923c; color: #fff; opacity: 1; }
+.tm-gear { width: 32px; display: grid; place-items: center; }
+.tm-gear .icon { width: 16px; height: 16px; }
+.tm-times:active, .tm-akta:active, .tm-gear:active { transform: scale(0.95); }
+.tm-stats { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 3px 8px; margin-top: 6px; font-size: 12px; }
+.tm-stats.hidden { display: none; }
+.tm-stats > span { opacity: 0.8; }
+.tm-stats b { font-variant-numeric: tabular-nums; text-align: right; }
+#tm-end-in { color: #c4b5fd; }
+#tm-runtime.under { color: #60a5fa; }
+#tm-runtime.over { color: #f87171; }
+#tm-runtime.ontime { color: #4ade80; }
+.tm-last { display: flex; align-items: center; justify-content: flex-end; gap: 4px; opacity: 1 !important; }
+#tm-last { color: #facc15; }
+#tm-last.bad { color: #f87171; }
+.tm-last button { padding: 1px 7px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.35); font-size: 11px; font-weight: 800; }
+.tm-last button:active { transform: scale(0.94); }
+#tm-spread-btn { color: #c4b5fd; }
+#tm-spread-btn.on { background: #6D28D9; border-color: #a78bfa; color: #fff; }
+#tm-update.on { background: #a78bfa; border-color: #a78bfa; color: #111; }
+.tm-spread { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+.tm-spread.hidden { display: none; }
+.tm-spread-label { flex: none; font-size: 12px; opacity: 0.75; }
+.tm-spread .block-chip { min-width: 28px; height: 28px; font-size: 13px; }
+/* The break after a block, in the rundown: orange; filled in while it's on */
+.show-break {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  margin-top: 8px;
+  padding: 3px 4px 3px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(251, 146, 60, 0.5);
+  background: rgba(251, 146, 60, 0.1);
+  color: #fdba74;
+  font-size: 12px;
+  font-weight: 700;
+}
+.show-break.show-tappable { cursor: pointer; }
+.show-break.on { background: #c2410c; border-color: #fb923c; color: #fff; }
+.show-break.done { opacity: 0.5; }
+.brk-icon .icon { width: 12px; height: 12px; }
+.brk-label { font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.brk-len { padding: 0 6px; border-radius: 6px; background: rgba(0, 0, 0, 0.25); font-variant-numeric: tabular-nums; }
+.brk-at { margin-left: auto; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.brk-btn { flex: none; width: 32px; height: 28px; display: grid; place-items: center; border-radius: 7px; background: #ea580c; color: #fff; }
+.brk-btn.reset { background: rgba(0, 0, 0, 0.3); color: inherit; }
+.brk-btn.end { background: #fff; color: #c2410c; }
+.show-break:not(.on) .brk-btn.end { display: none; } /* End early: only while the break is on */
+.show-break.on .brk-len { display: none; }          /* ...which makes room for it */
+.brk-btn .icon { width: 14px; height: 14px; }
+.brk-btn:active { transform: scale(0.92); }
+/* The Show times and breaks window, and the Breaks window */
+.tm-times-row { display: flex; gap: 8px; }
+.tm-times-row label { flex: 1; display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.tm-times-row input, .tm-format input, .tm-field input, .akta-add input, .akta-add select {
+  width: 100%;
+  min-width: 0;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  background: transparent;
+  color: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.tm-times-row input { color-scheme: dark; }
+.tm-format { display: grid; grid-template-columns: auto 1fr 1fr; align-items: center; gap: 4px 8px; max-height: 40vh; overflow-y: auto; }
+.tm-format > span { font-size: 11px; font-weight: 700; opacity: 0.7; }
+.tm-format > b { text-align: center; color: #c4b5fd; }
+.tm-error { color: #fca5a5; }
+.tm-switch { justify-content: space-between; padding: 6px 8px; border-radius: 8px; background: rgba(251, 146, 60, 0.14); font-size: 13px; font-weight: 700; }
+.tm-sec { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.18); }
+.tm-sec h4 { font-size: 13px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #c4b5fd; }
+.tm-field { display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.tm-small { align-self: flex-start; padding: 3px 10px; border-radius: 6px; background: rgba(255, 255, 255, 0.12); font-size: 12px; font-weight: 700; }
+.scene-list { display: flex; flex-direction: column; gap: 2px; max-height: 30vh; overflow-y: auto; }
+.scene-list:empty { display: none; }
+.scene-row, .akta-enc { display: flex; align-items: center; gap: 8px; padding: 3px 6px; border-radius: 6px; background: rgba(255, 255, 255, 0.06); font-size: 13px; }
+.scene-row span, .akta-enc span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scene-row.missing { opacity: 0.55; font-style: italic; }
+.akta-enc small { opacity: 0.7; }
+.akta-enc .cue-btn { width: 26px; height: 26px; }
+.akta-add { display: flex; gap: 4px; }
+.akta-add input { flex: 1; }
+.akta-add select { width: auto; flex: none; background: #3f3f46; }
+.akta-add button { flex: none; padding: 0 10px; border-radius: 6px; background: #4b5563; color: #fff; font-size: 12px; font-weight: 800; }
 /* The current item: an amber edge (graphics on air keep their green outline) */
 .show-card.show-current { box-shadow: inset 5px 0 0 #f59e0b; }
 .show-cue.show-current { border-color: #f59e0b; border-style: solid; color: #fde68a; background: rgba(245, 158, 11, 0.12); }
@@ -688,6 +834,8 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
   font-weight: 700;
 }
 .rundown-btn:active, .rundown-file:active { transform: scale(0.97); }
+/* Clear the projector: purple while it's cleared */
+#pj-clear-btn.on { background: #6D28D9; border-color: #a78bfa; color: #fff; }
 .rundown-file {
   display: flex;
   flex-direction: column;
@@ -700,7 +848,7 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
 .rundown-file span { font-size: 12px; opacity: 0.7; }
 
 /* Edit dialog for one show item, and the Import a rundown dialog */
-#edit-dialog, #rundown-dialog {
+#edit-dialog, #rundown-dialog, #timing-dialog, #breaks-dialog, #custom-dialog {
   position: fixed;
   inset: 0;
   margin: auto;        /* centered in the window */
@@ -713,8 +861,35 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
-#edit-dialog::backdrop, #rundown-dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
+#edit-dialog::backdrop, #rundown-dialog::backdrop, #timing-dialog::backdrop, #breaks-dialog::backdrop, #custom-dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
 #edit-dialog select { background: #3f3f46; color: #fff; }
+#timing-dialog, #breaks-dialog, #custom-dialog { max-height: 88vh; overflow-y: auto; }
+/* Custom image window: a preview and the name of each image in the custom folder; the one in use is outlined */
+.custom-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-height: 50vh; overflow-y: auto; }
+.custom-list:empty { display: none; }
+.custom-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 11px;
+  text-align: left;
+}
+.custom-pick:hover { background: rgba(255, 255, 255, 0.16); }
+.custom-pick:active { transform: scale(0.97); }
+.custom-pick.on { border-color: #a78bfa; background: rgba(109, 40, 217, 0.25); }
+.custom-pick img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  border-radius: 4px;
+  /* a checkerboard behind it, so see-through parts show */
+  background: repeating-conic-gradient(#52525b 0% 25%, #3f3f46 0% 50%) 50% / 12px 12px;
+}
+.custom-pick span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Scrollbars: thin and dark, purple while you grab one (light grey in light mode).
    OBS docks are Chromium, so these apply there too. */
@@ -760,8 +935,8 @@ html.light .fx-track { background: #9ca3af; }
 html.light #controller-view .border-gray-600 { border-color: #9ca3af; }
 html.light #edit-dialog, html.light #rundown-dialog { background: #fff; color: #111827; border-color: #d1d5db; }
 html.light .social-icon:not(.on) { border-color: #9ca3af; background: #fff; }
-html.light .rundown-btn { border-color: #9ca3af; background: #fff; }
-html.light .show-ctl:not(.on):not(.armed):not(.running) { border-color: #9ca3af; background: #fff; }
+html.light .rundown-btn:not(.on) { border-color: #9ca3af; background: #fff; }
+html.light .show-ctl:not(.on) { border-color: #9ca3af; background: #fff; }
 html.light .msg-panel { background: #f5f3ff; }
 html.light .msg-custom input { border-color: #6b7280; }
 html.light .block-time:not(.running):not(.over) { border-color: #a78bfa; }
@@ -802,7 +977,37 @@ html.light .show-block-head .count { background: rgba(109, 40, 217, 0.12); }
 html.light .show-block-head .line { background: #d1d5db; }
 html.light .block-remove { background: rgba(0, 0, 0, 0.08); color: #4b5563; }
 html.light .block-empty { border-color: #9ca3af; color: #6b7280; }
-html.light .gs-alert { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
+/* Show timing */
+html.light .tm-live { background: #fff; border-color: #d1d5db; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); }
+html.light .tm-clock { color: #6b7280; }
+html.light .tm-clock.on-air { color: #dc2626; }
+html.light .tm-left.block { color: #1d4ed8; }
+html.light .tm-left.break { color: #c2410c; }
+html.light .tm-left.over { color: #dc2626; }
+html.light .tm-left.pre { color: #6D28D9; }
+html.light .tm-break.end { color: #c2410c; }
+html.light .timing-box { background: #fff; border-color: #d1d5db; }
+html.light .tm-times, html.light .tm-akta:not(.on), html.light .tm-gear, html.light .tm-last button:not(.on) { border-color: #9ca3af; background: #fff; }
+html.light #tm-end-in, html.light #tm-spread-btn:not(.on) { color: #6D28D9; }
+html.light #tm-runtime.under { color: #1d4ed8; }
+html.light #tm-runtime.over, html.light #tm-last.bad { color: #dc2626; }
+html.light #tm-runtime.ontime { color: #15803d; }
+html.light #tm-last { color: #a16207; }
+html.light .block-at { color: #374151; }
+html.light .show-break:not(.on) { background: #fff7ed; border-color: #fb923c; color: #9a3412; }
+html.light .brk-len { background: rgba(0, 0, 0, 0.07); }
+html.light .brk-btn.reset { background: rgba(0, 0, 0, 0.08); }
+html.light #timing-dialog, html.light #breaks-dialog, html.light #custom-dialog { background: #fff; color: #111827; border-color: #d1d5db; }
+html.light .custom-pick:not(.on) { background: #f3f4f6; }
+html.light .custom-pick img { background: repeating-conic-gradient(#e5e7eb 0% 25%, #fff 0% 50%) 50% / 12px 12px; }
+html.light .tm-times-row input, html.light .tm-format input, html.light .tm-field input, html.light .akta-add input { border-color: #6b7280; }
+html.light .tm-times-row input { color-scheme: light; }
+html.light .akta-add select { background: #fff; color: #111827; border-color: #6b7280; }
+html.light .tm-format > b, html.light .tm-sec h4 { color: #6D28D9; }
+html.light .tm-sec { border-color: #e5e7eb; }
+html.light .scene-row, html.light .akta-enc, html.light .tm-small { background: #f3f4f6; }
+html.light .tm-switch { background: #fff7ed; }
+html.light .tm-error { color: #b91c1c; }
 
 
 /* =========================================================
@@ -1005,6 +1210,31 @@ html.light .gs-alert { background: #fef3c7; border-color: #f59e0b; color: #92400
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* ---------- KAMC (named "kamc" in the code) ----------
+   The same kind of bar as L3 PNG, on assets/kamc.png (1920x1080), with its own text: bigger,
+   further left and with a softer shadow (the original KAMC look). The padding lines the text up
+   with the blue bar in kamc.png (y 793-929 out of 1080, ending at x 1426). */
+#overlay-box.kamc {
+  background: url('../assets/kamc.png') center / 100% 100% no-repeat;
+}
+#overlay-box.kamc #overlay-text {
+  display: flex;
+  padding: 73.4vh 26.5vw 13.9vh 9.8vw; /* top right bottom left */
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-style: italic;
+  text-transform: uppercase; /* always capitals */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+#overlay-box.kamc #overlay-name {
+  font-size: 82px;
+  line-height: 1.05;
+}
+#overlay-box.kamc #overlay-title {
+  line-height: 1.1;
+  margin: 0; /* L3 PNG nudges its title; KAMC doesn't */
 }
 
 /* ---------- L3 Info (named "l3LargeAlt" in the code) ---------- */
@@ -1805,9 +2035,35 @@ html.projector, html.projector body { background: #0b0b10; color: #f4f4f5; overf
 .pj-block { color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.06em; }
 .pj-spacer { flex: 1; }
 .pj-time { font-variant-numeric: tabular-nums; }
-.pj-time.over { color: #f87171; }
-.pj-countdown { color: #fbbf24; }
+/* The time left in what's on now: blue for a block, orange for a break, red when a block runs over */
+.pj-timer { font-size: 8vh; line-height: 1; }
+.pj-timer.block { color: #60a5fa; }
+.pj-timer.break { color: #fb923c; }
+.pj-timer.over { color: #f87171; }
+.pj-timer.pre { color: #c4b5fd; }
+.pj-countdown { color: #c4b5fd; font-size: 3.6vh; }
 .pj-countdown.hidden { display: none; }
+.pj-clock { color: #a1a1aa; transition: color 0.5s; }
+.pj-clock.on-air { color: #f87171; }
+/* At 30, 15 and 5 seconds left: two red flashes */
+.pj-status.alert { animation: pjAlert 1s ease-in-out; }
+@keyframes pjAlert {
+  0%, 50%, 100% { background: #18181b; }
+  25%, 75% { background: #8b0000; }
+}
+/* The break after a block, in the rundown */
+.pj-break {
+  margin: 0.8vh 0 0.4vh;
+  padding: 0.6vh 1vw;
+  border-radius: 1vh;
+  border: 0.25vh dashed #9a3412;
+  color: #fdba74;
+  font-size: 2.8vh;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.pj-break.on { background: #c2410c; border-style: solid; border-color: #fb923c; color: #fff; }
 .pj-main { flex: 1; min-height: 0; display: flex; }
 /* The rundown: most of the screen */
 .pj-rundown { flex: 1.7; min-width: 0; overflow-y: auto; padding: 1.5vh 1.5vw 30vh; scrollbar-width: none; }

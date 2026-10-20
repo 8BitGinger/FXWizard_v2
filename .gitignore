@@ -18,6 +18,11 @@ rundowns/*
 logs/*
 !logs/README.txt
 
+# The AKTA break/return settings hold the private key, so they never get committed.
+# (The .tmp file only exists for a moment while the settings are being saved.)
+akta-config.json
+akta-config.json.tmp
+
 # Operating system and editor clutter
 .DS_Store
 Thumbs.db
@@ -25,3 +30,5 @@ desktop.ini
 .vscode/
 .idea/
 *.log
+
+.claude
