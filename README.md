@@ -1,6 +1,6 @@
 # FX Wizard: Live Graphics for OBS
 
-![Logo](./assets/FxNoBack.png)
+![Logo](./assets/fxWizardLogo.gif)
 
 **FX Wizard** puts animated lower thirds and fullscreen overlays on an OBS stream, run from a simple control panel in a web browser. The panel is built for touch screens, so a producer can take and clear graphics live with a tap.
 
@@ -24,6 +24,7 @@
   - [Saving rundowns](#saving-rundowns)
   - [Running the show](#running-the-show)
   - [Show timing](#show-timing)
+    - [Stream Deck and hotkeys](#stream-deck-and-hotkeys)
   - [The projector (anchor view)](#the-projector-anchor-view)
   - [During the show](#during-the-show)
 - [Customizing](#-customizing)
@@ -56,6 +57,7 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 | **L3 Info** | One paragraph of information on `assets/l3LargeAlt.png` in the bottom-left corner. The text is centered in the image's box and wraps onto about 5 lines (up to 400 characters). Line breaks you type are kept | Slides in from the left | Slides back out to the left |
 | **L3 Gif** | Name and title on a bar showing `assets/largeGif.gif`, centered across the screen | Rises up from the bottom | Drops back down |
 | **Custom** | Like L3 Gif, with a PNG, JPG or GIF you pick from the `custom` folder. Square corners, no side borders, and the image fades out at both sides | Rises up from the bottom | Drops back down |
+| **Location** | A red map-pin tile and the place you type, top left, like a live report. The pin slides in from the right and the place from the left, crossing as they meet, and the pin gives a little bounce | Pin and place cross in | Fades out |
 | **Overlays** | | | |
 | **Color Wave** | Soft, color-changing glow around the edges; the center stays clear | Fades in | Fades out |
 | **Confetti** | Bursts from both bottom corners, then light confetti rain | Slides up | Fades out |
@@ -66,7 +68,9 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 | **Arrested** | Police lights flash red and blue, then a steel jail cell door slams down over the screen with a shake (the wide gaps between the bars show the scene behind). It lifts away in the last second | Lights flash, door drops | Door lifts, fades out |
 | **Hot Take** | The bottom of the screen catches fire, a flaming **HOT TAKE** badge slams in just above the flames (clear of the host's face) and its heat meter maxes out, with embers flying. Type your own text (for example *Unpopular Opinion*) or leave it blank | Slams in | Fades out |
 | **Like & Subscribe** | **Like**, **Follow** and **Subscribe** buttons pop up along the bottom, a cursor clicks each one (they change to **Liked**, **Following** and **Subscribed**) and the bell rings, all in about 3 seconds. Any socials you add (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web) show above the buttons, each with its icon | Pops up | Fades out |
-| **Breaking News** | **LIVE** in the top-right corner and a red **BREAKING NEWS** bar along the bottom, with your ticker text scrolling across | Bar slides up | Fades out |
+| **Breaking News** | **LIVE** in the top-right corner and a red **BREAKING NEWS** bar along the bottom, with your ticker text scrolling across. Leave the ticker text empty and it scrolls **Breaking News \| Breaking News \| ...** | Bar slides up | Fades out |
+| **St. Patrick's** | Shamrocks (now and then a lucky four-leaf clover) and spinning gold coins tumble down, the coins catching the light, with a soft green glow around the edges | Fades in | Fades out |
+| **Retro VHS** | The picture looks like an old tape playing: scan lines, grain, a soft vignette, the ragged head-switching noise along the bottom, and a tracking glitch that rolls through now and then. The VCR's display shows **PLAY ▶** and **SP** at the top, the tape counter bottom left, and the date and time bottom right, like a camcorder | Fades in | Fades out |
 | **Stingers** | | | |
 | **Standard** | A wide band of red, white and blue stripes (some with stars) sweeps from top-left to bottom-right, covering the whole screen at the halfway point; the stripes drift slightly (about 2 seconds) | Sweeps in | Sweeps off |
 | **Storm** | Storm clouds roll down with rain and lightning, cover the screen, then clear (about 2.8 seconds) | Rolls in | Clears |
@@ -76,17 +80,19 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 | **X-mas** | A candy-cane band with a string of lights sweeps from left to right (about 1.8 seconds) | Sweeps in | Sweeps off |
 | **Sports** | Pick a sport (about 2.6 seconds): **Football** (one giant football jets across the screen), **Basketball** (basketballs rain down and pile up until they cover the screen), **Baseball** (home plate spins in on a patch of dirt, with a puff of dust), or **Soccer** (a ball flies straight at the camera, thumps the lens, and bounces away) | Flies, rains or spins in | Leaves the same way |
 | **Spring** | Flowers pop in a few at a time until they cover the screen, butterflies flutter past, then a breeze blows the flowers away (about 3 seconds) | Pops in | Blows away |
+| **Fireworks** | Rockets streak up into a night sky that fills the screen and burst in color (round bursts, rings, drooping gold willows and crackling glitter). The biggest go off just before the halfway point, with a flash, then the sky fades as the last sparks fall (about 3 seconds) | Rockets go up | Sky fades |
+| **Medical** | Blue and white: blue panels sweep in from both sides as a white heartbeat line races across; at the middle a big white medical cross pulses as the heartbeat passes under it, then the panels sweep back out (about 2.4 seconds) | Sweeps in | Sweeps out |
 
 L3 PNG, L3 Info, L3 Gif and Custom text is always shown in capitals. If text is longer than normal, it shrinks to fit instead of getting cut off.
 
-🟩 **Greenscreen depth:** Color Wave, Confetti, Fall, Snow, Fire, Underwater, Arrested and Hot Take each have a **Greenscreen** switch. With it on, they show partly *behind* you and partly *in front of* you. See [Greenscreen Depth](#-greenscreen-depth).
+🟩 **Greenscreen depth:** Color Wave, Confetti, Fall, Snow, Fire, Underwater, Arrested, Hot Take and St. Patrick's each have a **Greenscreen** switch. With it on, they show partly *behind* you and partly *in front of* you. See [Greenscreen Depth](#-greenscreen-depth).
 
 ### Import L3s
 Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import button shows when **L3 PNG**, **KAMC** or **L3 Info** is selected, and the L3s are imported as that type.
 - One name per line, or `Name | Title` to add a title. For **L3 Info**, each line is one paragraph.
 - Pick several files at once; they're added in file-name order.
 - Each button shows the file it came from (for example **L3 1A**), which makes it easy to match a rundown.
-- Imported L3s stay up for **5 minutes**, or until the producer clears them.
+- Imported L3s go up as a **toggle**: they stay up until they're turned off, with **TOGGLE OFF**, or **OFF** on their card in the Podcast Rundown (where they show **TOGGLE** instead of a time). Ones imported before this work the same way.
 - Names already saved (same name and title) are skipped.
 
 ### Control panel
@@ -96,17 +102,26 @@ Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import bu
 - **Podcast Rundown:** the graphics you added with ＋, grouped into **blocks** (A to E to start; tap **+** next to the letters to add F, G and so on). Tap a letter under **Add to** to choose which block ＋ adds to.
   - **Labels:** each card is labeled on the left with its block, number and type: **A1-L3**, **A2-L3**... for lower thirds (animated or fullscreen) and **A1-OV**, **A2-OV**... for overlays and stingers. Lower thirds and overlays are numbered separately in each block, so a graphic in block B is **B1-L3**, **B1-OV** and so on.
   - Each card shows how long it stays on screen (for example **5s** or **5:00**) so you can double-check the rundown.
-  - While **Set Order** is off: drag ⠿ to reorder or to move a card to another block, ✎ to edit the text, duration or block (and Greenscreen depth, for effects that support it) for this rundown only, and ✕ to remove. ✕ next to the last block removes it when it's empty. Cards can't be taken yet.
-  - Turn on **Set Order** when the show is ready, then tap a card to take it. A red **LIVE ORDER** bar across the top shows the rundown is running, not being edited. While it's on, **Add to** becomes **ALL**: tap **ALL** to see the whole rundown, or a letter to see just that block. Empty blocks are greyed out.
+  - While **Set Show** is off: drag ⠿ to reorder or to move a card to another block, ✎ to edit the text, duration or block (and Greenscreen depth, for effects that support it) for this rundown only, and ✕ to remove. ✕ next to the last block removes it when it's empty. Cards can't be taken yet. While you're building it, the cards and buttons are a little smaller and thinner so more fits; once Set Show is on they're back to full size for touch.
+  - Turn on **Set Show** when the show is ready, then tap a card to take it. A red **LIVE SHOW** bar across the top shows the rundown is running, not being edited. While it's on, **Add to** becomes **ALL**: tap **ALL** to see the whole rundown, or a letter to see just that block. Empty blocks are greyed out.
   - While a card is on screen it's outlined in green, with a floating red **OFF** button that counts down the time left; tap it to take the graphic down early. A ★ marks the one played last.
-  - **Unsorted:** graphics added with **＋ RUNDOWN** (see below) wait at the bottom under **Unsorted**, labeled with just their type, until you drag them into a block (or move them with ✎). They aren't part of the show: they're hidden while Set Order is on, and turning it on tells you how many are left.
-  - **Cues:** producer notes, placeholders for things that aren't graphics, and scripts. Tap **Note**, **Clip**, **SOT**, **PIC** or **Script** (while Set Order is off), type the note, an optional description or the script (or load the script from a .txt file), and pick its block. Cues show as thin, greyed-out rows, numbered like graphics (**A1-CLIP**, **A2-CLIP**, **A1-SOT**, **B1-SCRIPT**...; notes have no number). Drag, edit and remove them like cards. Scripts show on the [projector](#the-projector-anchor-view); notes are for the crew and don't.
+  - **Open, Tease and Close:** sections with no letter of their own (no "Add to" letter either: drag things in, or pick them as the block with ✎). They aren't timed, and during the show each one is hidden while it's empty.
+    - **Open** (optional): first of all, before the Tease. It takes anything. Its items are numbered **OP1-L3**, **OP1-SCENE**...
+    - **Tease:** at the top of block A, and runs before it. It takes notes, scripts, scenes, one clip (the **T1-TEASE**) and one lower third (the **T-L3**). Tap the empty **T1-TEASE** slot to add the clip, and drag a lower third onto the **T-L3** slot. Scripts and scenes in it are numbered **T1-SCRIPT**, **T1-SCENE**... No overlays, SOTs, pictures or breaks.
+    - **Close** (optional): the final section, after the last block. It takes anything, numbered **CL1-L3**, **CL1-SCENE**...
+  - **Unsorted:** graphics added with **＋ RUNDOWN** (see below) wait at the bottom under **Unsorted**, labeled with just their type, until you drag them into a block (or move them with ✎). They aren't part of the show: they're hidden while Set Show is on, and turning it on tells you how many are left.
+  - **Cues:** producer notes, placeholders for things that aren't graphics, the scene to take, and scripts. Tap **Note**, **Clip**, **SOT**, **PIC**, **Scene**, **Script** or **Break** (while Set Show is off), type the note, an optional description or the script (or load the script from a .txt file), and pick its block. Cues show as thin, greyed-out rows, numbered like graphics (**A1-CLIP**, **A2-CLIP**, **A1-SOT**, **A1-SCENE**, **B1-SCRIPT**...; notes have no number). Drag, edit and remove them like cards. Scripts show on the [projector](#the-projector-anchor-view); notes are for the crew and don't.
+  - **Break:** a break you fire from the rundown. Give it a length (like 2:00) and, if you like, a name (*Break 1*). It shows with an orange **BREAK** marker and its length. While **Set Show** is on, tap the marker (it has a ⚡) to fire it:
+    - It says so on the projector, big: **In break** and its countdown, and here in an orange strip with **End** to finish it early. It ends by itself when its time is up.
+    - In **Advanced**, if the block it's in has a break in the show times, that break starts instead, the same as **Start Break** (with AKTA, if AKTA is on). Otherwise, with AKTA on, an AKTA break goes out with it and the return when it ends. With AKTA off (and always in Simple), it's just the break and its countdown.
+    - Once fired, it's dimmed. **Start Break** from OBS fires the next one not fired yet, and **Reset Break** ends the one that's on (or lets the last one fire again): see [Stream Deck](#stream-deck-and-hotkeys).
+  - **Scene:** which shot to go to. Pick it from the list of scenes in OBS's active scene collection, or tap **Sources** to pick a source instead (a camera, say; audio-only sources are left out), and add a note if you like ("wide on the guest"). ↺ asks OBS again after you add or rename one. It shows in the rundown and on the projector with a yellow **TAKE** marker, so the director and whoever's on next know it's their turn. The list needs server.py running in OBS; without it (server.js, or not connected) you type the name instead. **Firing it:** while **Set Show** is on, tap the yellow **TAKE** (it gets a ⚡) and OBS switches to that scene, with its current transition (in Studio Mode it goes straight to program). It also becomes the current item, and goes in the log. The TAKE that's on program in OBS right now has a green ring, whoever switched it. Firing needs server.py running in OBS; a TAKE that names a source is a cue only and doesn't fire. If the scene is one of your [break scenes](#show-timing), it starts the break the same as switching to it in OBS would. The copy button on a TAKE (while Set Show is off) duplicates it right under it, for going back to the same shot.
   - **Block times:** tap **Set time** on a block's header to give it a planned length (like 6:00); the header also shows the total time of its graphics and when the block is due on air. The planned show length (with the breaks) and the graphics' total sit above the blocks. During the show, the block on air counts down its time left and turns red when it runs over. See [Show timing](#show-timing).
   - **Show timing** (from the OBS Show Timer): the show's start and end times of day, a break after any block, and a timing strip that stays at the top: the clock (red on air), the time left in the block or break on now, **Start Break**, the time to the show's end, and how far over or under the show will run, with **Update** and **÷** to fix it. Breaks can also start from OBS (break scenes and hotkeys) and send AKTA break and return cues. See [Show timing](#show-timing).
   - The trash can empties the rundown (saved graphics aren't affected, and the blocks stay). **CLEAR ALL** is right at the top.
-  - **Save Rundown / Import Rundown** (shown while Set Order is off): save the whole rundown, its blocks and a full copy of every graphic, as a file in the `rundowns` folder, and bring it back later, like a template. It still works after those graphics are deleted from Saved, and the files can be copied to another computer. See [Saving rundowns](#saving-rundowns).
+  - **Save Rundown / Import Rundown** (shown while Set Show is off): save the whole rundown, its blocks and a full copy of every graphic, as a file in the `rundowns` folder, and bring it back later, like a template. It still works after those graphics are deleted from Saved, and the files can be copied to another computer. See [Saving rundowns](#saving-rundowns).
 - **Duration:** on the right, just above the buttons. Picking an overlay fills in its usual time (for example Snow 15s, Breaking News 30s, Hot Take 7s), which you can still change. The Animated L3s tab keeps whatever you set there. For stingers it shows their fixed length, locked (with a padlock). The stinger buttons show their lengths too, for example **Storm · 2.8s**.
-- **Buttons, two by two:** **TAKE** and **TOGGLE ON** on top, **SAVE** and **＋ RUNDOWN** below. **＋ RUNDOWN** puts what you've set up straight into the Podcast Rundown under **Unsorted**, without saving it first. It only works while Set Order is off; if it's on, it offers to turn it off (or cancel).
+- **Buttons, two by two:** **TAKE** and **TOGGLE ON** on top, **SAVE** and **＋ RUNDOWN** below. **＋ RUNDOWN** puts what you've set up straight into the Podcast Rundown under **Unsorted**, without saving it first. It only works while Set Show is off; if it's on, it offers to turn it off (or cancel).
 - **TOGGLE ON / TOGGLE OFF:** puts the graphic up with no time limit. The button turns yellow and pulses and reads **TOGGLE OFF** until you press it again, press Clear All, or take something else on the same tab. Stingers play once, so it's greyed out for them.
 - **Message box:** floats at the bottom of the panel on every tab and shows what you just took and how long it will stay up, for example **Taken: Fire** *for 12s*. Then it counts down (*11s left*, *10s left*...) while the graphic is on screen, and says **Off screen: Fire** when it's gone. Any newer message (taking something else, Clear All, OFF, TOGGLE) takes its place. It lights up for each new message (and stays lit while it counts down), dims after 3 seconds, and goes back to a small, faint **Ready** after 15 seconds with nothing new. The panel leaves room at the bottom so it never covers the last card.
 - **Clear All:** takes everything off screen right away, with its normal out animation.
@@ -224,8 +239,9 @@ If you key yourself out of a greenscreen in OBS, FX Wizard can put some of an ov
 | **Color Wave** | The whole colored glow, like a backlight | Nothing |
 | **Arrested** | The flashing red and blue lights | The jail cell door, with the lights catching its top (so you're behind bars) |
 | **Hot Take** | The flames and the heat glow | The badge and its heat meter, and the embers |
+| **St. Patrick's** | Small, far-away shamrocks and coins | Bigger shamrocks and coins, a few big blurry shamrocks right past the camera, and the green glow |
 
-Everything else (lower thirds, the Fullscreen L3s, Breaking News, and all the stingers) has no Greenscreen switch and stays on `#display` in front, as usual. When nothing on screen uses Greenscreen, the underlay stays empty, so you can leave it in your scene.
+Everything else (lower thirds, the Fullscreen L3s, Breaking News, Retro VHS, and all the stingers) has no Greenscreen switch and stays on `#display` in front, as usual. When nothing on screen uses Greenscreen, the underlay stays empty, so you can leave it in your scene.
 
 ### Each effect has its own switch
 The **Greenscreen** switch only shows on the eight effects above, and each one remembers its own setting: Snow can be on while Confetti stays off. Taking an effect uses its switch, and the message box says **Greenscreen** when it's on.
@@ -282,12 +298,13 @@ Open `fx_wizard.html` in a browser (without `#display`). Check that the top bar 
 4. Press **TAKE** to put it on screen now, **TOGGLE ON** to keep it up until you turn it off, **SAVE** to add it to Saved L3s, or **＋ RUNDOWN** to put it straight into the Podcast Rundown (under Unsorted).
 
 ### Fullscreen Overlays tab
-1. Open **Fullscreen L3s**, **Overlays** or **Stingers** and pick one.
+1. Open **Fullscreen L3s**, **Overlays** or **Stingers** and pick one (opening one closes the others).
 2. For L3 PNG, L3 Gif and Custom, type a **Name** and an optional **Title**. For L3 Info, type the paragraph in **Text**.
    - **Custom:** same as the Custom background: tap **Custom…** and pick the image from the `custom` folder.
    - **Like & Subscribe:** under **Socials**, tap an icon (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web) to open a box for that account and type it in. Tap the icon again to leave it out. All of them are optional, and the panel remembers what you typed. Give it at least 4 seconds so the clicks finish.
    - **Hot Take:** type your own text in **Text (optional)**, or leave it blank for **HOT TAKE**.
-   - **Breaking News:** type the scrolling text in **Ticker text**. **TOGGLE ON** keeps it up until you turn it off.
+   - **Breaking News:** type the scrolling text in **Ticker text**, or leave it empty for **Breaking News | Breaking News | ...**. **TOGGLE ON** keeps it up until you turn it off.
+   - **Location:** type the place (like *City Hall*).
    - **Sports** (a stinger): pick **Football**, **Basketball**, **Baseball** or **Soccer** under **Sport**.
 3. Check the **Duration**: it fills in with the overlay's usual time when you pick it. Stingers show their fixed length, locked.
 4. Press **TAKE**, **TOGGLE ON**, **SAVE**, or **＋ RUNDOWN**.
@@ -307,28 +324,35 @@ Open `fx_wizard.html` in a browser (without `#display`). Check that the top bar 
 2. On the Animated L3s and Fullscreen Overlays tabs, tap **＋** on each saved graphic for that block, in show order. Then pick the next block and repeat. Need more than A to E? Tap **+** next to the letters.
    - Setting up something new? **＋ RUNDOWN** adds it straight to the rundown under **Unsorted**; drag it into its block afterwards.
 3. Back on **Podcast Rundown**, add **Cues** for the clips, SOTs, pictures and notes in each block, drag ⠿ to fix the order (or move a card to another block), ✎ to tweak anything for this rundown, and check each card's label and time.
-4. Turn on **Set Order**. Cards can only be taken once it's on. Tap **ALL** or a block letter to choose what's shown.
+4. Turn on **Set Show**. Cards can only be taken once it's on. Tap **ALL** or a block letter to choose what's shown.
 5. During the show, tap each card to take it. It's outlined in green while it's on screen, with an **OFF** button to take it down early, and ★ marks the one played last.
 
 ### Saving rundowns
-1. Build the rundown, then press **Save Rundown** (Set Order must be off) and give it a name.
+1. Build the rundown, then press **Save Rundown** (Set Show must be off) and give it a name.
 2. It's saved as `rundowns/<name>.json` next to `fx_wizard.html`. Saving with a name that's already there asks before replacing it.
-3. To use it again, press **Import Rundown** and tap it in the list (newest first), or **Choose a file…** to open a rundown file from anywhere. Importing replaces the current rundown (it asks first) and turns Set Order off so you can check it. It doesn't add anything to your saved graphics, and it works whether or not those graphics are still saved (rundowns with lower thirds from older versions too).
+3. To use it again, press **Import Rundown** and tap it in the list (newest first), or **Choose a file…** to open a rundown file from anywhere. Importing replaces the current rundown (it asks first) and turns Set Show off so you can check it. It doesn't add anything to your saved graphics, and it works whether or not those graphics are still saved (rundowns with lower thirds from older versions too).
 
-The file holds everything needed, so it works even if those graphics were deleted from Saved. The server does the saving, so it needs the current `server.py` or `server.js` (after updating, reload the script in OBS under **Tools > Scripts**, or restart `node server.js`). With an older server, **Save Rundown** downloads the file instead: move it into the `rundowns` folder.
+The file holds everything needed, so it works even if those graphics were deleted from Saved. The server does the saving, so it needs the current `server.py` or `server.js` (after updating, reload the script in OBS under **Tools > Scripts**, or restart `node server.js`; if your server.py is from before October 2026, restart OBS once instead, because older copies kept running after a reload). With an older server, **Save Rundown** downloads the file instead: move it into the `rundowns` folder.
 
 ### Running the show
-Turn on **Set Order**. A row of show controls appears:
+**Simple or Advanced** (under the title, while Set Show is off): **Simple** is just the rundown and the timer. **Advanced** adds the [show times](#show-timing): block lengths, breaks, the timing strip, AKTA and break scenes. Switching to Simple doesn't lose any of them; they're just set aside until you switch back. A panel that already had show times set starts in Advanced.
+
+**Always there** (Set Show on or off), as icons:
+- **Projector** (the screen): turns the [projector](#the-projector-anchor-view) on or off. It starts off; while it's off nothing is sent to it (an open projector says it's turned off), and the rundown works just the same.
+- **↗** (next to it) opens the projector in its own Chrome window, with no tabs or address bar, on the computer running the server (Edge if there's no Chrome), and turns the projector on. It starts at 800×800, then remembers where you put it and how big.
+- **Timer** (the stopwatch, Simple only: Advanced stops it and hides it, since it has the show times): opens the timer. Pick **Count down** (set the time in **From**, like 5:00) or **Count up**, then ▶ to start, ⏸ to pause, ⏹ to stop (back to the start) and ↺ to start over (it keeps running if it was). A countdown that reaches 0 keeps going in red (+0:05). While the timer is open and the projector is on, the projector shows it big in place of the rundown; close it and the projector goes back to the rundown. Closed, the Timer button shows the time while it's going. It survives a reload.
+- **Message** (the speech bubble, while the projector is on): **Toss to Break**, **No Video**, **No L3** and **Center on Camera**, or type your own and press **Send**. It stays on the projector until you send another or clear it (the ✕ on the orange bar).
+
+Turn on **Set Show**. A row of show controls appears:
 
 - **The current item:** whatever you take becomes the current item (outlined in amber). Tap a clip, SOT, picture or script to make it current; nothing goes on screen. A graphic can stay on air while something else is current, like an L3 over a SOT.
 - **◀ ▶** move the current item back or on without taking anything (notes are skipped).
-- **Messages for the projector:** tap the message icon for **Toss to Break**, **No Video**, **No L3** and **Center on Camera**, or type your own and press **Send**. It stays on the projector until you send another or clear it (the ✕ on the orange bar).
 - **Generate Log** (the page icon) saves a spreadsheet (`.csv`) of what actually ran: every graphic from take to off, every cue while it was current, each break (and AKTA cue), each message, and each block's planned and actual time with how far over or under it was. It goes in the `logs` folder (with an older server it downloads instead), then offers to start a fresh log for the next show (that also clears the breaks that were started).
 
-The clock and the time left come from the show's times: see [Show timing](#show-timing). They only show while Set Order is on. The log keeps going if you turn Set Order off to fix something, and breaks that were started are kept: turning Set Order back on picks the timing up from the clock. All of it survives a reload.
+The clock and the time left come from the show's times: see [Show timing](#show-timing). They only show while Set Show is on. The log keeps going if you turn Set Show off to fix something, and breaks that were started are kept: turning Set Show back on picks the timing up from the clock. All of it survives a reload.
 
 ### Show timing
-The Podcast Rundown keeps the show on the clock, the way the OBS Show Timer does: each block runs for its length, one after another from the show's start time, with a break after any block that has one.
+This is the Podcast Rundown's **Advanced** mode (pick it under the title). The Podcast Rundown keeps the show on the clock, the way the OBS Show Timer does: each block runs for its length, one after another from the show's start time, with a break after any block that has one.
 
 **Set it up:** tap the show times button (with the clock icon, under the timing strip) and fill in:
 - **Start** and **End:** the times of day the show goes on and off air. A show that ends after midnight is fine.
@@ -337,8 +361,8 @@ The Podcast Rundown keeps the show on the clock, the way the OBS Show Timer does
 
 The show times and breaks are saved in rundown files.
 
-**During the show** (while **Set Order** is on, on any tab):
-- **The timing strip** stays at the top while you scroll: the time of day (red while the show is on air) and what's on now, **Block B** or **Break 1**, with the time it has left, in blue for a block and orange for a break. Before the show it counts down to air (**On air in**), so turn on Set Order a little before you go live.
+**During the show** (while **Set Show** is on, on any tab):
+- **The timing strip** stays at the top while you scroll: the time of day (red while the show is on air) and what's on now, **Block B** or **Break 1**, with the time it has left, in blue for a block and orange for a break. Before the show it counts down to air (**On air in**), so turn on Set Show a little before you go live.
 - Blocks follow on by themselves. A block with a break after it stays on when its time is up, counting up in red (**+0:12**), until the break starts. Everything after a break follows from when it really started.
 - **Start Break** (under the clock) starts the next break. It pulses when the break is due, and asks first if the break isn't due for more than a minute. Each break also has its own orange row in the rundown, after its block, with when it's due, ▶ to start it, and ↺ to reset one started by mistake (it asks first).
 - **End a break early:** while a break is on, the button under the clock becomes **End Break 1 early**, and the break's row gets ⏹. It asks first, then the break is over: the next block starts now, everything after it moves up, and with AKTA on, AKTA gets the return cue. The log marks it **(ended early)**.
@@ -347,11 +371,16 @@ The show times and breaks are saved in rundown files.
 - **Last block:** the length the last block needs to end on time. **Update** sets it. To share the difference out instead, tap **÷**, pick the blocks (ones that are over are greyed out) and tap **Spread**.
 - Each block's header shows when it's due on air; the block on air shows its time left instead of its length.
 
-**With Set Order off** the show isn't running: the timing strip, the countdowns and the times on the blocks and breaks go away, leaving each block's length and each break's name and length to edit. **Runtime** and **Last block** (with **Update** and **÷**) still work, from the planned lengths against the start and end times, so you can make the plan fit before the show. A break that's already on still ends on time (and still gets its AKTA return).
+**With Set Show off** the show isn't running: the timing strip, the countdowns and the times on the blocks and breaks go away, leaving each block's length and each break's name and length to edit. **Runtime** and **Last block** (with **Update** and **÷**) still work, from the planned lengths against the start and end times, so you can make the plan fit before the show. A break that's already on still ends on time (and still gets its AKTA return).
 
-**Starting breaks from OBS** (this needs `server.py`, the server that runs inside OBS, and works only while Set Order is on). Tap the gear next to the show times:
+**Starting breaks from OBS** (this needs `server.py`, the server that runs inside OBS, and works only while Set Show is on). Tap the gear next to the show times:
 - **Break scenes:** tick the OBS scenes that start a break. When OBS goes to one of them, the next break starts (not while a break is already on).
 - **Hotkeys:** in OBS, under **Settings > Hotkeys**, give keys to **FX Wizard: Start Break** (the next break), **Reset Break** (the last one started) and **Toggle AKTA control**. They work while OBS is in the background, so a keyboard or Stream Deck can run the breaks.
+
+#### Stream Deck and hotkeys
+**Start Break** and **Reset Break** work in Simple and Advanced, while **Set Show** is on. With breaks in the show times (Advanced) they start the next one and reset the last one. Otherwise, **Start Break** fires the next [Break cue](#control-panel) in the rundown, and **Reset Break** ends the break that's on (or lets the last one fired fire again).
+- **From a Stream Deck:** give **FX Wizard: Start Break** a key combination in OBS (**Settings > Hotkeys**, say Ctrl+Shift+F9), then use Stream Deck's **Hotkey** action with the same keys. It can go in a **Multi Action** with anything else (a scene change, a sound, a mic mute).
+- **From anything that can send a WebSocket message** (a Stream Deck WebSocket plugin, Companion...): send `{"mode":"timerCommand","action":"start-break"}` (or `"reset-break"`) to `ws://127.0.0.1:8080`, the address the panel uses.
 
 **AKTA** (optional): sends AKTA a break cue (a slate for the break's length) when a break starts, and a return when it's over (or when a break that's still on is reset).
 1. Tap the gear, fill in the **Public key**, **Private key** and your **Encoders** (each one's ID, and Local or National), and tap **Save AKTA settings**. The server keeps them in `akta-config.json`, next to it. The private key is never sent back to the panel (leave the box empty to keep the saved one), and the file isn't shared in Git.
@@ -361,23 +390,28 @@ The show times and breaks are saved in rundown files.
 The message box shows whether each cue went through, and the log lists them. Keep the panel showing while a show runs (an OBS dock is ideal): a browser tab in the background slows its timers down, which can hold up a break's return cue.
 
 ### The projector (anchor view)
-A screen for the anchor and guests, outside OBS. On a computer running the control panel (or any computer that can reach the server), open `fx_wizard.html#projector` in a browser, full screen (F11), on the guest-facing screen.
+A screen for the anchor and guests, outside OBS. On a computer running the control panel (or any computer that can reach the server), open `fx_wizard.html#projector` in a browser, full screen (F11), on the guest-facing screen. Or tap **↗** next to **Projector** in the Podcast Rundown to open it in its own Chrome window. Either way, **Projector** has to be on.
 
 - **Across the top:** the director's message, flashing when a new one arrives.
-- **Under it:** what's on now (a block or a break) and its time left, in big numbers: blue for a block, orange for a break, red and counting up when a block runs over. The bar flashes red at 30, 15 and 5 seconds left. On the right, the time to the show's end and the time of day (red while on air). Before the show it counts down to air. The times only run while **Set Order** is on; with it off it says **Not running**. Without [show times](#show-timing), it just shows the current block.
+- **Under it:** what's on now (a block or a break) and its time left, in big numbers: blue for a block, orange for a break, red and counting up when a block runs over. The bar flashes red at 30, 15 and 5 seconds left. On the right, the time to the show's end and the time of day (red while on air). Before the show it counts down to air. The times only run while **Set Show** is on; with it off it says **Not running**. Without [show times](#show-timing), it just shows the current block.
 - **Most of the screen:** the whole rundown in order, with the breaks between the blocks, following along: **PREV**, **NOW** and **NEXT** are marked, and anything on air has a green outline.
 - **On the side:** what's on now, what's next, and what's on air. When a script is current, its text fills the side, sized to fit.
+- **Scene cues** show their yellow **TAKE** marker everywhere they appear, so whoever's on next can see their shot coming. When one is current, it pulses on the **Now** line.
 
-It updates by itself as the director works. Producer notes aren't shown.
+**On a square or upright screen** (like 800×800, the size it's built around), it stacks instead: the message and the times across the top, then **Now**, then the rundown, with **Next** and **On air** along the bottom. When a script is current, the script takes the rundown's place, in bigger text.
 
-**Between shows:** with **Set Order** off, **Clear the projector** (under Save Rundown and Import Rundown) blanks it, back to how it looks when it opens, with nothing counting. The director's message is cleared too. It stays blank until you tap the button again or turn **Set Order** back on. (Turning Set Order off on its own stops the countdowns but leaves the rundown showing.)
+**Timer view:** while the [timer](#running-the-show) is open in the control panel, the projector shows it big in place of the rundown (gold while it's paused, red once a countdown runs out), with what's on now under it while the show runs.
+
+It updates by itself as the director works, as long as **Projector** is on in the control panel. Producer notes aren't shown.
+
+**Between shows:** with **Set Show** off, **Clear the projector** (under Save Rundown and Import Rundown) blanks it, back to how it looks when it opens, with nothing counting. The director's message is cleared too. It stays blank until you tap the button again or turn **Set Show** back on. (Turning Set Show off on its own stops the countdowns but leaves the rundown showing.)
 
 ### During the show
-- **Tap a saved card** (or a Podcast Rundown card, once Set Order is on) to take it. **OFF** on a live rundown card takes it down early.
+- **Tap a saved card** (or a Podcast Rundown card, once Set Show is on) to take it. **OFF** on a live rundown card takes it down early.
 - **CLEAR ALL** removes everything from the screen, including anything toggled on.
 - **TOGGLE OFF** takes down the graphic you toggled on.
 - If the top bar says **CLOSED**, press the wrench for things to check.
-- Using a greenscreen? Turn on the **Greenscreen** switch on Snow, Fall, Confetti, Fire, Underwater, Arrested, Hot Take or Color Wave before you take it (or save it that way). Each effect remembers its switch.
+- Using a greenscreen? Turn on the **Greenscreen** switch on Snow, Fall, Confetti, Fire, Underwater, Arrested, Hot Take, St. Patrick's or Color Wave before you take it (or save it that way). Each effect remembers its switch.
 - **✕** on a card deletes it (you'll be asked to confirm).
 
 ---

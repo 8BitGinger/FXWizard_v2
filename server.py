@@ -1,12 +1,17 @@
 import obspython as obs
 import asyncio
 import base64
+import ctypes
 import hashlib
 import hmac
 import json
 import math
 import os
+import pathlib
 import re
+import shutil
+import subprocess
+import sys
 import threading
 import time
 import urllib.error
@@ -49,6 +54,52 @@ def rundown_files():
         return []
     found = [{"name": f[:-5], "saved": os.path.getmtime(os.path.join(RUNDOWN_DIR, f))} for f in files]
     return sorted(found, key=lambda f: f["saved"], reverse=True)
+
+# The projector, opened from the control panel (launchProjector): fx_wizard.html#projector, next to this
+# script, in Chrome as an app window (no tabs or address bar, just the page), or in Edge if there's no
+# Chrome. The page and the options are fixed here: nothing from the panel goes into the command. It
+# gets a browser profile of its own, so the window comes back where it was put, and starts at 800x800.
+PROJECTOR_PAGE = os.path.join(BASE_DIR, "fx_wizard.html")
+
+def find_browser():
+    """(path, name) of Chrome, or Edge, on this computer, or (None, None)."""
+    found = []
+    if os.name == "nt":
+        for env in ("PROGRAMFILES", "PROGRAMFILES(X86)", "LOCALAPPDATA"):
+            if os.environ.get(env):
+                found.append((os.path.join(os.environ[env], "Google", "Chrome", "Application", "chrome.exe"), "Chrome"))
+        for env in ("PROGRAMFILES(X86)", "PROGRAMFILES"):
+            if os.environ.get(env):
+                found.append((os.path.join(os.environ[env], "Microsoft", "Edge", "Application", "msedge.exe"), "Edge"))
+    elif sys.platform == "darwin":
+        found += [("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "Chrome"),
+                  ("/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge", "Edge")]
+    else:
+        found += [(shutil.which(cmd), "Chrome") for cmd in ("google-chrome", "google-chrome-stable", "chromium", "chromium-browser")]
+        found.append((shutil.which("microsoft-edge"), "Edge"))
+    return next(((path, name) for path, name in found if path and os.path.isfile(path)), (None, None))
+
+def launch_projector():
+    def failed(error):
+        return {"mode": "projectorLaunched", "ok": False, "error": error}
+    browser, name = find_browser()
+    if not browser:
+        return failed("Couldn't find Chrome (or Edge) on the computer running OBS")
+    if not os.path.isfile(PROJECTOR_PAGE):
+        return failed("fx_wizard.html isn't next to server.py")
+    home = os.environ.get("LOCALAPPDATA") if os.name == "nt" else None
+    profile = os.path.join(home or os.path.join(os.path.expanduser("~"), ".fxwizard"), "FXWizard", "projector-browser")
+    args = [browser, "--app=" + pathlib.Path(PROJECTOR_PAGE).as_uri() + "#projector", "--user-data-dir=" + profile,
+            "--no-first-run", "--no-default-browser-check"]
+    if not os.path.isdir(profile):
+        args.append("--window-size=800,800")  # the first time; after that it remembers its own size and place
+    try:
+        flags = (subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP) if os.name == "nt" else 0
+        subprocess.Popen(args, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         close_fds=True, creationflags=flags, start_new_session=os.name != "nt")
+    except OSError as e:
+        return failed(f"Couldn't open {name} ({e.__class__.__name__})")
+    return {"mode": "projectorLaunched", "ok": True, "browser": name}
 
 def answer_request(message):
     """Requests from the control panel that the server answers itself (only to that panel).
@@ -94,8 +145,19 @@ def answer_request(message):
         except (OSError, ValueError) as e:
             return {"mode": "rundownData", "ok": False, "error": f"Couldn't read {name}.json ({e.__class__.__name__})"}
     if mode == "obsScenes":
-        # For picking break scenes (see "OBS scenes" below)
+        # For picking break scenes and Scene cues (see "OBS scenes" below)
         return {"mode": "obsSceneList", "ok": True, "scenes": list(scene_names)}
+    if mode == "obsSources":
+        # For Scene cues that name a source instead of a scene
+        try:
+            return {"mode": "obsSourceList", "ok": True, "sources": source_names()}
+        except Exception as e:
+            return {"mode": "obsSourceList", "ok": False, "sources": [], "error": f"Couldn't read OBS's sources ({e.__class__.__name__})."}
+    if mode == "obsProgram":
+        # The scene on program now, so the panel can mark the TAKE that's on air
+        return {"mode": "obsProgramScene", "ok": True, "scene": program_scene}
+    if mode == "launchProjector":
+        return launch_projector()
     return None
 
 # ---------------------------------------------------------------------------------------------
@@ -407,6 +469,13 @@ async def socket_handler(websocket):
                 task.add_done_callback(akta_tasks.discard)
                 continue
 
+            # A TAKE fired from the rundown: OBS switches scene on a worker thread, answered only to that panel
+            if isinstance(request, dict) and request.get("mode") == "obsTake":
+                task = asyncio.get_running_loop().create_task(reply_take(websocket, request))
+                take_tasks.add(task)
+                task.add_done_callback(take_tasks.discard)
+                continue
+
             # The control panel asking for the custom images or a rundown file: answer only it
             reply = answer_request(message)
             if reply is not None:
@@ -430,16 +499,54 @@ async def socket_handler(websocket):
         clients.discard(websocket)
         print(f"FXWizard: Client Disconnected. Total: {len(clients)}")
 
+server_stop = None                    # resolving it closes the server (script_unload does, so a reload can take port 8080)
+server_released = threading.Event()   # set once the server has let go of port 8080
+server_thread = None                  # the thread the server runs on
+
 async def main_async_entry(host, port):
-    async with websockets.serve(socket_handler, host, port):
-        await asyncio.Future()  # Keep server alive
+    global server_stop
+    server_stop = asyncio.get_running_loop().create_future()
+    server = await websockets.serve(socket_handler, host, port)
+    try:
+        await server_stop  # until the script is unloaded (or reloaded)
+    finally:
+        # Stop listening first, so the port is free straight away, then close the connections in the background
+        server.close()
+        listener = getattr(server, "server", None)  # the asyncio server that holds the port
+        if listener is not None:
+            listener.close()
+        await asyncio.sleep(0.05)
+        server_released.set()
+    try:
+        await asyncio.wait_for(server.wait_closed(), 10)
+    except Exception:
+        pass  # a connection that never answered; the thread ends anyway
 
 def start_server_thread(loop):
     asyncio.set_event_loop(loop)
     try:
         loop.run_until_complete(main_async_entry("0.0.0.0", 8080))
+    except OSError as e:
+        print(f"FXWizard Thread Error: {e}")
+        print("FXWizard: Port 8080 is taken: another FX Wizard server is still running (server.js, or a copy of this "
+              "script from before an update). Close it, or restart OBS, and the panel will connect to this one.")
     except Exception as e:
         print(f"FXWizard Thread Error: {e}")
+
+def stop_server():
+    """Closes the server and frees port 8080, so a reloaded (or updated) script can start its own. Without this,
+    the old server kept running inside OBS, and kept answering, until OBS was restarted."""
+    loop, stop = server_loop, server_stop
+    if loop is None or stop is None:
+        return
+    def finish():
+        if not stop.done():
+            stop.set_result(None)
+    try:
+        loop.call_soon_threadsafe(finish)
+    except RuntimeError:
+        return  # its loop has already finished
+    server_released.wait(timeout=2)  # OBS waits on this, so only for the port, not for every panel to hang up
 
 # ---------------------------------------------------------------------------------------------
 # OBS hotkeys
@@ -503,17 +610,105 @@ def register_hotkeys(settings):
 # runs inside OBS, so it hears about it and tells every connected panel:
 #   {"mode": "obsScene", "scene": "<name>"}   OBS went to that scene (its transition has started)
 #   {"mode": "obsTransitionEnd"}             the transition has finished
-# The panel's obsScenes request gets the scene names, for picking the break scenes.
+# The panel's obsScenes request gets the scene names, for picking the break scenes and Scene cues;
+# obsSources gets the source names, for Scene cues that name a source; obsProgram gets the scene on
+# program now; and obsTake {scene} puts a scene on program (a TAKE fired from the rundown).
 # ---------------------------------------------------------------------------------------------
-scene_names = []  # kept up to date on OBS's own thread, so the server never has to ask OBS from its thread
-obs_busy = True   # while OBS starts up or changes scene collection, a "scene change" isn't someone taking a scene
+scene_names = []     # kept up to date on OBS's own thread, so the server never has to ask OBS from its thread
+program_scene = None # the scene on program, kept up to date the same way
+obs_busy = True      # while OBS starts up or changes scene collection, a "scene change" isn't someone taking a scene
 
 def refresh_scene_names():
-    global scene_names
+    global scene_names, program_scene
     try:
         scene_names = [name for name in (obs.obs_frontend_get_scene_names() or []) if isinstance(name, str)]
+        program_scene = current_scene_name()
     except Exception as e:
         print(f"FXWizard: Couldn't read the scene names ({e.__class__.__name__})")
+
+# Switching scenes waits for OBS's own (Qt) thread to do it, and while it does, OBS calls this script's
+# on_frontend_event. If this thread still held Python's lock while it waited, that would freeze OBS. So
+# the switch goes straight to OBS's libraries through ctypes, which lets go of the lock during the call
+# (the way obs-websocket calls it from its own threads). If those can't be found, it falls back to the
+# obspython call.
+_take_api = None
+
+def take_api():
+    """(get source by name, release source, set current scene) through ctypes, or None."""
+    global _take_api
+    if _take_api is None:
+        try:
+            if os.name == "nt":
+                libobs, frontend = ctypes.CDLL("obs"), ctypes.CDLL("obs-frontend-api")
+            else:
+                libobs = frontend = ctypes.CDLL(None)  # already loaded into OBS
+            get_by_name, release = libobs.obs_get_source_by_name, libobs.obs_source_release
+            set_scene = frontend.obs_frontend_set_current_scene
+            get_by_name.argtypes, get_by_name.restype = [ctypes.c_char_p], ctypes.c_void_p
+            release.argtypes, release.restype = [ctypes.c_void_p], None
+            set_scene.argtypes, set_scene.restype = [ctypes.c_void_p], None
+            _take_api = (get_by_name, release, set_scene)
+        except (OSError, AttributeError):
+            _take_api = False
+    return _take_api or None
+
+def take_scene(name):
+    """obsTake: puts the scene on program (in Studio Mode too), with OBS's current transition. It's run on a
+    worker thread, because it waits for OBS to do it."""
+    def failed(error):
+        return {"mode": "obsTakeResult", "ok": False, "scene": name if isinstance(name, str) else "", "error": error}
+    if not isinstance(name, str) or not name:
+        return failed("No scene to take")
+    if obs_busy:
+        return failed("OBS is busy (starting up, or changing scene collection)")
+    if name not in scene_names:
+        return failed(f"OBS doesn't have a scene called {name} (in this scene collection)")
+    try:
+        api = take_api()
+        if api:
+            get_by_name, release, set_scene = api
+            source = get_by_name(name.encode("utf-8"))
+            if not source:
+                return failed(f"OBS doesn't have a scene called {name}")
+            try:
+                set_scene(source)
+            finally:
+                release(source)
+        else:
+            source = obs.obs_get_source_by_name(name)
+            if source is None:
+                return failed(f"OBS doesn't have a scene called {name}")
+            try:
+                obs.obs_frontend_set_current_scene(source)
+            finally:
+                obs.obs_source_release(source)
+    except Exception as e:
+        return failed(f"Couldn't switch OBS ({e.__class__.__name__})")
+    print(f"FXWizard: TAKE {name}")
+    return {"mode": "obsTakeResult", "ok": True, "scene": name}
+
+take_tasks = set()  # keeps the takes that are in flight from being cleaned up before they finish
+
+async def reply_take(websocket, request):
+    """Fires one TAKE on a worker thread and tells the panel that asked how it went."""
+    reply = await asyncio.get_running_loop().run_in_executor(None, take_scene, request.get("scene"))
+    try:
+        await websocket.send(json.dumps(reply))
+    except Exception:
+        pass  # the panel went away while OBS switched
+
+def source_names():
+    """The sources with a picture (cameras, media, browser sources, groups...) in the active scene collection,
+    sorted by name. Audio-only ones (Desktop Audio, mics) aren't shots, so they're left out. Unlike the
+    frontend's scene list, libobs's list of sources is safe to read from the server's thread."""
+    sources = obs.obs_enum_sources() or []
+    try:
+        names = {obs.obs_source_get_name(source) for source in sources
+                 if obs.obs_source_get_output_flags(source) & obs.OBS_SOURCE_VIDEO}
+    finally:
+        if sources:
+            obs.source_list_release(sources)
+    return sorted((name for name in names if isinstance(name, str) and name), key=str.lower)
 
 def current_scene_name():
     """The scene on program now (in studio mode too), or None."""
@@ -526,10 +721,11 @@ def current_scene_name():
         obs.obs_source_release(source)
 
 def on_frontend_event(event):
-    global obs_busy
+    global obs_busy, program_scene
     try:
         if event == obs.OBS_FRONTEND_EVENT_SCENE_CHANGED:
-            name = None if obs_busy else current_scene_name()
+            program_scene = current_scene_name()
+            name = None if obs_busy else program_scene
             if name:
                 send_to_panels({"mode": "obsScene", "scene": name}, "scene change")
         elif event == obs.OBS_FRONTEND_EVENT_TRANSITION_STOPPED:
@@ -547,13 +743,14 @@ def on_frontend_event(event):
 
 def script_description():
     return ("FXWizard WebSocket Server. It also adds three hotkeys to OBS (see Settings, Hotkeys): FX Wizard: Start Break, "
-            "Reset Break and Toggle AKTA control, and tells the control panel when OBS changes scene (for break scenes).")
+            "Reset Break and Toggle AKTA control, tells the control panel when OBS changes scene (for break scenes and "
+            "the TAKE tally), switches scenes for TAKEs fired from the rundown, and opens the projector in Chrome.")
 
 def script_load(settings):
-    global server_loop, obs_busy
+    global server_loop, server_thread, obs_busy
     server_loop = asyncio.new_event_loop()
-    t = threading.Thread(target=start_server_thread, args=(server_loop,), daemon=True)
-    t.start()
+    server_thread = threading.Thread(target=start_server_thread, args=(server_loop,), daemon=True)
+    server_thread.start()
 
     # The hotkeys are added after the server is on its way, so a problem with them can never hold it up
     register_hotkeys(settings)
@@ -573,6 +770,11 @@ def script_unload():
         obs.obs_frontend_remove_event_callback(on_frontend_event)
     except Exception:
         pass  # OBS removes it by itself as well
+    # Close the server, so reloading the script (after an update) really starts the new one
+    try:
+        stop_server()
+    except Exception as e:
+        print(f"FXWizard: Couldn't stop the server ({e.__class__.__name__})")
 
 def script_save(settings):
     """OBS calls this when it saves, so the keys the user gave the hotkeys are remembered."""

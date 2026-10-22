@@ -85,11 +85,67 @@ function answerRequest(request) {
             return { mode: 'rundownData', ok: false, error: `Couldn't read ${name}.json (${err.code || err.name})` };
         }
     }
-    // Break scenes need OBS's scenes and their changes, which only server.py (running inside OBS) can see
+    // Break scenes and Scene cues need OBS's scenes and sources, which only server.py (running inside OBS) can see
     if (request.mode === 'obsScenes') {
         return { mode: 'obsSceneList', ok: false, scenes: [], error: "server.js runs outside OBS, so it can't see your scenes. Break scenes (and the break hotkeys) need server.py, run in OBS." };
     }
+    if (request.mode === 'obsSources') {
+        return { mode: 'obsSourceList', ok: false, sources: [], error: "server.js runs outside OBS, so it can't see your sources. The list needs server.py, run in OBS." };
+    }
+    // Firing a TAKE (and the tally of what's on program) needs server.py too
+    if (request.mode === 'obsTake') {
+        return { mode: 'obsTakeResult', ok: false, scene: '', error: "server.js runs outside OBS, so it can't switch scenes. Firing a TAKE needs server.py, run in OBS." };
+    }
+    if (request.mode === 'obsProgram') {
+        return { mode: 'obsProgramScene', ok: false, scene: null };
+    }
+    if (request.mode === 'launchProjector') {
+        return launchProjector();
+    }
     return null;
+}
+
+// The projector, opened from the control panel (launchProjector): fx_wizard.html#projector, next to this
+// file, in Chrome as an app window (no tabs or address bar, just the page), or in Edge if there's no
+// Chrome. The page and the options are fixed here: nothing from the panel goes into the command. It gets
+// a browser profile of its own, so the window comes back where it was put, and starts at 800x800.
+const PROJECTOR_PAGE = path.join(__dirname, 'fx_wizard.html');
+function findBrowser() {
+    const found = [];
+    if (process.platform === 'win32') {
+        for (const env of ['PROGRAMFILES', 'PROGRAMFILES(X86)', 'LOCALAPPDATA']) {
+            if (process.env[env]) found.push([path.join(process.env[env], 'Google', 'Chrome', 'Application', 'chrome.exe'), 'Chrome']);
+        }
+        for (const env of ['PROGRAMFILES(X86)', 'PROGRAMFILES']) {
+            if (process.env[env]) found.push([path.join(process.env[env], 'Microsoft', 'Edge', 'Application', 'msedge.exe'), 'Edge']);
+        }
+    } else if (process.platform === 'darwin') {
+        found.push(['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', 'Chrome'],
+            ['/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge', 'Edge']);
+    } else {
+        for (const dir of (process.env.PATH || '').split(path.delimiter)) {
+            for (const [cmd, name] of [['google-chrome', 'Chrome'], ['google-chrome-stable', 'Chrome'], ['chromium', 'Chrome'], ['chromium-browser', 'Chrome'], ['microsoft-edge', 'Edge']]) {
+                found.push([path.join(dir, cmd), name]);
+            }
+        }
+    }
+    return found.find(([file]) => { try { return fs.statSync(file).isFile(); } catch (err) { return false; } }) || [null, null];
+}
+function launchProjector() {
+    const failed = (error) => ({ mode: 'projectorLaunched', ok: false, error });
+    const [browser, name] = findBrowser();
+    if (!browser) return failed('Couldn\'t find Chrome (or Edge) on the computer running the server');
+    if (!fs.existsSync(PROJECTOR_PAGE)) return failed('fx_wizard.html isn\'t next to server.js');
+    const home = process.platform === 'win32' ? process.env.LOCALAPPDATA : null;
+    const profile = path.join(home || path.join(require('os').homedir(), '.fxwizard'), 'FXWizard', 'projector-browser');
+    const args = [`--app=${require('url').pathToFileURL(PROJECTOR_PAGE).href}#projector`, `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check'];
+    if (!fs.existsSync(profile)) args.push('--window-size=800,800'); // the first time; after that it remembers its own size and place
+    try {
+        require('child_process').spawn(browser, args, { detached: true, stdio: 'ignore' }).on('error', () => {}).unref();
+    } catch (err) {
+        return failed(`Couldn't open ${name} (${err.code || err.name})`);
+    }
+    return { mode: 'projectorLaunched', ok: true, browser: name };
 }
 
 // ---------------------------------------------------------------------------------------------

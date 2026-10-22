@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,700&family=Bona+Nova+SC:ital,wght@0,400;0,700;1,400&family=Cal+Sans&family=Changa+One:ital@0;1&family=Limelight&family=Lobster&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Oswald:wght@200..700&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,700&family=Bona+Nova+SC:ital,wght@0,400;0,700;1,400&family=Cal+Sans&family=Changa+One:ital@0;1&family=Limelight&family=Lobster&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Oswald:wght@200..700&family=Space+Grotesk:wght@300..700&family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./css/styles.css">
     <title>FX Wizard</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -111,6 +111,11 @@
                             <!-- Custom: like L3 Gif, with the first image in the "custom" folder (next to "assets") -->
                             <input type="radio" id="ov-l3Custom" name="overlayStyle" value="l3Custom" data-custom="l3" class="hidden peer/o15">
                             <label for="ov-l3Custom" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o15:bg-primary">Custom…</label>
+
+                            <!-- Location: a map pin and the place, like a live report. The pin comes in from the right
+                                 and the place from the left, crossing as they meet, then it fades out. -->
+                            <input type="radio" id="ov-locpin" name="overlayStyle" value="locpin" class="hidden peer/o24">
+                            <label for="ov-locpin" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o24:bg-primary">Location</label>
                             <p id="custom-l3-name" class="col-span-2 text-[12px] text-center opacity-75 hidden"></p>
                         </div>
                     </details>
@@ -150,6 +155,14 @@
                             <!-- Like, Follow & Subscribe: a cursor clicks each button; optional socials above -->
                             <input type="radio" id="ov-social" name="overlayStyle" value="social" class="hidden peer/o20">
                             <label for="ov-social" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o20:bg-primary">Like &amp; Subscribe</label>
+
+                            <!-- St. Patrick's: shamrocks and gold coins tumble down, a green glow around the edges -->
+                            <input type="radio" id="ov-stpatricks" name="overlayStyle" value="stpatricks" class="hidden peer/o25">
+                            <label for="ov-stpatricks" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o25:bg-primary">St. Patrick's</label>
+
+                            <!-- Retro VHS: scan lines, grain, tracking glitches and a VCR's PLAY display -->
+                            <input type="radio" id="ov-vhs" name="overlayStyle" value="vhs" class="hidden peer/o26">
+                            <label for="ov-vhs" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o26:bg-primary">Retro VHS</label>
                         </div>
                     </details>
 
@@ -179,6 +192,13 @@
 
                             <input type="radio" id="ov-spring" name="overlayStyle" value="spring" class="hidden peer/o19">
                             <label for="ov-spring" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o19:bg-primary">Spring</label>
+
+                            <input type="radio" id="ov-fireworks" name="overlayStyle" value="fireworks" class="hidden peer/o27">
+                            <label for="ov-fireworks" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o27:bg-primary">Fireworks</label>
+
+                            <!-- Medical: blue and white, a heartbeat line and a medical cross -->
+                            <input type="radio" id="ov-medical" name="overlayStyle" value="medical" class="hidden peer/o28">
+                            <label for="ov-medical" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o28:bg-primary">Medical</label>
                         </div>
                     </details>
 
@@ -347,7 +367,7 @@
                         <!-- Stays on screen until pressed again, cleared, or replaced (classes set by the script) -->
                         <button id="toggle-btn" class="py-1.5 w-full active:scale-95 font-bold rounded" onclick="toggleButton()">TOGGLE ON</button>
                         <button class="py-1.5 hover:bg-rose-600 w-full active:scale-95 bg-rose-500 font-bold rounded" onclick="saveButton()"><span data-icon="save"></span> SAVE</button>
-                        <!-- Puts it straight into the Podcast Rundown, under Unsorted (only while Set Order is off) -->
+                        <!-- Puts it straight into the Podcast Rundown, under Unsorted (only while Set Show is off) -->
                         <button id="add-rundown-btn" class="py-1.5 hover:bg-emerald-700 w-full active:scale-95 bg-emerald-600 font-bold rounded" onclick="addCurrentToRundown()" title="Add to the Podcast Rundown, under Unsorted">＋ RUNDOWN</button>
                     </div>
                 </div>
@@ -383,17 +403,23 @@
 
             <!-- ===== PODCAST RUNDOWN TAB =====
                  Graphics added with ＋ on a saved card, in blocks (A, B, C...) in show order.
-                 Once Set Order is on, tap to take. -->
+                 Once Set Show is on, tap to take. -->
             <div id="show-section" class="w-full hidden">
                 <div class="flex items-center gap-2 mb-2 pb-1 px-2 border-b border-gray-600">
                     <h2 class="text-base font-bold">Podcast Rundown</h2>
-                    <!-- Set Order: locks the list so nothing moves, gets edited or removed by accident -->
+                    <!-- Set Show: locks the list so nothing moves, gets edited or removed by accident -->
                     <label class="fx-switch ml-auto" title="Lock the rundown order">
-                        <span>Set Order</span>
+                        <span>Set Show</span>
                         <input type="checkbox" id="show-lock">
                         <span class="fx-track"></span>
                     </label>
                     <button id="show-clear" type="button" title="Remove everything from the rundown (asks first)" onclick="clearShow()" class="w-8 h-7 rounded hover:bg-red-700 active:scale-95 grid place-items-center"><span data-icon="trash"></span></button>
+                </div>
+                <!-- Simple: the rundown and the timer. Advanced adds the show times: block lengths, breaks, the
+                     timing strip, AKTA and break scenes. (Only while Set Show is off.) -->
+                <div id="rundown-mode-row" class="rundown-mode">
+                    <button type="button" id="rundown-simple" onclick="setRundownMode('simple')" title="Just the rundown and the timer">Simple</button>
+                    <button type="button" id="rundown-advanced" onclick="setRundownMode('advanced')" title="Adds the show times: block lengths, breaks, AKTA and break scenes">Advanced</button>
                 </div>
                 <!-- Show timing (stays at the top while you scroll): the time of day, red while the show is on air;
                      what's on now and the time it has left; and Start Break for the next break -->
@@ -427,13 +453,45 @@
                     </div>
                     <div id="tm-spread" class="tm-spread hidden"></div>
                 </div>
-                <!-- During the show (Set Order on): step through the rundown, a message to the projector,
-                     and saving the log of what ran -->
+                <!-- Always there, whether Set Show is on or not: the projector on or off (off, nothing is sent
+                     to it), the timer, and messages for the projector (only while it's on) -->
+                <div class="pj-tools">
+                    <button type="button" id="pj-on-btn" class="pj-tool" onclick="setProjectorOn(!projectorOn())" title="Projector: send the rundown, messages and the timer to fx_wizard.html#projector"><span data-icon="monitor"></span></button>
+                    <button type="button" id="pj-launch-btn" class="pj-tool pj-launch" onclick="launchProjector()" title="Open the projector in its own Chrome window (on the computer running the server), and turn it on"><span data-icon="launch"></span></button>
+                    <button type="button" id="timer-btn" class="pj-tool" onclick="toggleTimerView()" title="Timer: count down or count up (on the projector too, while it's on). Simple mode only."><span data-icon="timer"></span><span id="timer-btn-text"></span></button>
+                    <button type="button" id="msg-btn" class="pj-tool" onclick="toggleMsgPanel()" title="Send a message to the projector"><span data-icon="message"></span></button>
+                </div>
+                <!-- The timer: count down from a time, or count up. ▶/⏸ runs and pauses it, ⏹ stops it (back to the
+                     start), ↺ starts it over. While it's open, the projector shows it big. -->
+                <div id="timer-box" class="timer-box hidden">
+                    <div class="timer-top">
+                        <div class="timer-modes">
+                            <button type="button" id="timer-mode-down" onclick="setTimerMode('down')">Count down</button>
+                            <button type="button" id="timer-mode-up" onclick="setTimerMode('up')">Count up</button>
+                        </div>
+                        <label id="timer-from-wrap" class="timer-from" title="Minutes:seconds to count down from, like 5:00">From <input type="text" id="timer-from" inputmode="numeric" maxlength="8" autocomplete="off"></label>
+                    </div>
+                    <div id="timer-readout" class="timer-readout"></div>
+                    <div class="timer-btns">
+                        <button type="button" id="timer-play" onclick="timerPlayPause()"><span data-icon="play"></span></button>
+                        <button type="button" onclick="timerStop()" title="Stop: back to the start"><span data-icon="stop"></span></button>
+                        <button type="button" onclick="timerReset()" title="Reset: start over (it keeps running if it was)"><span data-icon="reset"></span></button>
+                    </div>
+                    <p id="timer-note" class="timer-note"></p>
+                </div>
+                <!-- A break fired from a Break cue: its name, the time it has left, and End to finish it early.
+                     (A break from the show times shows in the timing strip instead.) -->
+                <div id="break-strip" class="break-strip hidden">
+                    <span data-icon="pause"></span>
+                    <span id="break-strip-label" class="break-strip-label"></span>
+                    <b id="break-strip-left" class="break-strip-left"></b>
+                    <button type="button" onclick="endCueBreak(true)" title="End the break now"><span data-icon="stop"></span> End</button>
+                </div>
+                <!-- During the show (Set Show on): step through the rundown, and save the log of what ran -->
                 <div id="show-controls" class="show-controls hidden">
                     <button type="button" class="show-ctl" onclick="stepCurrent(-1)" title="Back one item (doesn't take anything)"><span data-icon="prev"></span></button>
                     <button type="button" class="show-ctl" onclick="stepCurrent(1)" title="On to the next item (doesn't take anything)"><span data-icon="next"></span></button>
                     <span class="flex-1"></span>
-                    <button type="button" id="msg-btn" class="show-ctl" onclick="toggleMsgPanel()" title="Send a message to the projector"><span data-icon="message"></span></button>
                     <button type="button" class="show-ctl" onclick="generateLog()" title="Generate Log: save what ran, and for how long"><span data-icon="log"></span></button>
                 </div>
                 <!-- Messages for the projector: presets, or type your own. They stay up until replaced or cleared. -->
@@ -456,7 +514,7 @@
                     <button type="button" onclick="sendMessage('')" title="Clear the message"><span data-icon="x"></span></button>
                 </div>
                 <!-- Save the rundown as a file in the "rundowns" folder, or bring one back. Between shows,
-                     blank the projector until Set Order is turned on again. (All hidden while Set Order is on.) -->
+                     blank the projector until Set Show is turned on again. (All hidden while Set Show is on.) -->
                 <div id="rundown-files-row" class="grid grid-cols-2 gap-2 mb-2 px-2">
                     <button type="button" class="rundown-btn" onclick="saveRundownFile()" title="Save this rundown, with everything in it, to the rundowns folder"><span data-icon="save"></span> Save Rundown</button>
                     <button type="button" class="rundown-btn" onclick="openRundownPicker()" title="Replace this rundown with one from the rundowns folder"><span data-icon="folder"></span> Import Rundown</button>
@@ -467,17 +525,20 @@
                     <span id="block-chips-label" class="text-xs opacity-75 flex-none">Add to:</span>
                     <div id="block-chips" class="block-chips"></div>
                 </div>
-                <!-- Cues: notes and placeholders for things that aren't graphics (clips, SOTs, pictures).
-                     They show greyed out in the rundown and can't be taken. Only while Set Order is off. -->
+                <!-- Cues: notes and placeholders for things that aren't graphics (clips, SOTs, pictures, the
+                     scene to take). They show greyed out in the rundown (a scene with a yellow TAKE) and can't
+                     be taken. Only while Set Show is off. -->
                 <div id="cue-row" class="cue-row">
                     <span class="text-xs opacity-75 flex-none">Cue:</span>
                     <button type="button" class="cue-add" onclick="addCue('note')" title="Add a producer note"><span data-icon="note"></span> Note</button>
                     <button type="button" class="cue-add" onclick="addCue('clip')" title="Add a placeholder for a clip"><span data-icon="clip"></span> Clip</button>
                     <button type="button" class="cue-add" onclick="addCue('sot')" title="Add a placeholder for a SOT (sound on tape)"><span data-icon="sot"></span> SOT</button>
                     <button type="button" class="cue-add" onclick="addCue('pic')" title="Add a placeholder for a picture"><span data-icon="pic"></span> PIC</button>
+                    <button type="button" class="cue-add" onclick="addCue('scene')" title="Add the scene to take next (picked from OBS's scenes or sources)"><span data-icon="scene"></span> Scene</button>
                     <button type="button" class="cue-add" onclick="addCue('script')" title="Add a script (shown on the projector)"><span data-icon="script"></span> Script</button>
+                    <button type="button" class="cue-add" onclick="addCue('break')" title="Add a break you fire from the rundown (or from OBS / a Stream Deck with Start Break)"><span data-icon="pause"></span> Break</button>
                 </div>
-                <p id="show-hint" class="text-xs text-center opacity-75 mb-2 px-2">Arrange the rundown, then turn on <b>Set Order</b> to run it. Cards can't be taken until then.</p>
+                <p id="show-hint" class="text-xs text-center opacity-75 mb-2 px-2">Arrange the rundown, then turn on <b>Set Show</b> to run it. Cards can't be taken until then.</p>
                 <!-- Planned length of the whole show, the graphics' total, and (during the show) the time so far -->
                 <div id="show-totals" class="show-totals"></div>
                 <div id="show-list" class="flex flex-col p-1 pt-0"></div>
@@ -518,6 +579,21 @@
                         <label for="edit-title" class="block text-sm">Title:</label>
                         <input type="text" id="edit-title" maxlength="50" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm">
                     </div>
+                    <!-- Scene cues: the scene (or source) to take, from OBS's active scene collection. Without
+                         server.py in OBS there's no list, so the name is typed instead. -->
+                    <div id="edit-scene-wrap" class="hidden">
+                        <div class="scene-pick-head">
+                            <label for="edit-scene" class="text-sm">Take:</label>
+                            <div class="scene-kinds">
+                                <button type="button" id="edit-kind-scene" onclick="setSceneKind('scene')">Scenes</button>
+                                <button type="button" id="edit-kind-source" onclick="setSceneKind('source')">Sources</button>
+                            </div>
+                            <button type="button" class="scene-reload" onclick="loadObsNames()" title="Ask OBS again"><span data-icon="reset"></span></button>
+                        </div>
+                        <select id="edit-scene" class="w-full p-1 rounded border-2 border-white text-sm" onchange="pickScene(this.value)"></select>
+                        <input type="text" id="edit-scene-text" maxlength="80" class="hidden w-full p-1 rounded border-2 border-white bg-transparent text-sm" oninput="pickScene(this.value)">
+                        <p id="edit-scene-note" class="text-xs opacity-75 mt-1"></p>
+                    </div>
                     <div id="edit-para-wrap">
                         <label id="edit-para-label" for="edit-para" class="block text-sm">Text:</label>
                         <textarea id="edit-para" rows="4" maxlength="400" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm resize-y"></textarea>
@@ -525,6 +601,11 @@
                         <input type="file" id="edit-txt-file" accept=".txt,text/plain" class="hidden">
                     </div>
                     <div id="edit-socials-wrap" class="flex flex-col gap-1"></div>
+                    <!-- Break cues: how long the break is -->
+                    <div id="edit-break-wrap" class="hidden">
+                        <label for="edit-break-len" class="block text-sm">Length (minutes:seconds):</label>
+                        <input type="text" id="edit-break-len" inputmode="numeric" maxlength="8" placeholder="2:00" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm">
+                    </div>
                     <div id="edit-duration-wrap">
                         <label for="edit-duration" class="block text-sm">Duration (sec):</label>
                         <input type="number" id="edit-duration" min="1" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm">
@@ -624,15 +705,28 @@
                 <span id="pj-countdown" class="pj-time pj-countdown hidden"></span>
                 <span id="pj-show-time" class="pj-time pj-clock"></span>
             </div>
+            <!-- Timer view (while the Timer is open in the control panel): the timer, big, in place of the
+                 rundown, and what's on now along the bottom while the show runs -->
+            <div id="pj-timer-view" class="pj-timer-view">
+                <div id="pj-tv-label" class="pj-tv-label"></div>
+                <div id="pj-tv-time" class="pj-tv-time"></div>
+                <div id="pj-tv-now" class="pj-tv-now"></div>
+            </div>
             <div class="pj-main">
                 <div id="pj-rundown" class="pj-rundown"></div>
+                <!-- On a square or upright screen (like 800x800) these stack instead: Now across the top,
+                     then the script (or the rundown), then Next and On air along the bottom -->
                 <aside class="pj-side">
-                    <div class="pj-label">Now</div>
-                    <div id="pj-now" class="pj-now"></div>
+                    <div id="pj-now-wrap" class="pj-now-wrap">
+                        <div class="pj-label">Now</div>
+                        <div id="pj-now" class="pj-now"></div>
+                    </div>
                     <div id="pj-script" class="pj-script hidden"><div id="pj-script-text" class="pj-script-text"></div></div>
-                    <div class="pj-label">Next</div>
-                    <div id="pj-next" class="pj-next"></div>
-                    <div id="pj-onair-wrap">
+                    <div class="pj-next-wrap">
+                        <div class="pj-label">Next</div>
+                        <div id="pj-next" class="pj-next"></div>
+                    </div>
+                    <div id="pj-onair-wrap" class="pj-onair-wrap">
                         <div class="pj-label">On air</div>
                         <div id="pj-onair" class="pj-onair"></div>
                     </div>
@@ -683,6 +777,14 @@
                         <i class="s-white" style="--h:0.8"></i>
                         <i class="s-red"   style="--h:3"></i>
                         <i class="s-white" style="--h:1.2"></i>
+                    </div>
+                </div>
+                <!-- Location: a map pin and the place, top left, like a live report. The pin slides in from the
+                     right and the place from the left, so they cross as they meet. Timing is in styles.css. -->
+                <div id="locpin">
+                    <div class="lp-bug">
+                        <span class="lp-pin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2z"/></svg></span>
+                        <span id="locpin-text" class="lp-text"></span>
                     </div>
                 </div>
                 <!-- Breaking News: LIVE in the top-right corner and a red ticker bar along the bottom -->
@@ -800,7 +902,7 @@
            3.  Small helpers
            4.  Animations
            5.  Display: lower third
-           6.  Display: canvas effects (Color Wave, Confetti, Fall, Snow, Fire, Underwater, Sports, Storm, Static)
+           6.  Display: canvas effects (Color Wave, Confetti, Fall, Snow, Fire, Underwater, St. Patrick's, Retro VHS, Sports, Storm, Static, Fireworks, Medical)
            7.  Display: fullscreen overlays
            8.  Display: message router
            9.  Connection to the server
@@ -825,7 +927,6 @@
         const SOCKET_URL = 'ws://127.0.0.1:8080';   // the server address
         const STORAGE_KEY = 'studio_buttons';       // where saved graphics are kept in the browser
         const SHOW_KEY = 'fx_show';                 // the Rundown list
-        const IMPORT_DURATION = 300;                // imported L3s stay up 5 minutes unless cleared
         const CUSTOM_FOLDER = 'custom';             // custom backgrounds live here, next to "assets"
         let customFolderFiles = null;               // what the server last said is in it (null = not known yet)
 
@@ -855,6 +956,7 @@
         //   sport:   true = shows the Sport picker (Football, Basketball, Baseball, Soccer)
         //   social:  true = shows the Socials picker (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web)
         //   caption: one optional line of text, with this as the default (Hot Take)
+        //   place:   one line of text, the place (Location)
         //   dur:     usual time in seconds, filled in when it's picked (not for stingers)
         //   depth:   true = shows a Greenscreen switch; taken with it on, it splits: the far part shows
         //            on #underlay (behind you) and the near part on #display (in front of you)
@@ -879,6 +981,9 @@
             hottake:   { label: 'Hot Take',   text: false, dur: 7, caption: 'HOT TAKE', effect: 'hottake', animIn: 'anim-fade', animOut: 'anim-hide', depth: true },
             breaking:  { label: 'Breaking News', text: false, dur: 30, ticker: true, effect: null, animIn: 'anim-fade', animOut: 'anim-hide' },
             social:    { label: 'Like & Subscribe', text: false, dur: 6, social: true, effect: null, animIn: 'anim-fade', animOut: 'anim-hide' },
+            stpatricks: { label: "St. Patrick's", text: false, dur: 15, effect: 'stpatricks', animIn: 'anim-fade', animOut: 'anim-hide', depth: true },
+            vhs:       { label: 'Retro VHS',  text: false, dur: 15, effect: 'vhs', animIn: 'anim-fade', animOut: 'anim-hide' },
+            locpin:    { label: 'Location',   text: false, dur: 8, place: true, effect: null, animIn: '', animOut: 'anim-hide' },
             // Stingers: CSS stinger lengths are read from styles.css, so the speed is only set there
             stinger:   { label: 'Standard', text: false, effect: null, animIn: '', animOut: '',
                          get length() { return cssSeconds('stinger', '--stinger-time', 2); } },
@@ -893,7 +998,18 @@
             tvstatic:  { label: 'Static', text: false, effect: 'tvstatic', animIn: '', animOut: '', length: 1.8 },
             sportsfx:  { label: 'Sports', text: false, sport: true, effect: 'sports', animIn: '', animOut: '', length: 2.6 },
             spring:    { label: 'Spring', text: false, effect: 'spring',   animIn: '', animOut: '', length: 3 },
+            fireworks: { label: 'Fireworks', text: false, effect: 'fireworks', animIn: '', animOut: '', length: 3 },
+            medical:   { label: 'Medical', text: false, effect: 'medical',  animIn: '', animOut: '', length: 2.4 },
         };
+
+        // Overlays with one text box instead of Name and Title (L3 Info, Breaking News, Hot Take, Location):
+        // what the box is called, what it shows when empty, and whether it's one short line
+        const oneBoxOf = (cfg) => !!(cfg && (cfg.paragraph || cfg.ticker || cfg.caption || cfg.place));
+        const oneBoxLabel = (cfg) => (cfg?.ticker ? 'Ticker text (optional):' : cfg?.caption ? 'Text (optional):' : cfg?.place ? 'Location:' : 'Text:');
+        const oneBoxShort = (cfg) => !!(cfg?.caption || cfg?.place);
+        // Breaking News with no ticker text typed says this
+        const BREAKING_DEFAULT = 'Breaking News  |  Breaking News  |  Breaking News  |';
+        const oneBoxPlaceholder = (cfg) => cfg?.caption || (cfg?.ticker ? BREAKING_DEFAULT : cfg?.place ? 'Where you are, like City Hall' : 'Type the information to show');
 
         // Lower third positions on screen
         const LOCATION_MAP = {
@@ -937,7 +1053,8 @@
             ghost: 'border-lime-300', xmas: 'border-red-400', storm: 'border-indigo-300',
             colorbars: 'border-yellow-300', tvstatic: 'border-gray-300', underwater: 'border-sky-400',
             breaking: 'border-red-500', sportsfx: 'border-orange-400', spring: 'border-pink-300', social: 'border-rose-400',
-            arrested: 'border-indigo-400', hottake: 'border-orange-500',
+            arrested: 'border-indigo-400', hottake: 'border-orange-500', locpin: 'border-red-400',
+            stpatricks: 'border-green-500', vhs: 'border-fuchsia-500', fireworks: 'border-yellow-400', medical: 'border-blue-500',
         };
 
 
@@ -959,8 +1076,11 @@
         // True for overlays. Older saves stored L3 PNG (then "L3 Large") as a lower third with bgStyle "l3Large".
         const isOverlayItem = (data) => data.mode === 'overlay' || data.bgStyle === 'l3Large';
 
-        // How long a graphic stays up, and that time as "5s", "2.6s" or "5:00"
-        const graphicSeconds = (data) => OVERLAYS[isOverlayItem(data) ? (data.overlay || 'l3Large') : '']?.length ?? (Number(data.duration) || 5);
+        // Imported L3s go up as a toggle: they stay up until they're turned off (TOGGLE OFF, or OFF on a
+        // rundown card), instead of for a set time. (Older imports, saved with 5 minutes, work the same.)
+        const holdsOn = (data) => isOverlayItem(data) && !!(data.toggle || data.source);
+        // How long a graphic stays up (0 for one that stays up until it's turned off), and that time as "5s", "2.6s" or "5:00"
+        const graphicSeconds = (data) => (holdsOn(data) ? 0 : OVERLAYS[isOverlayItem(data) ? (data.overlay || 'l3Large') : '']?.length ?? (Number(data.duration) || 5));
         const formatTime = (secs) => secs < 60 ? `${secs}s` : `${Math.floor(secs / 60)}:${String(Math.round(secs % 60)).padStart(2, '0')}`;
 
         // Where a custom background file is, relative to this page
@@ -977,6 +1097,10 @@
             clip:   '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/>',
             sot:    '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/>',
             pic:    '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
+            monitor: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+            launch: '<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+            copy:   '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+            scene:  '<rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/>',
             wrench: '<path d="M15 4a5 5 0 0 0-4.6 6.9L3 18.3 5.7 21l7.4-7.4A5 5 0 0 0 20 9l-3 1-2-2 1-3z"/>',
             zap:    '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
             moon:   '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
@@ -1113,7 +1237,8 @@
 
 
         /* =========================================================
-           6. DISPLAY: CANVAS EFFECTS (Color Wave, Confetti, Fall, Snow, Fire, Underwater, Arrested, Hot Take, Sports, Storm, Static)
+           6. DISPLAY: CANVAS EFFECTS (Color Wave, Confetti, Fall, Snow, Fire, Underwater, Arrested, Hot Take, St. Patrick's,
+              Retro VHS, Sports, Storm, Static, Fireworks, Medical)
            FX.start(name, seconds) and FX.stop()
            ========================================================= */
         const FX = (() => {
@@ -2978,7 +3103,559 @@
                 },
             };
 
-            const EFFECTS = { confetti, colorwave, leaves, snow, fire, underwater, arrested, hottake, sports, spring, storm, tvstatic };
+            // ---------- Fireworks stinger: rockets streak up into a night sky that fills the screen and burst in
+            // color (round peonies, rings, gold willows that droop, crackling glitter). The sky covers the screen
+            // through the middle, with the biggest bursts and a flash at the halfway point, then fades away as
+            // the last sparks fall. Sparks are drawn onto their own layer that fades a little every frame, which
+            // leaves the short trails. ----------
+            const FW_COLORS = ['#ff4d6d', '#ffd23f', '#4dabff', '#5cff8a', '#c77dff', '#ff8c42', '#ffffff', '#ff7ad9'];
+            const FW_SPRITES = FW_COLORS.map(c => glowSprite(c, 0.2, 32));
+            const FW_GOLD = glowSprite('#ffc94d', 0.2, 32);
+            const FW_WHITE = glowSprite('#ffffff', 0.1, 64);
+            const FW_POP = glowSprite('#fff4d6', 0, 64); // the soft flash where a rocket bursts
+            const fireworks = {
+                detail: 0.75, // hundreds of sparks at once (see "detail" above)
+                init(durationSec) {
+                    this.T = durationSec;
+                    this.trail = this.trail || document.createElement('canvas');
+                    this.trail.width = canvas.width;
+                    this.trail.height = canvas.height;
+                    this.tx = this.trail.getContext('2d');
+                    this.tx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+                    this.tx.clearRect(0, 0, W, H);
+                    this.sparks = [];
+                    this.rockets = [];
+                    this.pops = [];
+                    // The launches: when (fraction of the run), where each bursts, what kind and how big
+                    const kinds = ['peony', 'ring', 'crackle', 'peony', 'willow'];
+                    this.plan = Array.from({ length: 14 }, (_, i) => ({
+                        at: 0.02 + (i / 14) * 0.48 + rand(-0.015, 0.015),
+                        x: rand(0.1, 0.9) * W, y: rand(0.14, 0.5) * H, kind: kinds[i % kinds.length], size: rand(0.8, 1.15),
+                    }));
+                    // The big ones, bursting just before the halfway point
+                    this.plan.push({ at: 0.33, x: 0.5 * W, y: 0.34 * H, kind: 'willow', size: 1.7 },
+                        { at: 0.35, x: 0.22 * W, y: 0.3 * H, kind: 'peony', size: 1.35 },
+                        { at: 0.37, x: 0.78 * W, y: 0.3 * H, kind: 'ring', size: 1.35 });
+                    this.plan.sort((a, b) => a.at - b.at);
+                },
+                // A rocket's burst: its sparks fly out, slow down and fall, and a bright pop at the middle
+                burst(q, t) {
+                    const s = H / 1080, k = q.size;
+                    const ci = Math.floor(Math.random() * FW_COLORS.length), ci2 = Math.floor(Math.random() * FW_COLORS.length);
+                    const n = { peony: 110, ring: 64, crackle: 80, willow: 120 }[q.kind];
+                    for (let i = 0; i < n; i++) {
+                        const ring = q.kind === 'ring', willow = q.kind === 'willow';
+                        const a = ring ? (i / n) * Math.PI * 2 : rand(0, Math.PI * 2);
+                        const sp = (ring ? 7.2 : willow ? rand(1.5, 6) : rand(1.5, 8)) * s * k;
+                        this.sparks.push({
+                            x: q.x, y: q.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, age: 0,
+                            max: willow ? rand(1.5, 2.1) : rand(0.8, 1.3),
+                            drag: willow ? 0.96 : 0.955, g: (willow ? 0.09 : 0.055) * s,
+                            sprite: willow ? FW_GOLD : FW_SPRITES[i % 3 === 0 ? ci2 : ci],
+                            r: (willow ? 5 : 6.5) * s * k, twinkle: q.kind === 'crackle',
+                        });
+                    }
+                    this.pops.push({ x: q.x, y: q.y, t0: t, r: 75 * s * k });
+                },
+                frame(dt, t) {
+                    const s = H / 1080, p = clamp01(t / this.T), tx = this.tx;
+                    // Rockets due to go up
+                    while (this.plan.length && this.plan[0].at * this.T <= t) {
+                        const q = this.plan.shift();
+                        this.rockets.push({ q, x0: q.x + rand(-90, 90) * s, t0: t, fly: rand(0.28, 0.36) });
+                    }
+                    // The sparks' layer: what's there fades a little (the trails), then this frame is added on top
+                    tx.globalCompositeOperation = 'destination-out';
+                    tx.fillStyle = `rgba(0, 0, 0, ${Math.min(1, 0.3 * dt)})`;
+                    tx.fillRect(0, 0, W, H);
+                    tx.globalCompositeOperation = 'lighter';
+                    tx.strokeStyle = 'rgba(255, 210, 120, 0.8)';
+                    tx.lineWidth = 3 * s;
+                    tx.lineCap = 'round';
+                    for (const r of this.rockets) {
+                        const k = (t - r.t0) / r.fly;
+                        if (k >= 1) { this.burst(r.q, t); r.done = true; continue; }
+                        const x = lerp(r.x0, r.q.x, k), y = lerp(H + 20 * s, r.q.y, EASE.out3(k)); // slows as it climbs
+                        if (r.px !== undefined) { // a streak from where it was, so the trail is a line, not dots
+                            tx.globalAlpha = 1;
+                            tx.beginPath();
+                            tx.moveTo(r.px, r.py);
+                            tx.lineTo(x, y);
+                            tx.stroke();
+                        }
+                        r.px = x;
+                        r.py = y;
+                        tx.globalAlpha = 0.95;
+                        tx.drawImage(FW_GOLD, x - 7 * s, y - 7 * s, 14 * s, 14 * s);
+                    }
+                    this.rockets = this.rockets.filter(r => !r.done);
+                    this.sparks = this.sparks.filter(sp => {
+                        sp.age += dt / 60;
+                        if (sp.age >= sp.max) return false;
+                        const drag = Math.pow(sp.drag, dt);
+                        sp.vx *= drag;
+                        sp.vy = sp.vy * drag + sp.g * dt;
+                        sp.x += sp.vx * dt;
+                        sp.y += sp.vy * dt;
+                        const life = 1 - sp.age / sp.max;
+                        tx.globalAlpha = (life < 0.35 ? life / 0.35 : 1) * (sp.twinkle && Math.random() < 0.5 ? 0.15 : 1);
+                        const r = sp.r * (0.55 + 0.45 * life);
+                        tx.drawImage(sp.sprite, sp.x - r, sp.y - r, r * 2, r * 2);
+                        return true;
+                    });
+                    tx.globalAlpha = 1;
+                    tx.globalCompositeOperation = 'source-over';
+
+                    // The night sky: covers the screen through the middle
+                    const cover = p < 0.3 ? EASE.out3(p / 0.3) : p < 0.68 ? 1 : 1 - EASE.in3((p - 0.68) / 0.32);
+                    ctx.clearRect(0, 0, W, H);
+                    if (cover > 0) {
+                        if (!this.sky || this.skyH !== H) {
+                            this.skyH = H;
+                            this.sky = ctx.createLinearGradient(0, 0, 0, H);
+                            this.sky.addColorStop(0, '#02030f');
+                            this.sky.addColorStop(0.6, '#0a1038');
+                            this.sky.addColorStop(1, '#1d1238');
+                        }
+                        ctx.globalAlpha = cover;
+                        ctx.fillStyle = this.sky;
+                        ctx.fillRect(0, 0, W, H);
+                    }
+                    // A flash at the halfway point
+                    const fl = (t - 0.5 * this.T) / 0.35;
+                    if (fl >= 0 && fl < 1) {
+                        ctx.globalAlpha = 0.28 * (1 - fl);
+                        ctx.fillStyle = '#fff6dd';
+                        ctx.fillRect(0, 0, W, H);
+                    }
+                    // The sparks, fading out with the sky at the very end
+                    ctx.globalAlpha = p > 0.86 ? (1 - p) / 0.14 : 1;
+                    ctx.drawImage(this.trail, 0, 0, W, H);
+                    // Each burst's soft flash, on top (on the sparks' layer it would leave a ring as it grows)
+                    ctx.globalCompositeOperation = 'lighter';
+                    this.pops = this.pops.filter(pp => {
+                        const k = (t - pp.t0) / 0.25;
+                        if (k >= 1) return false;
+                        ctx.globalAlpha = 0.7 * (1 - k);
+                        const r = pp.r * (0.6 + 0.6 * k);
+                        ctx.drawImage(FW_POP, pp.x - r, pp.y - r, r * 2, r * 2);
+                        return true;
+                    });
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.globalAlpha = 1;
+                },
+            };
+
+            // ---------- Medical stinger (blue and white): blue panels sweep in from both sides with a white
+            // heartbeat (EKG) line racing across. In the middle the screen is all blue, with a heart monitor's
+            // grid and a big white medical cross that pulses as the heartbeat's spike passes under it. Then the
+            // panels sweep back out. ----------
+            const medical = {
+                init(durationSec) {
+                    this.T = durationSec;
+                    const s = H / 1080;
+                    // The heartbeat: flat, a small bump, the sharp spike, a dip, a rounded bump (one beat, 0 to 1 wide)
+                    const beat = [[0, 0], [0.1, 0], [0.14, -0.08], [0.18, 0], [0.24, 0], [0.26, 0.12], [0.29, -0.9], [0.32, 0.35], [0.35, 0], [0.45, 0], [0.5, -0.16], [0.56, 0], [1, 0]];
+                    const bw = W * 0.34, amp = 120 * s;
+                    this.lineY = H * 0.76;
+                    this.ekg = [];
+                    // Lined up so one spike passes right under the cross, in the middle of the screen
+                    for (let bx = W / 2 - 0.29 * bw - bw * 3; bx < W + bw; bx += bw) {
+                        for (const [fx, fy] of beat) this.ekg.push([bx + fx * bw, this.lineY + fy * amp]);
+                    }
+                    // When the line's tip is under the cross: the cross beats then
+                    this.beatP = 0.12 + 0.5 * ((W / 2 + 0.05 * W) / (1.1 * W));
+                    // A heart monitor's grid, drawn once
+                    const g = document.createElement('canvas');
+                    g.width = g.height = Math.round(60 * s);
+                    const gx = g.getContext('2d');
+                    gx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+                    gx.lineWidth = Math.max(1, s);
+                    gx.strokeRect(0, 0, g.width, g.height);
+                    this.grid = ctx.createPattern(g, 'repeat');
+                },
+                // The two panels' outline (each a slanted half of the screen), slid out by (1 - k). They reach past
+                // the top and bottom, so only their slanted inside edges show.
+                panels(k) {
+                    const skew = 0.08 * W, off = (1 - k) * W * 0.75, y0 = -0.05 * H, y1 = 1.05 * H;
+                    ctx.beginPath();
+                    ctx.moveTo(-0.1 * W - off, y0);
+                    ctx.lineTo(0.55 * W + skew * 1.1 - off, y0);
+                    ctx.lineTo(0.55 * W - skew * 1.1 - off, y1);
+                    ctx.lineTo(-0.1 * W - off, y1);
+                    ctx.closePath();
+                    ctx.moveTo(0.45 * W + skew * 1.1 + off, y0);
+                    ctx.lineTo(1.1 * W + off, y0);
+                    ctx.lineTo(1.1 * W + off, y1);
+                    ctx.lineTo(0.45 * W - skew * 1.1 + off, y1);
+                    ctx.closePath();
+                },
+                frame(dt, t) {
+                    const s = H / 1080, p = clamp01(t / this.T);
+                    const k = p < 0.3 ? EASE.out3(p / 0.3) : p < 0.66 ? 1 : 1 - EASE.in3((p - 0.66) / 0.34);
+                    ctx.clearRect(0, 0, W, H);
+                    if (k <= 0) return;
+                    // The panels' white leading edges, then the blue panels on top (so only the edges show)
+                    ctx.save();
+                    ctx.lineWidth = 16 * s;
+                    ctx.strokeStyle = '#ffffff';
+                    this.panels(k);
+                    ctx.stroke();
+                    ctx.restore();
+                    ctx.save();
+                    this.panels(k);
+                    if (!this.blue || this.blueW !== W) {
+                        this.blueW = W;
+                        this.blue = ctx.createLinearGradient(0, 0, W, H);
+                        this.blue.addColorStop(0, '#0a3d91');
+                        this.blue.addColorStop(0.5, '#1565d8');
+                        this.blue.addColorStop(1, '#0b4aa8');
+                    }
+                    ctx.fillStyle = this.blue;
+                    ctx.fill();
+                    ctx.clip();
+                    ctx.fillStyle = this.grid;
+                    ctx.fillRect(0, 0, W, H);
+                    // The heartbeat line, drawn up to its tip and fading out behind it
+                    const lp = clamp01((p - 0.12) / 0.5), head = lerp(-0.05 * W, 1.05 * W, lp);
+                    const fade = p > 0.66 ? 1 - clamp01((p - 0.66) / 0.15) : 1;
+                    if (lp > 0 && fade > 0) {
+                        ctx.beginPath();
+                        let tipY = this.lineY, started = false;
+                        for (let i = 0; i < this.ekg.length; i++) {
+                            const [x, y] = this.ekg[i];
+                            if (x > head) {
+                                const [px, py] = this.ekg[i - 1] || [x, y];
+                                tipY = py + (y - py) * ((head - px) / ((x - px) || 1));
+                                ctx.lineTo(head, tipY);
+                                break;
+                            }
+                            if (started) ctx.lineTo(x, y); else { ctx.moveTo(x, y); started = true; }
+                            tipY = y;
+                        }
+                        const g = ctx.createLinearGradient(head - 0.7 * W, 0, head, 0);
+                        g.addColorStop(0, 'rgba(255, 255, 255, 0)');
+                        g.addColorStop(1, `rgba(255, 255, 255, ${fade})`);
+                        ctx.lineJoin = 'round';
+                        ctx.lineCap = 'round';
+                        ctx.strokeStyle = g;
+                        ctx.globalAlpha = 0.25;
+                        ctx.lineWidth = 18 * s;
+                        ctx.stroke();
+                        ctx.globalAlpha = 1;
+                        ctx.lineWidth = 6 * s;
+                        ctx.stroke();
+                        ctx.globalAlpha = fade;
+                        ctx.drawImage(FW_WHITE, head - 40 * s, tipY - 40 * s, 80 * s, 80 * s); // the bright tip
+                        ctx.globalAlpha = 1;
+                    }
+                    ctx.restore();
+                    // The cross: pops in, beats as the spike passes, then shrinks away
+                    const inK = clamp01((p - 0.26) / 0.14), outK = clamp01((p - 0.6) / 0.12);
+                    if (inK > 0 && outK < 1) {
+                        const bt = (p - this.beatP) * this.T; // seconds from the beat
+                        const pulse = 1 + 0.14 * Math.exp(-((bt / 0.09) ** 2));
+                        const sc = EASE.outBack(inK) * (1 - EASE.in3(outK)) * pulse;
+                        const cx = W / 2, cy = H * 0.42, L = 170 * s, th = 112 * s;
+                        // A ring that ripples out from the beat
+                        if (bt > 0 && bt < 0.6) {
+                            ctx.globalAlpha = 0.6 * (1 - bt / 0.6);
+                            ctx.strokeStyle = '#ffffff';
+                            ctx.lineWidth = 6 * s;
+                            ctx.beginPath();
+                            ctx.arc(cx, cy, L * (1.1 + bt * 2.2), 0, Math.PI * 2);
+                            ctx.stroke();
+                            ctx.globalAlpha = 1;
+                        }
+                        ctx.save();
+                        ctx.translate(cx, cy);
+                        ctx.scale(sc, sc);
+                        ctx.globalAlpha = 0.35;
+                        ctx.drawImage(FW_WHITE, -L * 1.6, -L * 1.6, L * 3.2, L * 3.2); // soft glow behind it
+                        ctx.globalAlpha = 1;
+                        ctx.fillStyle = '#ffffff';
+                        const bar = (x, y, w, h) => {
+                            ctx.beginPath();
+                            if (ctx.roundRect) ctx.roundRect(x, y, w, h, 16 * s); else ctx.rect(x, y, w, h);
+                            ctx.fill();
+                        };
+                        bar(-th / 2, -L, th, L * 2);
+                        bar(-L, -th / 2, L * 2, th);
+                        ctx.restore();
+                    }
+                },
+            };
+
+            // ---------- St. Patrick's Day: shamrocks (now and then a lucky four-leaf clover) and spinning gold
+            // coins tumble down, with glints of gold and a soft green glow around the edges.
+            // Greenscreen: small far ones fall behind the person, bigger near ones in front, plus a few big,
+            // blurry shamrocks drifting right past the camera (and the glow, in front). ----------
+            const CLOVER_GREENS = ['#1e8f3e', '#27ae60', '#2ecc71', '#169c48', '#0f7a35'];
+            // One clover, drawn once and stamped: leaves = 3 (a shamrock) or 4. blur: out of focus, for the
+            // big ones by the camera (the blur comes from a shadow, like Fall's near leaves).
+            const makeClover = (color, leaves, blur = false) => {
+                const S = 128, R = S * 0.27, pad = blur ? 20 : 0;
+                const c = document.createElement('canvas');
+                c.width = c.height = S + pad * 2;
+                const x = c.getContext('2d');
+                if (blur) {
+                    x.shadowColor = color;
+                    x.shadowBlur = 12;
+                    x.shadowOffsetX = c.width * 2;
+                    x.translate(-c.width * 2, 0);
+                }
+                x.translate(c.width / 2, c.height / 2);
+                // The stem, curving down
+                x.strokeStyle = mixHex(color, '#000000', 0.25);
+                x.lineWidth = R * 0.14;
+                x.lineCap = 'round';
+                x.beginPath();
+                x.moveTo(0, 0);
+                x.quadraticCurveTo(R * 0.15, R * 1.1, R * 0.55, R * 1.6);
+                x.stroke();
+                const light = mixHex(color, '#ffffff', 0.3);
+                for (let i = 0; i < leaves; i++) {
+                    x.save();
+                    x.rotate(i * Math.PI * 2 / leaves + (leaves === 3 ? 0 : Math.PI / 4)); // leaves up and out, the stem between the lower ones
+                    // A heart-shaped leaf, its point at the middle
+                    const g = x.createRadialGradient(0, -R * 0.2, R * 0.1, 0, -R * 0.6, R * 1.1);
+                    g.addColorStop(0, light);
+                    g.addColorStop(1, color);
+                    x.fillStyle = g;
+                    x.beginPath();
+                    x.moveTo(0, 0);
+                    x.bezierCurveTo(-R * 1.05, -R * 0.3, -R * 0.85, -R * 1.25, 0, -R * 0.85);
+                    x.bezierCurveTo(R * 0.85, -R * 1.25, R * 1.05, -R * 0.3, 0, 0);
+                    x.fill();
+                    if (!blur) {
+                        x.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+                        x.lineWidth = R * 0.05;
+                        x.beginPath();
+                        x.moveTo(0, -R * 0.08);
+                        x.lineTo(0, -R * 0.7);
+                        x.stroke();
+                    }
+                    x.restore();
+                }
+                return c;
+            };
+            const makeCoin = () => {
+                const S = 96, c = document.createElement('canvas');
+                c.width = c.height = S;
+                const x = c.getContext('2d'), r = S / 2 - 2;
+                const g = x.createRadialGradient(S * 0.38, S * 0.36, r * 0.1, S / 2, S / 2, r);
+                g.addColorStop(0, '#fff3b0');
+                g.addColorStop(0.45, '#ffcf3a');
+                g.addColorStop(1, '#b07800');
+                x.fillStyle = g;
+                x.beginPath();
+                x.arc(S / 2, S / 2, r, 0, Math.PI * 2);
+                x.fill();
+                x.lineWidth = 4;
+                x.strokeStyle = '#8a5a00';
+                x.stroke();
+                x.lineWidth = 2;
+                x.strokeStyle = 'rgba(255, 240, 180, 0.8)';
+                x.beginPath();
+                x.arc(S / 2, S / 2, r * 0.74, 0, Math.PI * 2);
+                x.stroke();
+                // A little shamrock stamped in the middle
+                x.globalAlpha = 0.45;
+                x.drawImage(makeClover('#7a5200', 3), S / 2 - r * 0.6, S / 2 - r * 0.62, r * 1.2, r * 1.2);
+                return c;
+            };
+            let STPAT = null; // the sprites, made the first time it's used
+            const stpatricks = {
+                init(durationSec, opts) {
+                    STPAT = STPAT || {
+                        clovers: CLOVER_GREENS.map(c => makeClover(c, 3)),
+                        lucky: CLOVER_GREENS.slice(0, 2).map(c => makeClover(c, 4)),
+                        blurred: CLOVER_GREENS.slice(1, 4).map(c => makeClover(c, 3, true)),
+                        coin: makeCoin(),
+                        glint: glowSprite('#fff7c2', 0.1, 48),
+                    };
+                    this.d = depthOf(opts);
+                    // Start spread over the screen so it's already falling when it fades in
+                    this.bits = [];
+                    for (let i = 0; i < Math.round(42 * this.d.share); i++) this.bits.push(this.piece(rand(-0.2 * H, H), false));
+                    for (let i = 0; i < Math.round(12 * this.d.share); i++) this.bits.push(this.piece(rand(-0.2 * H, H), true));
+                    if (this.d.layer === 'front') {
+                        for (let i = 0; i < 3; i++) this.bits.push(this.piece(rand(-0.6 * H, 0.6 * H), false, true));
+                    }
+                    this.glow = this.d.layer !== 'back'; // the edges' green glow is a screen thing, in front
+                },
+                // One falling piece: a clover or a coin. z = depth: bigger, faster ones look closer. near = by the camera.
+                piece(y, coin, near = false) {
+                    const s = H / 1080, z = near ? 1 : rand(this.d.zMin, this.d.zMax);
+                    const sprite = near ? STPAT.blurred[Math.floor(Math.random() * STPAT.blurred.length)]
+                        : coin ? STPAT.coin
+                        : Math.random() < 0.12 ? STPAT.lucky[Math.floor(Math.random() * STPAT.lucky.length)]
+                        : STPAT.clovers[Math.floor(Math.random() * STPAT.clovers.length)];
+                    return {
+                        x: rand(0, W), y, coin, near, sprite,
+                        size: (near ? rand(240, 320) : coin ? 34 + z * 34 : 62 + z * 70) * s,
+                        vy: (near ? rand(2.4, 3.2) : coin ? 1.4 + z * 1.6 : 0.8 + z * 1.2) * s,
+                        sway: rand(0.8, 2) * s * (near ? 1.8 : 1), freq: rand(0.5, 1.1), phase: rand(0, Math.PI * 2),
+                        rot: rand(0, Math.PI * 2), vr: rand(-0.03, 0.03),
+                        tilt: rand(0, Math.PI * 2), vt: coin ? rand(0.06, 0.12) : rand(0.02, 0.05),
+                    };
+                },
+                frame(dt, t) {
+                    ctx.clearRect(0, 0, W, H);
+                    if (this.glow) { // soft green around the edges, gently breathing
+                        if (!this.vig || this.vigW !== W) {
+                            this.vigW = W;
+                            this.vig = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.hypot(W, H) * 0.55);
+                            this.vig.addColorStop(0, 'rgba(30, 170, 80, 0)');
+                            this.vig.addColorStop(1, 'rgba(30, 170, 80, 0.4)');
+                        }
+                        ctx.globalAlpha = 0.75 + 0.25 * Math.sin(t * 1.4);
+                        ctx.fillStyle = this.vig;
+                        ctx.fillRect(0, 0, W, H);
+                        ctx.globalAlpha = 1;
+                    }
+                    for (const b of this.bits) {
+                        const swing = Math.sin(t * b.freq + b.phase);
+                        b.y += b.vy * dt;
+                        b.x += swing * b.sway * dt;
+                        b.rot += b.vr * dt;
+                        b.tilt += b.vt * dt;
+                        // Off the bottom: start again at the top. Off a side: wrap around.
+                        if (b.y > H + b.size) Object.assign(b, this.piece(-b.size, b.coin, b.near));
+                        if (b.x < -b.size) b.x = W + b.size; else if (b.x > W + b.size) b.x = -b.size;
+                        const flip = Math.cos(b.tilt);
+                        ctx.save();
+                        ctx.translate(b.x, b.y);
+                        ctx.rotate(b.rot + swing * (b.coin ? 0.2 : 0.5));
+                        ctx.scale(b.coin ? Math.max(0.08, Math.abs(flip)) : 1, b.coin ? 1 : 0.6 + 0.4 * Math.abs(flip)); // coins spin, clovers flutter
+                        ctx.drawImage(b.sprite, -b.size / 2, -b.size / 2, b.size, b.size);
+                        ctx.restore();
+                        // A coin facing the camera catches the light
+                        if (b.coin && flip > 0.9) {
+                            const gl = (flip - 0.9) / 0.1, r = b.size * 0.9 * gl;
+                            ctx.globalAlpha = gl;
+                            ctx.drawImage(STPAT.glint, b.x - b.size * 0.25 - r / 2, b.y - b.size * 0.25 - r / 2, r, r);
+                            ctx.globalAlpha = 1;
+                        }
+                    }
+                },
+            };
+
+            // ---------- Retro VHS: the picture looks like an old tape playing. Scan lines, grain, a soft
+            // vignette and a washed-out tint; the head-switching noise along the bottom edge; a tracking glitch
+            // that rolls through now and then; and the VCR's on-screen display: PLAY ▶ and SP at the top, the
+            // tape counter and a camcorder date and time at the bottom. ----------
+            const vhs = {
+                init(durationSec) {
+                    this.T = durationSec;
+                    // Grain is made at a quarter of the screen size and scaled up
+                    this.buf = this.buf || document.createElement('canvas');
+                    this.buf.width = Math.ceil(W / 4);
+                    this.buf.height = Math.ceil(H / 4);
+                    this.bctx = this.buf.getContext('2d');
+                    this.img = this.bctx.createImageData(this.buf.width, this.buf.height);
+                    this.px = new Uint32Array(this.img.data.buffer);
+                    this.tick = 0;
+                    const sl = document.createElement('canvas');
+                    sl.width = 1; sl.height = 4;
+                    const sx = sl.getContext('2d');
+                    sx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+                    sx.fillRect(0, 0, 1, 2);
+                    this.lines = ctx.createPattern(sl, 'repeat');
+                    this.vig = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.4, W / 2, H / 2, Math.hypot(W, H) * 0.6);
+                    this.vig.addColorStop(0, 'rgba(0, 0, 0, 0)');
+                    this.vig.addColorStop(1, 'rgba(0, 0, 0, 0.55)');
+                    // The tracking glitches: when, how long, and where on the screen
+                    this.glitches = [];
+                    for (let at = rand(1.2, 2.4); at < durationSec - 0.5; at += rand(2.5, 5)) this.glitches.push({ at, len: rand(0.35, 0.7), y: rand(0.2, 0.8) });
+                    document.fonts.load('48px VT323').catch(() => {}); // the VCR-style font (it falls back to a monospace one)
+                },
+                // Text in the VCR's style: white, with red and blue fringes like a tape's smeared color
+                osd(text, x, y, size, align = 'left', color = '#ffffff') {
+                    ctx.font = `${size}px VT323, "Courier New", monospace`;
+                    ctx.textAlign = align;
+                    ctx.textBaseline = 'alphabetic';
+                    const o = size * 0.04;
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+                    ctx.fillText(text, x + o * 1.5, y + o * 1.5);
+                    ctx.fillStyle = 'rgba(255, 40, 60, 0.7)';
+                    ctx.fillText(text, x - o, y);
+                    ctx.fillStyle = 'rgba(40, 170, 255, 0.7)';
+                    ctx.fillText(text, x + o, y);
+                    ctx.fillStyle = color;
+                    ctx.fillText(text, x, y);
+                },
+                frame(dt, t) {
+                    const s = H / 1080;
+                    ctx.clearRect(0, 0, W, H);
+                    // A washed-out tint
+                    ctx.fillStyle = 'rgba(90, 70, 120, 0.07)';
+                    ctx.fillRect(0, 0, W, H);
+                    // Grain: new every other frame, faint
+                    if (this.tick++ % 2 === 0) {
+                        const px = this.px;
+                        for (let i = 0; i < px.length; i++) {
+                            const v = (Math.random() * 256) | 0;
+                            px[i] = (((Math.random() * 40) | 0) << 24) | (v << 16) | (v << 8) | v;
+                        }
+                        this.bctx.putImageData(this.img, 0, 0);
+                    }
+                    ctx.imageSmoothingEnabled = false;
+                    ctx.drawImage(this.buf, 0, 0, W, H);
+                    // A tracking glitch: a band of noise and white streaks, and the picture's display jumps
+                    const gl = this.glitches.find(g => t >= g.at && t < g.at + g.len);
+                    let jx = 0;
+                    if (gl) {
+                        const k = (t - gl.at) / gl.len, by = (gl.y + (k - 0.5) * 0.25) * H, bh = (40 + 50 * Math.sin(k * Math.PI)) * s;
+                        ctx.globalAlpha = 0.8;
+                        ctx.drawImage(this.buf, 0, (by / H) * this.buf.height, this.buf.width, (bh / H) * this.buf.height, rand(-30, 30) * s, by, W, bh);
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+                        for (let i = 0; i < 7; i++) ctx.fillRect(rand(-0.2, 0.8) * W, by + rand(0, bh), rand(0.1, 0.5) * W, rand(1, 3) * s);
+                        ctx.globalAlpha = 1;
+                        jx = rand(-8, 8) * s;
+                    }
+                    // Head-switching noise: a ragged strip along the bottom edge
+                    const hs = H * 0.03;
+                    ctx.globalAlpha = 0.7;
+                    ctx.drawImage(this.buf, 0, this.buf.height * 0.5, this.buf.width, this.buf.height * 0.04, rand(-12, 12) * s, H - hs, W, hs);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+                    for (let i = 0; i < 3; i++) ctx.fillRect(rand(0, 0.7) * W, H - rand(0, hs), rand(0.1, 0.4) * W, 2 * s);
+                    ctx.globalAlpha = 1;
+                    ctx.imageSmoothingEnabled = true;
+                    // A soft brighter band rolling slowly up the screen
+                    const ry = (1.15 - ((t * 0.12) % 1.3)) * H;
+                    const band = ctx.createLinearGradient(0, ry - H * 0.08, 0, ry + H * 0.08);
+                    band.addColorStop(0, 'rgba(255, 255, 255, 0)');
+                    band.addColorStop(0.5, 'rgba(255, 255, 255, 0.05)');
+                    band.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                    ctx.fillStyle = band;
+                    ctx.fillRect(0, ry - H * 0.08, W, H * 0.16);
+                    ctx.fillStyle = this.lines;
+                    ctx.fillRect(0, 0, W, H);
+                    ctx.fillStyle = this.vig;
+                    ctx.fillRect(0, 0, W, H);
+                    // The on-screen display
+                    const pad = W * 0.06, top = H * 0.12, bottom = H * 0.86, big = 64 * s, small = 52 * s;
+                    this.osd('PLAY', pad + jx, top, big);
+                    const tw = (ctx.measureText('PLAY').width) + 18 * s, ty = top - big * 0.62; // a solid ▶ after it
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.moveTo(pad + jx + tw, ty);
+                    ctx.lineTo(pad + jx + tw + big * 0.5, ty + big * 0.3);
+                    ctx.lineTo(pad + jx + tw, ty + big * 0.6);
+                    ctx.fill();
+                    this.osd('SP', W - pad + jx, top, big, 'right');
+                    const secs = Math.floor(t);
+                    this.osd(`${Math.floor(secs / 3600)}:${String(Math.floor(secs / 60) % 60).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`, pad + jx, bottom, small);
+                    const now = new Date();
+                    const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+                    const date = now.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase().replace(',', '');
+                    this.osd(time, W - pad + jx, bottom - small * 1.05, small, 'right');
+                    this.osd(date, W - pad + jx, bottom, small, 'right');
+                },
+            };
+
+            const EFFECTS = { confetti, colorwave, leaves, snow, fire, underwater, arrested, hottake, sports, spring, storm, tvstatic, fireworks, medical, stpatricks, vhs };
 
             // Runs every frame while an effect is playing
             const loop = () => {
@@ -3033,8 +3710,11 @@
             box.classList.add(data.overlay);
             currentOverlay = data.overlay;
 
-            // Breaking News: the ticker text scrolls right to left, over and over
-            if (cfg.ticker) startTicker(data.label || '');
+            // Breaking News: the ticker text scrolls right to left, over and over (with none typed, "Breaking News | ...")
+            if (cfg.ticker) startTicker(data.label || BREAKING_DEFAULT);
+
+            // Location: the place next to the pin
+            if (cfg.place) $('locpin-text').textContent = data.label || '';
 
             // Like, Follow & Subscribe: a pill for each social entered, above the buttons
             if (cfg.social) {
@@ -3139,7 +3819,7 @@
             ws.onopen = () => {
                 const el = $('controller-connection');
                 if (el) { el.className = "text-green-400 font-bold"; el.textContent = "OPEN"; }
-                if (isController) { askCustomList(); broadcastProjector(); loadAktaSettings(); } // checks the custom image is still there
+                if (isController) { askCustomList(); broadcastProjector(); loadAktaSettings(); askObsProgram(); } // checks the custom image is still there; the TAKE tally
                 if (isProjector) ws.send(JSON.stringify({ mode: 'projectorHello' }));
             };
             // The display shows graphics. The control panel listens for the server's replies (the
@@ -3151,7 +3831,9 @@
                 if (!data || typeof data !== 'object') return;
                 if (isProjector) projectorMessage(data);
                 else if (!isController) showDisplay(data);
-                else if (data.mode === 'projectorHello') broadcastProjector(); // a projector just opened: send it the show
+                else if (data.mode === 'projectorHello') { // a projector just opened: send it the show (or say it's off)
+                    if (projectorOn()) broadcastProjector(); else sendProjectorOff();
+                }
                 else if (data.mode === 'customFiles') gotCustomList(data.files || []);
                 else if (data.mode === 'timerCommand') timerCommand(data.action);
                 else if (data.mode === 'obsScene') obsSceneChanged(data.scene);
@@ -3246,12 +3928,18 @@
 
         // Sends a graphic and shows "Taken: Name  for 5s", counting down until it's off screen
         const flashTake = (data) => {
-            if (!sendPayload(data)) return false;
+            const hold = holdsOn(data); // an imported L3: up until it's turned off
+            if (!sendPayload(hold ? { ...data, hold: true } : data)) return false;
             const layer = isOverlayItem(data) ? 'overlay' : 'l3';
-            setToggled(layer, false); // it replaces anything toggled on that layer
+            setToggled(layer, hold);  // it replaces anything toggled on that layer (and a toggle shows TOGGLE OFF)
             clearLive(layer);         // ...and any rundown card that was on screen there
             const ovKey = isOverlayItem(data) ? (data.overlay || 'l3Large') : null;
             const name = data.label || OVERLAYS[ovKey]?.label || 'Graphic';
+            if (hold) {
+                stopTakeCountdown();
+                flash(`On: ${name}`, false, 'until toggled off');
+                return true;
+            }
             const secs = graphicSeconds(data), extra = data.gs && OVERLAYS[ovKey]?.depth ? ' · Greenscreen' : '';
             flash(`Taken: ${name}`, false, `for ${formatTime(secs)}${extra}`);
             startTakeCountdown(name, secs, extra);
@@ -3270,14 +3958,14 @@
             const cfg = mode === 'overlay' ? OVERLAYS[checked('overlayStyle')] : null;
             $('l3-section').classList.toggle('hidden', mode !== 'l3');
             $('overlay-section').classList.toggle('hidden', mode !== 'overlay');
-            const oneBox = cfg?.paragraph || cfg?.ticker || cfg?.caption; // a single text box instead of Name and Title
+            const oneBox = oneBoxOf(cfg); // a single text box instead of Name and Title
             $('text-fields').classList.toggle('hidden', !(mode === 'l3' || cfg?.text || oneBox));
             $('name-fields').classList.toggle('hidden', !!oneBox);
             $('paragraph-field').classList.toggle('hidden', !oneBox);
-            $('paragraph-label').textContent = cfg?.ticker ? 'Ticker text:' : cfg?.caption ? 'Text (optional):' : 'Text:';
-            $('paragraph-input').placeholder = cfg?.caption || 'Type the information to show';
-            $('paragraph-input').rows = cfg?.caption ? 1 : 4;
-            $('paragraph-input').maxLength = cfg?.caption ? 40 : 400;
+            $('paragraph-label').textContent = oneBoxLabel(cfg);
+            $('paragraph-input').placeholder = oneBoxPlaceholder(cfg);
+            $('paragraph-input').rows = oneBoxShort(cfg) ? 1 : 4;
+            $('paragraph-input').maxLength = oneBoxShort(cfg) ? 40 : 400;
             $('social-field').classList.toggle('hidden', !cfg?.social);
             $('sport-field').classList.toggle('hidden', !cfg?.sport);
             // Stingers: the duration box shows their fixed length, locked
@@ -3400,6 +4088,11 @@
 
         const initSections = () => {
             document.querySelectorAll('details.fx-section input[type="radio"]').forEach(r => r.addEventListener('change', updateSummaries));
+            // Fullscreen Overlays tab: opening one section closes the others there
+            const overlaySections = document.querySelectorAll('#overlay-section > details.fx-section');
+            overlaySections.forEach(d => d.addEventListener('toggle', () => {
+                if (d.open) overlaySections.forEach(other => { if (other !== d) other.open = false; });
+            }));
         };
 
 
@@ -3431,7 +4124,7 @@
         const toggleButton = () => {
             const layer = currentLayer();
             if (toggled[layer]) {
-                if (sendPayload({ mode: 'hide', layer })) { setToggled(layer, false); flash('Toggled off'); }
+                if (sendPayload({ mode: 'hide', layer })) { setToggled(layer, false); clearLive(layer); flash('Toggled off'); }
                 return;
             }
             const p = buildPayload();
@@ -3452,10 +4145,11 @@
             if (mode === 'overlay') {
                 const overlay = checked('overlayStyle');
                 const cfg = OVERLAYS[overlay];
-                // L3 Info, Breaking News and Hot Take send their one text box as the label, with no title
-                const oneBox = cfg.paragraph || cfg.ticker || cfg.caption;
+                // L3 Info, Breaking News, Hot Take and Location send their one text box as the label, with no title.
+                // Breaking News and Hot Take can be left empty (they have their own words).
+                const oneBox = oneBoxOf(cfg);
                 const text = oneBox ? $('paragraph-input').value.trim() : label;
-                if ((cfg.text || cfg.ticker) && !text) { flash(oneBox ? 'Enter some text' : 'Enter a name', true); return null; }
+                if ((cfg.text || cfg.place) && !text) { flash(cfg.place ? 'Enter the location' : oneBox ? 'Enter some text' : 'Enter a name', true); return null; }
                 if (cfg.custom && !customFile) { flash(`Put a PNG, JPG or GIF in the "${CUSTOM_FOLDER}" folder, then tap Custom…`, true); return null; }
                 return {
                     mode: 'overlay',
@@ -3507,12 +4201,12 @@
         };
 
         // ＋ RUNDOWN: adds what's set up now straight to the Podcast Rundown, under Unsorted.
-        // Only while Set Order is off (it offers to turn it off).
+        // Only while Set Show is off (it offers to turn it off).
         const addCurrentToRundown = () => {
             const p = buildPayload();
             if (!p) return;
             if (showLocked()) {
-                if (!confirm('The Podcast Rundown order is set. Turn off Set Order and add this under Unsorted?')) return;
+                if (!confirm('The show is set. Turn off Set Show and add this under Unsorted?')) return;
                 localStorage.setItem(SHOW_LOCK_KEY, '0');
             }
             addToShow(p, UNSORTED);
@@ -3555,7 +4249,7 @@
                 (await file.text()).split(/\r?\n/).forEach(line => {
                     const [label = '', title = ''] = OVERLAYS[overlay].paragraph ? [line.trim()] : line.split('|').map(s => s.trim());
                     if (!label) return;
-                    const item = { id: Date.now() + added.length, mode: 'overlay', overlay, label, title, duration: IMPORT_DURATION, source };
+                    const item = { id: Date.now() + added.length, mode: 'overlay', overlay, label, title, toggle: true, source }; // stays up until turned off
                     const key = importKey(item);
                     if (existing.has(key)) { skipped++; return; }
                     existing.add(key);
@@ -3583,7 +4277,7 @@
             const kind = OVERLAYS[ovKey]?.length !== undefined ? 'STINGER' : 'OVERLAY';
             // Second line: file name for imported L3s, otherwise the style
             const sub = isOverlay
-                ? (data.source || `${kind} | ${OVERLAYS[ovKey]?.label || ovKey}${data.customBg ? `: ${data.customBg}` : ''}${data.sport ? `: ${SPORTS[data.sport] || data.sport}` : ''}`)
+                ? (data.source ? `${data.source} | toggle` : `${kind} | ${OVERLAYS[ovKey]?.label || ovKey}${data.customBg ? `: ${data.customBg}` : ''}${data.sport ? `: ${SPORTS[data.sport] || data.sport}` : ''}`)
                 : `${data.bgStyle === 'custom' ? `custom: ${data.customBg}` : data.bgStyle} | ${data.fontStyle?.replace('font-', '')}`;
 
             const card = document.createElement('div');
@@ -3734,9 +4428,9 @@
            fullscreen) or B2-OV (an overlay or stinger), and shows how
            long it stays up. Lower thirds and overlays are numbered
            separately in each block: A1-L3, A2-L3, A1-OV...
-           While Set Order is off: drag ⠿ to reorder or to move it to
+           While Set Show is off: drag ⠿ to reorder or to move it to
            another block, ✎ to edit it (or change its block), ✕ to remove
-           it. Cards can't be taken until Set Order is on. Then the
+           it. Cards can't be taken until Set Show is on. Then the
            letters at the top pick what's shown: ALL for the whole
            rundown, or one block (empty ones are greyed out).
            A card is outlined in green while it's on screen, with a
@@ -3747,9 +4441,34 @@
         const LAST_PLAYED_KEY = 'fx_last_played';
         const BLOCKS_KEY = 'fx_blocks';       // the rundown's blocks, in order
         const ADD_BLOCK_KEY = 'fx_block_add'; // the block ＋ adds to
-        const VIEW_KEY = 'fx_block_view';     // while Set Order is on: 'ALL' or the one block shown
+        const VIEW_KEY = 'fx_block_view';     // while Set Show is on: 'ALL' or the one block shown
         const DEFAULT_BLOCKS = ['A', 'B', 'C', 'D', 'E'];
         const UNSORTED = 'unsorted'; // ＋ RUNDOWN puts graphics here, at the bottom, until they're dragged into a block
+        // Sections with no letter of their own: the Open (optional, first), the Tease (before block A) and the
+        // Close (optional, after the last block). They show with block A (the Open and Tease) or the last
+        // block (the Close), have no "Add to" letter, and aren't timed. The Open and Close take anything, and
+        // are hidden during the show while they're empty.
+        const OPEN = 'open', TEASE = 'tease', CLOSE = 'close';
+        const SECTIONS = { open: { name: 'Open', code: 'OP' }, tease: { name: 'Tease', code: 'T' }, close: { name: 'Close', code: 'CL' } };
+        // The Tease takes notes, scripts, scenes, one clip (the T1-TEASE) and one lower third (the T-L3).
+        // Its one-only slots: 'clip', 'l3', or null for anything else
+        const teaseSlot = (d) => (d.cue === 'clip' ? 'clip' : !d.cue && itemType(d) === 'L3' ? 'l3' : null);
+        const teaseFits = (d) => d.cue === 'note' || d.cue === 'script' || d.cue === 'scene' || !!teaseSlot(d);
+        const TEASE_SLOT_CODES = { clip: 'T1-TEASE', l3: 'T-L3' };
+        // Whether another item in the Tease already has d's slot
+        const teaseTaken = (list, d) => !!teaseSlot(d) && list.some(x => x.block === TEASE && x.sid !== d.sid && teaseSlot(x) === teaseSlot(d));
+        // Why a list can't be saved as it is (null if the tease is fine)
+        const teaseProblem = (list) => {
+            const tease = list.filter(d => d.block === TEASE);
+            if (tease.some(d => !teaseFits(d))) return 'Only notes, scripts, scenes, one clip and one L3 go in the Tease';
+            if (tease.filter(d => teaseSlot(d) === 'clip').length > 1) return 'The Tease has its T1-TEASE clip already';
+            if (tease.filter(d => teaseSlot(d) === 'l3').length > 1) return 'The Tease has its T-L3 already';
+            return null;
+        };
+        const blockName = (b) => SECTIONS[b]?.name || `Block ${b}`;
+        // A block's items, with the Open and Tease counted in the first block and the Close in the last
+        const blockItems = (list, b, blocks) => list.filter(d => d.block === b
+            || ((d.block === OPEN || d.block === TEASE) && b === blocks[0]) || (d.block === CLOSE && b === blocks[blocks.length - 1]));
         // Cues: notes and placeholders for things that aren't graphics, and scripts for the projector.
         // Numbered like graphics (A1-CLIP, A2-CLIP, A1-SOT, A1-SCRIPT...), except notes.
         const CUES = {
@@ -3757,8 +4476,24 @@
             clip: { label: 'Clip', icon: 'clip', code: 'CLIP', hint: 'Which clip? (optional)' },
             sot:  { label: 'SOT',  icon: 'sot',  code: 'SOT',  hint: 'Which SOT? (optional)' },
             pic:  { label: 'PIC',  icon: 'pic',  code: 'PIC',  hint: 'Which picture? (optional)' },
+            scene: { label: 'Scene', icon: 'scene', code: 'SCENE', hint: 'Note (optional, like "wide on the guest"):' },
             script: { label: 'Script', icon: 'script', code: 'SCRIPT', hint: 'Script (shown on the projector):' },
+            break: { label: 'Break', icon: 'pause', code: 'BREAK', hint: 'Name (optional, like "Break 1"):' },
         };
+        // A Scene cue is the OBS scene (or source) to take next: { cue: 'scene', obsName, obsKind: 'source'
+        // (left out for a scene), text: an optional note }. It shows with a yellow TAKE marker.
+        // A Break cue fires a break: { cue: 'break', secs: its length, text: an optional name }. It shows
+        // with an orange BREAK marker and its length.
+        const cueMarker = (word, text, cls, title) => {
+            const pill = document.createElement('span');
+            pill.className = cls;
+            pill.title = title;
+            pill.innerHTML = `<b>${word}</b><span></span>`;
+            pill.lastChild.textContent = text;
+            return pill;
+        };
+        const takeMarker = (d, cls = 'take-pill') => cueMarker('TAKE', d.obsName || 'Scene', cls, d.obsKind === 'source' ? 'The OBS source to take' : 'The OBS scene to take');
+        const breakMarker = (d, cls = 'take-pill brk-pill') => cueMarker('BREAK', clock(d.secs || 0), cls, 'A break this long');
         const newSid = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
         let lastTakenSid = localStorage.getItem(LAST_PLAYED_KEY); // gets the ★
         const liveByLayer = { l3: null, overlay: null };           // rundown card on screen now, per layer
@@ -3776,10 +4511,10 @@
             const b = localStorage.getItem(ADD_BLOCK_KEY);
             return blocks.includes(b) ? b : blocks[0];
         };
-        // Every item is in a block that exists, or Unsorted (rundowns from before blocks go in the first one)
+        // Every item is in a block that exists, the Tease, or Unsorted (rundowns from before blocks go in the first one)
         const loadShow = () => {
             const blocks = loadBlocks();
-            return JSON.parse(localStorage.getItem(SHOW_KEY) || '[]').map(d => (blocks.includes(d.block) || d.block === UNSORTED ? d : { ...d, block: blocks[0] }));
+            return JSON.parse(localStorage.getItem(SHOW_KEY) || '[]').map(d => (blocks.includes(d.block) || d.block === UNSORTED || SECTIONS[d.block] ? d : { ...d, block: blocks[0] }));
         };
         const saveShow = (list) => { localStorage.setItem(SHOW_KEY, JSON.stringify(list)); renderShow(); };
         const showLocked = () => localStorage.getItem(SHOW_LOCK_KEY) === '1';
@@ -3788,13 +4523,15 @@
         const itemType = (d) => (d.cue ? CUES[d.cue]?.code || 'NOTE'
             : (isOverlayItem(d) ? OVERLAYS[d.overlay || 'l3Large']?.text : true) ? 'L3' : 'OV');
         // Its label, like "A1-L3": its block, then its place among that block's items of the same type.
-        // Unsorted ones just show their type; notes have none.
+        // Unsorted ones just show their type; notes have none. In the Tease: T1-TEASE (its clip), T-L3,
+        // T1-SCRIPT...; in the Open and Close: OP1-L3, CL1-SCENE...
         const itemCode = (d, list = loadShow()) => {
             const type = itemType(d);
             if (d.cue === 'note') return '';
             if (d.block === UNSORTED) return type;
+            if (d.block === TEASE && teaseSlot(d)) return TEASE_SLOT_CODES[teaseSlot(d)];
             const same = list.filter(x => x.block === d.block && itemType(x) === type);
-            return `${d.block}${same.findIndex(x => x.sid === d.sid) + 1}-${type}`;
+            return `${SECTIONS[d.block]?.code || d.block}${same.findIndex(x => x.sid === d.sid) + 1}-${type}`;
         };
 
         // ＋ on a saved card: it goes at the end of the block picked under "Add to".
@@ -3830,7 +4567,7 @@
                     off.remove();
                     off = null;
                 }
-                if (off) off.lastChild.textContent = `OFF ${formatTime(Math.max(0, Math.ceil((liveEnds[layer] - now) / 1000)))}`;
+                if (off) off.lastChild.textContent = liveEnds[layer] === Infinity ? 'OFF' : `OFF ${formatTime(Math.max(0, Math.ceil((liveEnds[layer] - now) / 1000)))}`;
             });
         };
         // A graphic left the screen on this layer (time up, taken off, replaced, or cleared)
@@ -3853,15 +4590,18 @@
             flash('Taken off');
         };
 
-        // Tapping a rundown card (only once Set Order is on)
+        // Tapping a rundown card (only once Set Show is on)
         const takeFromRundown = (data) => {
-            if (!showLocked()) { flash('Turn on Set Order to run the rundown', true); return; }
+            if (!showLocked()) { flash('Turn on Set Show to run the rundown', true); return; }
             if (!flashTake(data)) return;
             const layer = isOverlayItem(data) ? 'overlay' : 'l3';
             const secs = graphicSeconds(data);
             liveByLayer[layer] = data.sid;
-            liveEnds[layer] = Date.now() + secs * 1000;
-            liveTimers[layer] = setTimeout(() => clearLive(layer), secs * 1000);
+            if (holdsOn(data)) liveEnds[layer] = Infinity; // up until OFF (or TOGGLE OFF)
+            else {
+                liveEnds[layer] = Date.now() + secs * 1000;
+                liveTimers[layer] = setTimeout(() => clearLive(layer), secs * 1000);
+            }
             if (!liveTicker) liveTicker = setInterval(updateLiveMarks, 250);
             lastTakenSid = data.sid;
             localStorage.setItem(LAST_PLAYED_KEY, data.sid);
@@ -3869,16 +4609,16 @@
             setCurrent(data.sid); // what's taken becomes the current item
         };
 
-        // While Set Order is on: which block is shown ('ALL' if the saved one is gone or empty)
+        // While Set Show is on: which block is shown ('ALL' if the saved one is gone or empty)
         const viewBlock = (blocks, list) => {
             const v = localStorage.getItem(VIEW_KEY);
-            return blocks.includes(v) && list.some(d => d.block === v) ? v : 'ALL';
+            return blocks.includes(v) && blockItems(list, v, blocks).length ? v : 'ALL';
         };
         const setView = (v) => { localStorage.setItem(VIEW_KEY, v); renderShow(); };
 
         // The letters at the top.
-        // Set Order on: ALL shows the whole rundown, a letter shows just that block; empty blocks are greyed out.
-        // Set Order off: "Add to" letters pick the block ＋ adds to (and jump to it); + adds a block at the end.
+        // Set Show on: ALL shows the whole rundown, a letter shows just that block; empty blocks are greyed out.
+        // Set Show off: "Add to" letters pick the block ＋ adds to (and jump to it); + adds a block at the end.
         const renderBlockChips = (blocks, locked, list) => {
             const bar = $('block-chips');
             const target = addBlockTarget(blocks);
@@ -3898,7 +4638,7 @@
                 };
                 chip('ALL', 'Show the whole rundown', view === 'ALL', () => setView('ALL')).classList.add('block-all');
                 blocks.forEach(b => {
-                    const empty = !list.some(d => d.block === b);
+                    const empty = !blockItems(list, b, blocks).length;
                     chip(b, empty ? `Block ${b} is empty` : `Show only block ${b}`, view === b, () => setView(b)).disabled = empty;
                 });
                 return;
@@ -3935,7 +4675,7 @@
         };
 
         // One rundown card: its label on the left, its time (or the OFF button) on the right
-        // A cue: a thin, greyed-out row that can't be taken. ⠿ ✎ ✕ while Set Order is off.
+        // A cue: a thin, greyed-out row that can't be taken. ⠿ ✎ ✕ while Set Show is off.
         const makeCueRow = (data, code, locked) => {
             const cue = CUES[data.cue] || CUES.note;
             const row = document.createElement('div');
@@ -3951,9 +4691,47 @@
                 tag.textContent = code;
                 row.append(tag);
             }
+            if (data.cue === 'scene') { // TAKE and the scene's name in yellow, on a line of its own
+                const line = document.createElement('span');
+                line.className = 'take-line';
+                const pill = takeMarker(data);
+                pill.dataset.obsName = data.obsName || ''; // for the tally
+                if (data.obsKind === 'source') pill.dataset.kind = 'source';
+                // Set Show on: tapping TAKE fires it, switching OBS to that scene (sources are cues only)
+                if (locked && data.obsKind !== 'source' && data.obsName) {
+                    const fire = document.createElement('button');
+                    fire.type = 'button';
+                    fire.className = 'take-fire';
+                    fire.title = `Fire: switch OBS to ${data.obsName}`;
+                    pill.insertAdjacentHTML('beforeend', `<i class="take-go">${icon('zap')}</i>`);
+                    fire.append(pill);
+                    fire.onclick = (e) => { e.stopPropagation(); fireTake(data); };
+                    line.append(fire);
+                } else line.append(pill);
+                row.append(line);
+            }
+            if (data.cue === 'break') { // BREAK and its length in orange, on a line of its own; Set Show on: tap it to fire
+                const line = document.createElement('span');
+                line.className = 'take-line';
+                const pill = breakMarker(data);
+                const on = loadCueBreak()?.sid === data.sid;
+                pill.classList.toggle('on-break', on);
+                pill.classList.toggle('fired', !on && firedBreaks().includes(data.sid));
+                if (locked && !on) {
+                    const fire = document.createElement('button');
+                    fire.type = 'button';
+                    fire.className = 'take-fire';
+                    fire.title = `Fire: start ${data.text || 'the break'} (${clock(data.secs || 0)})`;
+                    pill.insertAdjacentHTML('beforeend', `<i class="take-go">${icon('zap')}</i>`);
+                    fire.append(pill);
+                    fire.onclick = (e) => { e.stopPropagation(); fireBreak(data); };
+                    line.append(fire);
+                } else line.append(pill);
+                row.append(line);
+            }
             const text = document.createElement('span');
             text.className = 'cue-text';
-            text.textContent = data.cue === 'script' ? scriptTitle(data) : data.text || (data.cue === 'note' ? '' : cue.label);
+            text.textContent = data.cue === 'script' ? scriptTitle(data) : data.text || (data.cue === 'note' || data.cue === 'scene' ? '' : cue.label);
             row.append(text);
             // During the show: tap a cue (not a note) to make it the current item
             if (locked && data.cue !== 'note') {
@@ -3980,9 +4758,117 @@
                 del.title = 'Remove';
                 del.onclick = () => saveShow(loadShow().filter(x => x.sid !== data.sid));
                 row.prepend(handle);
+                // A TAKE can be duplicated (going back to the same shot is common)
+                if (data.cue === 'scene') {
+                    const dup = document.createElement('button');
+                    dup.type = 'button';
+                    dup.className = 'cue-btn';
+                    dup.innerHTML = icon('copy');
+                    dup.title = 'Duplicate (the copy goes right under it)';
+                    dup.onclick = () => duplicateShowItem(data.sid);
+                    row.append(dup);
+                }
                 row.append(edit, del);
             }
             return row;
+        };
+        // ---------- Firing a TAKE (server.py switches OBS) ----------
+        // While Set Show is on, tapping a TAKE puts that scene on program (in Studio Mode too), with OBS's
+        // current transition, and makes it the current item. It goes in the log. The tally: whichever TAKE
+        // OBS has on program now (server.py says when it changes) gets a green ring.
+        let obsProgram = null;   // the scene on program, as server.py last said
+        let takeInFlight = false; // one at a time
+        const setObsProgram = (scene) => { obsProgram = typeof scene === 'string' ? scene : null; updateTally(); };
+        const updateTally = () => document.querySelectorAll('.take-pill[data-obs-name]').forEach(p => {
+            p.classList.toggle('on-program', !!obsProgram && p.dataset.kind !== 'source' && p.dataset.obsName === obsProgram);
+        });
+        const askObsProgram = async () => {
+            const reply = await serverRequest({ mode: 'obsProgram' }, 'obsProgramScene');
+            setObsProgram(reply?.ok ? reply.scene : null);
+        };
+        const fireTake = async (d) => {
+            if (!showLocked() || takeInFlight) return;
+            takeInFlight = true;
+            setCurrent(d.sid);
+            const reply = await serverRequest({ mode: 'obsTake', scene: d.obsName }, 'obsTakeResult', 6000);
+            takeInFlight = false;
+            logEvent('fire', d, loadShow(), { scene: d.obsName, ok: !!reply?.ok, error: reply?.ok ? '' : reply?.error || 'no answer from the server' });
+            if (reply?.ok) { setObsProgram(d.obsName); flash(`TAKE ${d.obsName}`, false, 'OBS switched'); }
+            else flash(`Couldn't take ${d.obsName}`, true, reply?.error || 'firing a TAKE needs server.py, running in OBS');
+        };
+
+        // ---------- Break cues ----------
+        // While Set Show is on, tapping a Break cue fires it, and Start Break from OBS (its hotkey, a Stream
+        // Deck, or a {"mode":"timerCommand","action":"start-break"} message) fires the next one not fired yet.
+        // - In Advanced, if the block it's in has a break in the show times, that break starts, the same as
+        //   Start Break: AKTA (when it's on), the countdown in the timing strip, and the return.
+        // - Otherwise it's a break of the cue's own length: "In break" and its countdown here and on the
+        //   projector. With AKTA on (Advanced), an AKTA break goes out with it and the return when it ends.
+        // It ends by itself when its time is up, or early with End (or Reset Break, which also lets it fire again).
+        const CUE_BREAK_KEY = 'fx_cue_break'; // the cue break on now: { sid, label, secs, since, block, akta }
+        const loadCueBreak = () => { const b = readJson(CUE_BREAK_KEY, null); return b && b.since && b.secs ? b : null; };
+        const firedBreaks = () => showState().breaksFired || [];
+        const markBreakFired = (sid, fired = true) => {
+            const st = showState(), set = new Set(st.breaksFired || []);
+            if (fired) set.add(sid); else set.delete(sid);
+            st.breaksFired = [...set];
+            saveShowState(st);
+        };
+        const nextBreakCue = () => showFlow().find(d => d.cue === 'break' && !firedBreaks().includes(d.sid)) || null;
+        const fireBreak = (d) => {
+            if (!showLocked()) { flash('Turn on Set Show to run the rundown', true); return; }
+            const on = loadCueBreak();
+            if (on) { flash(`${on.label} is on now`, true, 'end it first'); return; }
+            if (advancedMode()) {
+                const now = Date.now(), tl = buildTimeline(now), ev = breakEvent(tl, d.block);
+                if (activeEvent(tl, now)?.ev.kind === 'break') { flash('A break is on now', true, 'end it first'); return; }
+                if (ev && !ev.started) { // the show times' break after this block
+                    markBreakFired(d.sid);
+                    setCurrent(d.sid);
+                    startBreak(d.block);
+                    renderShow();
+                    return;
+                }
+            }
+            const b = { sid: d.sid, label: d.text || 'Break', secs: d.secs || 120, since: Date.now(), block: d.block, akta: advancedMode() && aktaOn() };
+            localStorage.setItem(CUE_BREAK_KEY, JSON.stringify(b));
+            markBreakFired(d.sid);
+            setCurrent(d.sid);
+            logEvent('break', null, undefined, { block: d.block, label: b.label, planned: b.secs });
+            if (b.akta) aktaCue('break', b.secs, d.block);
+            flash(`${b.label}: ${clock(b.secs)}`, false, b.akta ? 'AKTA break sent' : 'in break');
+            renderShow();
+        };
+        // early: End (or Reset Break) before its time was up. late: it was up a while ago (the panel was closed),
+        // so it's too late for an AKTA return.
+        const endCueBreak = (early = false, late = false) => {
+            const b = loadCueBreak();
+            if (!b) return;
+            localStorage.removeItem(CUE_BREAK_KEY);
+            logEvent('breakEnd', null, undefined, { block: b.block, label: b.label, early });
+            if (b.akta && !late) aktaCue('return', 0, b.block);
+            flash(early ? `${b.label} ended early` : `${b.label} is over`, false, b.akta && !late ? 'AKTA return sent' : '');
+            renderShow();
+        };
+        // 4 times a second: its time left here (the projector counts by itself), and its end when the time is up
+        const tickCueBreak = () => {
+            const b = loadCueBreak();
+            $('break-strip').classList.toggle('hidden', !b);
+            if (!b) return;
+            const left = b.secs - (Date.now() - b.since) / 1000;
+            if (left <= 0) { endCueBreak(false, -left * 1000 > RETURN_LATE); return; }
+            $('break-strip-label').textContent = `In break · ${b.label}`;
+            $('break-strip-left').textContent = clock(Math.ceil(left));
+        };
+
+        // A copy of a rundown item, right under it
+        const duplicateShowItem = (sid) => {
+            const list = loadShow(), i = list.findIndex(d => d.sid === sid);
+            if (i < 0) return;
+            const copy = { ...list[i], sid: newSid() };
+            list.splice(i + 1, 0, copy);
+            saveShow(list);
+            flash('Duplicated', false, itemCode(copy, list));
         };
 
         const makeShowCard = (data, code, locked) => {
@@ -4001,8 +4887,8 @@
             star.title = 'Played last';
             const time = document.createElement('span');
             time.className = 'show-time';
-            time.textContent = formatTime(graphicSeconds(data));
-            time.title = 'Time on screen';
+            time.textContent = holdsOn(data) ? 'TOGGLE' : formatTime(graphicSeconds(data));
+            time.title = holdsOn(data) ? 'Stays up until OFF' : 'Time on screen';
             card.append(star, time);
             if (!locked) {
                 // Drag handle on the left
@@ -4023,8 +4909,8 @@
             return card;
         };
 
-        // The break after a block: its length, and during the show (Set Order on, show times set) when it's due
-        // or when it's back: ▶ starts it; while it's on, ⏹ ends it early; ↺ resets it. Set Order off: just its
+        // The break after a block: its length, and during the show (Set Show on, show times set) when it's due
+        // or when it's back: ▶ starts it; while it's on, ⏹ ends it early; ↺ resets it. Set Show off: just its
         // name and length; tap it to change the breaks.
         const makeBreakRow = (part, ev, locked) => {
             const row = document.createElement('div');
@@ -4055,29 +4941,96 @@
             return row;
         };
 
+        // The Open, the Tease and the Close (sections with no letter). Each is hidden during the show while
+        // it's empty. While Set Show is off, the empty Open and Close are just their header (drag things
+        // onto it), and the Tease has an empty slot for each of its one-only items: tap the T1-TEASE one to
+        // add the clip, drag a lower third onto the T-L3 one.
+        const SECTION_HINTS = { open: 'optional: drag anything here', tease: 'notes, scripts, scenes, 1 clip, 1 L3', close: 'optional: drag anything here' };
+        const makeExtraSection = (kind, list, locked) => {
+            const items = list.filter(d => d.block === kind);
+            if (locked && !items.length) return null;
+            const section = document.createElement('section');
+            section.className = `show-block show-extra show-${kind}${items.length ? '' : ' is-empty'}`;
+            section.dataset.block = kind;
+            const head = document.createElement('div');
+            head.className = 'show-block-head';
+            const title = document.createElement('span');
+            title.textContent = SECTIONS[kind].name;
+            const count = document.createElement('span');
+            count.className = 'count';
+            count.textContent = items.length || '';
+            const line = document.createElement('span');
+            line.className = 'line';
+            head.append(title, count, line);
+            if (!locked) {
+                const hint = document.createElement('span');
+                hint.className = 'unsorted-hint';
+                hint.textContent = SECTION_HINTS[kind];
+                head.append(hint);
+            }
+            const listEl = document.createElement('div');
+            listEl.className = 'block-list';
+            listEl.dataset.block = kind;
+            const empty = document.createElement('p');
+            empty.className = 'block-empty hidden'; // the header (and the Tease's slots) say what goes here
+            listEl.append(empty);
+            items.forEach(data => listEl.append(makeShowCard(data, itemCode(data, items), locked)));
+            section.append(head, listEl);
+            if (kind !== TEASE) return section;
+            if (!locked && !items.some(d => teaseSlot(d) === 'clip')) {
+                const slot = document.createElement('button');
+                slot.type = 'button';
+                slot.className = 'tease-slot';
+                slot.title = 'Add the tease clip';
+                slot.innerHTML = `${icon('clip')}<span class="cue-code">${TEASE_SLOT_CODES.clip}</span><span>Add the tease clip</span>`;
+                slot.onclick = () => addCue('clip', TEASE);
+                section.append(slot);
+            }
+            if (!locked && !items.some(d => teaseSlot(d) === 'l3')) {
+                const slot = document.createElement('div');
+                slot.className = 'tease-slot tease-slot-drop';
+                slot.title = 'Drag a lower third here, or pick Tease as its block with ✎';
+                slot.innerHTML = `${icon('l3')}<span class="cue-code">T-L3</span><span>Drag a lower third here</span>`;
+                section.append(slot);
+            }
+            return section;
+        };
+
         const renderShow = () => {
             const box = $('show-list');
             const list = loadShow();
             const blocks = loadBlocks();
             const locked = showLocked();
             $('show-lock').checked = locked;
-            $('show-section').classList.toggle('show-running', locked); // red LIVE ORDER bar while the show runs
+            $('show-section').classList.toggle('show-running', locked); // red LIVE SHOW bar while the show runs
             $('show-hint').classList.toggle('hidden', locked || !list.length);
             $('rundown-files-row').classList.toggle('hidden', locked);
             $('cue-row').classList.toggle('hidden', locked);
             $('show-controls').classList.toggle('hidden', !locked);
-            if (!locked) $('msg-panel').classList.add('hidden');
+            // Simple or Advanced (picked while Set Show is off). Simple hides the show times, the timing strip and AKTA.
+            const advanced = advancedMode();
+            $('show-section').classList.toggle('rundown-simple', !advanced);
+            $('rundown-mode-row').classList.toggle('hidden', locked);
+            $('rundown-simple').classList.toggle('active', !advanced);
+            $('rundown-advanced').classList.toggle('active', advanced);
+            $('timer-btn').classList.toggle('hidden', advanced); // the simple timer is Simple's
+            // The projector, the timer and messages work whether Set Show is on or not; messages need the projector
+            $('pj-on-btn').classList.toggle('on', projectorOn());
+            $('msg-btn').classList.toggle('hidden', !projectorOn());
+            if (!projectorOn()) $('msg-panel').classList.add('hidden');
+            renderTimer();
             renderTotals(list);
             renderBlockChips(blocks, locked, list);
             box.innerHTML = '';
             const view = locked ? viewBlock(blocks, list) : 'ALL';
-            const lengths = loadBlockLengths();
+            const lengths = advanced ? loadBlockLengths() : {}; // block lengths are part of the show times
             const tl = buildTimeline();
             const breaks = Object.fromEntries(showFormat().filter(p => p.kind === 'break').map(p => [p.block, p]));
             blocks.forEach((block, bi) => {
                 const items = list.filter(d => d.block === block);
-                if (locked && !items.length && !lengths[block]) return; // empty blocks get out of the way during the show (unless they're timed)
                 if (view !== 'ALL' && block !== view) return; // showing just one block
+                if (bi === 0) [OPEN, TEASE].forEach(kind => { const s = makeExtraSection(kind, list, locked); if (s) box.append(s); }); // they go with the first block
+                if (locked && !items.length && !lengths[block]) return; // empty blocks get out of the way during the show (unless they're timed)
                 const section = document.createElement('section');
                 section.className = 'show-block';
                 section.dataset.block = block;
@@ -4096,20 +5049,22 @@
                 // While it's on air (by the show's times), the length becomes the time it has left.
                 const planned = lengths[block] || 0;
                 const gfx = items.filter(d => !d.cue && d.block !== UNSORTED).reduce((sum, d) => sum + graphicSeconds(d), 0);
-                const time = document.createElement(locked ? 'span' : 'button');
-                time.className = `block-time${planned ? '' : ' unset'}`;
-                time.dataset.blockTime = block;
-                time.textContent = planned ? clock(planned) : locked ? '' : 'Set time';
-                if (!locked) {
-                    time.type = 'button';
-                    time.title = `Planned length of block ${block}`;
-                    time.onclick = () => setBlockLength(block);
+                if (advanced) { // Simple has no block lengths
+                    const time = document.createElement(locked ? 'span' : 'button');
+                    time.className = `block-time${planned ? '' : ' unset'}`;
+                    time.dataset.blockTime = block;
+                    time.textContent = planned ? clock(planned) : locked ? '' : 'Set time';
+                    if (!locked) {
+                        time.type = 'button';
+                        time.title = `Planned length of block ${block}`;
+                        time.onclick = () => setBlockLength(block);
+                    }
+                    const at = document.createElement('span');
+                    at.className = 'block-at';
+                    at.dataset.blockAt = block;
+                    at.title = 'When it\'s due on air';
+                    head.append(time, at);
                 }
-                const at = document.createElement('span');
-                at.className = 'block-at';
-                at.dataset.blockAt = block;
-                at.title = 'When it\'s due on air';
-                head.append(time, at);
                 if (gfx && !locked) {
                     const g = document.createElement('span');
                     g.className = 'block-gfx';
@@ -4144,7 +5099,12 @@
                 if (breaks[block]) section.append(makeBreakRow(breaks[block], locked ? tl?.events.find(e => e.kind === 'break' && e.block === block) : null, locked));
                 box.append(section);
             });
-            // Unsorted (from ＋ RUNDOWN): at the bottom while Set Order is off; not part of the show
+            // The Close: after the last block (with the whole rundown, or the last block on its own)
+            if (view === 'ALL' || view === blocks[blocks.length - 1]) {
+                const close = makeExtraSection(CLOSE, list, locked);
+                if (close) box.append(close);
+            }
+            // Unsorted (from ＋ RUNDOWN): at the bottom while Set Show is off; not part of the show
             const unsorted = list.filter(d => d.block === UNSORTED);
             if (!locked && unsorted.length) {
                 const section = document.createElement('section');
@@ -4180,6 +5140,7 @@
                 box.append(none);
             }
             updateLiveMarks();
+            updateTally();
             updateMessageNow();
             updateProjectorClearBtn();
             renderSpread();
@@ -4222,6 +5183,9 @@
                     const d = bySid.get(c.dataset.sid);
                     if (d) order.push({ ...d, block: l.dataset.block });
                 }));
+                // The Tease only takes notes, scripts and one clip: anything else goes back where it was
+                const problem = teaseProblem(order);
+                if (problem) { flash(problem, true); renderShow(); return; }
                 saveShow(order);
             };
             window.addEventListener('pointermove', move);
@@ -4234,11 +5198,18 @@
         let editingSid = null;
         let newCue = null; // the type of cue being added, while the dialog is open for a new one
 
-        // The dialog's block list: every block, plus Unsorted
-        const fillBlockSelect = (value) => {
+        // The dialog's block list: every block, plus Unsorted. The Tease too, for a note, a script, or a
+        // clip or lower third when the Tease doesn't have one yet (pass the item, or { cue } for a new cue).
+        const fillBlockSelect = (value, item = null) => {
             const sel = $('edit-block');
             sel.innerHTML = '';
+            sel.append(new Option('Open', OPEN));
+            if (item && teaseFits(item) && !teaseTaken(loadShow(), item)) {
+                const slot = teaseSlot(item);
+                sel.append(new Option(slot ? `Tease (${TEASE_SLOT_CODES[slot]})` : 'Tease', TEASE));
+            }
             loadBlocks().forEach(b => sel.append(new Option(`Block ${b}`, b)));
+            sel.append(new Option('Close', CLOSE));
             sel.append(new Option('Unsorted', UNSORTED));
             sel.value = value;
         };
@@ -4252,30 +5223,87 @@
         const scriptTitle = (d) => (d.text || '').split('\n').map(l => l.trim()).find(Boolean) || 'Script';
 
         // Shows only the dialog fields that fit
-        const showEditFields = ({ name = false, para = false, duration = false, gs = false } = {}) => {
+        const showEditFields = ({ name = false, para = false, duration = false, gs = false, scene = false, brk = false } = {}) => {
             $('edit-name-wrap').classList.toggle('hidden', !name);
             $('edit-title-wrap').classList.toggle('hidden', !name);
+            $('edit-scene-wrap').classList.toggle('hidden', !scene);
+            $('edit-break-wrap').classList.toggle('hidden', !brk);
             $('edit-para-wrap').classList.toggle('hidden', !para);
             $('edit-duration-wrap').classList.toggle('hidden', !duration);
             $('edit-gs-wrap').classList.toggle('hidden', !gs);
         };
 
-        // Cue: buttons: the dialog opens to type it (and pick its block); it's added on Save
-        const addCue = (type) => {
+        // ---------- Scene cues: picking from OBS's scenes or sources ----------
+        // server.py (running in OBS) sends the names in the active scene collection. Each list is kept
+        // for the next time the dialog opens, and asked for again each time. Without an answer
+        // (server.js, an older server.py, or not connected) the name is typed instead.
+        const obsNames = { scene: undefined, source: undefined }; // undefined: not asked yet; null: the server couldn't say
+        let scenePick = { kind: 'scene', names: { scene: '', source: '' } }; // the dialog's picks, one for each list
+        const pickScene = (name) => { scenePick.names[scenePick.kind] = name; };
+        const setSceneKind = (kind) => {
+            scenePick.kind = kind;
+            renderScenePick();
+            loadObsNames();
+        };
+        const loadObsNames = async () => {
+            const kind = scenePick.kind;
+            $('edit-scene-note').textContent = `Asking OBS for its ${kind}s…`;
+            const reply = kind === 'scene' ? await serverRequest({ mode: 'obsScenes' }, 'obsSceneList')
+                : await serverRequest({ mode: 'obsSources' }, 'obsSourceList');
+            const found = reply?.ok && reply[`${kind}s`];
+            obsNames[kind] = Array.isArray(found) ? found.filter(s => typeof s === 'string') : null;
+            if (kind !== scenePick.kind) return; // switched to the other list while it asked
+            $('edit-scene-note').textContent = !reply ? `No answer from the server: the list of ${kind}s needs the current server.py, running in OBS. Type the name instead.`
+                : !reply.ok ? `${reply.error || `The server can't see OBS's ${kind}s.`} Type the name instead.`
+                : obsNames[kind].length ? `From OBS's active scene collection.` : `OBS doesn't have any ${kind}s yet.`;
+            renderScenePick();
+        };
+        // The list from OBS (or a box to type in), with the pick selected. A pick OBS doesn't have now
+        // (renamed, or another scene collection) stays in the list, marked.
+        const renderScenePick = () => {
+            const kind = scenePick.kind, names = obsNames[kind], want = scenePick.names[kind];
+            $('edit-kind-scene').classList.toggle('active', kind === 'scene');
+            $('edit-kind-source').classList.toggle('active', kind === 'source');
+            const sel = $('edit-scene'), typed = $('edit-scene-text');
+            sel.classList.toggle('hidden', names === null);
+            typed.classList.toggle('hidden', names !== null);
+            if (names === null) {
+                typed.value = want;
+                typed.placeholder = `Type the ${kind}'s name`;
+                return;
+            }
+            sel.innerHTML = '';
+            sel.append(new Option(names === undefined ? 'Asking OBS…' : names.length ? `Pick a ${kind}…` : `No ${kind}s in OBS`, ''));
+            (names || []).forEach(n => sel.append(new Option(n, n)));
+            if (want && !(names || []).includes(want)) sel.append(new Option(names ? `${want} (not in OBS now)` : want, want));
+            sel.value = want;
+        };
+        const openScenePick = (item) => {
+            const kind = item?.obsKind === 'source' ? 'source' : 'scene';
+            scenePick = { kind, names: { scene: '', source: '', [kind]: item?.obsName || '' } };
+            renderScenePick();
+            loadObsNames();
+        };
+
+        // Cue: buttons: the dialog opens to type it (and pick its block); it's added on Save.
+        // The Tease's T1-TEASE slot opens it for a clip in the Tease.
+        const addCue = (type, block = addBlockTarget()) => {
             if (!CUES[type]) return;
             editingSid = null;
             newCue = type;
-            $('edit-heading').textContent = `Add a ${CUES[type].label} cue`;
+            $('edit-heading').textContent = block === TEASE && type === 'clip' ? 'Add the tease clip (T1-TEASE)' : `Add a ${CUES[type].label} cue`;
             scriptFields(type === 'script');
             $('edit-socials-wrap').innerHTML = '';
             $('edit-socials-wrap').classList.add('hidden');
-            showEditFields({ para: true });
+            showEditFields({ para: true, scene: type === 'scene', brk: type === 'break' });
+            if (type === 'scene') openScenePick(null);
+            $('edit-break-len').value = '2:00';
             $('edit-para-label').textContent = CUES[type].hint;
             $('edit-para').value = '';
-            fillBlockSelect(addBlockTarget());
+            fillBlockSelect(block, { cue: type });
             $('edit-dialog').returnValue = '';
             $('edit-dialog').showModal();
-            $('edit-para').focus();
+            (type === 'scene' ? $('edit-scene') : $('edit-para')).focus();
         };
 
         const editShowItem = (sid) => {
@@ -4288,18 +5316,20 @@
             $('edit-socials-wrap').classList.add('hidden');
             scriptFields(item.cue === 'script');
             if (item.cue) {
-                showEditFields({ para: true });
+                showEditFields({ para: true, scene: item.cue === 'scene', brk: item.cue === 'break' });
+                if (item.cue === 'scene') openScenePick(item);
+                $('edit-break-len').value = clock(item.secs || 120);
                 $('edit-para-label').textContent = (CUES[item.cue] || CUES.note).hint;
                 $('edit-para').value = item.text || '';
-                fillBlockSelect(item.block);
+                fillBlockSelect(item.block, item);
                 $('edit-dialog').returnValue = '';
                 $('edit-dialog').showModal();
                 return;
             }
             const cfg = isOverlayItem(item) ? OVERLAYS[item.overlay || 'l3Large'] : null;
-            const oneBox = cfg?.paragraph || cfg?.ticker || cfg?.caption;
+            const oneBox = oneBoxOf(cfg);
             const hasText = !cfg || cfg.text || oneBox;
-            $('edit-para-label').textContent = cfg?.ticker ? 'Ticker text:' : cfg?.caption ? 'Text (optional):' : 'Text:';
+            $('edit-para-label').textContent = oneBoxLabel(cfg);
             // Like, Follow & Subscribe: a box for each social (older saves had one channel name: YouTube)
             const socialsWrap = $('edit-socials-wrap');
             socialsWrap.innerHTML = '';
@@ -4308,13 +5338,13 @@
                 const socials = item.socials || (item.label ? { youtube: item.label } : {});
                 Object.keys(SOCIALS).forEach(k => socialsWrap.append(socialRow(k, socials[k], `edit-social-${k}`).row));
             }
-            showEditFields({ name: hasText && !oneBox, para: !!oneBox, duration: cfg?.length === undefined, gs: !!cfg?.depth });
+            showEditFields({ name: hasText && !oneBox, para: !!oneBox, duration: cfg?.length === undefined && !holdsOn(item), gs: !!cfg?.depth });
             $('edit-name').value = item.label || '';
             $('edit-title').value = item.title || '';
             $('edit-para').value = item.label || '';
             $('edit-duration').value = item.duration || 5;
             $('edit-gs').checked = !!item.gs;
-            fillBlockSelect(item.block);
+            fillBlockSelect(item.block, item);
             $('edit-dialog').returnValue = '';
             $('edit-dialog').showModal();
         };
@@ -4329,10 +5359,19 @@
                 const text = $('edit-para').value.trim();
                 if (type === 'note' && !text) { flash('Type the note first', true); return; }
                 if (type === 'script' && !text) { flash('Type or load the script first', true); return; }
-                const item = { cue: type, ...(text && { text }), block: $('edit-block').value, sid: newSid() };
+                const obsName = scenePick.names[scenePick.kind].trim();
+                if (type === 'scene' && !obsName) { flash(`Pick the ${scenePick.kind} to take first`, true); return; }
+                const secs = parseClock($('edit-break-len').value);
+                if (type === 'break' && !secs) { flash('Set the break\'s length, like 2:00', true); return; }
+                const item = {
+                    cue: type, ...(text && { text }),
+                    ...(type === 'scene' && { obsName, ...(scenePick.kind === 'source' && { obsKind: 'source' }) }),
+                    ...(type === 'break' && { secs }),
+                    block: $('edit-block').value, sid: newSid(),
+                };
                 list.push(item);
                 saveShow(list);
-                flash(`${CUES[type].label} added`, false, item.block === UNSORTED ? 'Unsorted' : itemCode(item, list) || `block ${item.block}`);
+                flash(`${CUES[type].label} added`, false, item.block === UNSORTED ? 'Unsorted' : itemCode(item, list) || blockName(item.block));
                 return;
             }
             if (!saving || !editingSid) return;
@@ -4343,13 +5382,22 @@
                 const text = $('edit-para').value.trim();
                 if (text) item.text = text;
                 else if (item.cue !== 'note' && item.cue !== 'script') delete item.text; // a note or script keeps its text
-            } else if (cfg?.caption) {
+                // A scene keeps the one it had if nothing's picked
+                const obsName = scenePick.names[scenePick.kind].trim();
+                if (item.cue === 'scene' && obsName) {
+                    item.obsName = obsName;
+                    if (scenePick.kind === 'source') item.obsKind = 'source';
+                    else delete item.obsKind;
+                }
+                const secs = parseClock($('edit-break-len').value);
+                if (item.cue === 'break' && secs) item.secs = secs; // a break keeps its length if this isn't one
+            } else if (cfg?.caption || cfg?.ticker) {
                 item.label = $('edit-para').value.trim(); // blank uses the default text
             } else if (cfg?.social) {
                 item.socials = Object.fromEntries(Object.keys(SOCIALS)
                     .map(k => [k, $(`edit-social-${k}`).value.trim()]).filter(([, v]) => v));
                 item.label = '';
-            } else if (cfg?.paragraph || cfg?.ticker) {
+            } else if (cfg?.paragraph || cfg?.place) {
                 item.label = $('edit-para').value.trim() || item.label;
             } else if (!cfg || cfg.text) {
                 item.label = $('edit-name').value.trim() || item.label;
@@ -4366,6 +5414,8 @@
                 item.block = block;
                 list = [...list.filter(d => d !== item), item];
             }
+            const problem = teaseProblem(list);
+            if (problem) { flash(problem, true); return; }
             saveShow(list);
             flash('Updated for this rundown');
         };
@@ -4490,8 +5540,16 @@
             items.forEach(d => { if (/^[A-Z]$/.test(d.block) && !blocks.includes(d.block)) blocks.push(d.block); });
             blocks = blocks.length ? [...new Set(blocks)].sort() : [...DEFAULT_BLOCKS];
             const stamp = Date.now().toString(36);
-            const show = items.map(({ id, sid, ...d }, i) => ({ ...d, block: blocks.includes(d.block) || d.block === UNSORTED ? d.block : blocks[0], sid: `${stamp}${i}${Math.random().toString(36).slice(2, 5)}` }));
-            // A fresh start: nothing live, no ★, Set Order off so it can be checked first, showing ALL
+            const show = items.map(({ id, sid, ...d }, i) => ({ ...d, block: blocks.includes(d.block) || d.block === UNSORTED || SECTIONS[d.block] ? d.block : blocks[0], sid: `${stamp}${i}${Math.random().toString(36).slice(2, 5)}` }));
+            // The Tease keeps only notes, scripts, its first clip and its first L3; anything else goes to the first block
+            const teaseSlots = new Set();
+            show.forEach(d => {
+                if (d.block !== TEASE) return;
+                const slot = teaseSlot(d);
+                if (!teaseFits(d) || teaseSlots.has(slot)) d.block = blocks[0];
+                else if (slot) teaseSlots.add(slot);
+            });
+            // A fresh start: nothing live, no ★, Set Show off so it can be checked first, showing ALL
             clearLive('l3');
             clearLive('overlay');
             lastTakenSid = null;
@@ -4733,7 +5791,7 @@
 
         /* =========================================================
            18. CONTROLLER: RUNNING THE SHOW
-           While Set Order is on:
+           While Set Show is on:
            - The current item: whatever was taken last, or a cue tapped (◀ ▶ step through without
              taking anything). Graphics can be on air at the same time (an L3 over a SOT).
            - Block times: each block has a planned length (set while editing). The clock and the
@@ -4766,10 +5824,13 @@
             return parts.length === 1 ? parts[0] * 60 : parts.reduce((total, n) => total * 60 + n, 0);
         };
 
-        // The rundown in show order: every block, without notes or Unsorted
-        const showFlow = (list = loadShow(), blocks = loadBlocks()) => blocks.flatMap(b => list.filter(d => d.block === b && d.cue !== 'note'));
+        // The rundown in show order: the Open, the Tease, every block, then the Close, without notes or Unsorted
+        const showFlow = (list = loadShow(), blocks = loadBlocks()) => [OPEN, TEASE, ...blocks, CLOSE].flatMap(b => list.filter(d => d.block === b && d.cue !== 'note'));
         // An item's name, as the rundown and projector show it
-        const itemLabel = (d) => (d.cue ? (d.cue === 'script' ? scriptTitle(d) : d.text || CUES[d.cue]?.label || 'Cue')
+        const itemLabel = (d) => (d.cue ? (d.cue === 'script' ? scriptTitle(d)
+                : d.cue === 'scene' ? `TAKE ${d.obsName || 'Scene'}${d.text ? ` (${d.text})` : ''}`
+                : d.cue === 'break' ? `${d.text || 'Break'} ${clock(d.secs || 0)}`
+                : d.text || CUES[d.cue]?.label || 'Cue')
             : d.label || OVERLAYS[d.overlay || 'l3Large']?.label || 'Graphic');
 
         // ---------- The log ----------
@@ -4785,7 +5846,7 @@
         };
 
         // ---------- The current item ----------
-        // The show starts the first time Set Order is turned on (and again after a fresh log)
+        // The show starts the first time Set Show is turned on (and again after a fresh log)
         const startShow = () => {
             const st = showState();
             if (st.start) return;
@@ -4845,6 +5906,33 @@
             $('show-totals').classList.toggle('hidden', !parts.length || !list.length);
         };
 
+        // ---------- The projector on or off ----------
+        // Off (the way it starts), nothing is sent to the projector: an open one says it's off. The rundown
+        // works the same either way. Messages only go to the projector, so they need it on.
+        const PROJECTOR_ON_KEY = 'fx_projector_on';
+        const projectorOn = () => localStorage.getItem(PROJECTOR_ON_KEY) === '1';
+        const sendProjectorOff = () => {
+            if (isController && ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ mode: 'projector', cleared: true, off: true }));
+        };
+        const setProjectorOn = (on) => {
+            localStorage.setItem(PROJECTOR_ON_KEY, on ? '1' : '0');
+            if (!on) {
+                $('msg-panel').classList.add('hidden');
+                $('msg-btn').classList.remove('on');
+                sendProjectorOff();
+            }
+            renderShow(); // the buttons, and (while it's on) the projector gets the show
+            flash(on ? 'Projector on' : 'Projector off', false, on ? 'fx_wizard.html#projector' : 'nothing is sent to it');
+        };
+        // ↗ opens the projector in its own Chrome window (no tabs or address bar), on the computer running the
+        // server, and turns it on. The server does the opening, because a page can't start Chrome itself.
+        const launchProjector = async () => {
+            if (!projectorOn()) { localStorage.setItem(PROJECTOR_ON_KEY, '1'); renderShow(); }
+            const reply = await serverRequest({ mode: 'launchProjector' }, 'projectorLaunched', 5000);
+            if (reply?.ok) flash('Projector opened', false, `in ${reply.browser}`);
+            else flash('Couldn\'t open the projector', true, reply?.error || 'no answer: the server running is an older version (after updating server.py, restart OBS)');
+        };
+
         // ---------- Messages for the projector ----------
         const toggleMsgPanel = () => {
             const open = $('msg-panel').classList.toggle('hidden') === false;
@@ -4867,27 +5955,100 @@
         };
         const updateMessageNow = () => {
             const text = showState().message;
-            $('msg-now').classList.toggle('hidden', !text || !showLocked());
+            $('msg-now').classList.toggle('hidden', !text || !projectorOn());
             $('msg-now-text').textContent = text;
         };
 
+        // ---------- The timer ----------
+        // A countdown from a time you set, or a count-up, run from the Timer box whether Set Show is on or
+        // not. A countdown that reaches 0 keeps going, in red (+0:05). It's kept in storage (when the run
+        // started and how long it ran before that), so a reload doesn't lose it. While the Timer box is
+        // open, the projector shows it big in place of the rundown (the timer view).
+        const TIMER_KEY = 'fx_timer';           // { mode: 'down' | 'up', from: seconds, ran: ms before this run, since: when this run started (ms) or null }
+        const TIMER_VIEW_KEY = 'fx_timer_view'; // '1' while the Timer box is open
+        const loadTimer = () => {
+            const t = readJson(TIMER_KEY, {});
+            return {
+                mode: t.mode === 'up' ? 'up' : 'down',
+                from: Number(t.from) > 0 ? Number(t.from) : 300,
+                ran: Number(t.ran) > 0 ? Number(t.ran) : 0,
+                since: Number(t.since) > 0 ? Number(t.since) : null,
+            };
+        };
+        const saveTimer = (t) => { localStorage.setItem(TIMER_KEY, JSON.stringify(t)); renderTimer(); broadcastProjector(); };
+        const timerView = () => localStorage.getItem(TIMER_VIEW_KEY) === '1';
+        // What it reads at a moment (on the panel's clock): its text, and idle (not started), running, paused or over
+        const timerReading = (t, now) => {
+            const secs = (t.ran + (t.since ? now - t.since : 0)) / 1000;
+            const idle = !t.since && !t.ran;
+            const left = t.mode === 'down' ? t.from - secs : null;
+            return {
+                text: left === null ? clock(Math.floor(secs)) : leftText(left),
+                state: idle ? 'idle' : left !== null && left <= 0 ? 'over' : t.since ? 'running' : 'paused',
+            };
+        };
+        const timerPlayPause = () => {
+            const t = loadTimer(), now = Date.now();
+            if (t.since) { t.ran += now - t.since; t.since = null; } // pause
+            else t.since = now;                                      // start, or carry on
+            saveTimer(t);
+        };
+        const timerStop = () => saveTimer({ ...loadTimer(), ran: 0, since: null });
+        const timerReset = () => { const t = loadTimer(); saveTimer({ ...t, ran: 0, since: t.since ? Date.now() : null }); };
+        const setTimerMode = (mode) => saveTimer({ ...loadTimer(), mode, ran: 0, since: null }); // a new mode starts fresh
+        const setTimerFrom = (text) => {
+            const secs = parseClock(text);
+            if (!secs) { flash('Use minutes:seconds, like 5:00', true); renderTimer(); return; }
+            saveTimer({ ...loadTimer(), from: secs }); // while it's running, the time left changes with it
+        };
+        const toggleTimerView = () => {
+            const open = !timerView();
+            localStorage.setItem(TIMER_VIEW_KEY, open ? '1' : '0');
+            if (open) localStorage.setItem(PROJECTOR_CLEAR_KEY, '0'); // a cleared projector comes back for the timer
+            renderShow();
+        };
+        // The Timer box, and the Timer button (which shows the time while the box is closed and it's going)
+        const renderTimer = () => {
+            const t = loadTimer(), r = timerReading(t, Date.now()), open = timerView() && !advancedMode();
+            $('timer-box').classList.toggle('hidden', !open);
+            $('timer-btn').classList.toggle('on', open);
+            $('timer-btn-text').textContent = !open && r.state !== 'idle' ? r.text : '';
+            $('timer-btn').classList.toggle('going', !open && r.state !== 'idle');
+            if (!open) return;
+            $('timer-mode-down').classList.toggle('active', t.mode === 'down');
+            $('timer-mode-up').classList.toggle('active', t.mode === 'up');
+            $('timer-from-wrap').classList.toggle('hidden', t.mode !== 'down');
+            if (document.activeElement !== $('timer-from')) $('timer-from').value = clock(t.from);
+            $('timer-readout').textContent = r.text;
+            $('timer-readout').className = `timer-readout ${r.state}`;
+            const play = $('timer-play');
+            play.innerHTML = icon(t.since ? 'pause' : 'play');
+            play.classList.toggle('pause', !!t.since);
+            play.title = t.since ? 'Pause' : r.state === 'idle' ? 'Start' : 'Carry on';
+            $('timer-note').textContent = projectorOn() ? 'On the projector too, big, while this is open.' : 'Turn on the projector to show it there too.';
+        };
+
         // ---------- Clearing the projector between shows ----------
-        // While Set Order is off, the projector can be blanked: back to how it looks when it opens, with
-        // nothing counting. It stays blank until it's tapped again or Set Order is turned on.
+        // While Set Show is off, the projector can be blanked: back to how it looks when it opens, with
+        // nothing counting. It stays blank until it's tapped again or Set Show is turned on.
         const PROJECTOR_CLEAR_KEY = 'fx_projector_clear';
         const projectorCleared = () => localStorage.getItem(PROJECTOR_CLEAR_KEY) === '1' && !showLocked();
         const toggleProjectorClear = () => {
             const clear = !projectorCleared();
             localStorage.setItem(PROJECTOR_CLEAR_KEY, clear ? '1' : '0');
-            if (clear) { const st = showState(); st.message = ''; saveShowState(st); } // the director's message goes too
+            if (clear) {
+                const st = showState(); st.message = ''; saveShowState(st); // the director's message goes too
+                localStorage.setItem(TIMER_VIEW_KEY, '0');                   // and so does the timer view
+            }
             renderShow();
-            flash(clear ? 'Projector cleared' : 'Projector back on', false, clear ? 'until Set Order is turned on' : 'showing the rundown');
+            flash(clear ? 'Projector cleared' : 'Projector back on', false, clear ? 'until Set Show is turned on' : 'showing the rundown');
         };
         const updateProjectorClearBtn = () => {
             const clear = projectorCleared(), btn = $('pj-clear-btn');
+            btn.classList.toggle('hidden', !projectorOn());
             btn.innerHTML = clear ? `${icon('play')} Projector cleared: tap to show it again` : `${icon('x')} Clear the projector`;
             btn.classList.toggle('on', clear);
-            btn.title = clear ? 'Show the rundown and times on the projector again' : 'Blank the projector until the next show (it comes back when Set Order is turned on)';
+            btn.title = clear ? 'Show the rundown and times on the projector again' : 'Blank the projector until the next show (it comes back when Set Show is turned on)';
         };
 
         // ---------- Tell the projector ----------
@@ -4898,26 +6059,35 @@
             projectorTimer = setTimeout(sendProjectorState, 60);
         };
         const sendProjectorState = () => {
-            if (!isController || !ws || ws.readyState !== WebSocket.OPEN) return;
+            if (!isController || !projectorOn() || !ws || ws.readyState !== WebSocket.OPEN) return;
             if (projectorCleared()) { ws.send(JSON.stringify({ mode: 'projector', cleared: true })); return; }
-            const list = loadShow(), blocks = loadBlocks(), lengths = loadBlockLengths(), st = showState(), now = Date.now();
+            const list = loadShow(), blocks = loadBlocks(), lengths = advancedMode() ? loadBlockLengths() : {}, st = showState(), now = Date.now();
             const flow = showFlow(list, blocks), cur = list.find(d => d.sid === st.current);
             const breaks = Object.fromEntries(showFormat().filter(p => p.kind === 'break').map(p => [p.block, p]));
             const tl = buildTimeline(now), on = activeEvent(tl, now);
             ws.send(JSON.stringify({
                 mode: 'projector',
+                now,
                 running: showLocked(),
+                timer: timerView() && !advancedMode() ? loadTimer() : null, // the timer view, counted on this panel's clock
+                cueBreak: loadCueBreak(), // a break from a Break cue: "In break" and its countdown
                 items: flow.map(d => ({
                     sid: d.sid, block: d.block, code: itemCode(d, list), type: itemType(d), kind: d.cue || 'graphic',
                     label: itemLabel(d), ...(d.cue === 'script' && { script: d.text || '' }),
+                    ...(d.cue === 'scene' && { obsName: d.obsName || '', note: d.text || '' }),
+                    ...(d.cue === 'break' && { secs: d.secs || 0, note: d.text || '' }),
                 })),
-                blocks: blocks.filter(b => lengths[b] || flow.some(d => d.block === b)).map(b => ({
-                    name: b, planned: lengths[b] || 0, ...(breaks[b] && { brk: { label: breaks[b].label, secs: breaks[b].secs } }),
-                })),
+                blocks: [
+                    ...[OPEN, TEASE].filter(k => flow.some(d => d.block === k)).map(name => ({ name, planned: 0 })),
+                    ...blocks.filter(b => lengths[b] || flow.some(d => d.block === b)).map(b => ({
+                        name: b, planned: lengths[b] || 0, ...(breaks[b] && { brk: { label: breaks[b].label, secs: breaks[b].secs } }),
+                    })),
+                    ...(flow.some(d => d.block === CLOSE) ? [{ name: CLOSE, planned: 0 }] : []),
+                ],
                 current: cur ? cur.sid : null,
                 live: Object.values(liveByLayer).filter(Boolean),
                 message: st.message || '',
-                timing: tl && showLocked() ? { // only while the show is running (Set Order on)
+                timing: tl && showLocked() ? { // only while the show is running (Set Show on)
                     now, start: tl.start, end: tl.end, over: now >= Math.max(tl.end, tl.projectedEnd),
                     active: on ? { kind: on.ev.kind, block: on.ev.block, label: on.ev.label, ends: on.ev.end } : null,
                 } : null,
@@ -4958,6 +6128,8 @@
                     if (row) { row.end = e.t; if (e.reset || e.early) row.item += e.reset ? ' (reset)' : ' (ended early)'; delete openBreaks[e.block]; }
                 } else if (e.kind === 'akta') {
                     rows.push({ start: e.t, end: e.t, type: 'AKTA', code: '', item: e.text, block: e.block || '', message: true });
+                } else if (e.kind === 'fire') {
+                    rows.push({ start: e.t, end: e.t, type: 'TAKE', code: e.code, item: `${e.scene}${e.ok ? '' : ` (failed: ${e.error})`}`, block: e.block, message: true });
                 } else if (e.kind === 'start') {
                     rows.push({ start: e.t, end: e.t, type: 'SHOW', code: '', item: 'Show started', block: '', message: true });
                 }
@@ -4967,7 +6139,7 @@
                 const ended = r.end ?? end;
                 lines.push([timeOfDay(r.start), r.message ? '' : timeOfDay(ended) + (r.end === null ? ' (still going)' : ''),
                     r.message ? '' : clock((ended - r.start) / 1000), r.planned ? clock(r.planned) : '',
-                    r.type, r.code, r.item, r.block].map(csvCell).join(','));
+                    r.type, r.code, r.item, SECTIONS[r.block]?.name || r.block].map(csvCell).join(','));
             });
             // Blocks: from when the show reached each one to when it reached the next (or the end)
             const blocks = log.filter(e => e.kind === 'block');
@@ -4977,7 +6149,7 @@
                 blocks.forEach((b, i) => {
                     const ran = ((blocks[i + 1]?.t ?? end) - b.t) / 1000, planned = lengths[b.block] || 0;
                     const diff = planned ? `${ran > planned ? '+' : '-'}${clock(Math.abs(ran - planned))}` : '';
-                    lines.push([b.block, timeOfDay(b.t), clock(ran), planned ? clock(planned) : '', diff].map(csvCell).join(','));
+                    lines.push([SECTIONS[b.block]?.name || b.block, timeOfDay(b.t), clock(ran), planned ? clock(planned) : '', diff].map(csvCell).join(','));
                 });
             }
             return lines.join('\r\n');
@@ -5032,9 +6204,9 @@
              that's running over right now. Update puts the difference on the last block; ÷ spreads it
              over the blocks you pick.
            - AKTA (switched on per panel): a break cue when a break starts, a return when it's over.
-           All of that is only while Set Order is on (the show is running), on every tab. With it off,
+           All of that is only while Set Show is on (the show is running), on every tab. With it off,
            only the plan shows (Runtime and Last block from the planned lengths), and break scenes and
-           the break hotkeys do nothing. Started breaks are kept (turning Set Order back on, or a reload,
+           the break hotkeys do nothing. Started breaks are kept (turning Set Show back on, or a reload,
            picks up where the show is). The projector gets the same times and counts down by itself.
            ========================================================= */
         const TIMING_KEY = 'fx_timing';             // { start: 'HH:MM:SS', end: 'HH:MM:SS', breaks: { block: seconds } }
@@ -5093,8 +6265,32 @@
         const saveLive = (live) => localStorage.setItem(TIMING_LIVE_KEY, JSON.stringify(live));
         const clearStartedBreaks = () => { cancelPendingBreak(); localStorage.removeItem(TIMING_LIVE_KEY); };
 
-        // The show in order: each block with a length, then the break after it (if it has one)
+        // ---------- Simple or Advanced ----------
+        // Simple is just the rundown and the timer. Advanced adds the show times: block lengths, breaks, the
+        // timing strip, AKTA and break scenes. In Simple they're all kept, just not used, so switching back
+        // brings them back. Until it's picked, a panel that has show times set starts in Advanced, so
+        // nothing changes under a show that uses them.
+        const RUNDOWN_MODE_KEY = 'fx_rundown_mode';
+        const advancedMode = () => {
+            const m = localStorage.getItem(RUNDOWN_MODE_KEY);
+            return m ? m === 'advanced' : !!showWindow(loadTiming(), Date.now());
+        };
+        const setRundownMode = (mode) => {
+            localStorage.setItem(RUNDOWN_MODE_KEY, mode);
+            if (mode === 'simple') cancelPendingBreak();
+            else { // Advanced has the show times instead of the simple timer: it stops, and its button goes
+                localStorage.setItem(TIMER_KEY, JSON.stringify({ ...loadTimer(), ran: 0, since: null }));
+                localStorage.setItem(TIMER_VIEW_KEY, '0');
+            }
+            timingSig = ''; // the projector hears about it
+            renderShow();
+            updateTiming();
+            flash(mode === 'simple' ? 'Simple: the rundown and the timer' : 'Advanced: show times, breaks and AKTA');
+        };
+
+        // The show in order: each block with a length, then the break after it (if it has one). None in Simple.
         const showFormat = (timing = loadTiming(), lengths = loadBlockLengths()) => {
+            if (!advancedMode()) return [];
             const parts = [];
             let n = 0;
             loadBlocks().forEach(block => {
@@ -5109,8 +6305,9 @@
         // started (and ends where it was ended early). While the show is on air, a break that's due but not
         // started yet sits at now (the block before it is running over), so everything after it, and the
         // runtime, moves along with it. plan: just the plan (no started breaks, nothing moved), for when
-        // Set Order is off.
+        // Set Show is off.
         const buildTimeline = (now = Date.now(), plan = false) => {
+            if (!advancedMode()) return null; // Simple: no show times
             const timing = loadTiming(), win = showWindow(timing, now);
             if (!win) return null;
             const live = plan ? { show: win.show, breaks: {}, ended: {}, returned: {} } : loadLive(win.show);
@@ -5147,7 +6344,7 @@
             }
             return at < 0 ? null : { ev: tl.events[at], index: at, left: (tl.events[at].end - now) / 1000 };
         };
-        // The timeline the panel works from: live while Set Order is on, otherwise just the plan
+        // The timeline the panel works from: live while Set Show is on, otherwise just the plan
         const workingTimeline = (now = Date.now()) => buildTimeline(now, !showLocked());
         const nextBreak = (tl) => tl?.events.find(e => e.kind === 'break' && !e.started) || null;
         const breakEvent = (tl, block) => tl?.events.find(e => e.kind === 'break' && e.block === block) || null;
@@ -5265,12 +6462,39 @@
         };
 
         // ---------- From OBS: the hotkeys and break scenes (server.py passes them on) ----------
+        // Start Break / Reset Break (the hotkeys, so a Stream Deck too, also in a Multi Action) work in Simple and
+        // Advanced. With breaks in the show times (Advanced), they start the next one / reset the last one.
+        // Otherwise Start Break fires the next Break cue in the rundown, and Reset Break ends the one that's on
+        // (or lets the last one fired fire again).
         const timerCommand = (action) => {
-            if (action === 'toggle-akta') { setAktaOn(!aktaOn(), true); return; }
+            if (action === 'toggle-akta') {
+                if (!advancedMode()) { flash('AKTA is in Advanced', true, 'the Podcast Rundown is set to Simple'); return; }
+                setAktaOn(!aktaOn(), true);
+                return;
+            }
             if (action !== 'start-break' && action !== 'reset-break') return;
-            if (!showLocked()) { flash('Set Order is off', true, 'turn it on to run the breaks'); return; }
-            const now = Date.now(), tl = buildTimeline(now);
-            if (!tl) { flash('Set the show times first', true); return; }
+            if (!showLocked()) { flash('Set Show is off', true, 'turn it on to run the breaks'); return; }
+            const cb = loadCueBreak(); // a break from a Break cue is on
+            if (cb) {
+                if (action === 'start-break') flash(`${cb.label} is on now`, true, 'Reset Break ends it');
+                else { markBreakFired(cb.sid, false); endCueBreak(true); }
+                return;
+            }
+            const now = Date.now(), tl = buildTimeline(now); // none in Simple
+            if (!tl || !tl.events.some(e => e.kind === 'break')) { // no breaks in the show times: the Break cues
+                if (action === 'start-break') {
+                    const next = nextBreakCue();
+                    if (next) fireBreak(next);
+                    else flash('No Break cue left to fire', true, 'add one to the rundown');
+                } else {
+                    const lastSid = firedBreaks().slice(-1)[0], last = loadShow().find(d => d.sid === lastSid);
+                    if (!last) { flash('No break to reset', true); return; }
+                    markBreakFired(lastSid, false);
+                    renderShow();
+                    flash(`Reset: ${last.text || 'Break'}`, false, 'it can fire again');
+                }
+                return;
+            }
             if (action === 'start-break') {
                 const on = activeEvent(tl, now);
                 if (on?.ev.kind === 'break') { flash(`${on.ev.label} is on now`, true, 'Reset Break first to start another'); return; }
@@ -5286,7 +6510,8 @@
         // OBS went to a scene: if it's a break scene, the next break starts. With AKTA on, its delay (from when
         // the transition starts) or waiting for the transition to end holds it back, to line the cue up with a stinger.
         const obsSceneChanged = (scene) => {
-            if (!showLocked() || typeof scene !== 'string' || !loadBreakScenes().includes(scene)) return; // no show running
+            setObsProgram(scene); // the TAKE tally
+            if (!showLocked() || !advancedMode() || typeof scene !== 'string' || !loadBreakScenes().includes(scene)) return; // no show running, or Simple
             const now = Date.now(), tl = buildTimeline(now), nb = nextBreak(tl);
             if (!nb || pendingBreak || activeEvent(tl, now)?.ev.kind === 'break') return; // nothing to start, or a break is on
             const akta = aktaOn() ? aktaSettings : null;
@@ -5299,7 +6524,7 @@
 
         // ---------- What the panel shows (4 times a second, on every tab) ----------
         let timingSig = ''; // what the projector was last told
-        // Set Order off means the show isn't running: no timing strip, no countdowns and no times on the
+        // Set Show off means the show isn't running: no timing strip, no countdowns and no times on the
         // blocks and breaks, just the plan (Runtime and Last block, from the planned lengths)
         const updateTiming = () => {
             if (!isController) return;
@@ -5682,13 +6907,17 @@
             $('pj-rundown').innerHTML = '';
             $('pj-onair').innerHTML = '';
             ['pj-countdown', 'pj-script', 'pj-onair-wrap'].forEach(id => $(id).classList.add('hidden'));
+            $('projector-view').classList.remove('pj-scripting', 'pj-timer-mode', 'pj-break-mode');
+            $('pj-now-wrap').classList.remove('take');
         };
         const projectorMessage = (data) => {
-            if (data.mode === 'projector' && data.cleared) blankProjector();
-            else if (data.mode === 'projector') {
+            if (data.mode === 'projector' && data.cleared) {
+                blankProjector();
+                if (data.off) $('pj-now').textContent = 'Turned off in the control panel';
+            } else if (data.mode === 'projector') {
                 PJ.state = data;
                 PJ.at = Date.now();
-                if (data.timing) PJ.offset = data.timing.now - PJ.at; // the panel's clock against this computer's
+                if (data.now) PJ.offset = data.now - PJ.at; // the panel's clock against this computer's
                 renderProjector();
             } else if (data.mode === 'message') {
                 if (PJ.state) PJ.state.message = data.text;
@@ -5713,14 +6942,39 @@
             row.querySelector('.pj-tag').textContent = tag || '';
             row.querySelector('.pj-code').textContent = it.code;
             row.querySelector('.pj-icon').innerHTML = icon(CUES[it.kind]?.icon || (it.type === 'L3' ? 'l3' : 'layers'));
-            row.querySelector('.pj-text').textContent = it.label;
+            pjName(row.querySelector('.pj-text'), it);
             return row;
         };
-        // Shrinks the script's text until it fits its box
+        // An item's name; a scene shows the yellow TAKE marker, then its note
+        const pjName = (el, it) => {
+            if (it.kind !== 'scene' && it.kind !== 'break') { el.textContent = it.label; return; }
+            el.replaceChildren(it.kind === 'break' ? breakMarker(it, 'pj-take pj-brk') : takeMarker(it, 'pj-take'));
+            if (it.note) {
+                const note = document.createElement('span');
+                note.className = 'pj-take-note';
+                note.textContent = it.note;
+                el.append(note);
+            }
+        };
+        // Now and Next: the item's code, then its name
+        const pjItem = (el, it) => {
+            el.replaceChildren();
+            if (it.code) {
+                const code = document.createElement('span');
+                code.className = 'pj-item-code';
+                code.textContent = it.code;
+                el.append(code);
+            }
+            const name = document.createElement('span');
+            pjName(name, it);
+            el.append(name);
+        };
+        // Shrinks the script's text until it fits its box. On a square or upright screen the script has the
+        // middle of the screen to itself, so it starts bigger.
         const fitScript = () => {
             const box = $('pj-script'), el = $('pj-script-text');
             if (box.classList.contains('hidden')) return;
-            let size = 5.2; // vh
+            let size = matchMedia('(max-aspect-ratio: 5/4)').matches ? 6.4 : 5.2; // vh
             el.style.fontSize = `${size}vh`;
             while (el.scrollHeight > box.clientHeight && size > 1.6) {
                 size -= 0.2;
@@ -5740,7 +6994,7 @@
             st.blocks.forEach(b => {
                 const head = document.createElement('div');
                 head.className = `pj-block-head${cur && cur.block === b.name ? ' current' : ''}`;
-                head.textContent = `Block ${b.name}${b.planned ? ` · ${clock(b.planned)}` : ''}`;
+                head.textContent = `${blockName(b.name)}${b.planned ? ` · ${clock(b.planned)}` : ''}`;
                 list.append(head);
                 items.forEach((it, i) => {
                     if (it.block !== b.name) return;
@@ -5763,9 +7017,24 @@
                 list.querySelector('.pj-row.current')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
             }
             // Side: now (with its script), next, and what's on air
-            $('pj-now').textContent = cur ? `${cur.code}  ${cur.label}` : st.running ? 'Waiting for the first item' : 'The show hasn\'t started';
-            $('pj-next').textContent = next ? `${next.code}  ${next.label}` : '—';
+            if (cur) pjItem($('pj-now'), cur);
+            else $('pj-now').textContent = st.running ? 'Waiting for the first item' : 'The show hasn\'t started';
+            if (next) pjItem($('pj-next'), next);
+            else $('pj-next').textContent = '—';
+            $('pj-now-wrap').classList.toggle('take', cur?.kind === 'scene'); // a scene to take now: Now lights up yellow
+            // The big view (the timer, or a break; tickProjector picks): what's on now under it while the show runs
+            const tvNow = $('pj-tv-now');
+            tvNow.replaceChildren();
+            if (st.running && cur) {
+                const label = document.createElement('span');
+                label.className = 'pj-label';
+                label.textContent = 'Now';
+                const item = document.createElement('span');
+                pjItem(item, cur);
+                tvNow.append(label, item);
+            }
             const script = cur?.kind === 'script';
+            $('projector-view').classList.toggle('pj-scripting', script); // on a square screen the script gets the room
             $('pj-script').classList.toggle('hidden', !script);
             $('pj-script-text').textContent = script ? cur.script : '';
             const onAir = items.filter(it => st.live.includes(it.sid));
@@ -5788,11 +7057,30 @@
             if (!st) return;
             const now = Date.now() + PJ.offset, tm = st.timing;
             const cur = st.items.find(it => it.sid === st.current);
-            let label = !st.running ? 'Not running' : cur ? `Block ${cur.block}` : 'Ready', left = null, kind = '';
+            let label = !st.running ? 'Not running' : cur ? blockName(cur.block) : 'Ready', left = null, kind = '';
             if (tm) {
                 if (now < tm.start) { label = 'On air in'; left = (tm.start - now) / 1000; kind = 'pre'; }
                 else if (tm.active) { label = tm.active.label; left = (tm.active.ends - now) / 1000; kind = left > 0 ? tm.active.kind : 'over'; }
                 else if (tm.over || now >= tm.end) label = 'Off air';
+            }
+            // The big view, in place of the rundown. A break (from a Break cue, or the show times' break) says
+            // "In break" with its countdown; otherwise the timer view, while the timer's open in the panel.
+            const brk = st.cueBreak ? { label: st.cueBreak.label, ends: st.cueBreak.since + st.cueBreak.secs * 1000 }
+                : tm?.active?.kind === 'break' ? { label: tm.active.label, ends: tm.active.ends } : null;
+            $('projector-view').classList.toggle('pj-timer-mode', !!(brk || st.timer));
+            $('projector-view').classList.toggle('pj-break-mode', !!brk);
+            if (brk) {
+                const secs = (brk.ends - now) / 1000, text = leftText(secs);
+                $('pj-tv-label').textContent = /^break$/i.test(brk.label) ? 'In break' : `In break · ${brk.label}`;
+                $('pj-tv-time').textContent = text;
+                $('pj-tv-time').className = `pj-tv-time brk${secs <= 0 ? ' over' : ''}${text.length > 5 ? ' long' : ''}`;
+                if (!st.running) label = '';
+            } else if (st.timer) {
+                const r = timerReading(st.timer, now);
+                $('pj-tv-label').textContent = `${st.timer.mode === 'down' ? 'Countdown' : 'Count up'}${r.state === 'paused' ? ' · paused' : r.state === 'over' ? ' · time\'s up' : ''}`;
+                $('pj-tv-time').textContent = r.text;
+                $('pj-tv-time').className = `pj-tv-time ${r.state}${r.text.length > 5 ? ' long' : ''}`;
+                if (!st.running) label = ''; // no show running: just the timer and the clock
             }
             $('pj-block').textContent = label;
             $('pj-block-time').textContent = left === null ? '' : leftText(left);
@@ -5900,7 +7188,7 @@
                     }
                     renderShow();
                     const unsorted = loadShow().filter(d => d.block === UNSORTED).length;
-                    if (e.target.checked && unsorted) flash(`${unsorted} unsorted item${unsorted === 1 ? ' isn\'t' : 's aren\'t'} in the show`, true, 'turn off Set Order to drag them into a block');
+                    if (e.target.checked && unsorted) flash(`${unsorted} unsorted item${unsorted === 1 ? ' isn\'t' : 's aren\'t'} in the show`, true, 'turn off Set Show to drag them into a block');
                 });
                 // Saves the moment Save is pressed (not when the dialog's close event arrives later)
                 $('edit-dialog').querySelector('form').addEventListener('submit', (e) => finishEdit(e.submitter?.value || 'save'));
@@ -5922,6 +7210,11 @@
                 });
                 updateAktaUI();
                 setInterval(updateTiming, 250);
+                setInterval(renderTimer, 250); // the timer's readout (and the Timer button while it's going)
+                setInterval(tickCueBreak, 250); // a break from a Break cue: its countdown, and its end
+                // The timer's "From" box: Enter or leaving it sets the countdown's length
+                $('timer-from').addEventListener('change', (e) => setTimerFrom(e.target.value));
+                $('timer-from').addEventListener('keydown', (e) => { if (e.key === 'Enter') e.target.blur(); });
                 initSections();
                 showCustomNames();
                 updateMode();

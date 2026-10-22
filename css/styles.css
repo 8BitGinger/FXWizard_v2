@@ -64,7 +64,7 @@ body {
   outline-offset: 2px;
 }
 
-/* On/off switches (light mode, Set Order) */
+/* On/off switches (light mode, Set Show) */
 .fx-switch {
   display: flex;
   align-items: center;
@@ -247,7 +247,7 @@ body {
   pointer-events: none;
 }
 .show-card.show-unlocked .show-time { right: 38px; } /* leaves room for ✕ and ✎ */
-/* Until Set Order is on, cards don't react like buttons */
+/* Until Set Show is on, cards don't react like buttons */
 .card-take.show-off { cursor: default; }
 .card-take.show-off:hover, .card-take.show-off:active { background: transparent; transform: none; }
 /* Red ! in front of the name: its custom image isn't in the custom folder */
@@ -326,7 +326,7 @@ body {
 .block-chip.active { background: #6D28D9; border-color: #a78bfa; color: #fff; }
 .block-chip.block-add { border-style: dashed; font-size: 18px; line-height: 1; opacity: 0.85; }
 .block-chip.block-all { padding: 0 10px; letter-spacing: 0.04em; }
-/* Set Order on: empty blocks are greyed out */
+/* Set Show on: empty blocks are greyed out */
 .block-chip:disabled { opacity: 0.3; border-style: dashed; cursor: not-allowed; transform: none; }
 .show-block { margin-bottom: 6px; }
 .show-block-head {
@@ -429,9 +429,9 @@ body {
 /* Message box while idle ("Ready"): smaller and fainter, so it stays out of the way */
 .fx-toast.idle { padding: 3px 10px; font-size: 12px; opacity: 0.45; border-left-width: 1px; }
 
-/* Podcast Rundown while Set Order is on: a red LIVE ORDER bar, so running and editing look different */
+/* Podcast Rundown while Set Show is on: a red LIVE SHOW bar, so running and editing look different */
 #show-section.show-running::before {
-  content: '● LIVE ORDER';
+  content: '● LIVE SHOW';
   display: block;
   margin-bottom: 6px;
   padding: 2px 0;
@@ -514,6 +514,61 @@ body {
 .show-ctl .icon { width: 18px; height: 18px; }
 .show-ctl:active { transform: scale(0.94); }
 .show-ctl.on { background: #6D28D9; border-color: #a78bfa; color: #fff; }
+/* Simple or Advanced, under the header (only while Set Show is off). Simple hides the show times. */
+.rundown-mode { display: flex; margin: 0 8px 8px; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 8px; overflow: hidden; }
+.rundown-mode.hidden { display: none; }
+.rundown-mode button { flex: 1; padding: 3px 6px; font-size: 12px; font-weight: 700; opacity: 0.7; }
+.rundown-mode button.active { background: #6D28D9; color: #fff; opacity: 1; }
+#show-section.rundown-simple .tm-live, #show-section.rundown-simple #timing-box { display: none; }
+/* Always there: Projector (dimmed while it's off) and ↗ to open it, Timer and Message */
+.pj-tool.pj-launch { flex: none; width: 34px; padding: 0; }
+.pj-tools { display: flex; gap: 6px; margin: 0 8px 8px; }
+.pj-tool {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 34px;
+  padding: 0 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.pj-tool .icon { flex: none; width: 18px; height: 18px; }
+#timer-btn-text:empty { display: none; } /* just the icon, unless the timer's going */
+.pj-tool:active { transform: scale(0.96); }
+.pj-tool.on { background: #6D28D9; border-color: #a78bfa; color: #fff; }
+#pj-on-btn:not(.on) { opacity: 0.6; }
+#pj-on-btn.on { background: #0369a1; border-color: #7dd3fc; }
+#timer-btn.going { border-color: #7dd3fc; color: #7dd3fc; font-variant-numeric: tabular-nums; }
+.pj-tool.hidden { display: none; }
+/* The timer: Count down or Count up, the time, and ▶/⏸ ⏹ ↺ */
+.timer-box { margin: 0 8px 8px; padding: 8px; border-radius: 10px; border: 1px solid rgba(125, 211, 252, 0.5); background: rgba(3, 105, 161, 0.12); }
+.timer-box.hidden { display: none; }
+.timer-top { display: flex; align-items: center; gap: 6px; }
+.timer-modes { flex: 1; display: flex; min-width: 0; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 8px; overflow: hidden; }
+.timer-modes button { flex: 1; padding: 4px 4px; font-size: 12px; font-weight: 700; white-space: nowrap; opacity: 0.75; }
+.timer-modes button.active { background: #0369a1; color: #fff; opacity: 1; }
+.timer-from { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; }
+.timer-from.hidden { display: none; }
+.timer-from input { width: 58px; padding: 2px 4px; border-radius: 6px; border: 2px solid rgba(255, 255, 255, 0.6); background: transparent; color: inherit; font-size: 14px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+.timer-readout { margin: 6px 0; text-align: center; font-size: 46px; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; color: #7dd3fc; }
+.timer-readout.idle { color: inherit; opacity: 0.45; }
+.timer-readout.paused { color: #fbbf24; }
+.timer-readout.over { color: #f87171; }
+.timer-btns { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 6px; }
+.timer-btns button { height: 38px; display: grid; place-items: center; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.35); background: rgba(255, 255, 255, 0.06); }
+.timer-btns button:active { transform: scale(0.95); }
+.timer-btns .icon { width: 18px; height: 18px; }
+#timer-play { background: #15803d; border-color: #4ade80; color: #fff; }
+#timer-play.pause { background: #b45309; border-color: #fbbf24; }
+.timer-note { margin-top: 6px; font-size: 11px; text-align: center; opacity: 0.7; }
 .msg-panel { margin: 0 8px 8px; padding: 8px; border-radius: 10px; border: 1px solid rgba(167, 139, 250, 0.6); background: rgba(109, 40, 217, 0.12); }
 .msg-panel.hidden { display: none; }
 .msg-presets { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
@@ -588,7 +643,7 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
   background: #27272a;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
-.tm-live.hidden { display: none; } /* only while Set Order is on */
+.tm-live.hidden { display: none; } /* only while Set Show is on */
 .tm-stats.planning .tm-live-only { display: none; }
 .tm-row { display: flex; align-items: center; gap: 8px; }
 .tm-clock { font-size: 19px; font-weight: 800; color: #9ca3af; font-variant-numeric: tabular-nums; white-space: nowrap; transition: color 0.5s; }
@@ -748,10 +803,10 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
 .show-cue.show-tappable:active { transform: scale(0.98); }
 .cue-script .cue-text { font-weight: 600; }
 
-/* Cue buttons in the Podcast Rundown (Note, Clip, SOT, PIC, Script) */
-.cue-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0 8px 8px; }
+/* Cue buttons in the Podcast Rundown (Note, Clip, SOT, PIC, Scene, Script, Break): two rows of four */
+.cue-row { display: grid; grid-template-columns: auto repeat(4, minmax(0, 1fr)); align-items: center; gap: 4px; margin: 0 8px 8px; }
+.cue-row > span:first-child { grid-row: span 2; }
 .cue-add {
-  flex: 1;
   padding: 4px 2px;
   border-radius: 8px;
   border: 1px dashed rgba(255, 255, 255, 0.35);
@@ -804,6 +859,115 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
 .show-unsorted .show-block-head { color: #9ca3af; }
 .show-unsorted .unsorted-hint { font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; opacity: 0.8; }
 .show-unsorted .show-code { background: #4b5563; }
+/* The Tease (at the top of block A) and its empty T1-TEASE slot */
+.show-tease .show-block-head { color: #7dd3fc; }
+.show-tease .show-block-head .count { background: rgba(125, 211, 252, 0.18); }
+.tease-slot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 32px;
+  margin-top: 8px;
+  padding: 4px 8px;
+  border: 1px dashed rgba(125, 211, 252, 0.45);
+  border-radius: 8px;
+  color: #7dd3fc;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+.tease-slot:hover { background: rgba(125, 211, 252, 0.08); }
+.tease-slot:active { transform: scale(0.98); }
+.tease-slot .icon { width: 15px; height: 15px; }
+/* The T-L3 slot is only a place to drop a lower third, not a button */
+.tease-slot-drop { font-weight: 600; opacity: 0.75; }
+.tease-slot-drop:hover { background: none; }
+.tease-slot-drop:active { transform: none; }
+/* The Open, Tease and Close: no "empty" box (the header, and the Tease's slots, say what goes there) */
+.show-extra .block-empty { display: none; }
+.show-extra .unsorted-hint { font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; opacity: 0.8; }
+.show-open .show-block-head, .show-close .show-block-head { color: #a5b4fc; }
+.show-open .show-block-head .count, .show-close .show-block-head .count { background: rgba(165, 180, 252, 0.18); }
+.show-extra.is-empty:not(.show-tease) { margin-bottom: 0; }
+.show-extra.is-empty:not(.show-tease) .show-block-head { opacity: 0.75; }
+
+/* Scene cues: a yellow TAKE marker with the scene's name, so it stands out from the greyed-out cues.
+   It gets a line of its own under the code and the note, so a long name has room in a narrow dock. */
+.show-cue.cue-scene { flex-wrap: wrap; row-gap: 4px; padding-top: 5px; padding-bottom: 6px; border-color: rgba(250, 204, 21, 0.45); }
+.take-line { order: 9; flex-basis: 100%; display: flex; min-width: 0; }
+.take-pill {
+  max-width: 100%;
+  min-width: 0;
+  display: inline-flex;
+  align-items: stretch;
+  overflow: hidden;
+  border-radius: 5px;
+  background: #facc15;
+  color: #1c1917;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 18px;
+}
+.take-pill b { flex: none; padding: 0 6px; background: #1c1917; color: #facc15; letter-spacing: 0.08em; border: 2px solid #facc15; border-radius: 5px 0 0 5px; line-height: 14px; }
+.take-pill span { min-width: 0; padding: 0 7px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Set Show on: tapping the TAKE fires it (OBS switches to that scene). It's bigger, with a ⚡, and presses down. */
+.take-fire { display: flex; min-width: 0; max-width: 100%; padding: 0; border-radius: 6px; }
+.take-fire .take-pill { font-size: 13px; line-height: 24px; box-shadow: 0 2px 0 #a16207; }
+.take-fire .take-pill b { line-height: 20px; }
+.take-fire:active .take-pill { transform: translateY(2px); box-shadow: none; }
+.take-go { flex: none; display: grid; place-items: center; padding-right: 7px; font-style: normal; }
+.take-go .icon { width: 13px; height: 13px; }
+/* Break cues: the same marker in orange (BREAK and its length). While its break is on it pulses; once
+   it's been fired it's dimmed (Reset Break lets it fire again). */
+.show-cue.cue-break { flex-wrap: wrap; row-gap: 4px; padding-top: 5px; padding-bottom: 6px; border-color: rgba(251, 146, 60, 0.5); }
+.brk-pill { background: #fb923c; }
+.brk-pill b { background: #1c1917; color: #fb923c; border-color: #fb923c; }
+.take-fire .brk-pill { box-shadow: 0 2px 0 #9a3412; }
+.brk-pill.on-break { animation: brkPulse 1.4s ease-in-out infinite; }
+.brk-pill.fired { opacity: 0.5; }
+@keyframes brkPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(251, 146, 60, 0.7); }
+  50%      { box-shadow: 0 0 0 6px rgba(251, 146, 60, 0); }
+}
+/* A break fired from a Break cue: its name, time left and End */
+.break-strip { display: flex; align-items: center; gap: 8px; margin: 0 8px 8px; padding: 6px 6px 6px 10px; border-radius: 10px; background: #c2410c; color: #fff; font-weight: 800; }
+.break-strip.hidden { display: none; }
+.break-strip .icon { width: 16px; height: 16px; }
+.break-strip-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.break-strip-left { font-size: 20px; font-variant-numeric: tabular-nums; }
+.break-strip button { display: flex; align-items: center; gap: 4px; height: 30px; padding: 0 10px; border-radius: 8px; background: rgba(0, 0, 0, 0.3); font-size: 12px; }
+.break-strip button .icon { width: 12px; height: 12px; }
+/* The tally: the TAKE that's on program in OBS now */
+.take-pill.on-program { box-shadow: 0 0 0 2px #22c55e, 0 0 10px rgba(34, 197, 94, 0.6); }
+
+/* Building the rundown (Set Show off): a little smaller and thinner, so more fits while you arrange it.
+   The drag handles stay full height for touch. Once Set Show is on, it's all back to full size. */
+#show-section:not(.show-running) .show-card .card-take { height: 52px; }
+#show-section:not(.show-running) .show-card .card-take b { font-size: 13px; }
+#show-section:not(.show-running) .show-card .card-sub { margin-top: 0; font-size: 11px; }
+#show-section:not(.show-running) .show-card .card-btn { width: 22px; height: 22px; }
+#show-section:not(.show-running) .show-card .card-btn .icon { width: 12px; height: 12px; }
+#show-section:not(.show-running) .show-card.show-unlocked .show-time { right: 32px; }
+#show-section:not(.show-running) .show-time, #show-section:not(.show-running) .show-code { font-size: 11px; }
+#show-section:not(.show-running) .show-cue { min-height: 28px; padding-top: 2px; padding-bottom: 2px; font-size: 11.5px; }
+#show-section:not(.show-running) .show-cue.cue-scene, #show-section:not(.show-running) .show-cue.cue-break { padding-top: 4px; padding-bottom: 5px; }
+#show-section:not(.show-running) .cue-btn { width: 26px; height: 26px; }
+#show-section:not(.show-running) .block-list { gap: 6px; }
+#show-section:not(.show-running) .show-block-head { min-height: 26px; font-size: 11px; }
+#show-section:not(.show-running) .block-chip { min-width: 28px; height: 28px; font-size: 13px; }
+#show-section:not(.show-running) .cue-add { padding: 3px 2px; font-size: 11px; }
+#show-section:not(.show-running) .rundown-btn { padding: 4px; font-size: 11.5px; }
+#show-section:not(.show-running) .pj-tool { height: 30px; font-size: 12px; }
+#show-section:not(.show-running) .tease-slot { min-height: 28px; }
+
+/* The Scene cue's picker in the edit dialog: Scenes or Sources, and ↺ to ask OBS again */
+.scene-pick-head { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.scene-kinds { display: flex; flex: 1; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 8px; overflow: hidden; }
+.scene-kinds button { flex: 1; padding: 3px 6px; font-size: 12px; font-weight: 700; opacity: 0.75; }
+.scene-kinds button.active { background: #facc15; color: #1c1917; opacity: 1; }
+.scene-reload { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: rgba(0, 0, 0, 0.3); }
+.scene-reload:active { transform: scale(0.92); }
 
 /* Socials picker (Like, Follow & Subscribe): small icons, colored when picked */
 .social-icons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
@@ -937,6 +1101,18 @@ html.light #edit-dialog, html.light #rundown-dialog { background: #fff; color: #
 html.light .social-icon:not(.on) { border-color: #9ca3af; background: #fff; }
 html.light .rundown-btn:not(.on) { border-color: #9ca3af; background: #fff; }
 html.light .show-ctl:not(.on) { border-color: #9ca3af; background: #fff; }
+html.light .pj-tool:not(.on) { border-color: #9ca3af; background: #fff; }
+html.light .rundown-mode { border-color: #9ca3af; }
+html.light .rundown-mode button:not(.active) { background: #fff; }
+html.light #timer-btn.going { border-color: #0369a1; color: #0369a1; }
+html.light .timer-box { background: #f0f9ff; border-color: #7dd3fc; }
+html.light .timer-modes, html.light .timer-btns button:not(#timer-play) { border-color: #9ca3af; }
+html.light .timer-btns button:not(#timer-play) { background: #fff; }
+html.light .timer-from input { border-color: #6b7280; }
+html.light .timer-readout { color: #0369a1; }
+html.light .timer-readout.idle { color: inherit; }
+html.light .timer-readout.paused { color: #b45309; }
+html.light .timer-readout.over { color: #dc2626; }
 html.light .msg-panel { background: #f5f3ff; }
 html.light .msg-custom input { border-color: #6b7280; }
 html.light .block-time:not(.running):not(.over) { border-color: #a78bfa; }
@@ -977,6 +1153,20 @@ html.light .show-block-head .count { background: rgba(109, 40, 217, 0.12); }
 html.light .show-block-head .line { background: #d1d5db; }
 html.light .block-remove { background: rgba(0, 0, 0, 0.08); color: #4b5563; }
 html.light .block-empty { border-color: #9ca3af; color: #6b7280; }
+html.light .show-tease .show-block-head { color: #0369a1; }
+html.light .show-tease .show-block-head .count { background: rgba(3, 105, 161, 0.12); }
+html.light .show-open .show-block-head, html.light .show-close .show-block-head { color: #4338ca; }
+html.light .show-open .show-block-head .count, html.light .show-close .show-block-head .count { background: rgba(67, 56, 202, 0.12); }
+html.light .tease-slot { border-color: #0369a1; color: #0369a1; }
+html.light .tease-slot:hover { background: rgba(3, 105, 161, 0.08); }
+html.light .tease-slot-drop:hover { background: none; }
+html.light .show-cue.cue-scene { border-color: #ca8a04; }
+html.light .take-pill { box-shadow: 0 0 0 1px #ca8a04; }
+html.light .take-fire .take-pill { box-shadow: 0 0 0 1px #ca8a04, 0 2px 0 #a16207; }
+html.light .take-fire:active .take-pill { box-shadow: 0 0 0 1px #ca8a04; }
+html.light .take-pill.on-program { box-shadow: 0 0 0 2px #16a34a, 0 0 10px rgba(22, 163, 74, 0.5); }
+html.light .scene-kinds { border-color: #9ca3af; }
+html.light .scene-reload { background: rgba(0, 0, 0, 0.08); color: #4b5563; }
 /* Show timing */
 html.light .tm-live { background: #fff; border-color: #d1d5db; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); }
 html.light .tm-clock { color: #6b7280; }
@@ -1560,6 +1750,68 @@ html.light .tm-error { color: #b91c1c; }
   100%   { opacity: 0; transform: translate(112vh, 12vh) scale(1); }
 }
 
+/* ---------- Location: a map pin and the place, top left, like a live report ----------
+   The pin slides in from the right and the place from the left, so they cross as they meet (the pin
+   passes over); the pin gives a little bounce once it lands. At the end the overlay fades out. */
+#locpin {
+  position: absolute;
+  inset: 0;
+  display: none;
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+}
+#overlay-box.locpin #locpin { display: block; }
+.lp-bug {
+  position: absolute;
+  top: 7vh;
+  left: 4vw;
+  display: flex;
+  align-items: stretch;
+  height: 8.5vh;
+  filter: drop-shadow(0 0.6vh 1.4vh rgba(0, 0, 0, 0.5));
+}
+.lp-pin {
+  position: relative;
+  z-index: 2;
+  flex: none;
+  width: 8.5vh;
+  display: grid;
+  place-items: center;
+  border-radius: 1vh 0 0 1vh;
+  background: linear-gradient(#e3101f, #a5000b);
+  color: #fff;
+  animation: lpPinIn 1s cubic-bezier(0.22, 0.9, 0.25, 1) both;
+}
+.lp-pin svg { width: 5vh; height: 5vh; fill: currentColor; animation: lpPinBounce 0.5s 0.95s ease-out both; }
+.lp-text {
+  display: flex;
+  align-items: center;
+  padding: 0 2.4vw 0 1.6vw;
+  border-left: 0.5vh solid #fff;
+  border-radius: 0 1vh 1vh 0;
+  background: rgba(12, 14, 24, 0.88);
+  color: #fff;
+  font-size: 5vh;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  animation: lpTextIn 1s cubic-bezier(0.22, 0.9, 0.25, 1) both;
+}
+@keyframes lpPinIn {
+  from { opacity: 0; transform: translateX(70vw); }
+  15%  { opacity: 1; }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes lpTextIn {
+  from { opacity: 0; transform: translateX(-60vw); }
+  15%  { opacity: 1; }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes lpPinBounce {
+  0%, 100% { transform: none; }
+  40%      { transform: translateY(-0.9vh); }
+}
+
 /* ---------- Breaking News: LIVE in the top-right corner, red ticker bar along the bottom ---------- */
 #breaking {
   position: absolute;
@@ -2111,3 +2363,78 @@ html.projector, html.projector body { background: #0b0b10; color: #f4f4f5; overf
 .pj-onair { display: flex; flex-wrap: wrap; gap: 0.8vh; }
 .pj-chip { padding: 0.4vh 1vw; border-radius: 1vh; background: #14532d; color: #bbf7d0; font-size: 2.8vh; font-weight: 600; }
 #pj-onair-wrap.hidden { display: none; }
+.pj-now-wrap, .pj-next-wrap, .pj-onair-wrap { display: flex; flex-direction: column; gap: 0.8vh; }
+.pj-item-code { margin-right: 0.5em; }
+/* A Scene cue: the yellow TAKE marker with the scene's name, then its note */
+.pj-take {
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+  overflow: hidden;
+  vertical-align: middle;
+  border-radius: 0.3em;
+  background: #facc15;
+  color: #1c1917;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.pj-take b { flex: none; padding: 0 0.4em; border: 0.12em solid #facc15; border-radius: 0.3em 0 0 0.3em; background: #1c1917; color: #facc15; letter-spacing: 0.08em; }
+.pj-take span { min-width: 0; padding: 0 0.45em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pj-take-note { margin-left: 0.5em; color: #d4d4d8; font-weight: 400; }
+.pj-now .pj-take-note { display: block; margin: 0.15em 0 0; font-size: 0.72em; }
+/* A scene to take now: Now lights up, so whoever's on next sees it's their turn */
+.pj-now-wrap.take .pj-take { animation: pjTake 1.6s ease-in-out infinite; }
+@keyframes pjTake {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7); }
+  50% { box-shadow: 0 0 0 0.8vh rgba(250, 204, 21, 0); }
+}
+
+/* Timer view (the Timer is open in the control panel): the timer, big, in place of the rundown */
+.pj-timer-view { display: none; }
+.pj-timer-mode .pj-main { display: none; }
+.pj-timer-mode .pj-timer-view { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2vh; padding: 2vh 4vw; }
+.pj-tv-label { color: #a1a1aa; font-size: 3.6vh; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+.pj-tv-time { color: #f4f4f5; font-size: min(36vh, 30vw); font-weight: 700; line-height: 0.95; font-variant-numeric: tabular-nums; }
+.pj-tv-time.long { font-size: min(28vh, 21vw); }
+.pj-tv-time.idle { color: #71717a; }
+.pj-tv-time.paused { color: #fbbf24; }
+.pj-tv-time.over { color: #f87171; }
+/* In break: the label and the countdown in orange */
+.pj-break-mode .pj-tv-label { color: #fdba74; }
+.pj-tv-time.brk { color: #fb923c; }
+.pj-tv-time.brk.over { color: #f87171; }
+.pj-take.pj-brk { background: #fb923c; }
+.pj-take.pj-brk b { background: #1c1917; color: #fb923c; border-color: #fb923c; }
+.pj-tv-now { display: flex; align-items: baseline; gap: 2vw; max-width: 100%; color: #fbbf24; font-size: 4vh; font-weight: 700; }
+.pj-tv-now:empty { display: none; }
+.pj-tv-now > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* A square or upright screen (like 800x800): everything stacks, full width.
+   Message, then what's on and its time, then Now; then the script, or the rundown when there isn't
+   one; then Next and On air along the bottom. */
+@media (max-aspect-ratio: 5/4) {
+  .pj-message { min-height: 11vh; padding: 1vh 4vw; font-size: 6.4vh; }
+  .pj-message.empty { font-size: 3vh; }
+  .pj-status { flex-wrap: wrap; gap: 0.4vh 2.5vw; padding: 1vh 4vw; font-size: 3.8vh; }
+  .pj-timer { font-size: 7vh; }
+  .pj-countdown { font-size: 3vh; }
+  .pj-main { flex-direction: column; }
+  .pj-side { display: contents; }
+  .pj-label { margin-top: 0; font-size: 2.2vh; }
+  .pj-now-wrap { order: 1; flex: none; gap: 0.4vh; padding: 1.4vh 4vw 1.6vh; background: #111114; border-bottom: 2px solid #27272a; }
+  .pj-now { font-size: 5.4vh; line-height: 1.15; overflow-wrap: anywhere; }
+  .pj-now-wrap.take { background: #2a2005; box-shadow: inset 0.8vh 0 0 #facc15; }
+  .pj-script { order: 2; flex: 1; margin: 1.4vh 4vw 0; padding: 1.4vh 2.5vw; }
+  .pj-rundown { order: 3; flex: 1; padding: 0.5vh 4vw 14vh; }
+  .pj-scripting .pj-rundown { display: none; } /* the script gets the room: Now and Next still say where the show is */
+  .pj-next-wrap { order: 4; flex: none; flex-direction: row; align-items: baseline; gap: 2.5vw; margin-top: 1.4vh; padding: 1.2vh 4vw; background: #111114; border-top: 2px solid #27272a; }
+  .pj-next { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 3.6vh; }
+  .pj-onair-wrap { order: 5; flex: none; flex-direction: row; align-items: center; gap: 2.5vw; padding: 0 4vw 1.2vh; background: #111114; }
+  .pj-chip { padding: 0.3vh 1.6vw; font-size: 2.6vh; }
+  .pj-block-head { margin: 1.6vh 0 0.6vh; font-size: 2.6vh; }
+  .pj-row { gap: 1.6vw; padding: 0.9vh 2vw; font-size: 3.4vh; }
+  .pj-row.current { font-size: 4vh; }
+  .pj-tag { width: 9vw; font-size: 2.2vh; }
+  .pj-code { padding: 0 1vw; font-size: 2.4vh; }
+  .pj-break { padding: 0.6vh 2vw; font-size: 2.6vh; }
+}
