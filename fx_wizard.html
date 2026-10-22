@@ -52,14 +52,16 @@
         <div id="controller-view" class="pb-20 hidden controller-max-width mx-auto">
             <div class="space-y-3 p-2 rounded-lg w-full">
 
-                <!-- Tabs: Animated L3s / Fullscreen Overlays / Podcast Rundown -->
-                <div id="mode-tabs" class="grid grid-cols-3 gap-1 text-sm">
+                <!-- Tabs, as icons: Animated L3s / Fullscreen Overlays / Podcast Rundown / L3 Builder -->
+                <div id="mode-tabs" class="mode-tabs grid grid-cols-4 gap-1 text-sm">
                     <input type="radio" id="mode-l3" name="mode" value="l3" checked class="hidden peer/m1">
-                    <label for="mode-l3" class="p-1 border rounded font-bold cursor-pointer hover:bg-violet-400 peer-checked/m1:bg-primary flex items-center justify-center text-center leading-tight">Animated L3s</label>
+                    <label for="mode-l3" title="Animated L3s" aria-label="Animated L3s" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m1:bg-primary"><span data-icon="l3"></span></label>
                     <input type="radio" id="mode-overlay" name="mode" value="overlay" class="hidden peer/m2">
-                    <label for="mode-overlay" class="p-1 border rounded font-bold cursor-pointer hover:bg-violet-400 peer-checked/m2:bg-primary flex items-center justify-center text-center leading-tight">Fullscreen Overlays</label>
+                    <label for="mode-overlay" title="Fullscreen Overlays" aria-label="Fullscreen Overlays" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m2:bg-primary"><span data-icon="sparkles"></span></label>
                     <input type="radio" id="mode-show" name="mode" value="show" class="hidden peer/m3">
-                    <label for="mode-show" class="p-1 border rounded font-bold cursor-pointer hover:bg-violet-400 peer-checked/m3:bg-primary flex items-center justify-center text-center leading-tight">Podcast Rundown</label>
+                    <label for="mode-show" title="Podcast Rundown" aria-label="Podcast Rundown" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m3:bg-primary"><span data-icon="list"></span></label>
+                    <input type="radio" id="mode-builder" name="mode" value="builder" class="hidden peer/m4">
+                    <label for="mode-builder" title="L3 Builder" aria-label="L3 Builder" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m4:bg-primary"><span data-icon="stack"></span></label>
                 </div>
 
                 <!-- Text: Name and Title, or one paragraph for L3 Info -->
@@ -95,12 +97,12 @@
                     <details class="fx-section" data-key="ov-l3s">
                         <summary><span>Fullscreen L3s</span><span class="fx-value"></span></summary>
                         <div class="grid grid-cols-2 gap-1 text-[12px]">
-                            <input type="radio" id="ov-l3Large" name="overlayStyle" value="l3Large" checked class="hidden peer/o1">
-                            <label for="ov-l3Large" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o1:bg-primary">L3 PNG</label>
-
                             <!-- KAMC: like L3 PNG, on assets/kamc.png, with its own bigger text -->
                             <input type="radio" id="ov-kamc" name="overlayStyle" value="kamc" class="hidden peer/o23">
                             <label for="ov-kamc" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o23:bg-primary">KAMC</label>
+
+                            <input type="radio" id="ov-l3Large" name="overlayStyle" value="l3Large" checked class="hidden peer/o1">
+                            <label for="ov-l3Large" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o1:bg-primary">L3 PNG</label>
 
                             <input type="radio" id="ov-l3LargeAlt" name="overlayStyle" value="l3LargeAlt" class="hidden peer/o7">
                             <label for="ov-l3LargeAlt" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o7:bg-primary">L3 Info</label>
@@ -108,14 +110,14 @@
                             <input type="radio" id="ov-l3Gif" name="overlayStyle" value="l3Gif" class="hidden peer/o8">
                             <label for="ov-l3Gif" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o8:bg-primary">L3 Gif</label>
 
+                            <!-- Location: a map pin and the place, like a live report. The pin comes in from the right
+                                 and the place from the left, crossing as they meet; it leaves sliding off to the left -->
+                            <input type="radio" id="ov-locpin" name="overlayStyle" value="locpin" class="hidden peer/o24">
+                            <label for="ov-locpin" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o24:bg-primary">Location</label>
+
                             <!-- Custom: like L3 Gif, with the first image in the "custom" folder (next to "assets") -->
                             <input type="radio" id="ov-l3Custom" name="overlayStyle" value="l3Custom" data-custom="l3" class="hidden peer/o15">
                             <label for="ov-l3Custom" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o15:bg-primary">Custom…</label>
-
-                            <!-- Location: a map pin and the place, like a live report. The pin comes in from the right
-                                 and the place from the left, crossing as they meet, then it fades out. -->
-                            <input type="radio" id="ov-locpin" name="overlayStyle" value="locpin" class="hidden peer/o24">
-                            <label for="ov-locpin" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o24:bg-primary">Location</label>
                             <p id="custom-l3-name" class="col-span-2 text-[12px] text-center opacity-75 hidden"></p>
                         </div>
                     </details>
@@ -138,6 +140,10 @@
                             <input type="radio" id="ov-fire" name="overlayStyle" value="fire" class="hidden peer/o11">
                             <label for="ov-fire" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o11:bg-primary">Fire</label>
 
+                            <!-- Rain: streaks of rain, splashes along the bottom and a soft mist -->
+                            <input type="radio" id="ov-rain" name="overlayStyle" value="rain" class="hidden peer/o29">
+                            <label for="ov-rain" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o29:bg-primary">Rain</label>
+
                             <input type="radio" id="ov-underwater" name="overlayStyle" value="underwater" class="hidden peer/o16">
                             <label for="ov-underwater" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o16:bg-primary">Underwater</label>
 
@@ -149,20 +155,24 @@
                             <input type="radio" id="ov-hottake" name="overlayStyle" value="hottake" class="hidden peer/o22">
                             <label for="ov-hottake" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o22:bg-primary">Hot Take</label>
 
+                            <!-- V-Day: hearts float up, with sparkles and a soft pink glow around the edges -->
+                            <input type="radio" id="ov-vday" name="overlayStyle" value="vday" class="hidden peer/o30">
+                            <label for="ov-vday" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o30:bg-primary">V-Day</label>
+
+                            <!-- Retro VHS: scan lines, grain, tracking glitches and a VCR's PLAY display -->
+                            <input type="radio" id="ov-vhs" name="overlayStyle" value="vhs" class="hidden peer/o26">
+                            <label for="ov-vhs" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o26:bg-primary">Retro VHS</label>
+
+                            <!-- St. Patrick's: shamrocks and gold coins tumble down, a green glow around the edges -->
+                            <input type="radio" id="ov-stpatricks" name="overlayStyle" value="stpatricks" class="hidden peer/o25">
+                            <label for="ov-stpatricks" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o25:bg-primary">St. Patrick's</label>
+
                             <input type="radio" id="ov-breaking" name="overlayStyle" value="breaking" class="hidden peer/o17">
                             <label for="ov-breaking" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o17:bg-primary">Breaking News</label>
 
                             <!-- Like, Follow & Subscribe: a cursor clicks each button; optional socials above -->
                             <input type="radio" id="ov-social" name="overlayStyle" value="social" class="hidden peer/o20">
                             <label for="ov-social" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o20:bg-primary">Like &amp; Subscribe</label>
-
-                            <!-- St. Patrick's: shamrocks and gold coins tumble down, a green glow around the edges -->
-                            <input type="radio" id="ov-stpatricks" name="overlayStyle" value="stpatricks" class="hidden peer/o25">
-                            <label for="ov-stpatricks" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o25:bg-primary">St. Patrick's</label>
-
-                            <!-- Retro VHS: scan lines, grain, tracking glitches and a VCR's PLAY display -->
-                            <input type="radio" id="ov-vhs" name="overlayStyle" value="vhs" class="hidden peer/o26">
-                            <label for="ov-vhs" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o26:bg-primary">Retro VHS</label>
                         </div>
                     </details>
 
@@ -172,33 +182,41 @@
                             <input type="radio" id="ov-stinger" name="overlayStyle" value="stinger" class="hidden peer/o4">
                             <label for="ov-stinger" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o4:bg-primary">Standard</label>
 
-                            <input type="radio" id="ov-storm" name="overlayStyle" value="storm" class="hidden peer/o12">
-                            <label for="ov-storm" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o12:bg-primary">Storm</label>
-
-                            <input type="radio" id="ov-ghost" name="overlayStyle" value="ghost" class="hidden peer/o9">
-                            <label for="ov-ghost" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o9:bg-primary">Ghost</label>
-
                             <input type="radio" id="ov-colorbars" name="overlayStyle" value="colorbars" class="hidden peer/o13">
-                            <label for="ov-colorbars" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o13:bg-primary">Bars</label>
-
-                            <input type="radio" id="ov-tvstatic" name="overlayStyle" value="tvstatic" class="hidden peer/o14">
-                            <label for="ov-tvstatic" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o14:bg-primary">Static</label>
-
-                            <input type="radio" id="ov-xmas" name="overlayStyle" value="xmas" class="hidden peer/o10">
-                            <label for="ov-xmas" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o10:bg-primary">X-mas</label>
+                            <label for="ov-colorbars" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o13:bg-primary">Color Bars</label>
 
                             <input type="radio" id="ov-sportsfx" name="overlayStyle" value="sportsfx" class="hidden peer/o18">
                             <label for="ov-sportsfx" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o18:bg-primary">Sports</label>
 
+                            <input type="radio" id="ov-tvstatic" name="overlayStyle" value="tvstatic" class="hidden peer/o14">
+                            <label for="ov-tvstatic" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o14:bg-primary">Static</label>
+
+                            <input type="radio" id="ov-storm" name="overlayStyle" value="storm" class="hidden peer/o12">
+                            <label for="ov-storm" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o12:bg-primary">Storm</label>
+
+                            <!-- Fire: flames roar up from the bottom and fill the screen, then burn away -->
+                            <input type="radio" id="ov-firestinger" name="overlayStyle" value="firestinger" class="hidden peer/o32">
+                            <label for="ov-firestinger" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o32:bg-primary">Fire</label>
+
                             <input type="radio" id="ov-spring" name="overlayStyle" value="spring" class="hidden peer/o19">
                             <label for="ov-spring" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o19:bg-primary">Spring</label>
 
-                            <input type="radio" id="ov-fireworks" name="overlayStyle" value="fireworks" class="hidden peer/o27">
-                            <label for="ov-fireworks" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o27:bg-primary">Fireworks</label>
+                            <!-- Hearts: hearts burst in and pile up until they fill the screen, then float away -->
+                            <input type="radio" id="ov-hearts" name="overlayStyle" value="hearts" class="hidden peer/o31">
+                            <label for="ov-hearts" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o31:bg-primary">Hearts</label>
+
+                            <input type="radio" id="ov-ghost" name="overlayStyle" value="ghost" class="hidden peer/o9">
+                            <label for="ov-ghost" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o9:bg-primary">Ghost</label>
+
+                            <input type="radio" id="ov-xmas" name="overlayStyle" value="xmas" class="hidden peer/o10">
+                            <label for="ov-xmas" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o10:bg-primary">Xmas</label>
 
                             <!-- Medical: blue and white, a heartbeat line and a medical cross -->
                             <input type="radio" id="ov-medical" name="overlayStyle" value="medical" class="hidden peer/o28">
                             <label for="ov-medical" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o28:bg-primary">Medical</label>
+
+                            <input type="radio" id="ov-fireworks" name="overlayStyle" value="fireworks" class="hidden peer/o27">
+                            <label for="ov-fireworks" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o27:bg-primary">Fireworks</label>
                         </div>
                     </details>
 
@@ -226,6 +244,8 @@
                 <!-- ===== LOWER THIRD TAB =====
                      Each section opens and closes with a tap. The bar shows what's picked. -->
                 <div id="l3-section" class="space-y-2">
+                    <!-- Opening one section closes the others; Expand all opens them all at once (this tab only) -->
+                    <div class="expand-row"><button type="button" id="l3-expand" onclick="setL3ExpandAll(!l3ExpandAll)" title="Open every section at once"></button></div>
                     <details class="fx-section" data-key="l3-bg">
                         <summary><span>Background</span><span class="fx-value"></span></summary>
                         <div id="bg-selector" class="grid grid-cols-2 text-[12px] gap-1">
@@ -542,6 +562,44 @@
                 <!-- Planned length of the whole show, the graphics' total, and (during the show) the time so far -->
                 <div id="show-totals" class="show-totals"></div>
                 <div id="show-list" class="flex flex-col p-1 pt-0"></div>
+            </div>
+
+            <!-- ===== L3 BUILDER TAB =====
+                 Up to 5 saved lower thirds in slots, played one after another. Save them as a cL3, play it,
+                 or add it to the rundown. -->
+            <div id="builder-section" class="w-full hidden">
+                <div class="flex items-center gap-2 mb-2 pb-1 px-2 border-b border-gray-600">
+                    <h2 class="text-base font-bold">L3 Builder</h2>
+                    <span id="builder-total" class="builder-total ml-auto"></span>
+                    <button type="button" title="Empty the slots (start a new one)" onclick="clearBuilder()" class="w-8 h-7 rounded hover:bg-red-700 active:scale-95 grid place-items-center"><span data-icon="trash"></span></button>
+                </div>
+                <div class="px-2 mb-2">
+                    <label for="builder-name" class="block text-sm font-medium">Name:</label>
+                    <input type="text" id="builder-name" maxlength="50" placeholder="Name this cL3" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm">
+                </div>
+                <div id="builder-slots" class="builder-slots"></div>
+                <div class="builder-btns">
+                    <button type="button" class="b-play" onclick="playSeq(builderCl3())" title="Play the slots now, one after another"><span data-icon="play"></span> PLAY</button>
+                    <button type="button" id="builder-save" class="b-save" onclick="saveCl3()" title="Keep it as a cL3, with the saved graphics"></button>
+                    <button type="button" class="b-add" onclick="const d = builderCl3(); if (d.steps.length) addToShow(d); else flash('Put at least one L3 in the slots', true);" title="Add it to the rundown (in the block picked under Add to)"><span data-icon="plus"></span> RUNDOWN</button>
+                </div>
+                <!-- A cL3 playing: which one is up, ⏭ Next and ⏹ Stop -->
+                <div id="seq-now" class="seq-now hidden">
+                    <span data-icon="play"></span>
+                    <span id="seq-now-text" class="seq-now-text"></span>
+                    <button type="button" onclick="nextSeq()" title="Skip to the next L3"><span data-icon="next"></span></button>
+                    <button type="button" onclick="stopSeq(true)" title="Stop, and take it down"><span data-icon="stop"></span></button>
+                </div>
+                <div id="builder-saved-wrap" class="hidden">
+                    <h3 class="builder-heading">Saved cL3s</h3>
+                    <div id="builder-saved" class="grid grid-cols-1 gap-2 p-1 pt-0"></div>
+                </div>
+                <h3 class="builder-heading">Saved L3s <small>tap one to put it in the picked slot</small></h3>
+                <div class="saved-search builder-search">
+                    <span data-icon="search"></span>
+                    <input type="text" id="builder-search" placeholder="Search saved L3s" autocomplete="off" spellcheck="false">
+                </div>
+                <div id="builder-picks" class="grid grid-cols-2 gap-2 p-1 pt-0"></div>
             </div>
 
             <!-- Edit one rundown item (changes it for this rundown only) -->
@@ -983,15 +1041,17 @@
             social:    { label: 'Like & Subscribe', text: false, dur: 6, social: true, effect: null, animIn: 'anim-fade', animOut: 'anim-hide' },
             stpatricks: { label: "St. Patrick's", text: false, dur: 15, effect: 'stpatricks', animIn: 'anim-fade', animOut: 'anim-hide', depth: true },
             vhs:       { label: 'Retro VHS',  text: false, dur: 15, effect: 'vhs', animIn: 'anim-fade', animOut: 'anim-hide' },
-            locpin:    { label: 'Location',   text: false, dur: 8, place: true, effect: null, animIn: '', animOut: 'anim-hide' },
+            rain:      { label: 'Rain',       text: false, dur: 15, effect: 'rain', animIn: 'anim-fade', animOut: 'anim-hide', depth: true },
+            vday:      { label: 'V-Day',      text: false, dur: 15, effect: 'vday', animIn: 'anim-fade', animOut: 'anim-hide', depth: true },
+            locpin:    { label: 'Location',   text: false, dur: 8, place: true, effect: null, animIn: '', animOut: 'anim-slideOutLeft' }, // leaves as one block, like L3 PNG
             // Stingers: CSS stinger lengths are read from styles.css, so the speed is only set there
             stinger:   { label: 'Standard', text: false, effect: null, animIn: '', animOut: '',
                          get length() { return cssSeconds('stinger', '--stinger-time', 2); } },
             ghost:     { label: 'Ghost',  text: false, effect: null, animIn: '', animOut: '',
                          get length() { return cssSeconds('ghost', '--ghost-time', 2.4); } },
-            colorbars: { label: 'Bars',   text: false, effect: null, animIn: '', animOut: '',
+            colorbars: { label: 'Color Bars',   text: false, effect: null, animIn: '', animOut: '',
                          get length() { return cssSeconds('colorbars', '--bars-time', 2.6); } },
-            xmas:      { label: 'X-mas',  text: false, effect: null, animIn: '', animOut: '',
+            xmas:      { label: 'Xmas',  text: false, effect: null, animIn: '', animOut: '',
                          get length() { return cssSeconds('xmas', '--xmas-time', 1.8); } },
             // Drawn on the canvas, so their lengths are set here
             storm:     { label: 'Storm',  text: false, effect: 'storm',    animIn: '', animOut: '', length: 2.8 },
@@ -1000,6 +1060,8 @@
             spring:    { label: 'Spring', text: false, effect: 'spring',   animIn: '', animOut: '', length: 3 },
             fireworks: { label: 'Fireworks', text: false, effect: 'fireworks', animIn: '', animOut: '', length: 3 },
             medical:   { label: 'Medical', text: false, effect: 'medical',  animIn: '', animOut: '', length: 2.4 },
+            hearts:    { label: 'Hearts',  text: false, effect: 'hearts',   animIn: '', animOut: '', length: 2.6 },
+            firestinger: { label: 'Fire',  text: false, effect: 'firestinger', animIn: '', animOut: '', length: 2.4 },
         };
 
         // Overlays with one text box instead of Name and Title (L3 Info, Breaking News, Hot Take, Location):
@@ -1055,6 +1117,7 @@
             breaking: 'border-red-500', sportsfx: 'border-orange-400', spring: 'border-pink-300', social: 'border-rose-400',
             arrested: 'border-indigo-400', hottake: 'border-orange-500', locpin: 'border-red-400',
             stpatricks: 'border-green-500', vhs: 'border-fuchsia-500', fireworks: 'border-yellow-400', medical: 'border-blue-500',
+            rain: 'border-slate-300', vday: 'border-pink-400', hearts: 'border-rose-400', firestinger: 'border-orange-600',
         };
 
 
@@ -1078,9 +1141,19 @@
 
         // Imported L3s go up as a toggle: they stay up until they're turned off (TOGGLE OFF, or OFF on a
         // rundown card), instead of for a set time. (Older imports, saved with 5 minutes, work the same.)
-        const holdsOn = (data) => isOverlayItem(data) && !!(data.toggle || data.source);
+        // One put in a cL3 gets toggle: false and a time, like any other.
+        const holdsOn = (data) => isOverlayItem(data) && !!(data.toggle ?? data.source);
+        // A cL3 (complex L3, from the L3 Builder): up to 5 lower thirds played one after another. Each goes up
+        // once the one before has had its time and its exit animation (SEQ_GAP).
+        const SEQ_GAP = 0.9;
+        const cl3Steps = (d) => (Array.isArray(d.steps) ? d.steps.filter(Boolean) : []);
+        const cl3Seconds = (d) => {
+            const steps = cl3Steps(d);
+            return steps.reduce((sum, x) => sum + graphicSeconds(x), 0) + SEQ_GAP * Math.max(0, steps.length - 1);
+        };
         // How long a graphic stays up (0 for one that stays up until it's turned off), and that time as "5s", "2.6s" or "5:00"
-        const graphicSeconds = (data) => (holdsOn(data) ? 0 : OVERLAYS[isOverlayItem(data) ? (data.overlay || 'l3Large') : '']?.length ?? (Number(data.duration) || 5));
+        const graphicSeconds = (data) => (data.mode === 'cl3' ? Math.round(cl3Seconds(data) * 10) / 10 : holdsOn(data) ? 0
+            : OVERLAYS[isOverlayItem(data) ? (data.overlay || 'l3Large') : '']?.length ?? (Number(data.duration) || 5));
         const formatTime = (secs) => secs < 60 ? `${secs}s` : `${Math.floor(secs / 60)}:${String(Math.round(secs % 60)).padStart(2, '0')}`;
 
         // Where a custom background file is, relative to this page
@@ -1098,6 +1171,9 @@
             sot:    '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/>',
             pic:    '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
             monitor: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+            sparkles: '<path d="M11 3l1.9 5.1L18 10l-5.1 1.9L11 17l-1.9-5.1L4 10l5.1-1.9z"/><path d="M19 14l.9 2.1L22 17l-2.1.9L19 20l-.9-2.1L16 17l2.1-.9z"/>',
+            list:   '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.4" class="icon-fill"/><circle cx="4.5" cy="12" r="1.4" class="icon-fill"/><circle cx="4.5" cy="18" r="1.4" class="icon-fill"/>',
+            stack:  '<rect x="3" y="3.5" width="13" height="4.5" rx="1"/><rect x="5.5" y="9.75" width="13" height="4.5" rx="1"/><rect x="8" y="16" width="13" height="4.5" rx="1"/>',
             launch: '<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
             copy:   '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
             scene:  '<rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/>',
@@ -1206,8 +1282,9 @@
 
             // Background
             box.classList.remove(...BG_CLASSES);
-            box.style.backgroundImage = '';
-            if (data.bgStyle === 'custom') { if (data.customBg) box.style.backgroundImage = `url("${customPath(data.customBg)}")`; }
+            // (The background is drawn on its own layer behind the text: see #display-box::before in styles.css)
+            box.style.removeProperty('--l3-bg');
+            if (data.bgStyle === 'custom') { if (data.customBg) box.style.setProperty('--l3-bg', `url("${customPath(data.customBg)}")`); }
             else if (data.bgStyle) box.classList.add(data.bgStyle);
 
             // Position
@@ -1638,11 +1715,12 @@
             const fire = {
                 init(durationSec, opts) {
                     this.d = depthOf(opts);
-                    // Flames are drawn at half size on the bottom half of the screen, then
-                    // scaled up: softer, and much faster with this many flames
+                    // Flames are drawn at a third of the size on the bottom half of the screen, then scaled up:
+                    // they're soft glows, so it looks the same, and it's about half the drawing of half size
+                    // (this many flames was the slowest effect, and Hot Take uses them too)
                     this.buf = this.buf || document.createElement('canvas');
-                    this.buf.width = Math.ceil(W / 2);
-                    this.buf.height = Math.ceil(H / 4);
+                    this.buf.width = Math.ceil(W / 3);
+                    this.buf.height = Math.ceil(H / 6);
                     this.bctx = this.buf.getContext('2d');
                     this.flames = [];
                     this.embers = [];
@@ -3565,9 +3643,9 @@
                     this.vig = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.4, W / 2, H / 2, Math.hypot(W, H) * 0.6);
                     this.vig.addColorStop(0, 'rgba(0, 0, 0, 0)');
                     this.vig.addColorStop(1, 'rgba(0, 0, 0, 0.55)');
-                    // The tracking glitches: when, how long, and where on the screen
-                    this.glitches = [];
-                    for (let at = rand(1.2, 2.4); at < durationSec - 0.5; at += rand(2.5, 5)) this.glitches.push({ at, len: rand(0.35, 0.7), y: rand(0.2, 0.8) });
+                    // The next tracking glitch: when, how long, and where on the screen. Each one is planned as the
+                    // last one ends, so it runs however long it's up (toggled on, it has no end).
+                    this.glitch = { at: rand(1.2, 2.4), len: rand(0.35, 0.7), y: rand(0.2, 0.8) };
                     document.fonts.load('48px VT323').catch(() => {}); // the VCR-style font (it falls back to a monospace one)
                 },
                 // Text in the VCR's style: white, with red and blue fringes like a tape's smeared color
@@ -3603,7 +3681,8 @@
                     ctx.imageSmoothingEnabled = false;
                     ctx.drawImage(this.buf, 0, 0, W, H);
                     // A tracking glitch: a band of noise and white streaks, and the picture's display jumps
-                    const gl = this.glitches.find(g => t >= g.at && t < g.at + g.len);
+                    if (t >= this.glitch.at + this.glitch.len) this.glitch = { at: t + rand(2.5, 5), len: rand(0.35, 0.7), y: rand(0.2, 0.8) };
+                    const gl = t >= this.glitch.at ? this.glitch : null;
                     let jx = 0;
                     if (gl) {
                         const k = (t - gl.at) / gl.len, by = (gl.y + (k - 0.5) * 0.25) * H, bh = (40 + 50 * Math.sin(k * Math.PI)) * s;
@@ -3655,7 +3734,366 @@
                 },
             };
 
-            const EFFECTS = { confetti, colorwave, leaves, snow, fire, underwater, arrested, hottake, sports, spring, storm, tvstatic, fireworks, medical, stpatricks, vhs };
+            // ---------- Hearts: one heart, drawn once and stamped (the Hearts stinger and V-Day share them) ----------
+            // A rounded heart with a soft shine on its upper left. blur: out of focus, for the big ones right by the
+            // camera (the blur comes from a shadow, like Fall's near leaves).
+            const HEART_COLORS = ['#ff2d55', '#ff4d7a', '#e8174a', '#ff85a8', '#ffb3c8', '#c2185b', '#ffffff'];
+            const heartPath = (x, r) => { // centred at 0, 0, about 2r across
+                x.beginPath();
+                x.moveTo(0, r * 0.95);
+                x.bezierCurveTo(-r * 1.3, r * 0.1, -r * 1.12, -r * 1.05, 0, -r * 0.42);
+                x.bezierCurveTo(r * 1.12, -r * 1.05, r * 1.3, r * 0.1, 0, r * 0.95);
+                x.closePath();
+            };
+            const makeHeart = (color, blur = false) => {
+                const S = 128, r = S * 0.4, pad = blur ? 22 : 0;
+                const c = document.createElement('canvas');
+                c.width = c.height = S + pad * 2;
+                const x = c.getContext('2d');
+                if (blur) {
+                    x.shadowColor = color;
+                    x.shadowBlur = 14;
+                    x.shadowOffsetX = c.width * 2;
+                    x.translate(-c.width * 2, 0);
+                }
+                x.translate(c.width / 2, c.height / 2 + r * 0.05);
+                const g = x.createRadialGradient(-r * 0.35, -r * 0.4, r * 0.1, 0, 0, r * 1.25);
+                g.addColorStop(0, mixHex(color, '#ffffff', 0.45));
+                g.addColorStop(0.55, color);
+                g.addColorStop(1, mixHex(color, '#000000', 0.25));
+                x.fillStyle = blur ? color : g;
+                heartPath(x, r);
+                x.fill();
+                if (!blur) { // the shine
+                    x.fillStyle = 'rgba(255, 255, 255, 0.45)';
+                    x.beginPath();
+                    x.ellipse(-r * 0.5, -r * 0.42, r * 0.22, r * 0.12, -0.6, 0, Math.PI * 2);
+                    x.fill();
+                }
+                return c;
+            };
+            // A four-pointed twinkle, for V-Day's sparkles
+            const makeSparkle = () => {
+                const S = 64, c = document.createElement('canvas');
+                c.width = c.height = S;
+                const x = c.getContext('2d');
+                x.drawImage(glowSprite('#ffd6e6', 0, 64), 0, 0);
+                x.fillStyle = '#ffffff';
+                x.translate(S / 2, S / 2);
+                for (let i = 0; i < 2; i++) {
+                    x.rotate(Math.PI / 2 * i);
+                    x.beginPath();
+                    x.moveTo(0, -S * 0.48);
+                    x.quadraticCurveTo(S * 0.04, 0, 0, S * 0.48);
+                    x.quadraticCurveTo(-S * 0.04, 0, 0, -S * 0.48);
+                    x.fill();
+                }
+                return c;
+            };
+            let HEARTS = null; // the sprites, made the first time either is used
+            const heartSprites = () => (HEARTS = HEARTS || {
+                solid: HEART_COLORS.map(c => makeHeart(c)),
+                blurred: ['#ff4d7a', '#ffb3c8', '#ff2d55'].map(c => makeHeart(c, true)),
+                sparkle: makeSparkle(),
+            });
+
+            // ---------- Hearts stinger: hearts pop in all over the screen, a few at a time, over a rosy wash, until the
+            // screen is full and a big heart beats in the middle; then they all float up and away as the wash fades. ----------
+            const hearts = {
+                detail: 0.75, // dozens of big hearts at once (see "detail" above)
+                init(durationSec) {
+                    const sp = heartSprites();
+                    this.T = durationSec;
+                    // A spot in every part of the screen, so together they cover it, each heart popping in at its own moment
+                    const cols = 8, rows = 5, cw = W / cols, ch = H / rows;
+                    this.parts = [];
+                    for (let r = 0; r < rows; r++) {
+                        for (let c = 0; c < cols; c++) {
+                            this.parts.push({
+                                x: (c + 0.5 + rand(-0.3, 0.3)) * cw, y: (r + 0.5 + rand(-0.3, 0.3)) * ch,
+                                size: rand(1.4, 2) * Math.max(cw, ch), at: rand(0.03, 0.32), rot: rand(-0.35, 0.35),
+                                sprite: sp.solid[Math.floor(Math.random() * 6)], rise: rand(0.8, 1.4), lag: rand(0, 0.08),
+                            });
+                        }
+                    }
+                    for (let i = 0; i < 18; i++) { // smaller ones on top, a little later
+                        this.parts.push({
+                            x: rand(0, W), y: rand(0, H), size: rand(0.5, 0.9) * Math.max(cw, ch), at: rand(0.12, 0.36),
+                            rot: rand(-0.5, 0.5), sprite: sp.solid[Math.floor(Math.random() * sp.solid.length)], rise: rand(1, 1.6), lag: rand(0, 0.08),
+                        });
+                    }
+                    this.parts.sort((a, b) => a.at - b.at); // the later ones on top
+                },
+                frame(dt, t) {
+                    const sp = heartSprites(), p = clamp01(t / this.T);
+                    ctx.clearRect(0, 0, W, H);
+                    // The rosy wash: covers the screen through the middle
+                    const wash = p < 0.35 ? EASE.out3(p / 0.35) : p < 0.64 ? 1 : 1 - EASE.in3((p - 0.64) / 0.36);
+                    if (wash > 0) {
+                        if (!this.bg || this.bgH !== H) {
+                            this.bgH = H;
+                            this.bg = ctx.createLinearGradient(0, 0, W, H);
+                            this.bg.addColorStop(0, '#ff7aa2');
+                            this.bg.addColorStop(1, '#c2185b');
+                        }
+                        ctx.globalAlpha = wash;
+                        ctx.fillStyle = this.bg;
+                        ctx.fillRect(0, 0, W, H);
+                    }
+                    // Each heart pops in (with a little overshoot), then floats up and away near the end
+                    const draw = (h, sc, y, a) => {
+                        ctx.globalAlpha = a;
+                        ctx.save();
+                        ctx.translate(h.x, y);
+                        ctx.rotate(h.rot);
+                        ctx.drawImage(h.sprite, -h.size * sc / 2, -h.size * sc / 2, h.size * sc, h.size * sc);
+                        ctx.restore();
+                    };
+                    for (const h of this.parts) {
+                        const k = (p - h.at) / 0.07;
+                        if (k <= 0) continue;
+                        const e = clamp01((p - 0.62 - h.lag) / 0.3);
+                        if (e >= 1) continue;
+                        draw(h, EASE.outBack(Math.min(1, k)) * (1 - 0.3 * e), h.y - e * e * H * 1.2 * h.rise, 1 - e);
+                    }
+                    // The big heart in the middle, beating (lub-dub) while the screen is full
+                    const bk = clamp01((p - 0.34) / 0.08), be = clamp01((p - 0.62) / 0.25);
+                    if (bk > 0 && be < 1) {
+                        const tb = (t % 0.8) / 0.08;
+                        const beat = Math.exp(-tb * tb) + 0.6 * Math.exp(-((tb - 2.6) ** 2));
+                        const size = Math.min(W, H) * 0.62 * EASE.outBack(bk) * (1 + 0.08 * beat) * (1 - 0.4 * be);
+                        draw({ x: W / 2, rot: 0, size, sprite: sp.solid[0] }, 1, H / 2 - be * be * H * 1.2, 1 - be);
+                    }
+                    ctx.globalAlpha = 1;
+                },
+            };
+
+            // ---------- V-Day: hearts float up the screen, swaying and turning, with twinkling sparkles and a soft pink glow
+            // around the edges. Greenscreen: small far hearts behind the person, bigger near ones in front, plus a few
+            // big blurry hearts drifting right past the camera (and the glow, in front). ----------
+            const vday = {
+                init(durationSec, opts) {
+                    const sp = heartSprites();
+                    this.d = depthOf(opts);
+                    // Start spread over the screen so they're already floating when it fades in
+                    this.bits = Array.from({ length: Math.round(34 * this.d.share) }, () => this.heart(rand(0, H * 1.15)));
+                    if (this.d.layer === 'front') {
+                        for (let i = 0; i < 3; i++) this.bits.push(this.heart(rand(0.2 * H, 1.6 * H), true));
+                    }
+                    this.sparkles = this.d.layer === 'back' ? [] : Array.from({ length: Math.round(24 * this.d.share) }, () => ({
+                        x: rand(0, W), y: rand(0, H), size: rand(18, 38) * (H / 1080), speed: rand(1.5, 3), phase: rand(0, Math.PI * 2),
+                    }));
+                    this.glow = this.d.layer !== 'back'; // the edges' glow is a screen thing, in front
+                    this.sp = sp;
+                },
+                // One heart. z = depth: bigger, faster ones look closer. near = right by the camera.
+                heart(y, near = false) {
+                    const s = H / 1080, z = near ? 1 : rand(this.d.zMin, this.d.zMax), sp = heartSprites();
+                    return {
+                        x: rand(0, W), y, near,
+                        sprite: near ? sp.blurred[Math.floor(Math.random() * sp.blurred.length)] : sp.solid[Math.floor(Math.random() * sp.solid.length)],
+                        size: (near ? rand(240, 320) : 46 + z * 80) * s,
+                        vy: -(near ? rand(2, 2.8) : 0.6 + z * 1.2) * s,
+                        sway: rand(0.6, 1.6) * s * (near ? 1.6 : 1), freq: rand(0.5, 1.1), phase: rand(0, Math.PI * 2),
+                        rot: rand(-0.3, 0.3), pulse: rand(1.5, 2.5),
+                    };
+                },
+                frame(dt, t) {
+                    ctx.clearRect(0, 0, W, H);
+                    if (this.glow) { // soft pink around the edges, gently breathing
+                        if (!this.vig || this.vigW !== W) {
+                            this.vigW = W;
+                            this.vig = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.hypot(W, H) * 0.55);
+                            this.vig.addColorStop(0, 'rgba(255, 70, 130, 0)');
+                            this.vig.addColorStop(1, 'rgba(255, 70, 130, 0.42)');
+                        }
+                        ctx.globalAlpha = 0.75 + 0.25 * Math.sin(t * 1.4);
+                        ctx.fillStyle = this.vig;
+                        ctx.fillRect(0, 0, W, H);
+                        ctx.globalAlpha = 1;
+                    }
+                    for (const h of this.bits) {
+                        const swing = Math.sin(t * h.freq + h.phase);
+                        h.y += h.vy * dt;
+                        h.x += swing * h.sway * dt;
+                        // Off the top: start again at the bottom. Off a side: wrap around.
+                        if (h.y < -h.size) Object.assign(h, this.heart(H + h.size, h.near));
+                        if (h.x < -h.size) h.x = W + h.size; else if (h.x > W + h.size) h.x = -h.size;
+                        const sz = h.size * (1 + 0.05 * Math.sin(t * h.pulse * Math.PI + h.phase)); // a gentle beat
+                        ctx.save();
+                        ctx.translate(h.x, h.y);
+                        ctx.rotate(h.rot + swing * 0.25);
+                        ctx.drawImage(h.sprite, -sz / 2, -sz / 2, sz, sz);
+                        ctx.restore();
+                    }
+                    // Sparkles, each twinkling now and then
+                    ctx.globalCompositeOperation = 'lighter';
+                    for (const k of this.sparkles) {
+                        const a = Math.pow(Math.max(0, Math.sin(t * k.speed + k.phase)), 6);
+                        if (a < 0.02) continue;
+                        const sz = k.size * (0.5 + 0.5 * a);
+                        ctx.globalAlpha = a;
+                        ctx.drawImage(this.sp.sparkle, k.x - sz / 2, k.y - sz / 2, sz, sz);
+                    }
+                    ctx.globalAlpha = 1;
+                    ctx.globalCompositeOperation = 'source-over';
+                },
+            };
+
+            // ---------- Rain: streaks of rain at a slight slant, splashes where it lands near the bottom, and a cool mist.
+            // Greenscreen: the far, fine rain and the mist fall behind the person; the near, heavier streaks and the
+            // splashes in front. The streaks are drawn in three batches by depth (one line style each), which is fast. ----------
+            const rain = {
+                init(durationSec, opts) {
+                    this.d = depthOf(opts);
+                    this.wind = rand(0.12, 0.2); // how much it slants
+                    this.groups = [[], [], []]; // far, middle, near
+                    for (let i = 0; i < Math.round(420 * this.d.share); i++) {
+                        const d = this.drop(rand(-H, H));
+                        this.groups[d.g].push(d);
+                    }
+                    this.splashes = [];
+                    this.mist = this.d.layer !== 'front';
+                },
+                // One drop. z = depth: longer, faster, brighter drops look closer; each lands at its own depth near the bottom.
+                drop(y) {
+                    const s = H / 1080, z = rand(this.d.zMin, this.d.zMax);
+                    return { x: rand(-0.15 * W, 1.05 * W), y, z, g: z < 0.35 ? 0 : z < 0.7 ? 1 : 2,
+                             len: (16 + z * 46) * s, v: (16 + z * 22) * s, floor: H * (0.78 + z * 0.24) };
+                },
+                frame(dt, t) {
+                    const s = H / 1080;
+                    ctx.clearRect(0, 0, W, H);
+                    if (this.mist) { // a grey-blue wash, thicker low down
+                        if (!this.fog || this.fogH !== H) {
+                            this.fogH = H;
+                            this.fog = ctx.createLinearGradient(0, 0, 0, H);
+                            this.fog.addColorStop(0, 'rgba(30, 40, 60, 0.1)');
+                            this.fog.addColorStop(0.7, 'rgba(60, 75, 95, 0.12)');
+                            this.fog.addColorStop(1, 'rgba(170, 190, 210, 0.22)');
+                        }
+                        ctx.fillStyle = this.fog;
+                        ctx.fillRect(0, 0, W, H);
+                    }
+                    const STYLE = [[1 * s, 0.26], [1.6 * s, 0.38], [2.4 * s, 0.55]]; // line width and strength, far to near
+                    const near = this.d.layer !== 'back';
+                    ctx.lineCap = 'round';
+                    this.groups.forEach((group, g) => {
+                        ctx.beginPath();
+                        for (const d of group) {
+                            d.y += d.v * dt;
+                            d.x += d.v * this.wind * dt;
+                            if (d.y > d.floor) { // it lands: a splash (the nearer ones), then it falls again from the top
+                                if (near && d.z > 0.5 && Math.random() < 0.35 && this.splashes.length < 80) {
+                                    this.splashes.push({ x: d.x, y: d.floor, r: (5 + d.z * 9) * s, age: 0 });
+                                }
+                                Object.assign(d, this.drop(rand(-0.3 * H, -d.len)), { g });
+                            }
+                            ctx.moveTo(d.x, d.y);
+                            ctx.lineTo(d.x - d.len * this.wind, d.y - d.len);
+                        }
+                        ctx.lineWidth = STYLE[g][0];
+                        ctx.strokeStyle = `rgba(205, 220, 240, ${STYLE[g][1]})`;
+                        ctx.stroke();
+                    });
+                    // Splashes: a small ring spreading out on the ground, and fading
+                    ctx.lineWidth = 1.2 * s;
+                    this.splashes = this.splashes.filter(sp => {
+                        sp.age += dt / 60;
+                        if (sp.age > 0.3) return false;
+                        const k = sp.age / 0.3;
+                        ctx.strokeStyle = `rgba(215, 228, 245, ${0.5 * (1 - k)})`;
+                        ctx.beginPath();
+                        ctx.ellipse(sp.x, sp.y, sp.r * (0.3 + k), sp.r * (0.3 + k) * 0.32, 0, 0, Math.PI * 2);
+                        ctx.stroke();
+                        return true;
+                    });
+                },
+            };
+
+            // ---------- Fire stinger: a wall of flame roars up from the bottom and fills the screen, flickering, with sparks
+            // flying, then dies back down. The flames' top edge is a moving, ragged line; tongues of flame lick up from it. ----------
+            const firestinger = {
+                detail: 0.75, // a full-screen fill and dozens of glows (see "detail" above)
+                init(durationSec) {
+                    this.T = durationSec;
+                    this.tongues = Array.from({ length: 40 }, (_, i) => ({ x: (i + rand(-0.3, 0.3)) / 39, ph: rand(0, Math.PI * 2), sz: rand(0.8, 1.35) }));
+                    this.embers = [];
+                    this.blobs = []; // flames rising through the body of the fire, so it's alive, not a flat color
+                },
+                edge(x, t, s) { // how far above (or below) the front each point of the edge is
+                    return (Math.sin(x * 0.012 + t * 5) * 40 + Math.sin(x * 0.031 - t * 8) * 22 + Math.sin(x * 0.07 + t * 13) * 10) * s;
+                },
+                frame(dt, t) {
+                    const s = H / 1080, p = clamp01(t / this.T);
+                    const io = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+                    // The front: rises well past the top, holds, then sinks back down
+                    const c = p < 0.36 ? io(p / 0.36) : p < 0.62 ? 1 : 1 - io((p - 0.62) / 0.38);
+                    const front = H + 140 * s - c * (H + 440 * s);
+                    ctx.clearRect(0, 0, W, H);
+                    if (c <= 0) return;
+                    // The body of the fire, up to its ragged edge
+                    const step = 24 * s;
+                    ctx.beginPath();
+                    ctx.moveTo(0, H);
+                    for (let x = 0; x <= W + step; x += step) ctx.lineTo(x, front + this.edge(x, t, s));
+                    ctx.lineTo(W, H);
+                    ctx.closePath();
+                    // Hot all the way down: bright at the edge, deep red only at the very bottom
+                    const g = ctx.createLinearGradient(0, front - 80 * s, 0, Math.max(H, front + H * 0.6) + 50 * s);
+                    g.addColorStop(0, '#ffe27a');
+                    g.addColorStop(0.06, '#ffb02e');
+                    g.addColorStop(0.22, '#ff7a00');
+                    g.addColorStop(0.5, '#e83a00');
+                    g.addColorStop(0.8, '#b31d00');
+                    g.addColorStop(1, '#6e0d00');
+                    ctx.fillStyle = g;
+                    ctx.fill();
+                    ctx.globalCompositeOperation = 'lighter';
+                    // Flames rising through the fire (more of them the more of the screen it fills)
+                    for (let i = 0; i < 2.2 * c * dt && this.blobs.length < 60; i++) {
+                        this.blobs.push({ x: rand(0, W), y: rand(Math.max(front, 0), H + 100 * s), r: rand(110, 220) * s, vy: -rand(5, 9) * s, life: 0, max: rand(25, 45), hot: Math.random() < 0.4 });
+                    }
+                    this.blobs = this.blobs.filter(b => {
+                        b.life += dt;
+                        b.y += b.vy * dt;
+                        if (b.life >= b.max) return false;
+                        const k = b.life / b.max;
+                        ctx.globalAlpha = 0.3 * Math.sin(k * Math.PI);
+                        ctx.drawImage(FIRE_SPRITES[b.hot ? 1 : 2], b.x - b.r * 0.6, b.y - b.r * 1.3, b.r * 1.2, b.r * 2);
+                        return true;
+                    });
+                    // Tongues of flame licking up from the edge, and sparks, added together so they glow
+                    for (const tg of this.tongues) {
+                        const x = tg.x * W, flick = 0.5 + 0.5 * Math.sin(t * 9 + tg.ph);
+                        const h = (150 + 110 * flick) * s * tg.sz, w = (95 + 30 * flick) * s * tg.sz;
+                        const y = front + this.edge(x, t, s) + 30 * s;
+                        ctx.globalAlpha = 0.55;
+                        ctx.drawImage(FIRE_SPRITES[2], x - w / 2, y - h, w, h);
+                        ctx.globalAlpha = 0.45;
+                        ctx.drawImage(FIRE_SPRITES[1], x - w * 0.3, y - h * 0.7, w * 0.6, h * 0.7);
+                    }
+                    if (this.embers.length < 140) {
+                        for (let i = 0; i < 3 * dt; i++) {
+                            this.embers.push({ x: rand(0, W), y: front + rand(-30, 80) * s, vx: rand(-1.2, 1.2) * s, vy: -rand(5, 11) * s, r: rand(2, 4.5) * s, life: 0, max: rand(30, 70) });
+                        }
+                    }
+                    this.embers = this.embers.filter(e => {
+                        e.life += dt;
+                        e.x += e.vx * dt;
+                        e.y += e.vy * dt;
+                        if (e.life >= e.max || e.y < -20 * s) return false;
+                        ctx.globalAlpha = 1 - e.life / e.max;
+                        ctx.drawImage(FIRE_SPRITES[0], e.x - e.r * 3, e.y - e.r * 3, e.r * 6, e.r * 6);
+                        return true;
+                    });
+                    ctx.globalAlpha = 1;
+                    ctx.globalCompositeOperation = 'source-over';
+                },
+            };
+
+            const EFFECTS = { confetti, colorwave, leaves, snow, fire, underwater, arrested, hottake, sports, spring, storm, tvstatic,
+                fireworks, medical, stpatricks, vhs, hearts, vday, rain, firestinger };
 
             // Runs every frame while an effect is playing
             const loop = () => {
@@ -3928,6 +4366,7 @@
 
         // Sends a graphic and shows "Taken: Name  for 5s", counting down until it's off screen
         const flashTake = (data) => {
+            if (seq) stopSeq(false); // taking something else ends a cL3 that's playing (its own L3s don't come through here)
             const hold = holdsOn(data); // an imported L3: up until it's turned off
             if (!sendPayload(hold ? { ...data, hold: true } : data)) return false;
             const layer = isOverlayItem(data) ? 'overlay' : 'l3';
@@ -3954,7 +4393,7 @@
         // Shows only the fields the current tab and overlay need
         const updateSections = () => {
             const mode = checked('mode');
-            const show = mode === 'show';
+            const show = mode === 'show', builder = mode === 'builder';
             const cfg = mode === 'overlay' ? OVERLAYS[checked('overlayStyle')] : null;
             $('l3-section').classList.toggle('hidden', mode !== 'l3');
             $('overlay-section').classList.toggle('hidden', mode !== 'overlay');
@@ -3978,9 +4417,11 @@
             $('gs-field').classList.toggle('hidden', !cfg?.depth);
             if (cfg?.depth) $('gs-pick').checked = loadGsEffects().includes(checked('overlayStyle'));
             $('import-btn').classList.toggle('hidden', !cfg?.import);
-            $('take-row').classList.toggle('hidden', show);
-            $('saved-wrap').classList.toggle('hidden', show);
+            $('take-row').classList.toggle('hidden', show || builder);
+            $('saved-wrap').classList.toggle('hidden', show || builder);
             $('show-section').classList.toggle('hidden', !show);
+            $('builder-section').classList.toggle('hidden', !builder);
+            if (builder) $('text-fields').classList.add('hidden');
             updateToggleButton();
             updateSummaries();
         };
@@ -4060,6 +4501,7 @@
             updateSections();
             $('saved-heading').textContent = checked('mode') === 'overlay' ? 'Saved Overlays' : 'Saved L3s';
             if (checked('mode') === 'show') renderShow();
+            else if (checked('mode') === 'builder') renderBuilder();
             else renderButtons(loadButtonsFromStorage());
         };
 
@@ -4093,6 +4535,27 @@
             overlaySections.forEach(d => d.addEventListener('toggle', () => {
                 if (d.open) overlaySections.forEach(other => { if (other !== d) other.open = false; });
             }));
+            // Animated L3s tab: the same, unless Expand all is on (then they all stay open, until one is closed)
+            l3Sections().forEach(d => d.addEventListener('toggle', () => {
+                if (l3ExpandAll) {
+                    if (!d.open) { l3ExpandAll = false; updateL3Expand(); } // closing one ends Expand all
+                    return;
+                }
+                if (d.open) l3Sections().forEach(other => { if (other !== d) other.open = false; });
+            }));
+            updateL3Expand();
+        };
+        // Expand all / Collapse all, on the Animated L3s tab
+        let l3ExpandAll = false;
+        const l3Sections = () => document.querySelectorAll('#l3-section details.fx-section');
+        const updateL3Expand = () => {
+            $('l3-expand').textContent = l3ExpandAll ? '▴ Collapse all' : '▾ Expand all';
+            $('l3-expand').title = l3ExpandAll ? 'Close every section' : 'Open every section at once';
+        };
+        const setL3ExpandAll = (on) => {
+            l3ExpandAll = on;
+            l3Sections().forEach(d => { d.open = on; });
+            updateL3Expand();
         };
 
 
@@ -4215,6 +4678,7 @@
         // ✖ CLEAR ALL
         const clearAll = () => {
             if (!sendPayload({ mode: 'clear' })) return;
+            stopSeq(false);
             setToggled('l3', false);
             setToggled('overlay', false);
             clearLive('l3');
@@ -4276,12 +4740,14 @@
             const name = data.label || OVERLAYS[ovKey]?.label || 'Untitled';
             const kind = OVERLAYS[ovKey]?.length !== undefined ? 'STINGER' : 'OVERLAY';
             // Second line: file name for imported L3s, otherwise the style
-            const sub = isOverlay
-                ? (data.source ? `${data.source} | toggle` : `${kind} | ${OVERLAYS[ovKey]?.label || ovKey}${data.customBg ? `: ${data.customBg}` : ''}${data.sport ? `: ${SPORTS[data.sport] || data.sport}` : ''}`)
+            const cl3 = data.mode === 'cl3';
+            const sub = cl3 ? `cL3 | ${cl3Steps(data).length} L3s in a row`
+                : isOverlay
+                ? (data.source && holdsOn(data) ? `${data.source} | toggle` : data.source || `${kind} | ${OVERLAYS[ovKey]?.label || ovKey}${data.customBg ? `: ${data.customBg}` : ''}${data.sport ? `: ${SPORTS[data.sport] || data.sport}` : ''}`)
                 : `${data.bgStyle === 'custom' ? `custom: ${data.customBg}` : data.bgStyle} | ${data.fontStyle?.replace('font-', '')}`;
 
             const card = document.createElement('div');
-            card.className = `saved-card relative rounded-lg overflow-hidden border-l-4 ${ACCENTS[isOverlay ? ovKey : data.bgStyle] || 'border-gray-400'} bg-gradient-to-br ${isOverlay ? 'from-[#26253a] to-zinc-800' : 'from-zinc-700 to-zinc-800'} shadow-md`;
+            card.className = `saved-card relative rounded-lg overflow-hidden border-l-4 ${cl3 ? 'border-amber-400' : ACCENTS[isOverlay ? ovKey : data.bgStyle] || 'border-gray-400'} bg-gradient-to-br ${cl3 ? 'from-[#3a2f14] to-zinc-800' : isOverlay ? 'from-[#26253a] to-zinc-800' : 'from-zinc-700 to-zinc-800'} shadow-md`;
 
             const take = document.createElement('button');
             take.className = 'card-take w-full h-16 px-2 flex flex-col justify-center text-left text-white hover:bg-white/10 active:bg-white/20 active:scale-[0.97] transition';
@@ -4369,12 +4835,13 @@
         };
 
         const renderButtons = (buttons) => {
+            if (checked('mode') === 'builder') { renderBuilder(); return; } // the L3 Builder has its own lists
             const container = $('saved-buttons-container');
             container.innerHTML = '';
 
-            // Only show graphics for the current tab
+            // Only show graphics for the current tab (cL3s are on the L3 Builder tab)
             const showOverlays = checked('mode') === 'overlay';
-            let list = buttons.filter(d => isOverlayItem(d) === showOverlays);
+            let list = buttons.filter(d => d.mode !== 'cl3' && isOverlayItem(d) === showOverlays);
             const closed = !savedOpen[checked('mode')];
             const all = list.length;
             if (savedQuery) list = list.filter(d => savedSearchText(d).includes(savedQuery));
@@ -4411,10 +4878,11 @@
         const clearSaved = () => {
             const overlays = checked('mode') === 'overlay';
             const all = loadButtonsFromStorage();
-            const n = all.filter(d => isOverlayItem(d) === overlays).length;
+            const mine = (d) => d.mode !== 'cl3' && isOverlayItem(d) === overlays; // cL3s stay (they're on the L3 Builder tab)
+            const n = all.filter(mine).length;
             if (!n) { flash('Nothing to delete', true); return; }
             if (!confirm(`Delete all ${n} saved ${overlays ? 'overlays' : 'L3s'}? This can't be undone.`)) return;
-            saveButtonsToStorage(all.filter(d => isOverlayItem(d) !== overlays));
+            saveButtonsToStorage(all.filter(d => !mine(d)));
             flash('Deleted all');
         };
 
@@ -4496,9 +4964,9 @@
         const breakMarker = (d, cls = 'take-pill brk-pill') => cueMarker('BREAK', clock(d.secs || 0), cls, 'A break this long');
         const newSid = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
         let lastTakenSid = localStorage.getItem(LAST_PLAYED_KEY); // gets the ★
-        const liveByLayer = { l3: null, overlay: null };           // rundown card on screen now, per layer
-        const liveEnds = { l3: 0, overlay: 0 };                    // when each one goes off
-        const liveTimers = { l3: null, overlay: null };
+        const liveByLayer = { l3: null, overlay: null, seq: null }; // rundown card on screen now, per layer (seq: a cL3 playing)
+        const liveEnds = { l3: 0, overlay: 0, seq: 0 };            // when each one goes off
+        const liveTimers = { l3: null, overlay: null, seq: null };
         let liveTicker = null;                                     // counts down the OFF buttons
 
         const loadBlocks = () => {
@@ -4520,8 +4988,9 @@
         const showLocked = () => localStorage.getItem(SHOW_LOCK_KEY) === '1';
 
         // L3 for lower thirds (animated or fullscreen), OV for overlays and stingers; cues have their own
-        const itemType = (d) => (d.cue ? CUES[d.cue]?.code || 'NOTE'
-            : (isOverlayItem(d) ? OVERLAYS[d.overlay || 'l3Large']?.text : true) ? 'L3' : 'OV');
+        // (Location counts as an L3: it's one of the Fullscreen L3s. A cL3 is CL3.)
+        const itemType = (d) => (d.cue ? CUES[d.cue]?.code || 'NOTE' : d.mode === 'cl3' ? 'CL3'
+            : (isOverlayItem(d) ? OVERLAYS[d.overlay || 'l3Large']?.text || OVERLAYS[d.overlay]?.place : true) ? 'L3' : 'OV');
         // Its label, like "A1-L3": its block, then its place among that block's items of the same type.
         // Unsorted ones just show their type; notes have none. In the Tease: T1-TEASE (its clip), T-L3,
         // T1-SCRIPT...; in the Open and Close: OP1-L3, CL1-SCENE...
@@ -4552,6 +5021,7 @@
             document.querySelectorAll('.show-card').forEach(c => {
                 const layer = Object.keys(liveByLayer).find(l => liveByLayer[l] === c.dataset.sid);
                 c.classList.toggle('show-live', !!layer);
+                c.classList.toggle('live-seq', layer === 'seq'); // a cL3 playing: NEXT above OFF
                 c.classList.toggle('show-last', c.dataset.sid === lastTakenSid);
                 c.classList.toggle('show-current', showLocked() && c.dataset.sid === showState().current);
                 let off = c.querySelector('.show-offair');
@@ -4568,6 +5038,18 @@
                     off = null;
                 }
                 if (off) off.lastChild.textContent = liveEnds[layer] === Infinity ? 'OFF' : `OFF ${formatTime(Math.max(0, Math.ceil((liveEnds[layer] - now) / 1000)))}`;
+                // A cL3 playing: ⏭ NEXT skips to its next L3
+                let next = c.querySelector('.show-next');
+                if (layer === 'seq' && !next) {
+                    next = document.createElement('button');
+                    next.type = 'button';
+                    next.className = 'show-next';
+                    next.title = 'Skip to the next L3 in it';
+                    next.onclick = () => nextSeq();
+                    next.innerHTML = `${icon('next')}<span>NEXT</span>`;
+                    c.append(next);
+                } else if (layer !== 'seq' && next) next.remove();
+                if (next && seq) next.lastChild.textContent = `NEXT ${seq.i + 2 <= seq.steps.length ? `${seq.i + 2}/${seq.steps.length}` : ''}`.trim();
             });
         };
         // A graphic left the screen on this layer (time up, taken off, replaced, or cleared)
@@ -4579,11 +5061,12 @@
                 broadcastProjector();
             }
             liveByLayer[layer] = null;
-            if (!liveByLayer.l3 && !liveByLayer.overlay) { clearInterval(liveTicker); liveTicker = null; }
+            if (!Object.values(liveByLayer).some(Boolean)) { clearInterval(liveTicker); liveTicker = null; }
             updateLiveMarks();
         };
-        // ⏹ OFF: takes the graphic on that layer down now
+        // ⏹ OFF: takes the graphic on that layer down now (for a cL3: stops it, and takes down its L3 that's up)
         const takeOff = (layer) => {
+            if (layer === 'seq') { stopSeq(true); flash('Taken off'); return; }
             if (!sendPayload({ mode: 'hide', layer })) return;
             clearLive(layer);
             setToggled(layer, false);
@@ -4593,6 +5076,14 @@
         // Tapping a rundown card (only once Set Show is on)
         const takeFromRundown = (data) => {
             if (!showLocked()) { flash('Turn on Set Show to run the rundown', true); return; }
+            if (data.mode === 'cl3') { // a cL3: its L3s one after another, with ⏭ NEXT and OFF on the card
+                if (!playSeq(data, data.sid)) return;
+                lastTakenSid = data.sid;
+                localStorage.setItem(LAST_PLAYED_KEY, data.sid);
+                logEvent('take', data, loadShow(), { layer: 'seq' });
+                setCurrent(data.sid);
+                return;
+            }
             if (!flashTake(data)) return;
             const layer = isOverlayItem(data) ? 'overlay' : 'l3';
             const secs = graphicSeconds(data);
@@ -5326,6 +5817,15 @@
                 $('edit-dialog').showModal();
                 return;
             }
+            if (item.mode === 'cl3') { // a cL3: its name (its L3s are changed on the L3 Builder tab)
+                showEditFields({ name: true });
+                $('edit-title-wrap').classList.add('hidden');
+                $('edit-name').value = item.label || '';
+                fillBlockSelect(item.block, item);
+                $('edit-dialog').returnValue = '';
+                $('edit-dialog').showModal();
+                return;
+            }
             const cfg = isOverlayItem(item) ? OVERLAYS[item.overlay || 'l3Large'] : null;
             const oneBox = oneBoxOf(cfg);
             const hasText = !cfg || cfg.text || oneBox;
@@ -5391,6 +5891,8 @@
                 }
                 const secs = parseClock($('edit-break-len').value);
                 if (item.cue === 'break' && secs) item.secs = secs; // a break keeps its length if this isn't one
+            } else if (item.mode === 'cl3') {
+                item.label = $('edit-name').value.trim() || item.label;
             } else if (cfg?.caption || cfg?.ticker) {
                 item.label = $('edit-para').value.trim(); // blank uses the default text
             } else if (cfg?.social) {
@@ -5403,7 +5905,7 @@
                 item.label = $('edit-name').value.trim() || item.label;
                 item.title = $('edit-title').value.trim();
             }
-            if (!item.cue && cfg?.length === undefined) item.duration = Number($('edit-duration').value) || item.duration || 5;
+            if (!item.cue && item.mode !== 'cl3' && cfg?.length === undefined) item.duration = Number($('edit-duration').value) || item.duration || 5;
             if (cfg?.depth) {
                 if ($('edit-gs').checked) item.gs = true;
                 else delete item.gs;
@@ -5529,6 +6031,7 @@
             // no mode (like everywhere else in the panel, that means a lower third). Saved graphics
             // aren't touched: the rundown keeps its own copies.
             const known = (d) => (d.cue ? !!CUES[d.cue]
+                : d.mode === 'cl3' ? Array.isArray(d.steps) && d.steps.some(Boolean)
                 : d.mode === 'overlay' ? !!OVERLAYS[d.overlay]
                 : (d.mode === undefined || d.mode === 'l3') && (d.bgStyle === 'l3Large' || typeof d.label === 'string'));
             const items = data.items.filter(d => d && typeof d === 'object' && known(d));
@@ -5566,6 +6069,253 @@
             saveShow(show);
             flash(`Imported: ${name}`, skipped > 0, `${show.length} item${show.length === 1 ? '' : 's'}${skipped ? `, ${skipped} skipped` : ''}`);
             return true;
+        };
+
+
+        /* =========================================================
+           15b. CONTROLLER: L3 BUILDER (cL3s, complex L3s)
+           Up to 5 saved lower thirds (animated L3s or Fullscreen L3s) in slots, played one after another:
+           each goes up once the one before has had its time and its exit animation. Tap a slot to pick it,
+           then a saved L3 to put it there (or just tap saved L3s and they fill the slots in order). Save it
+           as a cL3: it's kept with the saved graphics, listed here, and can go in the rundown, where it
+           works like an L3 for its total time, with ⏭ NEXT on its card to skip ahead while it plays.
+           ========================================================= */
+        const BUILDER_KEY = 'fx_builder'; // the slots being built: { name, steps: [5 graphics or null], editing: the saved cL3 being changed }
+        const SLOTS = 5;
+        let builderTarget = null; // the slot the next saved L3 goes in (to start with, the first empty one)
+        let builderQuery = '';  // the search over the saved L3s
+        const loadBuilder = () => {
+            const b = readJson(BUILDER_KEY, {});
+            return {
+                name: typeof b.name === 'string' ? b.name : '',
+                steps: Array.from({ length: SLOTS }, (_, i) => (Array.isArray(b.steps) && b.steps[i]) || null),
+                editing: b.editing || null,
+            };
+        };
+        const saveBuilder = (b) => { localStorage.setItem(BUILDER_KEY, JSON.stringify(b)); renderBuilder(); };
+        // The saved graphics that can go in a slot: lower thirds, animated or fullscreen
+        const builderPicks = () => loadButtonsFromStorage().filter(d => d.mode !== 'cl3' && itemType(d) === 'L3');
+        // A saved graphic as a step: a copy, with an imported (toggle) L3 given a time like the others
+        const asStep = (d) => {
+            const { id, sid, block, ...copy } = d;
+            if (holdsOn(copy)) Object.assign(copy, { toggle: false, duration: OVERLAYS[copy.overlay || 'l3Large']?.dur || 8 });
+            return copy;
+        };
+        const stepName = (d) => d.label || OVERLAYS[d.overlay]?.label || 'L3';
+        const pickedSlot = (b) => {
+            if (builderTarget === null) { const empty = b.steps.findIndex(x => !x); builderTarget = empty >= 0 ? empty : 0; }
+            return builderTarget;
+        };
+        const addToBuilder = (d) => {
+            const b = loadBuilder(), at = pickedSlot(b);
+            b.steps[at] = asStep(d);
+            // On to the next empty slot after it (or the first empty one, or stay)
+            const after = b.steps.findIndex((x, i) => !x && i > at), any = b.steps.findIndex(x => !x);
+            builderTarget = after >= 0 ? after : any >= 0 ? any : at;
+            saveBuilder(b);
+            flash(`Slot ${at + 1}: ${stepName(d)}`);
+        };
+        const builderCl3 = () => {
+            const b = loadBuilder(), steps = b.steps.filter(Boolean);
+            const name = b.name.trim() || steps.map(stepName).slice(0, 2).join(' + ') || 'cL3';
+            return { mode: 'cl3', label: name, steps };
+        };
+        // 💾 Saves the slots as a cL3 (changing the one loaded with ✎, if it's still saved)
+        const saveCl3 = () => {
+            const b = loadBuilder(), item = builderCl3();
+            if (!item.steps.length) { flash('Put at least one L3 in the slots', true); return; }
+            const all = loadButtonsFromStorage(), i = b.editing ? all.findIndex(x => x.id === b.editing) : -1;
+            item.id = i >= 0 ? all[i].id : Date.now();
+            if (i >= 0) all[i] = item; else all.unshift(item);
+            localStorage.setItem(BUILDER_KEY, JSON.stringify({ ...b, name: item.label, editing: item.id }));
+            saveButtonsToStorage(all);
+            flash(i >= 0 ? 'cL3 updated' : 'cL3 saved', false, item.label);
+        };
+        // ✎ on a saved cL3: its L3s go back in the slots, to change it
+        const editCl3 = (d) => {
+            const steps = cl3Steps(d);
+            builderTarget = Math.min(steps.length, SLOTS - 1);
+            saveBuilder({ name: d.label || '', steps: Array.from({ length: SLOTS }, (_, i) => steps[i] || null), editing: d.id });
+            flash(`Editing: ${d.label}`, false, 'SAVE cL3 keeps the changes');
+        };
+        const clearBuilder = () => {
+            builderTarget = 0;
+            saveBuilder({ name: '', steps: [], editing: null });
+        };
+        const setStepTime = (i) => {
+            const b = loadBuilder(), st = b.steps[i];
+            if (!st) return;
+            const cfg = isOverlayItem(st) ? OVERLAYS[st.overlay || 'l3Large'] : null;
+            if (cfg?.length !== undefined) { flash('This one has a fixed length', true); return; }
+            const answer = prompt(`How long ${stepName(st)} stays up, in seconds:`, graphicSeconds(st));
+            if (answer === null) return;
+            const secs = Number(answer);
+            if (!(secs > 0)) { flash('Type a number of seconds, like 8', true); return; }
+            st.duration = secs;
+            saveBuilder(b);
+        };
+        const moveStep = (i, dir) => {
+            const b = loadBuilder(), j = i + dir;
+            if (j < 0 || j >= SLOTS) return;
+            [b.steps[i], b.steps[j]] = [b.steps[j], b.steps[i]];
+            if (builderTarget === i) builderTarget = j;
+            saveBuilder(b);
+        };
+        const renderBuilder = () => {
+            if (checked('mode') !== 'builder') return;
+            const b = loadBuilder();
+            pickedSlot(b);
+            if (document.activeElement !== $('builder-name')) $('builder-name').value = b.name;
+            // The slots
+            const box = $('builder-slots');
+            box.innerHTML = '';
+            const button = (iconName, title, onclick, cls = '') => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `slot-btn ${cls}`;
+                btn.innerHTML = icon(iconName);
+                btn.title = title;
+                btn.onclick = (e) => { e.stopPropagation(); onclick(); };
+                return btn;
+            };
+            b.steps.forEach((st, i) => {
+                const row = document.createElement('div');
+                row.className = `builder-slot${i === builderTarget ? ' target' : ''}${st ? '' : ' empty'}`;
+                row.title = 'Tap to put the next saved L3 here';
+                row.onclick = () => { builderTarget = i; renderBuilder(); };
+                const num = document.createElement('span');
+                num.className = 'slot-num';
+                num.textContent = i + 1;
+                const text = document.createElement('span');
+                text.className = 'slot-text';
+                row.append(num, text);
+                if (st) {
+                    text.innerHTML = '<b></b><small></small>';
+                    text.firstChild.textContent = stepName(st);
+                    text.lastChild.textContent = isOverlayItem(st) ? OVERLAYS[st.overlay || 'l3Large']?.label || 'Fullscreen L3' : `L3 | ${st.bgStyle || ''}`;
+                    const time = document.createElement('button');
+                    time.type = 'button';
+                    time.className = 'slot-time';
+                    time.textContent = formatTime(graphicSeconds(st));
+                    time.title = 'How long it stays up (tap to change, for this cL3)';
+                    time.onclick = (e) => { e.stopPropagation(); setStepTime(i); };
+                    row.append(time,
+                        button('prev', 'Move it up', () => moveStep(i, -1), 'up'),
+                        button('next', 'Move it down', () => moveStep(i, 1), 'down'),
+                        button('x', 'Take it out', () => { const nb = loadBuilder(); nb.steps[i] = null; builderTarget = i; saveBuilder(nb); }, 'del'));
+                } else {
+                    text.textContent = i === builderTarget ? 'Tap a saved L3 below to put it here' : 'Empty';
+                }
+                box.append(row);
+            });
+            const steps = b.steps.filter(Boolean);
+            $('builder-total').textContent = steps.length ? `${steps.length} L3${steps.length > 1 ? 's' : ''} · ${clock(cl3Seconds({ steps }))}` : '';
+            $('builder-save').innerHTML = `${icon('save')} ${b.editing && loadButtonsFromStorage().some(x => x.id === b.editing) ? 'UPDATE cL3' : 'SAVE cL3'}`;
+            // The saved cL3s: tap to play, ✎ to change, ＋ for the rundown, ✕ to delete
+            const saved = $('builder-saved');
+            saved.innerHTML = '';
+            const cl3s = loadButtonsFromStorage().filter(d => d.mode === 'cl3');
+            $('builder-saved-wrap').classList.toggle('hidden', !cl3s.length);
+            cl3s.forEach(d => {
+                const { card, take } = makeCard(d);
+                take.onclick = () => playSeq(d);
+                const time = document.createElement('span');
+                time.className = 'show-time';
+                time.textContent = formatTime(graphicSeconds(d));
+                card.append(time,
+                    cardButton('x', 'Delete', 'top-1 right-1', 'bg-black/40 text-gray-300 hover:bg-red-700 hover:text-white', () => {
+                        if (confirm(`Delete ${d.label}?`)) saveButtonsToStorage(loadButtonsFromStorage().filter(x => x.id !== d.id));
+                    }),
+                    cardButton('plus', 'Add to rundown', 'bottom-1 right-1', 'bg-emerald-600 text-white hover:bg-emerald-500', () => addToShow(d)),
+                    cardButton('pencil', 'Put it in the slots, to change it', 'bottom-1 right-9', 'bg-sky-600 text-white hover:bg-sky-500', () => editCl3(d)),
+                );
+                card.classList.add('cl3-card');
+                saved.append(card);
+            });
+            // The saved L3s to pick from
+            const picks = $('builder-picks');
+            picks.innerHTML = '';
+            let list = builderPicks();
+            if (builderQuery) list = list.filter(d => savedSearchText(d).includes(builderQuery));
+            if (!list.length) {
+                const empty = document.createElement('p');
+                empty.className = 'col-span-2 text-center text-gray-400 text-sm';
+                empty.textContent = builderQuery ? 'No matches' : 'Save some L3s first (on the Animated L3s or Fullscreen Overlays tab)';
+                picks.append(empty);
+            }
+            list.forEach(d => {
+                const { card, take } = makeCard(d);
+                take.onclick = () => addToBuilder(d);
+                take.title = `Put ${stepName(d)} in slot ${builderTarget + 1}`;
+                picks.append(card);
+            });
+            renderSeqNow();
+        };
+
+        // ---------- Playing a cL3 ----------
+        let seq = null; // the cL3 playing: { d, sid (its rundown card, if it's from the rundown), steps, i, layer, timer }
+        const seqLeft = (from) => { // seconds from the start of step "from" to the end
+            const rest = seq.steps.slice(from);
+            return rest.reduce((sum, x) => sum + graphicSeconds(x), 0) + SEQ_GAP * Math.max(0, rest.length - 1);
+        };
+        const playSeq = (d, sid = null) => {
+            const steps = cl3Steps(d);
+            if (!steps.length) { flash('That cL3 is empty', true); return false; }
+            if (!ws || ws.readyState !== WebSocket.OPEN) { flash('Not connected', true); return false; }
+            stopSeq(false);
+            // It takes over both layers: anything toggled or up from the rundown there makes way
+            ['l3', 'overlay'].forEach(l => { setToggled(l, false); clearLive(l); });
+            seq = { d, sid, steps, i: -1, layer: null, timer: null };
+            if (sid) {
+                liveByLayer.seq = sid;
+                if (!liveTicker) liveTicker = setInterval(updateLiveMarks, 250);
+            }
+            seqStep(0);
+            return true;
+        };
+        const seqStep = (i) => {
+            if (!seq) return;
+            clearTimeout(seq.timer);
+            if (i >= seq.steps.length) { stopSeq(false); return; } // the last one went off by itself
+            const st = seq.steps[i];
+            if (!sendPayload(st)) { stopSeq(false); return; }
+            seq.i = i;
+            seq.layer = isOverlayItem(st) ? 'overlay' : 'l3';
+            const secs = graphicSeconds(st);
+            seq.timer = setTimeout(() => seqStep(i + 1), (secs + SEQ_GAP) * 1000);
+            if (seq.sid) liveEnds.seq = Date.now() + seqLeft(i) * 1000;
+            flash(`${seq.d.label || 'cL3'} ${i + 1}/${seq.steps.length}: ${stepName(st)}`, false, `for ${formatTime(secs)}`);
+            startTakeCountdown(`${i + 1}/${seq.steps.length} ${stepName(st)}`, secs);
+            renderSeqNow();
+            updateLiveMarks();
+        };
+        // ⏭ NEXT: the L3 that's up goes off (with its exit animation), then the next one goes up
+        const nextSeq = () => {
+            if (!seq) return;
+            clearTimeout(seq.timer);
+            stopTakeCountdown();
+            sendPayload({ mode: 'hide', layer: seq.layer });
+            const next = seq.i + 1;
+            if (next >= seq.steps.length) { stopSeq(false); flash('cL3 done'); return; }
+            seq.timer = setTimeout(() => seqStep(next), SEQ_GAP * 1000);
+            if (seq.sid) liveEnds.seq = Date.now() + (SEQ_GAP + seqLeft(next)) * 1000;
+            updateLiveMarks();
+        };
+        // The end: hide = true takes down the L3 that's up (⏹ stop / OFF); false when the last one went off by itself
+        const stopSeq = (hide = true) => {
+            if (!seq) return;
+            clearTimeout(seq.timer);
+            if (hide && seq.layer) { sendPayload({ mode: 'hide', layer: seq.layer }); stopTakeCountdown(); }
+            const sid = seq.sid;
+            seq = null;
+            if (sid) clearLive('seq');
+            renderSeqNow();
+        };
+        // On the L3 Builder tab: what's playing, with ⏭ Next and ⏹ Stop
+        const renderSeqNow = () => {
+            const bar = $('seq-now');
+            bar.classList.toggle('hidden', !seq);
+            if (seq) $('seq-now-text').textContent = `${seq.d.label || 'cL3'} · ${seq.i + 1}/${seq.steps.length}: ${seq.steps[seq.i] ? stepName(seq.steps[seq.i]) : ''}`;
         };
 
 
@@ -6941,7 +7691,7 @@
             row.innerHTML = '<span class="pj-tag"></span><span class="pj-code"></span><span class="pj-icon"></span><span class="pj-text"></span>';
             row.querySelector('.pj-tag').textContent = tag || '';
             row.querySelector('.pj-code').textContent = it.code;
-            row.querySelector('.pj-icon').innerHTML = icon(CUES[it.kind]?.icon || (it.type === 'L3' ? 'l3' : 'layers'));
+            row.querySelector('.pj-icon').innerHTML = icon(CUES[it.kind]?.icon || (it.type === 'CL3' ? 'stack' : it.type === 'L3' ? 'l3' : 'layers'));
             pjName(row.querySelector('.pj-text'), it);
             return row;
         };
@@ -7152,6 +7902,9 @@
                 renderSocialField();
                 // Saved list search
                 $('saved-search').addEventListener('input', (e) => { savedQuery = e.target.value.trim().toLowerCase(); renderButtons(loadButtonsFromStorage()); });
+                // L3 Builder: its name (kept as it's typed) and the search over the saved L3s
+                $('builder-name').addEventListener('input', (e) => localStorage.setItem(BUILDER_KEY, JSON.stringify({ ...loadBuilder(), name: e.target.value })));
+                $('builder-search').addEventListener('input', (e) => { builderQuery = e.target.value.trim().toLowerCase(); renderBuilder(); });
                 $('saved-search').addEventListener('keydown', (e) => { if (e.key === 'Escape') toggleSavedSearch(false); });
                 // Stinger buttons show their length (Storm · 2.8s)
                 document.querySelectorAll('[data-key="ov-stingers"] input[name="overlayStyle"]').forEach(r => {

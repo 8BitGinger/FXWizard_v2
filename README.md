@@ -20,6 +20,7 @@
   - [Animated L3s tab](#animated-l3s-tab)
   - [Fullscreen Overlays tab](#fullscreen-overlays-tab)
   - [Importing L3s](#importing-l3s)
+  - [L3 Builder](#l3-builder)
   - [Running a show](#running-a-show)
   - [Saving rundowns](#saving-rundowns)
   - [Running the show](#running-the-show)
@@ -57,27 +58,31 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 | **L3 Info** | One paragraph of information on `assets/l3LargeAlt.png` in the bottom-left corner. The text is centered in the image's box and wraps onto about 5 lines (up to 400 characters). Line breaks you type are kept | Slides in from the left | Slides back out to the left |
 | **L3 Gif** | Name and title on a bar showing `assets/largeGif.gif`, centered across the screen | Rises up from the bottom | Drops back down |
 | **Custom** | Like L3 Gif, with a PNG, JPG or GIF you pick from the `custom` folder. Square corners, no side borders, and the image fades out at both sides | Rises up from the bottom | Drops back down |
-| **Location** | A red map-pin tile and the place you type, top left, like a live report. The pin slides in from the right and the place from the left, crossing as they meet, and the pin gives a little bounce | Pin and place cross in | Fades out |
+| **Location** | A red map-pin tile and the place you type, top left, like a live report. The pin slides in from the right and the place from the left, crossing as they meet, and the pin gives a little bounce | Pin and place cross in | Slides back out to the left, as one block |
 | **Overlays** | | | |
 | **Color Wave** | Soft, color-changing glow around the edges; the center stays clear | Fades in | Fades out |
 | **Confetti** | Bursts from both bottom corners, then light confetti rain | Slides up | Fades out |
 | **Fall** | Red, orange, gold and brown leaves sway, spin and flip as they float down | Fades in | Fades out |
 | **Snow** | Soft white snowflakes drift down; nearer flakes are bigger and faster | Fades in | Fades out |
 | **Fire** | Flames burn along the bottom of the screen while glowing embers float up | Fades in | Fades out |
+| **Rain** | Streaks of rain falling at a slight slant, small splashes where it lands near the bottom, and a cool mist | Fades in | Fades out |
 | **Underwater** | Blue-green water with swaying light rays, rising bubbles, and small schools of fish swimming by every few seconds | Fades in | Fades out |
 | **Arrested** | Police lights flash red and blue, then a steel jail cell door slams down over the screen with a shake (the wide gaps between the bars show the scene behind). It lifts away in the last second | Lights flash, door drops | Door lifts, fades out |
 | **Hot Take** | The bottom of the screen catches fire, a flaming **HOT TAKE** badge slams in just above the flames (clear of the host's face) and its heat meter maxes out, with embers flying. Type your own text (for example *Unpopular Opinion*) or leave it blank | Slams in | Fades out |
 | **Like & Subscribe** | **Like**, **Follow** and **Subscribe** buttons pop up along the bottom, a cursor clicks each one (they change to **Liked**, **Following** and **Subscribed**) and the bell rings, all in about 3 seconds. Any socials you add (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web) show above the buttons, each with its icon | Pops up | Fades out |
 | **Breaking News** | **LIVE** in the top-right corner and a red **BREAKING NEWS** bar along the bottom, with your ticker text scrolling across. Leave the ticker text empty and it scrolls **Breaking News \| Breaking News \| ...** | Bar slides up | Fades out |
 | **St. Patrick's** | Shamrocks (now and then a lucky four-leaf clover) and spinning gold coins tumble down, the coins catching the light, with a soft green glow around the edges | Fades in | Fades out |
+| **V-Day** | Hearts in reds and pinks float up the screen, swaying and gently beating, with twinkling sparkles and a soft pink glow around the edges | Fades in | Fades out |
 | **Retro VHS** | The picture looks like an old tape playing: scan lines, grain, a soft vignette, the ragged head-switching noise along the bottom, and a tracking glitch that rolls through now and then. The VCR's display shows **PLAY ▶** and **SP** at the top, the tape counter bottom left, and the date and time bottom right, like a camcorder | Fades in | Fades out |
 | **Stingers** | | | |
 | **Standard** | A wide band of red, white and blue stripes (some with stars) sweeps from top-left to bottom-right, covering the whole screen at the halfway point; the stripes drift slightly (about 2 seconds) | Sweeps in | Sweeps off |
 | **Storm** | Storm clouds roll down with rain and lightning, cover the screen, then clear (about 2.8 seconds) | Rolls in | Clears |
+| **Fire** | A wall of flame roars up from the bottom and fills the screen, with flames rising through it and sparks flying, then dies back down (about 2.4 seconds) | Roars up | Dies down |
+| **Hearts** | Hearts pop in all over the screen over a rosy wash until it's full and a big heart beats in the middle, then they all float up and away (about 2.6 seconds) | Pops in | Floats away |
 | **Ghost** | A big glowing ghost rises from the bottom and floats off the top (about 2.4 seconds) | Rises in | Floats off |
-| **Bars** | TV color bars: each piece slides in from its own direction, they hold, then fade (about 2.6 seconds) | Slides in | Fades out |
+| **Color Bars** | TV color bars: each piece slides in from its own direction, they hold, then fade (about 2.6 seconds) | Slides in | Fades out |
 | **Static** | An old TV screen full of static with a rolling band (about 1.8 seconds) | Fades in | Fades out |
-| **X-mas** | A candy-cane band with a string of lights sweeps from left to right (about 1.8 seconds) | Sweeps in | Sweeps off |
+| **Xmas** | A candy-cane band with a string of lights sweeps from left to right (about 1.8 seconds) | Sweeps in | Sweeps off |
 | **Sports** | Pick a sport (about 2.6 seconds): **Football** (one giant football jets across the screen), **Basketball** (basketballs rain down and pile up until they cover the screen), **Baseball** (home plate spins in on a patch of dirt, with a puff of dust), or **Soccer** (a ball flies straight at the camera, thumps the lens, and bounces away) | Flies, rains or spins in | Leaves the same way |
 | **Spring** | Flowers pop in a few at a time until they cover the screen, butterflies flutter past, then a breeze blows the flowers away (about 3 seconds) | Pops in | Blows away |
 | **Fireworks** | Rockets streak up into a night sky that fills the screen and burst in color (round bursts, rings, drooping gold willows and crackling glitter). The biggest go off just before the halfway point, with a flash, then the sky fades as the last sparks fall (about 3 seconds) | Rockets go up | Sky fades |
@@ -85,7 +90,7 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 
 L3 PNG, L3 Info, L3 Gif and Custom text is always shown in capitals. If text is longer than normal, it shrinks to fit instead of getting cut off.
 
-🟩 **Greenscreen depth:** Color Wave, Confetti, Fall, Snow, Fire, Underwater, Arrested, Hot Take and St. Patrick's each have a **Greenscreen** switch. With it on, they show partly *behind* you and partly *in front of* you. See [Greenscreen Depth](#-greenscreen-depth).
+🟩 **Greenscreen depth:** Color Wave, Confetti, Fall, Snow, Fire, Rain, Underwater, Arrested, Hot Take, V-Day and St. Patrick's each have a **Greenscreen** switch. With it on, they show partly *behind* you and partly *in front of* you. See [Greenscreen Depth](#-greenscreen-depth).
 
 ### Import L3s
 Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import button shows when **L3 PNG**, **KAMC** or **L3 Info** is selected, and the L3s are imported as that type.
@@ -96,8 +101,8 @@ Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import bu
 - Names already saved (same name and title) are skipped.
 
 ### Control panel
-- **Three tabs:** Animated L3s, Fullscreen Overlays, and Podcast Rundown. Animated L3s and Fullscreen Overlays each have their own saved list.
-- **Sections that open and close:** the lower third options (Background, Font Style, Font Color, Location, Animation) and the overlay groups (Fullscreen L3s, Overlays, Stingers) are big bars you tap to open or close. They all start closed. Each bar has a chevron and shows what's picked inside. Lower thirds start on Blue, Default, White, Bottom Left and Slide Left.
+- **Four tabs, as icons** (hover for the name): Animated L3s (a lower third), Fullscreen Overlays (sparkles), Podcast Rundown (a list) and [L3 Builder](#l3-builder) (stacked bars). Animated L3s and Fullscreen Overlays each have their own saved list.
+- **Sections that open and close:** the lower third options (Background, Font Style, Font Color, Location, Animation) and the overlay groups (Fullscreen L3s, Overlays, Stingers) are big bars you tap to open or close. They all start closed, and opening one closes the others on that tab. On the Animated L3s tab, **▾ Expand all** (above the sections) opens them all at once; **▴ Collapse all** closes them, and closing any one ends it. Each bar has a chevron and shows what's picked inside. Lower thirds start on Blue, Default, White, Bottom Left and Slide Left.
 - **Saved graphics:** large, touch-friendly cards, full width (or two per row with the switch on the left of the heading; the panel remembers). The list starts closed: tap the heading, or the chevron under it, to open or close it (each tab separately). Tap a card to take, ✕ to delete, ＋ to add it to the Podcast Rundown. A colored edge shows the background or overlay type. The trash can on the right of the heading deletes everything saved on that tab (it asks first). The spyglass next to the layout switch opens a search box that filters the list by name, title, file or style (Escape closes it).
 - **Podcast Rundown:** the graphics you added with ＋, grouped into **blocks** (A to E to start; tap **+** next to the letters to add F, G and so on). Tap a letter under **Add to** to choose which block ＋ adds to.
   - **Labels:** each card is labeled on the left with its block, number and type: **A1-L3**, **A2-L3**... for lower thirds (animated or fullscreen) and **A1-OV**, **A2-OV**... for overlays and stingers. Lower thirds and overlays are numbered separately in each block, so a graphic in block B is **B1-L3**, **B1-OV** and so on.
@@ -239,6 +244,8 @@ If you key yourself out of a greenscreen in OBS, FX Wizard can put some of an ov
 | **Color Wave** | The whole colored glow, like a backlight | Nothing |
 | **Arrested** | The flashing red and blue lights | The jail cell door, with the lights catching its top (so you're behind bars) |
 | **Hot Take** | The flames and the heat glow | The badge and its heat meter, and the embers |
+| **Rain** | The far, fine rain and the mist | The near, heavier streaks and the splashes |
+| **V-Day** | Small, far-away hearts | Bigger hearts, a few big blurry ones right past the camera, the sparkles and the pink glow |
 | **St. Patrick's** | Small, far-away shamrocks and coins | Bigger shamrocks and coins, a few big blurry shamrocks right past the camera, and the green glow |
 
 Everything else (lower thirds, the Fullscreen L3s, Breaking News, Retro VHS, and all the stingers) has no Greenscreen switch and stays on `#display` in front, as usual. When nothing on screen uses Greenscreen, the underlay stays empty, so you can leave it in your scene.
@@ -318,6 +325,17 @@ Open `fx_wizard.html` in a browser (without `#display`). Check that the top bar 
    ```
 2. On the Fullscreen Overlays tab, pick **L3 PNG**, **KAMC** or **L3 Info**, then press **IMPORT L3s (.txt)** and choose one or more files.
 3. The names appear under **Saved Overlays**, each labeled with its file name.
+
+### L3 Builder
+The fourth tab (the stacked bars) chains up to **5 saved lower thirds**, animated or fullscreen, into one **cL3** (complex L3) that plays them one after another: each goes up once the one before has had its time and its exit animation.
+1. Tap a slot to pick it (it's outlined in gold; it starts on the first empty one), then tap a saved L3 under **Saved L3s** to put it there. The next empty slot is picked for you, so tapping saved L3s fills the slots in order. Search to find one fast.
+2. On each slot: tap its time to change how long it stays up (for this cL3 only), ▲ ▼ to move it, ✕ to take it out. Imported L3s (the toggle ones) get the usual time for their style, 8 seconds, in a cL3.
+3. Give it a name (or it's named after its first two L3s), then **SAVE cL3**. **PLAY** plays the slots now; **＋ RUNDOWN** adds it to the rundown (in the block picked under **Add to**).
+4. **Saved cL3s** are listed above the saved L3s: tap one to play it, ✎ to put it back in the slots to change it (the button then reads **UPDATE cL3**), ＋ to add it to the rundown, ✕ to delete it. The 🗑️ at the top empties the slots to start a new one.
+
+While one plays, a gold bar shows which L3 is up, with ⏭ **Next** (the one up goes off with its exit animation and the next one comes up) and ⏹ **Stop**. Taking anything else, or Clear All, stops it.
+
+**In the rundown**, a cL3 is labeled like **A1-CL3**, shows its total time, and is taken like any card. While it plays, its card has **NEXT** (with which L3 is next, like 3/4) above its **OFF** button.
 
 ### Running a show
 1. Open **Podcast Rundown** and tap the block you're filling under **Add to** (A to start).
@@ -411,7 +429,7 @@ It updates by itself as the director works, as long as **Projector** is on in th
 - **CLEAR ALL** removes everything from the screen, including anything toggled on.
 - **TOGGLE OFF** takes down the graphic you toggled on.
 - If the top bar says **CLOSED**, press the wrench for things to check.
-- Using a greenscreen? Turn on the **Greenscreen** switch on Snow, Fall, Confetti, Fire, Underwater, Arrested, Hot Take, St. Patrick's or Color Wave before you take it (or save it that way). Each effect remembers its switch.
+- Using a greenscreen? Turn on the **Greenscreen** switch on Snow, Fall, Confetti, Fire, Rain, Underwater, Arrested, Hot Take, V-Day, St. Patrick's or Color Wave before you take it (or save it that way). Each effect remembers its switch.
 - **✕** on a card deletes it (you'll be asked to confirm).
 
 ---
@@ -471,8 +489,8 @@ Sizes are for a 1920 x 1080 canvas (for 4K, double them). Images are cropped to 
 
 | Image | Where it goes | Best size | Best format | Good to know |
 |---|---|---|---|---|
-| Lower third backgrounds (Blue, Green, Space...) | `assets/` (see the file names below) | 1200 x 300 or larger (4:1) | Animated GIF, under 10 MB | The box grows with the text (about 700–1100 x 190 for a name and title), so the edges may be cropped |
-| **Custom** background (Animated L3s) | `custom/` | 1200 x 300 (4:1) | GIF, PNG or JPG | Same box and cropping as the backgrounds above |
+| Lower third backgrounds (Blue, Green, Space...) | `assets/` (see the file names below) | 800 x 330 (about 2.4:1) | Animated GIF, 30 frames a second or fewer | The box is about 172 px tall and grows with the text (about 430 px wide for a short name and title, up to 1,400 for a long one). Only the middle band of the image ever shows, so the ones here are cropped to it |
+| **Custom** background (Animated L3s) | `custom/` | 800 x 330 (about 2.4:1) | GIF, PNG or JPG | Same box and cropping as the backgrounds above |
 | L3 PNG | `assets/l3Large.png` | 1920 x 1080 | PNG with transparency | A full-screen frame: everything except your bar should be transparent |
 | KAMC | `assets/kamc.png` | 1920 x 1080 | PNG with transparency | Same as L3 PNG |
 | L3 Info | `assets/l3LargeAlt.png` | 1920 x 500 | PNG with transparency | Shown at half the screen width (960 x 250) in the bottom-left. The text fits inside its inner box (see below) |
@@ -482,7 +500,7 @@ Sizes are for a 1920 x 1080 canvas (for 4K, double them). Images are cropped to 
 Which format?
 - **PNG:** when you need transparency or crisp edges and text.
 - **JPG:** for photos. Smallest files, but no transparency.
-- **GIF:** for motion. Short loops keep the file small; big GIFs take a moment to appear the first time.
+- **GIF:** for motion. Short loops keep the file small; big GIFs take a moment to appear the first time. Every frame of a GIF on screen is decoded as it plays, which is the main work the display does, so crop GIFs to what actually shows and keep them to 30 frames a second or fewer. (The backgrounds here are cropped to the band they show: 800 x 330, and 800 x 150 for L3 Gif.)
 
 Both **Custom** items use the same image (the one picked with **Custom…**), so pick a size that suits the one you use most.
 
@@ -503,14 +521,14 @@ Each background button uses one file in `assets/`. Replace the file and keep the
 | Politics | `politics.gif` |
 
 Tips:
-- See [Image sizes and formats](#image-sizes-and-formats) for the best size (1200 x 300 or larger, under 10 MB).
+- See [Image sizes and formats](#image-sizes-and-formats) for the best size (800 x 330, 30 frames a second or fewer).
 - Want a different name on the button? Change the label text next to that file's button in the **Backgrounds** section of `fx_wizard.html`.
 
 ### Add a new background (for example, a show-specific one)
 1. Put your GIF in `assets/`, for example `assets/weather.gif`.
 2. In `css/styles.css`, section 5, add a class with the same pattern as the others:
    ```css
-   .weather  { background: url('../assets/weather.gif'); }
+   .weather  { --l3-bg: url('../assets/weather.gif'); }
    ```
 3. In `fx_wizard.html`, in the **Backgrounds** section, copy the last button pair (the `<input>` and `<label>` for Politics) and change the `id`, `value`, `for`, the text, and the number in `peer/b10` and `peer-checked/b10` to a new one:
    ```html

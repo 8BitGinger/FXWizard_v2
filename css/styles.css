@@ -178,6 +178,80 @@ body {
 .fx-section[open] > summary { margin-bottom: 6px; }
 /* The Lower Thirds tab's sections are a little smaller */
 #l3-section .fx-section > summary { min-height: 34px; padding: 4px 10px; font-size: 14px; }
+/* The tabs, as icons (the name shows when you hover) */
+.mode-tabs label { display: grid; place-items: center; height: 40px; }
+.mode-tabs .icon { width: 24px; height: 24px; }
+
+/* L3 Builder: the slots, the buttons, what's playing, and the saved cL3s and L3s */
+.builder-total { font-size: 12px; font-weight: 700; opacity: 0.8; }
+.builder-slots { display: flex; flex-direction: column; gap: 4px; margin: 0 8px 8px; }
+.builder-slot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+}
+.builder-slot.empty { border-style: dashed; color: #9ca3af; font-size: 12px; }
+.builder-slot.target { border-color: #fbbf24; box-shadow: inset 0 0 0 1px #fbbf24; }
+.slot-num { flex: none; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.12); font-size: 12px; font-weight: 800; }
+.builder-slot.target .slot-num { background: #fbbf24; color: #1c1917; }
+.slot-text { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.2; }
+.slot-text b, .slot-text small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.slot-text b { font-size: 13px; }
+.slot-text small { font-size: 11px; opacity: 0.7; text-transform: uppercase; }
+.slot-time { flex: none; padding: 1px 6px; border-radius: 6px; background: rgba(0, 0, 0, 0.35); font-size: 12px; font-weight: 700; }
+.slot-btn { flex: none; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: rgba(0, 0, 0, 0.3); }
+.slot-btn .icon { width: 13px; height: 13px; }
+.slot-btn.up .icon { transform: rotate(90deg); }
+.slot-btn.down .icon { transform: rotate(90deg); }
+.slot-btn.del:hover { background: #b91c1c; }
+.builder-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: 0 8px 8px; }
+.builder-btns button { display: flex; align-items: center; justify-content: center; gap: 4px; height: 38px; border-radius: 8px; color: #fff; font-size: 13px; font-weight: 800; }
+.builder-btns button:active { transform: scale(0.96); }
+.builder-btns .icon { width: 15px; height: 15px; }
+.b-play { background: #4f46e5; }
+.b-save { background: #e11d48; }
+.b-add { background: #059669; }
+.seq-now { display: flex; align-items: center; gap: 8px; margin: 0 8px 8px; padding: 6px 6px 6px 10px; border-radius: 10px; background: #b45309; color: #fff; font-weight: 800; }
+.seq-now.hidden { display: none; }
+.seq-now-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.seq-now button { width: 34px; height: 30px; display: grid; place-items: center; border-radius: 8px; background: rgba(0, 0, 0, 0.3); }
+.seq-now .icon { width: 15px; height: 15px; }
+.builder-heading { display: flex; align-items: baseline; gap: 8px; margin: 10px 8px 6px; font-size: 13px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.85; }
+.builder-heading small { font-size: 11px; font-weight: 600; letter-spacing: 0; text-transform: none; opacity: 0.75; }
+.builder-search { margin: 0 8px 6px; }
+.cl3-card .show-time { right: 66px; }
+/* A cL3 playing in the rundown: ⏭ NEXT, just above its OFF button */
+.show-next {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  background: #b45309;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+}
+.show-next .icon { width: 11px; height: 11px; }
+.show-next:active { transform: scale(0.94); }
+.show-card.live-seq .show-offair { top: auto; bottom: 4px; transform: none; }
+.show-card.live-seq .show-offair:active { transform: scale(0.94); }
+
+/* Expand all / Collapse all, above the lower third sections */
+.expand-row { display: flex; justify-content: flex-end; }
+.expand-row button { padding: 1px 8px; border-radius: 6px; font-size: 12px; font-weight: 700; opacity: 0.75; }
+.expand-row button:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); }
 #l3-section.space-y-2 > :not([hidden]) ~ :not([hidden]) { margin-top: 6px; }
 .fx-section[open] > summary::after { transform: rotate(-135deg); margin-bottom: -4px; }
 .fx-value {
@@ -1103,6 +1177,12 @@ html.light .rundown-btn:not(.on) { border-color: #9ca3af; background: #fff; }
 html.light .show-ctl:not(.on) { border-color: #9ca3af; background: #fff; }
 html.light .pj-tool:not(.on) { border-color: #9ca3af; background: #fff; }
 html.light .rundown-mode { border-color: #9ca3af; }
+html.light .builder-slot { border-color: #d1d5db; background: #fff; }
+html.light .builder-slot.empty { color: #6b7280; }
+html.light .builder-slot.target { border-color: #d97706; box-shadow: inset 0 0 0 1px #d97706; }
+html.light .slot-num { background: #e5e7eb; }
+html.light .slot-time { background: rgba(0, 0, 0, 0.08); }
+html.light .slot-btn { background: rgba(0, 0, 0, 0.08); color: #374151; }
 html.light .rundown-mode button:not(.active) { background: #fff; }
 html.light #timer-btn.going { border-color: #0369a1; color: #0369a1; }
 html.light .timer-box { background: #f0f9ff; border-color: #7dd3fc; }
@@ -1275,17 +1355,30 @@ html.light .tm-error { color: #b91c1c; }
    5. LOWER THIRD BACKGROUNDS
    To add one: add a class here, a button in the "Backgrounds"
    section of fx_wizard.html, and its name in BG_CLASSES.
+   The GIF is drawn on its own layer behind the text (#display-box::before), so each new frame
+   only redraws the picture, not the name and title and their shadows. The GIFs are cropped to
+   the middle band the box can ever show (800x330; the box is about 172px tall at 1080p).
    ========================================================= */
-.blue     { background: url('../assets/blueGif.gif'); }
-.green    { background: url('../assets/greenGif.gif'); }
-.black    { background: url('../assets/blackGif.gif'); }
-.red      { background: url('../assets/redGif.gif'); }
-.space    { background: url('../assets/space.gif'); }
-.clouds   { background: url('../assets/clouds.gif'); }
-.tech     { background: url('../assets/tech.gif'); }
-.finance  { background: url('../assets/finance.gif'); }
-.sports   { background: url('../assets/sports.gif'); }
-.politics { background: url('../assets/politics.gif'); }
+#display-box::before {
+  content: '';
+  position: absolute;
+  inset: -3px; /* under the double border too, as before */
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--l3-bg, none) center / cover;
+  will-change: transform; /* its own layer */
+  pointer-events: none;
+}
+.blue     { --l3-bg: url('../assets/blueGif.gif'); }
+.green    { --l3-bg: url('../assets/greenGif.gif'); }
+.black    { --l3-bg: url('../assets/blackGif.gif'); }
+.red      { --l3-bg: url('../assets/redGif.gif'); }
+.space    { --l3-bg: url('../assets/space.gif'); }
+.clouds   { --l3-bg: url('../assets/clouds.gif'); }
+.tech     { --l3-bg: url('../assets/tech.gif'); }
+.finance  { --l3-bg: url('../assets/finance.gif'); }
+.sports   { --l3-bg: url('../assets/sports.gif'); }
+.politics { --l3-bg: url('../assets/politics.gif'); }
 
 
 /* =========================================================
@@ -1480,7 +1573,8 @@ html.light .tm-error { color: #b91c1c; }
 #overlay-gif {
   position: absolute;
   display: none;
-  background-image: url('../assets/largeGif.gif');
+  background-image: url('../assets/largeGif.gif'); /* cropped to the middle 800x150 band the bar shows */
+  will-change: transform; /* its own layer: each GIF frame doesn't redraw the text over it */
   left: 18.5vw;  /* (100vw - width) / 2 */
   top: 72.5vh;
   width: 63vw;
@@ -1752,7 +1846,8 @@ html.light .tm-error { color: #b91c1c; }
 
 /* ---------- Location: a map pin and the place, top left, like a live report ----------
    The pin slides in from the right and the place from the left, so they cross as they meet (the pin
-   passes over); the pin gives a little bounce once it lands. At the end the overlay fades out. */
+   passes over); the pin gives a little bounce once it lands. At the end it all slides off to the left as
+   one block, like L3 PNG. */
 #locpin {
   position: absolute;
   inset: 0;
@@ -1768,7 +1863,6 @@ html.light .tm-error { color: #b91c1c; }
   display: flex;
   align-items: stretch;
   height: 8.5vh;
-  filter: drop-shadow(0 0.6vh 1.4vh rgba(0, 0, 0, 0.5));
 }
 .lp-pin {
   position: relative;
@@ -1780,6 +1874,7 @@ html.light .tm-error { color: #b91c1c; }
   border-radius: 1vh 0 0 1vh;
   background: linear-gradient(#e3101f, #a5000b);
   color: #fff;
+  box-shadow: 0 0.6vh 1.4vh rgba(0, 0, 0, 0.5); /* each piece has its own shadow, drawn once (a filter on the bug would redraw every frame) */
   animation: lpPinIn 1s cubic-bezier(0.22, 0.9, 0.25, 1) both;
 }
 .lp-pin svg { width: 5vh; height: 5vh; fill: currentColor; animation: lpPinBounce 0.5s 0.95s ease-out both; }
@@ -1790,6 +1885,7 @@ html.light .tm-error { color: #b91c1c; }
   border-left: 0.5vh solid #fff;
   border-radius: 0 1vh 1vh 0;
   background: rgba(12, 14, 24, 0.88);
+  box-shadow: 0 0.6vh 1.4vh rgba(0, 0, 0, 0.5);
   color: #fff;
   font-size: 5vh;
   font-weight: 600;
