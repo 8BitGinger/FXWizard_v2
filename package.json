@@ -4,7 +4,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "build:css": "tailwindcss -i css/tailwind.src.css -o css/tailwind.css --minify"
   },
   "keywords": [],
   "author": "",
@@ -20,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/8BitGinger/obsWebsocket/issues"
   },
-  "homepage": "https://github.com/8BitGinger/obsWebsocket#readme"
+  "homepage": "https://github.com/8BitGinger/obsWebsocket#readme",
+  "devDependencies": {
+    "tailwindcss": "3.4.17"
+  }
 }

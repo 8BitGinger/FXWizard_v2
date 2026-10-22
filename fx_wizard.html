@@ -3,27 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,700&family=Bona+Nova+SC:ital,wght@0,400;0,700;1,400&family=Cal+Sans&family=Changa+One:ital@0;1&family=Limelight&family=Lobster&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Oswald:wght@200..700&family=Space+Grotesk:wght@300..700&family=VT323&display=swap" rel="stylesheet">
+    <!-- Everything the page needs is in this folder, so the panel and the display work with no internet:
+         the fonts (assets/fonts), the styles, and Tailwind's layout classes (css/tailwind.css, built with
+         "npm run build:css"; see tailwind.config.js). Tailwind comes after styles.css, as it always has. -->
+    <link rel="stylesheet" href="./css/fonts.css">
     <link rel="stylesheet" href="./css/styles.css">
     <title>FX Wizard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Tailwind color names used in the page (bg-primary etc.) -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'primary': '#6D28D9',
-                        'secondary': '#C4A127',
-                        'bg-dark': '#333333',
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="./css/tailwind.css">
 </head>
 <body class="bg-bg-dark text-white min-h-screen w-full p-0">
 
@@ -40,8 +26,20 @@
 
         <!-- ===== TOGGLE BAR (controller only) ===== -->
         <div id="toggle-bar" class="mb-1 text-xs py-1 px-3 bg-gray-700 w-full flex items-center gap-2">
+            <!-- The show open now (its number and title; a dot when there are changes since it was saved).
+                 Tap it to save the show, or open another from the shows folder. -->
+            <button type="button" id="show-chip" class="show-chip" onclick="openShowsDialog()" title="Shows: save this show, or open another">
+                <span data-icon="folder"></span><span id="show-chip-text" class="show-chip-text"></span><span id="show-chip-dirty" class="show-chip-dirty hidden"></span>
+            </button>
+            <!-- Simple mode: pick a theme, and its lower third, overlays, stingers and sounds are all on one page.
+                 It says "Pro" while it's off (the full panel, with the tabs) and "Simple" while it's on. -->
+            <label class="fx-switch ml-auto" title="Simple mode: pick a theme and use its own lower thirds, overlays, stingers and sounds">
+                <span id="simple-switch-text">Pro</span>
+                <input type="checkbox" id="simple-toggle">
+                <span class="fx-track"></span>
+            </label>
             <!-- Light / dark switch (dark is the default). The icon shows the current mode. -->
-            <label class="fx-switch ml-auto" title="Light / dark mode">
+            <label class="fx-switch" title="Light / dark mode">
                 <span id="theme-icon" class="text-base leading-none"></span>
                 <input type="checkbox" id="light-toggle">
                 <span class="fx-track"></span>
@@ -49,19 +47,56 @@
         </div>
 
         <!-- ===== CONTROLLER ===== -->
-        <div id="controller-view" class="pb-20 hidden controller-max-width mx-auto">
+        <div id="controller-view" class="pb-28 hidden controller-max-width mx-auto">
+            <!-- ===== SIMPLE MODE (the Simple switch in the top bar) =====
+                 Everything on one page, in the look of the theme picked: its lower third (TAKE, TOGGLE, SAVE,
+                 and the saved L3s, which all take in the theme's look), then its overlays, stingers and sounds.
+                 The tabs come back when Simple is turned off. Filled in by the script (THEMES). -->
+            <div id="simple-section" class="simple-section">
+                <div class="simple-label">Theme</div>
+                <div id="simple-themes" class="simple-themes"></div>
+                <section class="simple-card">
+                    <h3>Lower third <small id="simple-l3-look"></small></h3>
+                    <input type="text" id="simple-name" placeholder="Name" maxlength="50" autocomplete="off" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm text-violet-300 focus:text-white focus:bg-gray-700">
+                    <input type="text" id="simple-title" placeholder="Title (optional)" maxlength="50" autocomplete="off" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm text-violet-300 focus:text-white focus:bg-gray-700">
+                    <div id="simple-where" class="simple-where"></div>
+                    <div id="simple-len" class="simple-where simple-len"></div>
+                    <div class="simple-btns">
+                        <button type="button" class="s-take" onclick="simpleTake()"><span data-icon="zap"></span> TAKE</button>
+                        <button type="button" id="simple-toggle-btn" class="s-toggle" onclick="simpleToggle()">TOGGLE ON</button>
+                        <button type="button" class="s-save" onclick="simpleSave()" title="Keep it in the saved L3s"><span data-icon="save"></span> SAVE</button>
+                    </div>
+                    <div id="simple-saved-head" class="simple-saved-head"></div>
+                    <div id="simple-saved" class="simple-saved"></div>
+                </section>
+                <section class="simple-card">
+                    <h3>Overlays</h3>
+                    <div id="simple-overlays" class="simple-fx"></div>
+                </section>
+                <section class="simple-card">
+                    <h3>Stingers</h3>
+                    <div id="simple-stingers" class="simple-fx"></div>
+                </section>
+                <section class="simple-card">
+                    <h3>Sounds</h3>
+                    <div id="simple-sounds" class="simple-pads"></div>
+                </section>
+            </div>
+
             <div class="space-y-3 p-2 rounded-lg w-full">
 
-                <!-- Tabs, as icons: Animated L3s / Fullscreen Overlays / Podcast Rundown / L3 Builder -->
-                <div id="mode-tabs" class="mode-tabs grid grid-cols-4 gap-1 text-sm">
+                <!-- Tabs, as icons: Animated L3s / Fullscreen Overlays / L3 Builder / Podcast Rundown / Sound Pad -->
+                <div id="mode-tabs" class="mode-tabs grid grid-cols-5 gap-1 text-sm">
                     <input type="radio" id="mode-l3" name="mode" value="l3" checked class="hidden peer/m1">
                     <label for="mode-l3" title="Animated L3s" aria-label="Animated L3s" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m1:bg-primary"><span data-icon="l3"></span></label>
                     <input type="radio" id="mode-overlay" name="mode" value="overlay" class="hidden peer/m2">
                     <label for="mode-overlay" title="Fullscreen Overlays" aria-label="Fullscreen Overlays" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m2:bg-primary"><span data-icon="sparkles"></span></label>
-                    <input type="radio" id="mode-show" name="mode" value="show" class="hidden peer/m3">
-                    <label for="mode-show" title="Podcast Rundown" aria-label="Podcast Rundown" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m3:bg-primary"><span data-icon="list"></span></label>
                     <input type="radio" id="mode-builder" name="mode" value="builder" class="hidden peer/m4">
                     <label for="mode-builder" title="L3 Builder" aria-label="L3 Builder" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m4:bg-primary"><span data-icon="stack"></span></label>
+                    <input type="radio" id="mode-show" name="mode" value="show" class="hidden peer/m3">
+                    <label for="mode-show" title="Podcast Rundown" aria-label="Podcast Rundown" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m3:bg-primary"><span data-icon="list"></span></label>
+                    <input type="radio" id="mode-sound" name="mode" value="sound" class="hidden peer/m5">
+                    <label for="mode-sound" title="Sound Pad" aria-label="Sound Pad" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m5:bg-primary"><span data-icon="sound"></span></label>
                 </div>
 
                 <!-- Text: Name and Title, or one paragraph for L3 Info -->
@@ -167,6 +202,14 @@
                             <input type="radio" id="ov-stpatricks" name="overlayStyle" value="stpatricks" class="hidden peer/o25">
                             <label for="ov-stpatricks" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o25:bg-primary">St. Patrick's</label>
 
+                            <!-- Comic: POW! ZAP! BAM! bursts pop in around the edges, with halftone dots in the corners -->
+                            <input type="radio" id="ov-comic" name="overlayStyle" value="comic" class="hidden peer/o33">
+                            <label for="ov-comic" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o33:bg-primary">Comic</label>
+
+                            <!-- Disco Ball: a mirror ball drops down and spins, throwing spots of light around the screen -->
+                            <input type="radio" id="ov-disco" name="overlayStyle" value="disco" class="hidden peer/o34">
+                            <label for="ov-disco" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o34:bg-primary">Disco Ball</label>
+
                             <input type="radio" id="ov-breaking" name="overlayStyle" value="breaking" class="hidden peer/o17">
                             <label for="ov-breaking" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o17:bg-primary">Breaking News</label>
 
@@ -217,6 +260,22 @@
 
                             <input type="radio" id="ov-fireworks" name="overlayStyle" value="fireworks" class="hidden peer/o27">
                             <label for="ov-fireworks" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o27:bg-primary">Fireworks</label>
+
+                            <!-- 8-Bit: chunky pixel blocks stair-step across the screen, a pixel star bounces, then they wipe away -->
+                            <input type="radio" id="ov-pixel" name="overlayStyle" value="pixel" class="hidden peer/o35">
+                            <label for="ov-pixel" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o35:bg-primary">8-Bit</label>
+
+                            <!-- Cat: paws grab the bottom edge, a giant cat face rises up to fill the screen, blinks, then ducks back down -->
+                            <input type="radio" id="ov-cat" name="overlayStyle" value="cat" class="hidden peer/o36">
+                            <label for="ov-cat" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o36:bg-primary">Cat</label>
+
+                            <!-- Curtains: red velvet theater curtains close in from both sides, then are pulled back and slide away -->
+                            <input type="radio" id="ov-curtains" name="overlayStyle" value="curtains" class="hidden peer/o37">
+                            <label for="ov-curtains" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o37:bg-primary">Curtains</label>
+
+                            <!-- Coffee: a cup slides in, then the camera zooms into the foam: latte art of a heart around "Mom" (or your own text) -->
+                            <input type="radio" id="ov-coffee" name="overlayStyle" value="coffee" class="hidden peer/o38">
+                            <label for="ov-coffee" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o38:bg-primary">Coffee</label>
                         </div>
                     </details>
 
@@ -267,6 +326,12 @@
                             <input type="radio" id="bg-clouds" name="bgStyle" value="clouds" class="hidden peer/b6">
                             <label for="bg-clouds" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b6:bg-sky-600">Clouds</label>
 
+                            <input type="radio" id="bg-fantasy" name="bgStyle" value="fantasy" class="hidden peer/b12">
+                            <label for="bg-fantasy" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b12:bg-indigo-600">Fantasy</label>
+
+                            <input type="radio" id="bg-code" name="bgStyle" value="code" class="hidden peer/b13">
+                            <label for="bg-code" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b13:bg-lime-700">Code</label>
+
                             <input type="radio" id="bg-tech" name="bgStyle" value="tech" class="hidden peer/b7">
                             <label for="bg-tech" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b7:bg-teal-500">Tech</label>
 
@@ -278,6 +343,13 @@
 
                             <input type="radio" id="bg-politics" name="bgStyle" value="politics" class="hidden peer/b10">
                             <label for="bg-politics" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b10:bg-rose-800">Politics</label>
+
+                            <input type="radio" id="bg-holiday" name="bgStyle" value="holiday" class="hidden peer/b14">
+                            <label for="bg-holiday" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b14:bg-red-600">Holiday</label>
+
+                            <!-- Café: warm coffee-shop light, drifting bokeh and steam (the Lifestyle theme's look) -->
+                            <input type="radio" id="bg-cafe" name="bgStyle" value="cafe" class="hidden peer/b15">
+                            <label for="bg-cafe" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b15:bg-amber-800">Café</label>
 
                             <!-- Custom: uses the first image in the "custom" folder (next to "assets") -->
                             <input type="radio" id="bg-custom" name="bgStyle" value="custom" data-custom="bg" class="hidden peer/b11">
@@ -391,12 +463,13 @@
                         <button id="add-rundown-btn" class="py-1.5 hover:bg-emerald-700 w-full active:scale-95 bg-emerald-600 font-bold rounded" onclick="addCurrentToRundown()" title="Add to the Podcast Rundown, under Unsorted">＋ RUNDOWN</button>
                     </div>
                 </div>
-                <button id="clear-btn" class="py-1 w-full hover:bg-gray-500 active:scale-95 bg-gray-700 border-2 border-red-400 text-red-300 font-bold rounded" onclick="clearAll()"><span data-icon="x"></span> CLEAR ALL</button>
             </div>
 
             <!-- Message box ("Taken: Name for 5s"): floats at the bottom of the panel on every tab,
                  lights up for each new message, then dims but keeps showing the last one -->
             <div id="controller-feedback" class="fx-toast idle" role="status" aria-live="polite">Ready</div>
+            <!-- CLEAR ALL floats under the message box, on every tab and in Simple mode, so it never needs a scroll -->
+            <button id="clear-btn" type="button" class="fx-clear" onclick="clearAll()"><span data-icon="x"></span> CLEAR ALL</button>
 
             <!-- Saved graphics for the current tab (filled in by the script) -->
             <div id="saved-wrap" class="w-full">
@@ -562,6 +635,23 @@
                 <!-- Planned length of the whole show, the graphics' total, and (during the show) the time so far -->
                 <div id="show-totals" class="show-totals"></div>
                 <div id="show-list" class="flex flex-col p-1 pt-0"></div>
+            </div>
+
+            <!-- ===== SOUND PAD TAB =====
+                 Six pads, each plays one sound from assets/sounds on the display (so it goes out through OBS).
+                 Keys 1-6 hit them too while this tab is open. Filled in by the script (SOUNDS). -->
+            <div id="sound-section" class="w-full hidden">
+                <div class="flex items-center gap-2 mb-2 pb-1 px-2 border-b border-gray-600">
+                    <h2 class="text-base font-bold">Sound Pad</h2>
+                    <button type="button" title="Stop every sound that's playing" onclick="stopSounds()" class="sound-stop ml-auto"><span data-icon="stop"></span> STOP</button>
+                </div>
+                <div id="sound-pads" class="sound-pads"></div>
+                <!-- Volume for every pad (remembered). The OBS mixer still sets the overall level. -->
+                <label class="sound-volume" title="Volume of the pads (the browser source's slider in OBS sets the overall level)">
+                    <span data-icon="sound"></span>
+                    <input type="range" id="sound-volume" min="0" max="100" step="5">
+                    <span id="sound-volume-value"></span>
+                </label>
             </div>
 
             <!-- ===== L3 BUILDER TAB =====
@@ -746,6 +836,51 @@
                     <button value="close" class="py-2 rounded bg-gray-500 font-bold">Close</button>
                 </form>
             </dialog>
+
+            <!-- Shows: save everything the panel is set to as a numbered show in the "shows" folder, or open another -->
+            <dialog id="shows-dialog">
+                <form method="dialog" class="flex flex-col gap-2">
+                    <h3 class="font-bold">Shows</h3>
+                    <p id="shows-current" class="shows-current"></p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" class="rundown-btn" onclick="saveShowFile(false)" title="Save over the show open now"><span data-icon="save"></span> Save</button>
+                        <button type="button" class="rundown-btn" onclick="saveShowFile(true)" title="Save it as a new show, with its own number"><span data-icon="copy"></span> Save as…</button>
+                    </div>
+                    <section class="tm-sec">
+                        <h4>Open a show</h4>
+                        <p id="shows-note" class="text-xs opacity-75"></p>
+                        <div id="shows-list" class="flex flex-col gap-1 max-h-72 overflow-y-auto"></div>
+                        <button type="button" class="py-1.5 rounded bg-gray-600 text-white text-sm font-bold" onclick="$('show-file').click()"><span data-icon="file"></span> Choose a file…</button>
+                    </section>
+                    <button value="close" class="py-2 rounded bg-gray-500 font-bold">Close</button>
+                </form>
+            </dialog>
+            <input type="file" id="show-file" accept=".json,application/json" class="hidden">
+
+            <!-- Saving a show: its title and number (001 to 999) -->
+            <dialog id="show-save-dialog">
+                <form method="dialog" class="flex flex-col gap-2">
+                    <h3 class="font-bold">Save the show</h3>
+                    <label class="tm-field">Title <input type="text" id="show-title" maxlength="50" autocomplete="off" placeholder="Like Morning Show"></label>
+                    <label class="tm-field">Number (001 to 999) <input type="text" id="show-number" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="001"></label>
+                    <p id="show-save-note" class="text-xs opacity-75"></p>
+                    <div class="grid grid-cols-2 gap-2 mt-1">
+                        <button type="button" class="py-2 rounded bg-gray-500 font-bold" onclick="this.closest('dialog').close('cancel')">Cancel</button>
+                        <button value="save" class="py-2 rounded bg-indigo-600 text-white font-bold">Save</button>
+                    </div>
+                </form>
+            </dialog>
+
+            <!-- Opening another show while this one has changes: save them first, lose them, or stay -->
+            <dialog id="show-ask-dialog">
+                <form method="dialog" class="flex flex-col gap-2">
+                    <h3 class="font-bold">Save this show first?</h3>
+                    <p id="show-ask-text" class="text-sm"></p>
+                    <button value="save" class="py-2 rounded bg-indigo-600 text-white font-bold">Save, then open</button>
+                    <button value="discard" class="py-2 rounded bg-rose-700 text-white font-bold">Open without saving</button>
+                    <button value="cancel" class="py-2 rounded bg-gray-500 font-bold">Cancel</button>
+                </form>
+            </dialog>
         </div>
 
         <!-- ===== DISPLAY (what OBS shows, opened with #display) ===== -->
@@ -795,6 +930,8 @@
         <div id="display-view" class="hidden">
             <!-- Lower third -->
             <div id="display-box" class="shadow-inner">
+                <!-- The background video (assets/<name>.webm), behind the text. Custom images use #display-box::before. -->
+                <video id="l3-video" muted loop playsinline preload="auto" aria-hidden="true"></video>
                 <p id="action-name" class="text-6xl font-black text-center text-white text-shadow break-words max-w-full"></p>
                 <h4 id="action-title" class="text-5xl font-bold text-center text-white text-shadow break-words max-w-full"></h4>
             </div>
@@ -886,11 +1023,13 @@
                                     <stop offset="0.5" style="stop-color: var(--ghost-body)"/>
                                     <stop offset="1" style="stop-color: var(--ghost-tail)"/>
                                 </linearGradient>
-                                <filter id="ghost-blur" x="-25%" y="-25%" width="150%" height="150%">
-                                    <feGaussianBlur stdDeviation="9"/>
-                                </filter>
                             </defs>
-                            <use href="#ghost-path" class="ghost-glow"/>
+                            <!-- The aura: soft strokes stacked from wide and faint to narrow and bright (a blur
+                                 filter here was redrawn by the CPU every frame, and stalled the first take) -->
+                            <use href="#ghost-path" class="ghost-glow g1"/>
+                            <use href="#ghost-path" class="ghost-glow g2"/>
+                            <use href="#ghost-path" class="ghost-glow g3"/>
+                            <use href="#ghost-path" class="ghost-glow g4"/>
                             <use href="#ghost-path" class="ghost-shape"/>
                             <ellipse class="ghost-face" cx="80" cy="88" rx="7" ry="10"/>
                             <ellipse class="ghost-face" cx="120" cy="88" rx="7" ry="10"/>
@@ -975,7 +1114,11 @@
            18. Controller: running the show (current item, block times, messages, log)
            19. Controller: show timing (show times, breaks, runtime, AKTA, break scenes, hotkeys)
            20. Projector (fx_wizard.html#projector)
-           21. Startup
+           21. Sound Pad (the pads on the controller, the player on the display)
+           22. Controller: remembered picks (what's picked on each tab)
+           23. Controller: shows (saved, numbered shows in the "shows" folder)
+           24. Controller: Simple mode (themes)
+           25. Startup
            ========================================================= */
 
 
@@ -1013,7 +1156,8 @@
         //   ticker:  true = one text box, scrolled along the Breaking News bar
         //   sport:   true = shows the Sport picker (Football, Basketball, Baseball, Soccer)
         //   social:  true = shows the Socials picker (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web)
-        //   caption: one optional line of text, with this as the default (Hot Take)
+        //   caption: one optional line of text, with this as the default (Hot Take, Coffee)
+        //   max:     the most characters that text can have (default 40)
         //   place:   one line of text, the place (Location)
         //   dur:     usual time in seconds, filled in when it's picked (not for stingers)
         //   depth:   true = shows a Greenscreen switch; taken with it on, it splits: the far part shows
@@ -1043,6 +1187,8 @@
             vhs:       { label: 'Retro VHS',  text: false, dur: 15, effect: 'vhs', animIn: 'anim-fade', animOut: 'anim-hide' },
             rain:      { label: 'Rain',       text: false, dur: 15, effect: 'rain', animIn: 'anim-fade', animOut: 'anim-hide', depth: true },
             vday:      { label: 'V-Day',      text: false, dur: 15, effect: 'vday', animIn: 'anim-fade', animOut: 'anim-hide', depth: true },
+            comic:     { label: 'Comic',      text: false, dur: 10, effect: 'comic', animIn: 'anim-fade', animOut: 'anim-hide' },
+            disco:     { label: 'Disco Ball', text: false, dur: 15, effect: 'disco', animIn: 'anim-fade', animOut: 'anim-hide' },
             locpin:    { label: 'Location',   text: false, dur: 8, place: true, effect: null, animIn: '', animOut: 'anim-slideOutLeft' }, // leaves as one block, like L3 PNG
             // Stingers: CSS stinger lengths are read from styles.css, so the speed is only set there
             stinger:   { label: 'Standard', text: false, effect: null, animIn: '', animOut: '',
@@ -1062,6 +1208,10 @@
             medical:   { label: 'Medical', text: false, effect: 'medical',  animIn: '', animOut: '', length: 2.4 },
             hearts:    { label: 'Hearts',  text: false, effect: 'hearts',   animIn: '', animOut: '', length: 2.6 },
             firestinger: { label: 'Fire',  text: false, effect: 'firestinger', animIn: '', animOut: '', length: 2.4 },
+            pixel:     { label: '8-Bit',   text: false, effect: 'pixel',    animIn: '', animOut: '', length: 2.6 },
+            cat:       { label: 'Cat',     text: false, effect: 'cat',      animIn: '', animOut: '', length: 2.8 },
+            curtains:  { label: 'Curtains', text: false, effect: 'curtains', animIn: '', animOut: '', length: 3 },
+            coffee:    { label: 'Coffee',  text: false, caption: 'Mom', max: 14, effect: 'coffee', animIn: '', animOut: '', length: 3.4 },
         };
 
         // Overlays with one text box instead of Name and Title (L3 Info, Breaking News, Hot Take, Location):
@@ -1097,18 +1247,33 @@
         };
         const socialIcon = (key) => `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${SOCIALS[key].icon}</svg>`;
 
-        // Sports stinger choices
-        const SPORTS = { football: 'Football', basketball: 'Basketball', baseball: 'Baseball', soccer: 'Soccer' };
+        // Sound Pad: one pad each, in this order (keys 1-6). file is in assets/sounds; c1/c2 are the pad's colors.
+        // The keys are what the display is told to play, so don't rename them.
+        const SOUNDS = [
+            { key: 'victory',  label: 'Victory',      file: 'victory.mp3',    icon: '🏆', c1: '#ffc400', c2: '#ff6d00' },
+            { key: 'trombone', label: 'Sad Trombone', file: 'trombone.mp3',   icon: '🎺', c1: '#5c7cff', c2: '#7b2ff7' },
+            { key: 'comedy',   label: 'Comedy',       file: 'comedy.mp3',     icon: '😂', c1: '#ff5fa2', c2: '#e0218a' },
+            { key: 'mystery',  label: 'Mystery',      file: 'mystery.mp3',    icon: '🔮', c1: '#9d4dff', c2: '#3a1c9e' },
+            { key: 'swish',    label: 'Swish',        file: 'swish.mp3',      icon: '💨', c1: '#1de9b6', c2: '#00a3c4' },
+            { key: 'censor',   label: 'Censor Beep',  file: 'censorBeep.mp3', icon: '🤐', c1: '#ff4b3e', c2: '#b3001b' },
+        ];
+        const soundPath = (s) => `./assets/sounds/${encodeURIComponent(s.file)}`;
 
-        // Lower third font styles and backgrounds (must match the classes in styles.css)
+        // Sports stinger choices
+        const SPORTS ={ football: 'Football', basketball: 'Basketball', baseball: 'Baseball', soccer: 'Soccer' };
+
+        // Lower third font styles (must match the classes in styles.css)
         const FONT_CLASSES = ['font-default', 'font-script', 'font-fun', 'font-modern', 'font-classic', 'font-accent'];
-        const BG_CLASSES = ['blue', 'green', 'black', 'red', 'space', 'clouds', 'tech', 'finance', 'sports', 'politics'];
+        // Lower third backgrounds: each one plays assets/<name>.webm behind the text
+        const BG_VIDEOS = ['blue', 'green', 'black', 'red', 'space', 'clouds', 'fantasy', 'code', 'tech', 'finance', 'sports', 'politics', 'holiday', 'cafe'];
+        const bgVideoPath = (name) => `./assets/${name}.webm`;
 
         // Colored left edge on saved buttons: lower thirds by background, overlays by type
         const ACCENTS = {
             blue: 'border-blue-500', green: 'border-green-500', black: 'border-gray-300', red: 'border-red-500',
-            space: 'border-purple-400', clouds: 'border-sky-300', tech: 'border-teal-300', finance: 'border-emerald-500',
-            sports: 'border-orange-400', politics: 'border-rose-500', custom: 'border-fuchsia-300',
+            space: 'border-purple-400', clouds: 'border-sky-300', fantasy: 'border-indigo-400', code: 'border-lime-400',
+            tech: 'border-teal-300', finance: 'border-emerald-500',
+            sports: 'border-orange-400', politics: 'border-rose-500', holiday: 'border-red-400', cafe: 'border-amber-600', custom: 'border-fuchsia-300',
             l3Large: 'border-violet-400', kamc: 'border-blue-600', l3LargeAlt: 'border-emerald-400', l3Gif: 'border-fuchsia-400', l3Custom: 'border-pink-300',
             colorwave: 'border-pink-400', confetti: 'border-amber-400', stinger: 'border-cyan-400',
             fall: 'border-orange-500', snow: 'border-slate-100', fire: 'border-orange-600',
@@ -1118,6 +1283,8 @@
             arrested: 'border-indigo-400', hottake: 'border-orange-500', locpin: 'border-red-400',
             stpatricks: 'border-green-500', vhs: 'border-fuchsia-500', fireworks: 'border-yellow-400', medical: 'border-blue-500',
             rain: 'border-slate-300', vday: 'border-pink-400', hearts: 'border-rose-400', firestinger: 'border-orange-600',
+            comic: 'border-yellow-400', disco: 'border-fuchsia-400', pixel: 'border-lime-400', cat: 'border-orange-400',
+            curtains: 'border-red-600', coffee: 'border-amber-600',
         };
 
 
@@ -1185,6 +1352,7 @@
             search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
             x:      '<path d="M6 6l12 12M18 6L6 18"/>',
             stop:   '<rect x="6" y="6" width="12" height="12" rx="2" class="icon-fill"/>',
+            sound:  '<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 9a4 4 0 0 1 0 6M19 6.5a7.5 7.5 0 0 1 0 11"/>',
             pencil: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',
             prev:   '<path d="M15 5l-7 7 7 7"/>',
             l3:     '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M6 13h9M6 16h6"/>',
@@ -1280,20 +1448,21 @@
             name.style.color = data.fontColor || '';
             title.style.color = data.fontColor || '';
 
-            // Background
-            box.classList.remove(...BG_CLASSES);
-            // (The background is drawn on its own layer behind the text: see #display-box::before in styles.css)
+            // Background: a video for the built-in ones, the custom image on #display-box::before for Custom.
+            // The address is made absolute: a relative url() in a CSS variable is looked up from styles.css
+            // (css/custom/...), not from this page, and the image never shows.
             box.style.removeProperty('--l3-bg');
-            if (data.bgStyle === 'custom') { if (data.customBg) box.style.setProperty('--l3-bg', `url("${customPath(data.customBg)}")`); }
-            else if (data.bgStyle) box.classList.add(data.bgStyle);
+            if (data.bgStyle === 'custom' && data.customBg) box.style.setProperty('--l3-bg', `url("${new URL(customPath(data.customBg), location.href).href}")`);
+            setL3Video(BG_VIDEOS.includes(data.bgStyle) ? data.bgStyle : null);
 
-            // Position
+            // Position. On the right side of the screen the slanted edge is on the left, so it faces the middle.
             const loc = LOCATION_MAP[data.location];
             if (loc) {
                 box.style.top = loc.top; box.style.bottom = loc.bottom;
                 box.style.left = loc.left; box.style.right = loc.right;
                 box.style.margin = loc.margin;
             }
+            box.classList.toggle('slant-left', /Right$/.test(data.location || ''));
 
             // Show it, then hide it when the duration is up
             box.style.visibility = 'visible';
@@ -1308,8 +1477,25 @@
             if (l3Timeout) clearTimeout(l3Timeout);
             if (l3Cleanup) clearTimeout(l3Cleanup);
             playOut(box, l3Out);
-            // Fully hide after it's gone so nothing can get stuck on screen
-            l3Cleanup = setTimeout(() => { box.style.visibility = 'hidden'; }, l3Out === 'anim-hide' ? 600 : 750);
+            // Fully hide after it's gone so nothing can get stuck on screen (and stop the video playing unseen)
+            l3Cleanup = setTimeout(() => { box.style.visibility = 'hidden'; $('l3-video').pause(); }, l3Out === 'anim-hide' ? 600 : 750);
+        };
+
+        // Plays a background's video in the lower third (null = none). The same one taken again keeps playing
+        // where it is instead of loading again.
+        const setL3Video = (name) => {
+            const video = $('l3-video');
+            if (!name) {
+                video.pause();
+                video.removeAttribute('src');
+                video.load(); // lets go of the old file
+                video.hidden = true;
+                return;
+            }
+            const src = bgVideoPath(name);
+            if (video.getAttribute('src') !== src) video.src = src;
+            video.hidden = false;
+            video.play().catch(() => {}); // muted, so it's allowed to play on its own
         };
 
 
@@ -1341,6 +1527,35 @@
             const rand = (a, b) => a + Math.random() * (b - a);
             const clamp01 = (x) => Math.min(Math.max(x, 0), 1);
             const lerp = (a, b, k) => a + (b - a) * k;
+            // A full-screen layer that doesn't change while an effect plays (a vignette, a tint, scan lines, a
+            // backdrop), painted once and then stamped each frame with drawImage. Filling every pixel of the screen
+            // with a gradient or pattern, every frame, is the costliest thing an effect can do when OBS draws without
+            // the graphics chip; copying a ready-made picture takes a fraction of the time. paint(x) draws on the
+            // layer in screen units. Each is the size of the screen, so only the LAYER_KEEP used last are kept (about
+            // 5 MB each); taking the same effects again then starts straight away, without painting them again.
+            const LAYER_KEEP = 8;
+            const screenLayers = new Map();
+            const screenLayer = (key, paint) => {
+                const id = `${key}|${canvas.width}x${canvas.height}`;
+                let c = screenLayers.get(id);
+                if (c) {
+                    screenLayers.delete(id); // used now: to the back of the line
+                } else {
+                    c = Object.assign(document.createElement('canvas'), { width: canvas.width, height: canvas.height });
+                    const x = c.getContext('2d');
+                    x.scale(canvas.width / W, canvas.height / H);
+                    paint(x);
+                    while (screenLayers.size >= LAYER_KEEP) screenLayers.delete(screenLayers.keys().next().value); // the one unused longest
+                }
+                screenLayers.set(id, c);
+                return c;
+            };
+            const stampLayer = (key, paint, alpha = 1) => {
+                if (alpha <= 0) return;
+                ctx.globalAlpha = alpha;
+                ctx.drawImage(screenLayer(key, paint), 0, 0, W, H);
+                ctx.globalAlpha = 1;
+            };
             const shuffle = (list) => {
                 for (let i = list.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -1713,14 +1928,15 @@
             // Flame colors from newest (hottest) to oldest
             const FIRE_SPRITES = ['#fff3b0', '#ffd23f', '#ff8c1a', '#e8420f', '#8c1a05'].map(c => glowSprite(c));
             const fire = {
+                detail: 0.75, // flames over the whole bottom of the screen (see "detail" above)
                 init(durationSec, opts) {
                     this.d = depthOf(opts);
-                    // Flames are drawn at a third of the size on the bottom half of the screen, then scaled up:
-                    // they're soft glows, so it looks the same, and it's about half the drawing of half size
+                    // Flames are drawn at a quarter of the size on the bottom half of the screen, then scaled up:
+                    // they're soft glows, so it looks the same, for a fraction of the drawing
                     // (this many flames was the slowest effect, and Hot Take uses them too)
                     this.buf = this.buf || document.createElement('canvas');
-                    this.buf.width = Math.ceil(W / 3);
-                    this.buf.height = Math.ceil(H / 6);
+                    this.buf.width = Math.ceil(W / 4);
+                    this.buf.height = Math.ceil(H / 8);
                     this.bctx = this.buf.getContext('2d');
                     this.flames = [];
                     this.embers = [];
@@ -1735,13 +1951,14 @@
                     const bw = this.buf.width, bh = this.buf.height, sb = bh / 270, s = H / 1080;
                     const layer = this.d.layer;
                     if (layer !== 'front') {
-                        // New flames along the bottom edge
-                        const n = Math.round(0.045 * bw * dt);
+                        // New flames along the bottom edge: half as many as there were, each 30% bigger and a little
+                        // brighter, which looks the same for half the stamping
+                        const n = Math.round(0.0225 * bw * dt);
                         for (let i = 0; i < n; i++) {
                             const x = rand(-10, bw + 10), h = this.heat(x, t);
                             this.flames.push({
                                 x, y: bh + 6 * sb, vx: rand(-0.3, 0.3) * sb, vy: -rand(1.4, 2.6) * sb * (0.6 + h),
-                                r: rand(14, 24) * sb * (0.7 + 0.5 * h), life: 0, max: rand(30, 55) * (0.6 + h * 0.6),
+                                r: rand(14, 24) * sb * 1.3 * (0.7 + 0.5 * h), life: 0, max: rand(30, 55) * (0.6 + h * 0.6),
                                 phase: rand(0, Math.PI * 2),
                             });
                         }
@@ -1780,16 +1997,18 @@
                         for (const f of this.flames) {
                             const k = f.life / f.max;
                             const r = f.r * (1 - k * 0.6);
-                            b.globalAlpha = Math.pow(1 - k, 0.8) * 0.33;
+                            b.globalAlpha = Math.pow(1 - k, 0.8) * 0.45;
                             b.drawImage(FIRE_SPRITES[Math.min(4, Math.floor(k * 5))], f.x - r, f.y - r, r * 2, r * 2);
                         }
                         b.globalAlpha = 1;
                         // Warm glow along the bottom
-                        const g = ctx.createLinearGradient(0, H, 0, H * 0.55);
-                        g.addColorStop(0, 'rgba(255, 90, 0, 0.35)');
-                        g.addColorStop(1, 'rgba(255, 90, 0, 0)');
-                        ctx.fillStyle = g;
-                        ctx.fillRect(0, H * 0.55, W, H * 0.45);
+                        stampLayer('fire-glow', (x) => {
+                            const g = x.createLinearGradient(0, H, 0, H * 0.55);
+                            g.addColorStop(0, 'rgba(255, 90, 0, 0.35)');
+                            g.addColorStop(1, 'rgba(255, 90, 0, 0)');
+                            x.fillStyle = g;
+                            x.fillRect(0, H * 0.55, W, H * 0.45);
+                        });
                         ctx.drawImage(this.buf, 0, H / 2, W, H / 2);
                     } else {
                         // The fire behind lights the person from below
@@ -1813,6 +2032,7 @@
             // ---------- Storm stinger: storm clouds roll down over the screen with rain and lightning, then clear ----------
             const CLOUD_SPRITES = ['#1f232a', '#2c313a', '#3d434e'].map(c => glowSprite(c, 0.55, 128));
             const storm = {
+                detail: 0.75, // full-screen clouds and rain (see "detail" above)
                 init(durationSec) {
                     const s = H / 1080;
                     this.T = durationSec;
@@ -1905,16 +2125,20 @@
                         ctx.fillStyle = `rgba(205, 220, 255, ${a * 0.55})`;
                         ctx.fillRect(0, 0, W, H);
                         ctx.save();
-                        ctx.shadowColor = '#9ec5ff';
-                        ctx.shadowBlur = 30 * s;
-                        ctx.strokeStyle = `rgba(255, 255, 255, ${a})`;
-                        ctx.lineJoin = 'round';
+                        ctx.lineJoin = ctx.lineCap = 'round';
                         const line = (pts, w) => {
                             ctx.lineWidth = w;
                             ctx.beginPath();
                             pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
                             ctx.stroke();
                         };
+                        // The glow: wide, faint blue strokes under the bolt (a shadow blur here was redone every frame)
+                        for (const [w, ga] of [[34, 0.12], [18, 0.22]]) {
+                            ctx.strokeStyle = `rgba(158, 197, 255, ${a * ga})`;
+                            line(st.pts, w * s);
+                            st.branches.forEach(br => line(br, w * 0.55 * s));
+                        }
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${a})`;
                         line(st.pts, 4 * s);
                         st.branches.forEach(br => line(br, 2 * s));
                         ctx.restore();
@@ -1927,6 +2151,7 @@
             // light tint (so they look underwater too), big bubbles, and close fish swimming past.
             const FISH_COLORS = ['#ff8c1a', '#ffd23f', '#ff5e5b', '#4fc3f7'];
             const underwater = {
+                detail: 0.75, // full-screen water (see "detail" above)
                 init(durationSec, opts) {
                     this.d = depthOf(opts);
                     const front = this.d.layer === 'front';
@@ -1988,11 +2213,13 @@
                     // Water tint: lighter near the surface, deeper blue at the bottom.
                     // Behind a person it's deep; in front, just a light wash.
                     const [top, bottom] = layer === 'front' ? [0.14, 0.22] : layer === 'back' ? [0.55, 0.75] : [0.45, 0.65];
-                    const tint = ctx.createLinearGradient(0, 0, 0, H);
-                    tint.addColorStop(0, `rgba(20, 120, 170, ${top})`);
-                    tint.addColorStop(1, `rgba(0, 35, 70, ${bottom})`);
-                    ctx.fillStyle = tint;
-                    ctx.fillRect(0, 0, W, H);
+                    stampLayer(`water-${layer}`, (x) => {
+                        const tint = x.createLinearGradient(0, 0, 0, H);
+                        tint.addColorStop(0, `rgba(20, 120, 170, ${top})`);
+                        tint.addColorStop(1, `rgba(0, 35, 70, ${bottom})`);
+                        x.fillStyle = tint;
+                        x.fillRect(0, 0, W, H);
+                    });
 
                     if (layer !== 'front') {
                         // Light rays from the surface, slowly swaying
@@ -2065,11 +2292,13 @@
 
                     // Darker edges, like looking through water (in front of everything)
                     if (layer !== 'back') {
-                        const v = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
-                        v.addColorStop(0, 'rgba(0, 20, 40, 0)');
-                        v.addColorStop(1, 'rgba(0, 20, 40, 0.45)');
-                        ctx.fillStyle = v;
-                        ctx.fillRect(0, 0, W, H);
+                        stampLayer('water-edges', (x) => {
+                            const v = x.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
+                            v.addColorStop(0, 'rgba(0, 20, 40, 0)');
+                            v.addColorStop(1, 'rgba(0, 20, 40, 0.45)');
+                            x.fillStyle = v;
+                            x.fillRect(0, 0, W, H);
+                        });
                     }
                 },
             };
@@ -2178,7 +2407,7 @@
             // Baseball: home plate spins in on a patch of dirt. Soccer: a ball flies at the camera
             // and bounces back off it. Each one covers the whole screen between HOLD_START and HOLD_END.
             const sports = {
-                detail: (opts) => (opts.sport === 'basketball' ? 0.75 : 1), // dozens of balls (see "detail" above)
+                detail: (opts) => (opts.sport === 'soccer' ? 1 : 0.75), // dozens of balls, a field, a plate (see "detail" above)
                 init(durationSec, opts) {
                     this.kind = SPORTS[opts.sport] ? opts.sport : 'football';
                     this.T = durationSec;
@@ -2310,7 +2539,21 @@
                 // its own moment with a bounce, then they all fall away.
                 basketballInit() {
                     const R = H * 0.15, sp = 1.45 * R, rowH = sp * Math.sqrt(3) / 2;
-                    if (!this.ballSprite || this.ballSprite.R !== R) this.ballSprite = makeBasketballSprite(R);
+                    if (!this.ballSprite || this.ballSprite.R !== R) {
+                        this.ballSprite = makeBasketballSprite(R);
+                        // The ball turned to 24 angles, drawn once: dozens spin at a time, and stamping a ready-made
+                        // picture is much quicker than turning one every frame. Its lines look the same after half a
+                        // turn, so 24 steps over half a turn (7.5 degrees apart) spin smoothly.
+                        const spr = this.ballSprite, w = spr.width;
+                        this.spins = Array.from({ length: 24 }, (_, i) => {
+                            const c = Object.assign(document.createElement('canvas'), { width: w, height: w });
+                            const x = c.getContext('2d');
+                            x.translate(w / 2, w / 2);
+                            x.rotate(i * Math.PI / 24);
+                            x.drawImage(spr, -w / 2, -w / 2);
+                            return c;
+                        });
+                    }
                     this.ballR = R;
                     this.balls = [];
                     for (let row = 0, y = -0.3 * R; y < H + R; row++, y += rowH) {
@@ -2331,11 +2574,8 @@
                 // One ball: it spins; its shading (the light from above) doesn't
                 drawBall(c, x, y, angle) {
                     const spr = this.ballSprite, half = spr.width / 2;
-                    c.save();
-                    c.translate(x, y);
-                    c.rotate(angle);
-                    c.drawImage(spr, -half, -half);
-                    c.restore();
+                    const turn = ((angle % Math.PI) + Math.PI) % Math.PI; // the same ball every half turn
+                    c.drawImage(this.spins[Math.round(turn / (Math.PI / 24)) % 24], x - half, y - half);
                     c.drawImage(spr.shade, x - half, y - half);
                 },
                 basketballFrame(p, t) {
@@ -2658,7 +2898,7 @@
                 return c;
             };
             const spring = {
-                detail: 0.75, // dozens of flowers move at once (see "detail" above)
+                detail: 0.6, // dozens of flowers move at once (see "detail" above)
                 init(durationSec) {
                     this.T = durationSec;
                     const s = H / 1080;
@@ -2672,7 +2912,7 @@
                         this.leafImg = makeLeavesSprite();
                     }
                     // Flower spots in a loose honeycomb over the whole screen
-                    const R = H * 0.13, sp = 1.3 * R, rowH = sp * Math.sqrt(3) / 2;
+                    const R = H * 0.16, sp = 1.3 * R, rowH = sp * Math.sqrt(3) / 2; // bigger flowers, fewer of them (lighter work)
                     const spots = [];
                     for (let row = 0, y = 0; y < H + R; row++, y += rowH) {
                         for (let x = row % 2 ? sp / 2 : 0; x < W + R; x += sp) {
@@ -2712,13 +2952,13 @@
                     // A soft meadow behind the flowers: fades in as they fill the screen, out as they blow away
                     const bg = p < HOLD_START ? clamp01((p - 0.08) / 0.3) : p < 0.6 ? 1 : 1 - clamp01((p - 0.6) / 0.3);
                     if (bg > 0) {
-                        const g = ctx.createLinearGradient(0, 0, 0, H);
-                        g.addColorStop(0, '#dff7d0');
-                        g.addColorStop(1, '#94d88a');
-                        ctx.globalAlpha = bg;
-                        ctx.fillStyle = g;
-                        ctx.fillRect(0, 0, W, H);
-                        ctx.globalAlpha = 1;
+                        stampLayer('meadow', (x) => {
+                            const g = x.createLinearGradient(0, 0, 0, H);
+                            g.addColorStop(0, '#dff7d0');
+                            g.addColorStop(1, '#94d88a');
+                            x.fillStyle = g;
+                            x.fillRect(0, 0, W, H);
+                        }, bg);
                     }
                     // Flowers that have finished popping in sit still until the breeze takes them, so
                     // they're kept on a layer (drawn once) instead of being redrawn every frame
@@ -2881,8 +3121,7 @@
                     g.addColorStop(1, 'rgba(255, 255, 255, 0)');
                     ctx.fillStyle = g;
                     ctx.fillRect(0, by - H * 0.12, W, H * 0.24);
-                    ctx.fillStyle = this.lines;
-                    ctx.fillRect(0, 0, W, H);
+                    ctx.drawImage(screenLayer('static-lines', (x) => { x.fillStyle = this.lines; x.fillRect(0, 0, W, H); }), 0, 0, W, H);
                     ctx.globalAlpha = 1;
                 },
             };
@@ -2894,6 +3133,7 @@
             // them, with the red and blue lighting up its top.
             const POLICE_RED = '#ff1a2e', POLICE_BLUE = '#1f5bff';
             const arrested = {
+                detail: 0.75, // full-screen lights and a door (see "detail" above)
                 init(durationSec, opts) {
                     this.d = depthOf(opts);
                     this.T = durationSec;
@@ -3005,12 +3245,14 @@
                     if (layer !== 'front') {
                         ctx.fillStyle = rgba(color, 0.2 * k);
                         ctx.fillRect(0, 0, W, H);
-                        const gx = red ? 0 : W; // glow from the top corner on that side
-                        const g = ctx.createRadialGradient(gx, 0, 0, gx, 0, W * 0.75);
-                        g.addColorStop(0, rgba(color, 0.65 * k));
-                        g.addColorStop(1, rgba(color, 0));
-                        ctx.fillStyle = g;
-                        ctx.fillRect(0, 0, W, H);
+                        stampLayer(`police-${red ? 'red' : 'blue'}`, (x) => {
+                            const gx = red ? 0 : W; // glow from the top corner on that side
+                            const g = x.createRadialGradient(gx, 0, 0, gx, 0, W * 0.75);
+                            g.addColorStop(0, rgba(color, 0.65));
+                            g.addColorStop(1, rgba(color, 0));
+                            x.fillStyle = g;
+                            x.fillRect(0, 0, W, H);
+                        }, k);
                     }
                     if (layer !== 'back' && y > -H) {
                         const b = this.bctx;
@@ -3039,6 +3281,7 @@
             // and embers fly ----------
             // Greenscreen: the flames and the heat glow are behind the person; the badge and embers are in front.
             const hottake = {
+                detail: 0.6, // flames, a heat glow and a big badge (see "detail" above)
                 init(durationSec, opts) {
                     this.d = depthOf(opts);
                     this.text = String(opts.label || OVERLAYS.hottake.caption).toUpperCase();
@@ -3046,6 +3289,7 @@
                     document.fonts?.load('italic 700 120px "Barlow Condensed"');
                     // Heat: a warm glow in from the edges, drawn once at a quarter size (it's soft)
                     const q = 4;
+                    if (this.heat && this.heat.width === Math.ceil(W / q) && this.heat.height === Math.ceil(H / q)) return; // made already
                     this.heat = this.heat || document.createElement('canvas');
                     this.heat.width = Math.ceil(W / q);
                     this.heat.height = Math.ceil(H / q);
@@ -3056,15 +3300,14 @@
                     g.addColorStop(1, 'rgba(255, 70, 0, 0.35)');
                     hx.fillStyle = g;
                     hx.fillRect(0, 0, W, H);
-                    this.sprites = null;
+                    // (The badge is kept between takes too: badgeSprites makes it again only if the text, size or font changed)
                 },
                 frame(dt, t) {
                     const s = H / 1080, layer = this.d.layer;
                     fire.frame(dt, t);
                     if (layer !== 'front') {
-                        ctx.globalAlpha = (0.8 + 0.2 * Math.sin(t * 5)) * Math.min(1, t / 0.4); // it pulses
-                        ctx.drawImage(this.heat, 0, 0, W, H);
-                        ctx.globalAlpha = 1;
+                        // It pulses. Scaled up once to a full-screen layer, then stamped (scaling it every frame cost more)
+                        stampLayer('heat', (x) => x.drawImage(this.heat, 0, 0, W, H), (0.8 + 0.2 * Math.sin(t * 5)) * Math.min(1, t / 0.4));
                     }
                     if (layer !== 'back') this.badge(t, s);
                 },
@@ -3295,9 +3538,8 @@
                             this.sky.addColorStop(0.6, '#0a1038');
                             this.sky.addColorStop(1, '#1d1238');
                         }
+                        stampLayer('night-sky', (x) => { x.fillStyle = this.sky; x.fillRect(0, 0, W, H); }, cover);
                         ctx.globalAlpha = cover;
-                        ctx.fillStyle = this.sky;
-                        ctx.fillRect(0, 0, W, H);
                     }
                     // A flash at the halfway point
                     const fl = (t - 0.5 * this.T) / 0.35;
@@ -3389,11 +3631,11 @@
                         this.blue.addColorStop(0.5, '#1565d8');
                         this.blue.addColorStop(1, '#0b4aa8');
                     }
-                    ctx.fillStyle = this.blue;
-                    ctx.fill();
                     ctx.clip();
-                    ctx.fillStyle = this.grid;
-                    ctx.fillRect(0, 0, W, H);
+                    ctx.drawImage(screenLayer('medical-panels', (x) => {
+                        x.fillStyle = this.blue; x.fillRect(0, 0, W, H);
+                        x.fillStyle = this.grid; x.fillRect(0, 0, W, H);
+                    }), 0, 0, W, H);
                     // The heartbeat line, drawn up to its tip and fading out behind it
                     const lp = clamp01((p - 0.12) / 0.5), head = lerp(-0.05 * W, 1.05 * W, lp);
                     const fade = p > 0.66 ? 1 - clamp01((p - 0.66) / 0.15) : 1;
@@ -3544,6 +3786,7 @@
             };
             let STPAT = null; // the sprites, made the first time it's used
             const stpatricks = {
+                detail: 0.75, // dozens of shamrocks and coins (see "detail" above)
                 init(durationSec, opts) {
                     STPAT = STPAT || {
                         clovers: CLOVER_GREENS.map(c => makeClover(c, 3)),
@@ -3587,10 +3830,7 @@
                             this.vig.addColorStop(0, 'rgba(30, 170, 80, 0)');
                             this.vig.addColorStop(1, 'rgba(30, 170, 80, 0.4)');
                         }
-                        ctx.globalAlpha = 0.75 + 0.25 * Math.sin(t * 1.4);
-                        ctx.fillStyle = this.vig;
-                        ctx.fillRect(0, 0, W, H);
-                        ctx.globalAlpha = 1;
+                        stampLayer('shamrock-glow', (x) => { x.fillStyle = this.vig; x.fillRect(0, 0, W, H); }, 0.75 + 0.25 * Math.sin(t * 1.4));
                     }
                     for (const b of this.bits) {
                         const swing = Math.sin(t * b.freq + b.phase);
@@ -3709,10 +3949,7 @@
                     band.addColorStop(1, 'rgba(255, 255, 255, 0)');
                     ctx.fillStyle = band;
                     ctx.fillRect(0, ry - H * 0.08, W, H * 0.16);
-                    ctx.fillStyle = this.lines;
-                    ctx.fillRect(0, 0, W, H);
-                    ctx.fillStyle = this.vig;
-                    ctx.fillRect(0, 0, W, H);
+                    stampLayer('vhs-lines', (x) => { x.fillStyle = this.lines; x.fillRect(0, 0, W, H); x.fillStyle = this.vig; x.fillRect(0, 0, W, H); });
                     // The on-screen display
                     const pad = W * 0.06, top = H * 0.12, bottom = H * 0.86, big = 64 * s, small = 52 * s;
                     this.osd('PLAY', pad + jx, top, big);
@@ -3799,8 +4036,9 @@
 
             // ---------- Hearts stinger: hearts pop in all over the screen, a few at a time, over a rosy wash, until the
             // screen is full and a big heart beats in the middle; then they all float up and away as the wash fades. ----------
+            const TURNED_HEARTS = new Map(); // a heart sprite turned to a tilt, by color and tilt (Hearts stinger)
             const hearts = {
-                detail: 0.75, // dozens of big hearts at once (see "detail" above)
+                detail: 0.6, // dozens of big, soft hearts at once (see "detail" above)
                 init(durationSec) {
                     const sp = heartSprites();
                     this.T = durationSec;
@@ -3823,6 +4061,24 @@
                         });
                     }
                     this.parts.sort((a, b) => a.at - b.at); // the later ones on top
+                    // Each heart's tilt never changes, so it's drawn straight every frame from a copy that's already
+                    // turned (drawing a picture turned is much slower than drawing it straight, without the graphics
+                    // chip). Tilts are rounded to 0.05 radians and the copies kept, so later takes reuse them.
+                    for (const h of this.parts) {
+                        const rot = Math.round(h.rot / 0.05) * 0.05, key = `${HEART_COLORS[sp.solid.indexOf(h.sprite)]}|${rot.toFixed(2)}`;
+                        let c = TURNED_HEARTS.get(key);
+                        if (!c) {
+                            const w = h.sprite.width, d = Math.ceil(w * (Math.abs(Math.cos(rot)) + Math.abs(Math.sin(rot))));
+                            c = Object.assign(document.createElement('canvas'), { width: d, height: d });
+                            const x = c.getContext('2d');
+                            x.translate(d / 2, d / 2);
+                            x.rotate(rot);
+                            x.drawImage(h.sprite, -w / 2, -w / 2);
+                            TURNED_HEARTS.set(key, c);
+                        }
+                        h.turned = c;
+                        h.grow = c.width / h.sprite.width; // the turned picture is a little bigger than the heart
+                    }
                 },
                 frame(dt, t) {
                     const sp = heartSprites(), p = clamp01(t / this.T);
@@ -3836,18 +4092,14 @@
                             this.bg.addColorStop(0, '#ff7aa2');
                             this.bg.addColorStop(1, '#c2185b');
                         }
+                        stampLayer('rosy-wash', (x) => { x.fillStyle = this.bg; x.fillRect(0, 0, W, H); }, wash);
                         ctx.globalAlpha = wash;
-                        ctx.fillStyle = this.bg;
-                        ctx.fillRect(0, 0, W, H);
                     }
                     // Each heart pops in (with a little overshoot), then floats up and away near the end
                     const draw = (h, sc, y, a) => {
                         ctx.globalAlpha = a;
-                        ctx.save();
-                        ctx.translate(h.x, y);
-                        ctx.rotate(h.rot);
-                        ctx.drawImage(h.sprite, -h.size * sc / 2, -h.size * sc / 2, h.size * sc, h.size * sc);
-                        ctx.restore();
+                        const d = h.size * sc * (h.grow || 1);
+                        ctx.drawImage(h.turned || h.sprite, h.x - d / 2, y - d / 2, d, d);
                     };
                     for (const h of this.parts) {
                         const k = (p - h.at) / 0.07;
@@ -3907,10 +4159,7 @@
                             this.vig.addColorStop(0, 'rgba(255, 70, 130, 0)');
                             this.vig.addColorStop(1, 'rgba(255, 70, 130, 0.42)');
                         }
-                        ctx.globalAlpha = 0.75 + 0.25 * Math.sin(t * 1.4);
-                        ctx.fillStyle = this.vig;
-                        ctx.fillRect(0, 0, W, H);
-                        ctx.globalAlpha = 1;
+                        stampLayer('vday-glow', (x) => { x.fillStyle = this.vig; x.fillRect(0, 0, W, H); }, 0.75 + 0.25 * Math.sin(t * 1.4));
                     }
                     for (const h of this.bits) {
                         const swing = Math.sin(t * h.freq + h.phase);
@@ -3972,8 +4221,7 @@
                             this.fog.addColorStop(0.7, 'rgba(60, 75, 95, 0.12)');
                             this.fog.addColorStop(1, 'rgba(170, 190, 210, 0.22)');
                         }
-                        ctx.fillStyle = this.fog;
-                        ctx.fillRect(0, 0, W, H);
+                        stampLayer('mist', (x) => { x.fillStyle = this.fog; x.fillRect(0, 0, W, H); });
                     }
                     const STYLE = [[1 * s, 0.26], [1.6 * s, 0.38], [2.4 * s, 0.55]]; // line width and strength, far to near
                     const near = this.d.layer !== 'back';
@@ -4014,7 +4262,7 @@
             // ---------- Fire stinger: a wall of flame roars up from the bottom and fills the screen, flickering, with sparks
             // flying, then dies back down. The flames' top edge is a moving, ragged line; tongues of flame lick up from it. ----------
             const firestinger = {
-                detail: 0.75, // a full-screen fill and dozens of glows (see "detail" above)
+                detail: 0.6, // a full-screen fill and dozens of soft glows (see "detail" above)
                 init(durationSec) {
                     this.T = durationSec;
                     this.tongues = Array.from({ length: 40 }, (_, i) => ({ x: (i + rand(-0.3, 0.3)) / 39, ph: rand(0, Math.PI * 2), sz: rand(0.8, 1.35) }));
@@ -4092,8 +4340,792 @@
                 },
             };
 
+            // ---------- 8-Bit stinger: chunky pixel blocks stair-step in from the left in rainbow bands, like an old console's
+            // screen wipe, until they cover the screen; a pixel-art star bounces in the middle; then the blocks wipe away the
+            // same way. Blocks grow and shrink a few sizes at a time, not smoothly, and the canvas is drawn at half size and
+            // scaled up without smoothing (pixelated), for the 8-bit look. ----------
+            const PIXEL_COLORS = ['#e40058', '#f83800', '#f8b800', '#00b800', '#0078f8', '#6844fc'];
+            // The star, one character per pixel: o = outline, y = yellow, w = shine, e = eyes
+            const PIXEL_STAR = [
+                '.....oo.....',
+                '....oyyo....',
+                '....oywo....',
+                '...oyyyyo...',
+                'ooooyyyyoooo',
+                'oyyyeyyeyyyo',
+                '.oyyeyyeyyo.',
+                '..oyyyyyyo..',
+                '..oyyyyyyo..',
+                '.oyyyooyyyo.',
+                '.oyyo..oyyo.',
+                '.ooo....ooo.',
+            ];
+            const PIXEL_INK = { o: '#1a1a1a', y: '#f8d800', w: '#fff8c0', e: '#1a1a1a' };
+            let PIXEL = null; // the star sprite and the block shades, made the first time it's used
+            const pixel = {
+                detail: 0.5,
+                pixelated: true,
+                init(durationSec) {
+                    PIXEL = PIXEL || {
+                        star: (() => {
+                            const c = document.createElement('canvas');
+                            c.width = PIXEL_STAR[0].length; c.height = PIXEL_STAR.length;
+                            const x = c.getContext('2d');
+                            PIXEL_STAR.forEach((row, r) => [...row].forEach((ch, k) => {
+                                if (PIXEL_INK[ch]) { x.fillStyle = PIXEL_INK[ch]; x.fillRect(k, r, 1, 1); }
+                            }));
+                            return c;
+                        })(),
+                        shades: PIXEL_COLORS.map(c => ({ base: c, light: mixHex(c, '#ffffff', 0.4), dark: mixHex(c, '#000000', 0.35) })),
+                    };
+                    this.T = durationSec;
+                    this.cols = 32;
+                    this.rows = 18;
+                    this.cells = [];
+                    for (let r = 0; r < this.rows; r++) {
+                        for (let c = 0; c < this.cols; c++) {
+                            // Left to right, the top row a little ahead; rainbow bands run corner to corner
+                            const at = (c / (this.cols - 1)) * 0.78 + (r / (this.rows - 1)) * 0.22 + rand(0, 0.08);
+                            this.cells.push({ c, r, at: at / 1.08, shade: PIXEL.shades[Math.floor((c + r) / 3) % PIXEL.shades.length] });
+                        }
+                    }
+                    // Little twinkles around the star
+                    this.twinkles = Array.from({ length: 8 }, (_, i) => ({ a: i * Math.PI / 4 + rand(-0.2, 0.2), d: rand(0.2, 0.3), ph: Math.floor(rand(0, 4)) }));
+                },
+                frame(dt, t) {
+                    const p = clamp01(t / this.T), cw = W / this.cols, ch = H / this.rows;
+                    const steps = (k) => Math.ceil(clamp01(k) * 4) / 4; // grows in 4 jumps
+                    ctx.clearRect(0, 0, W, H);
+                    ctx.imageSmoothingEnabled = false;
+                    for (const cell of this.cells) {
+                        const grow = steps((p - (0.03 + cell.at * 0.32)) / 0.05);
+                        const shrink = steps((p - (0.6 + cell.at * 0.32)) / 0.05);
+                        const k = grow * (1 - shrink);
+                        if (k <= 0) continue;
+                        const w = Math.ceil(cw * k), h = Math.ceil(ch * k);
+                        const x = Math.floor(cell.c * cw + (cw - w) / 2), y = Math.floor(cell.r * ch + (ch - h) / 2);
+                        const b = Math.max(1, Math.round(w * 0.14)); // the bevel: light top and left, dark bottom and right
+                        ctx.fillStyle = cell.shade.dark;
+                        ctx.fillRect(x, y, w + 1, h + 1);
+                        ctx.fillStyle = cell.shade.light;
+                        ctx.fillRect(x, y, w - b, h - b);
+                        ctx.fillStyle = cell.shade.base;
+                        ctx.fillRect(x + b, y + b, w - b * 2, h - b * 2);
+                    }
+                    // The star: pops in while the screen is covered, hops in pixel steps, and pops back out
+                    const sIn = steps((p - 0.36) / 0.06), sOut = steps((p - 0.62) / 0.05), sk = sIn * (1 - sOut);
+                    if (sk > 0) {
+                        const u = cw * 0.5, size = PIXEL.star.width * u * sk; // one star pixel is half a block
+                        const hop = Math.round(Math.abs(Math.sin(t * 7)) * 3) * u * 0.6;
+                        const sx = Math.round(W / 2 - size / 2), sy = Math.round(H / 2 - size / 2 - hop);
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)'; // its shadow on the blocks
+                        ctx.fillRect(Math.round(W / 2 - size * 0.35), Math.round(H / 2 + size * 0.55), Math.round(size * 0.7), Math.round(u * 0.6));
+                        ctx.drawImage(PIXEL.star, sx, sy, size, size);
+                        // Twinkles: little pixel crosses blinking on and off around it
+                        ctx.fillStyle = '#ffffff';
+                        const blink = Math.floor(t * 8);
+                        for (const tw of this.twinkles) {
+                            if ((blink + tw.ph) % 4 > 1) continue;
+                            const tx = Math.round(W / 2 + Math.cos(tw.a) * W * tw.d), ty = Math.round(H / 2 + Math.sin(tw.a) * H * tw.d * 1.3);
+                            const q = Math.round(u * 0.5 * sk);
+                            ctx.fillRect(tx - q, ty - q * 3, q * 2, q * 6);
+                            ctx.fillRect(tx - q * 3, ty - q, q * 6, q * 2);
+                        }
+                    }
+                    ctx.imageSmoothingEnabled = true;
+                },
+            };
+
+            // ---------- Cat stinger: two paws grab the bottom edge of the screen, then a giant orange tabby's face rises up
+            // behind them, so big it fills the screen. It looks around, blinks, twitches its whiskers, and ducks back down
+            // (the paws let go last). ----------
+            const cat = {
+                detail: 0.75, // a full-screen face (see "detail" above)
+                init(durationSec) { this.T = durationSec; },
+                frame(dt, t) {
+                    const s = H / 1080, p = clamp01(t / this.T);
+                    ctx.clearRect(0, 0, W, H);
+                    // The face rises (overshooting a little), holds, then drops; the paws come first and go last
+                    const up = p < 0.64 ? EASE.outBack(clamp01((p - 0.08) / 0.28)) : 1 - EASE.in3(clamp01((p - 0.64) / 0.28));
+                    const paws = p < 0.7 ? EASE.outBack(clamp01(p / 0.12)) : 1 - EASE.in3(clamp01((p - 0.7) / 0.24));
+                    const RX = W * 0.78, RY = 1030 * s; // big enough to cover every corner of the screen
+                    const cx = W / 2, cy = lerp(H + RY + 340 * s, H / 2 + 60 * s, up);
+                    if (cy - RY * 1.3 < H) this.face(cx, cy, RX, RY, s, t, p);
+                    if (paws > 0) {
+                        for (const side of [-1, 1]) this.paw(cx + side * 520 * s, H + 70 * s - paws * 200 * s, s, side);
+                    }
+                },
+                face(cx, cy, RX, RY, s, t, p) {
+                    const fur = '#f08a24', stripe = '#c2610f', line = '#4a2a0a';
+                    // Ears (behind the head), with pink inside
+                    for (const side of [-1, 1]) {
+                        const ear = (k, color) => {
+                            ctx.fillStyle = color;
+                            ctx.beginPath();
+                            ctx.moveTo(cx + side * RX * lerp(0.4, 0.62, k), cy - RY * lerp(0.82, 0.62, k));
+                            ctx.lineTo(cx + side * RX * lerp(0.4, 0.55, k), cy - RY * lerp(1.04, 1.25, k));
+                            ctx.lineTo(cx + side * RX * lerp(0.4, 0.18, k), cy - RY * lerp(0.98, 0.97, k));
+                            ctx.closePath();
+                            ctx.fill();
+                        };
+                        ear(1, fur);
+                        ear(0.62, '#ffb3c1');
+                    }
+                    // The head, with tabby stripes on the forehead and cheeks
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.ellipse(cx, cy, RX, RY, 0, 0, Math.PI * 2);
+                    const g = ctx.createRadialGradient(cx, cy - RY * 0.2, RY * 0.1, cx, cy, RY * 1.05);
+                    g.addColorStop(0, '#ffb560');
+                    g.addColorStop(1, fur);
+                    ctx.fillStyle = g;
+                    ctx.fill();
+                    ctx.clip();
+                    ctx.fillStyle = stripe;
+                    for (const i of [-1, 0, 1]) {
+                        ctx.beginPath();
+                        ctx.moveTo(cx + i * 150 * s - 45 * s, cy - RY);
+                        ctx.lineTo(cx + i * 120 * s, cy - 400 * s + Math.abs(i) * 70 * s);
+                        ctx.lineTo(cx + i * 150 * s + 45 * s, cy - RY);
+                        ctx.fill();
+                    }
+                    for (const side of [-1, 1]) {
+                        for (let i = 0; i < 3; i++) {
+                            const y = cy - 60 * s + i * 110 * s;
+                            ctx.beginPath();
+                            ctx.moveTo(cx + side * 1100 * s, y - 32 * s);
+                            ctx.lineTo(cx + side * (720 + i * 30) * s, y);
+                            ctx.lineTo(cx + side * 1100 * s, y + 32 * s);
+                            ctx.fill();
+                        }
+                    }
+                    ctx.restore();
+                    // Rosy cheeks and the pale muzzle
+                    ctx.fillStyle = 'rgba(255, 120, 140, 0.35)';
+                    for (const side of [-1, 1]) { ctx.beginPath(); ctx.ellipse(cx + side * 500 * s, cy + 110 * s, 110 * s, 60 * s, 0, 0, Math.PI * 2); ctx.fill(); }
+                    ctx.fillStyle = '#fff0dc';
+                    for (const side of [-1, 1]) { ctx.beginPath(); ctx.ellipse(cx + side * 115 * s, cy + 185 * s, 170 * s, 125 * s, 0, 0, Math.PI * 2); ctx.fill(); }
+                    // Eyes: green, with slit pupils that look side to side, and a blink in the middle of the hold
+                    const blink = Math.sin(Math.PI * clamp01((p - 0.47) / 0.07));
+                    const look = Math.sin(t * 3.2) * 28 * s;
+                    for (const side of [-1, 1]) {
+                        const ex = cx + side * 330 * s, ey = cy - 130 * s;
+                        ctx.save();
+                        ctx.translate(ex, ey);
+                        ctx.scale(1, Math.max(0.04, 1 - blink));
+                        ctx.beginPath();
+                        ctx.ellipse(0, 0, 150 * s, 165 * s, 0, 0, Math.PI * 2);
+                        const eg = ctx.createRadialGradient(0, 20 * s, 20 * s, 0, 0, 165 * s);
+                        eg.addColorStop(0, '#d6f57a');
+                        eg.addColorStop(1, '#5c9e25');
+                        ctx.fillStyle = eg;
+                        ctx.fill();
+                        ctx.lineWidth = 12 * s;
+                        ctx.strokeStyle = line;
+                        ctx.stroke();
+                        ctx.fillStyle = '#111111';
+                        ctx.beginPath();
+                        ctx.ellipse(look, 0, 38 * s, 135 * s, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath(); ctx.arc(look - 55 * s, -70 * s, 30 * s, 0, Math.PI * 2); ctx.fill();
+                        ctx.beginPath(); ctx.arc(look + 40 * s, 60 * s, 13 * s, 0, Math.PI * 2); ctx.fill();
+                        ctx.restore();
+                    }
+                    // Nose and mouth
+                    ctx.fillStyle = '#ff8fa3';
+                    ctx.strokeStyle = line;
+                    ctx.lineWidth = 8 * s;
+                    ctx.lineJoin = ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(cx - 58 * s, cy + 68 * s);
+                    ctx.lineTo(cx + 58 * s, cy + 68 * s);
+                    ctx.lineTo(cx, cy + 128 * s);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.lineWidth = 10 * s;
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy + 128 * s);
+                    ctx.lineTo(cx, cy + 175 * s);
+                    ctx.quadraticCurveTo(cx - 45 * s, cy + 225 * s, cx - 105 * s, cy + 190 * s);
+                    ctx.moveTo(cx, cy + 175 * s);
+                    ctx.quadraticCurveTo(cx + 45 * s, cy + 225 * s, cx + 105 * s, cy + 190 * s);
+                    ctx.stroke();
+                    // Whiskers, twitching
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.92)';
+                    ctx.lineWidth = 6 * s;
+                    const twitch = Math.sin(t * 22) * Math.max(0, Math.sin(t * 2.5)) * 14 * s;
+                    for (const side of [-1, 1]) {
+                        for (let i = 0; i < 3; i++) {
+                            ctx.beginPath();
+                            ctx.moveTo(cx + side * 240 * s, cy + 150 * s + i * 38 * s);
+                            ctx.quadraticCurveTo(cx + side * 560 * s, cy + 110 * s + i * 60 * s + twitch, cx + side * 900 * s, cy + 60 * s + i * 95 * s + twitch * 1.5);
+                            ctx.stroke();
+                        }
+                    }
+                },
+                // A front paw gripping the bottom edge, seen from above: four round toes along the top, outlined so it
+                // stands out from the face behind it
+                paw(x, y, s, side) {
+                    const TOES = [-1.5, -0.5, 0.5, 1.5], toeY = (k) => (-88 + Math.abs(k) * 14) * s;
+                    const shape = () => {
+                        ctx.beginPath();
+                        ctx.ellipse(0, 10 * s, 170 * s, 120 * s, 0, 0, Math.PI * 2);
+                        for (const k of TOES) {
+                            ctx.moveTo(k * 70 * s + 48 * s, toeY(k));
+                            ctx.arc(k * 70 * s, toeY(k), 48 * s, 0, Math.PI * 2);
+                        }
+                    };
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.rotate(side * -0.08);
+                    ctx.save();
+                    ctx.translate(10 * s, 16 * s);
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // its shadow on the face
+                    shape();
+                    ctx.fill();
+                    ctx.restore();
+                    // The outline is stroked first and the paw filled over it, so only the outside edge shows
+                    ctx.lineWidth = 12 * s;
+                    ctx.strokeStyle = '#b8560c';
+                    ctx.fillStyle = '#ffa445';
+                    shape();
+                    ctx.stroke();
+                    ctx.fill();
+                    ctx.fillStyle = '#ffc888'; // light on top of each toe
+                    for (const k of TOES) { ctx.beginPath(); ctx.ellipse(k * 70 * s, toeY(k) - 14 * s, 26 * s, 15 * s, 0, 0, Math.PI * 2); ctx.fill(); }
+                    ctx.lineWidth = 7 * s; // the lines between the toes
+                    ctx.lineCap = 'round';
+                    for (const k of [-1, 0, 1]) {
+                        ctx.beginPath();
+                        ctx.moveTo(k * 70 * s, toeY(k) + 22 * s);
+                        ctx.lineTo(k * 64 * s, toeY(k) + 62 * s);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                },
+            };
+
+            // ---------- Curtains stinger: red velvet theater curtains sweep in from both sides (the bottoms swinging in a
+            // moment behind the tops) under a scalloped valance with gold trim, and meet in the middle; a warm spotlight
+            // glows on them; then they're pulled back, gathering to the sides like tied-back drapes, and slide away. ----------
+            let CURTAIN = null; // the velvet folds, one row of pixels stretched to the panel's size (made the first time it's used)
+            const curtainFolds = () => {
+                const c = Object.assign(document.createElement('canvas'), { width: 1024, height: 1 });
+                const x = c.getContext('2d'), img = x.createImageData(1024, 1), FOLDS = 9;
+                for (let i = 0; i < 1024; i++) {
+                    const u = (i / 1024) * FOLDS;
+                    const v = 0.5 + 0.5 * Math.cos(Math.PI * 2 * u + 0.7 * Math.sin(u * 1.3)); // uneven folds
+                    const k = Math.pow(v, 1.5), shine = Math.pow(v, 12) * 0.35;
+                    img.data.set([lerp(52, 196, k) + shine * 120, lerp(2, 18, k) + shine * 70, lerp(10, 34, k) + shine * 70, 255], i * 4);
+                }
+                x.putImageData(img, 0, 0);
+                return c;
+            };
+            const curtains = {
+                detail: 0.75, // a full-screen fill (see "detail" above)
+                init(durationSec) { CURTAIN = CURTAIN || curtainFolds(); this.T = durationSec; },
+                frame(dt, t) {
+                    const s = H / 1080, p = clamp01(t / this.T), mid = W / 2 + 24 * s;
+                    const inOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+                    ctx.clearRect(0, 0, W, H);
+                    // The left panel's inner edge: top (xt), the waist where it's tied back (xc, at waistY) and bottom (xb); xo = outer edge
+                    let xo, xt, xc, xb, waistY = H * 0.62;
+                    if (p < 0.5) {
+                        const c = EASE.out3(clamp01(p / 0.26)), lag = EASE.outBack(clamp01((p - 0.03) / 0.28)); // the bottoms swing in behind
+                        xt = lerp(-30 * s, mid, c);
+                        xb = lerp(-30 * s, mid, lag) + Math.sin(t * 5) * 6 * s * clamp01((p - 0.26) / 0.1) * (1 - clamp01((p - 0.4) / 0.1));
+                        xc = (xt + xb) / 2;
+                        xo = xt - mid - 20 * s;
+                    } else {
+                        const o = clamp01((p - 0.5) / 0.42);
+                        // The waist is pulled to the side first, the top follows (like drapes being tied back)...
+                        const g = inOut(clamp01(o / 0.5)), top = inOut(clamp01((o - 0.08) / 0.6));
+                        const off = -EASE.in3(clamp01((o - 0.5) / 0.5)) * W * 0.4; // ...then they slide off the screen
+                        xt = lerp(mid, W * 0.3, top) + off;
+                        xc = lerp(mid, W * 0.06, g) + off;
+                        xb = lerp(mid, W * 0.1, g) + off;
+                        xo = -20 * s + off;
+                    }
+                    for (const side of [-1, 1]) {
+                        ctx.save();
+                        if (side === 1) { ctx.translate(W, 0); ctx.scale(-1, 1); } // the right panel is the left one mirrored
+                        // The panel: the folds squeeze together as it gathers, darker at the top and the floor
+                        const right = Math.max(xt, xb, xc) + 2;
+                        ctx.beginPath();
+                        ctx.moveTo(xo, -2);
+                        ctx.lineTo(xt, -2);
+                        ctx.quadraticCurveTo(xt, waistY * 0.55, xc, waistY); // swept from the top down to the tie-back...
+                        ctx.quadraticCurveTo(xc, lerp(waistY, H, 0.55), xb, H + 2); // ...and hanging loose below it
+                        ctx.lineTo(xo, H + 2);
+                        ctx.closePath();
+                        ctx.save();
+                        ctx.clip();
+                        ctx.drawImage(CURTAIN, xo, 0, Math.max(1, right - xo), H);
+                        const shade = ctx.createLinearGradient(0, 0, 0, H);
+                        shade.addColorStop(0, 'rgba(0, 0, 0, 0.55)');
+                        shade.addColorStop(0.22, 'rgba(0, 0, 0, 0)');
+                        shade.addColorStop(0.78, 'rgba(0, 0, 0, 0)');
+                        shade.addColorStop(1, 'rgba(0, 0, 0, 0.45)');
+                        ctx.fillStyle = shade;
+                        ctx.fillRect(xo, 0, right - xo, H);
+                        ctx.restore();
+                        // A dark edge where it meets the other panel
+                        ctx.lineWidth = 10 * s;
+                        ctx.strokeStyle = 'rgba(20, 0, 4, 0.55)';
+                        ctx.stroke();
+                        // The gold tie-back at the waist, once it's being pulled back
+                        if (p > 0.55 && p < 0.97) {
+                            const k = clamp01((p - 0.55) / 0.08);
+                            ctx.fillStyle = '#d4a017';
+                            ctx.beginPath();
+                            ctx.ellipse(xc + 10 * s, waistY, 16 * s * k, 46 * s * k, 0, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.fillStyle = '#f5d76e';
+                            ctx.beginPath();
+                            ctx.ellipse(xc + 6 * s, waistY - 12 * s, 6 * s * k, 16 * s * k, 0, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                        ctx.restore();
+                    }
+                    // The spotlight on the closed curtains
+                    const glow = Math.sin(Math.PI * clamp01((p - 0.2) / 0.38));
+                    if (glow > 0) {
+                        const g = ctx.createRadialGradient(W / 2, H * 0.58, 0, W / 2, H * 0.58, H * 0.62);
+                        g.addColorStop(0, `rgba(255, 214, 150, ${0.3 * glow})`);
+                        g.addColorStop(1, 'rgba(255, 214, 150, 0)');
+                        ctx.globalCompositeOperation = 'lighter';
+                        ctx.fillStyle = g;
+                        ctx.fillRect(0, 0, W, H);
+                        ctx.globalCompositeOperation = 'source-over';
+                    }
+                    // The valance across the top: drops in with the curtains and goes up as they slide away
+                    const vh = H * 0.13, n = 8;
+                    const vy = -vh * 1.4 * (1 - EASE.out3(clamp01(p / 0.22))) - vh * 1.5 * EASE.in3(clamp01((p - 0.78) / 0.2));
+                    if (vy > -vh * 1.4) {
+                        ctx.save();
+                        ctx.translate(0, vy);
+                        const edge = () => {
+                            ctx.beginPath();
+                            ctx.moveTo(-10, -10);
+                            ctx.lineTo(W + 10, -10);
+                            ctx.lineTo(W + 10, vh * 0.8);
+                            for (let i = n; i > 0; i--) ctx.quadraticCurveTo(W * (i - 0.5) / n, vh * 1.35, W * (i - 1) / n, vh * 0.8);
+                            ctx.closePath();
+                        };
+                        edge();
+                        ctx.save();
+                        ctx.clip();
+                        for (let i = 0; i < 3; i++) ctx.drawImage(CURTAIN, i * W / 3, -10, W / 3 + 1, vh * 1.4);
+                        const shade = ctx.createLinearGradient(0, 0, 0, vh * 1.3);
+                        shade.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
+                        shade.addColorStop(0.5, 'rgba(0, 0, 0, 0.05)');
+                        shade.addColorStop(1, 'rgba(0, 0, 0, 0.35)');
+                        ctx.fillStyle = shade;
+                        ctx.fillRect(0, -10, W, vh * 1.5);
+                        ctx.restore();
+                        // Gold trim along the scallops, with a tassel where each two meet
+                        ctx.beginPath();
+                        ctx.moveTo(W + 10, vh * 0.8);
+                        for (let i = n; i > 0; i--) ctx.quadraticCurveTo(W * (i - 0.5) / n, vh * 1.35, W * (i - 1) / n, vh * 0.8);
+                        ctx.lineWidth = 9 * s;
+                        ctx.strokeStyle = '#d4a017';
+                        ctx.stroke();
+                        ctx.lineWidth = 3 * s;
+                        ctx.strokeStyle = '#f5d76e';
+                        ctx.stroke();
+                        ctx.fillStyle = '#d4a017';
+                        for (let i = 1; i < n; i++) {
+                            const x = W * i / n;
+                            ctx.beginPath();
+                            ctx.moveTo(x - 9 * s, vh * 0.8);
+                            ctx.lineTo(x + 9 * s, vh * 0.8);
+                            ctx.lineTo(x + 5 * s, vh * 0.8 + 46 * s);
+                            ctx.lineTo(x - 5 * s, vh * 0.8 + 46 * s);
+                            ctx.fill();
+                            ctx.beginPath();
+                            ctx.arc(x, vh * 0.8, 10 * s, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                        ctx.restore();
+                    }
+                },
+            };
+
+            // ---------- Coffee stinger: a cup of coffee on its saucer, seen from above, slides in spinning a little and
+            // steaming; then the camera zooms into the foam, where latte art draws itself: a heart around "Mom" in the milk
+            // (or whatever's typed in its Text box; long words get smaller to stay inside the heart).
+            // The foam fills the screen (the cut happens behind it), then it zooms on through and fades away. ----------
+            const coffee = {
+                detail: 0.75, // a full-screen fill (see "detail" above)
+                init(durationSec, opts = {}) {
+                    this.T = durationSec;
+                    this.text = String(opts.label || OVERLAYS.coffee.caption).slice(0, OVERLAYS.coffee.max);
+                    // Little bubbles in the foam (where they are, as a share of the coffee's size)
+                    this.bubbles = Array.from({ length: 70 }, () => {
+                        const a = rand(0, Math.PI * 2), d = Math.sqrt(rand(0, 1)) * 0.95;
+                        return { x: Math.cos(a) * d, y: Math.sin(a) * d, r: rand(0.004, 0.013) };
+                    });
+                    document.fonts.load('80px Lobster').catch(() => {}); // the script font (it falls back to a curly one)
+                },
+                frame(dt, t) {
+                    const s = H / 1080, p = clamp01(t / this.T);
+                    const inOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+                    ctx.clearRect(0, 0, W, H);
+                    const R = 210 * s; // the coffee's radius before the zoom
+                    // It slides in from the right, turning, then the camera zooms in until the foam covers the screen
+                    const slide = EASE.out3(clamp01(p / 0.24));
+                    const cover = Math.hypot(W, H) / 2 / R * 1.04;
+                    const zoom = lerp(1, cover, inOut(clamp01((p - 0.22) / 0.34))) * (1 + 0.05 * clamp01((p - 0.56) / 0.2)) * (1 + 0.9 * EASE.in3(clamp01((p - 0.76) / 0.24)));
+                    const fade = 1 - clamp01((p - 0.8) / 0.18);
+                    if (fade <= 0) return;
+                    ctx.save();
+                    ctx.globalAlpha = fade;
+                    ctx.translate(lerp(W + R * 2.6, W / 2, slide), H / 2);
+                    ctx.scale(zoom, zoom);
+                    ctx.rotate(lerp(1.1, -0.35, slide));
+                    // The saucer and its soft shadow
+                    if (zoom < cover) { // (once the foam covers the screen, the cup is out of sight)
+                        const sh = ctx.createRadialGradient(R * 0.15, R * 0.2, R * 1.3, R * 0.15, R * 0.2, R * 1.95);
+                        sh.addColorStop(0, 'rgba(0, 0, 0, 0.35)');
+                        sh.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                        ctx.fillStyle = sh;
+                        ctx.beginPath(); ctx.arc(R * 0.15, R * 0.2, R * 1.95, 0, Math.PI * 2); ctx.fill();
+                        const sg = ctx.createRadialGradient(-R * 0.4, -R * 0.4, R * 0.2, 0, 0, R * 1.7);
+                        sg.addColorStop(0, '#ffffff');
+                        sg.addColorStop(1, '#e9e2da');
+                        ctx.fillStyle = sg;
+                        ctx.beginPath(); ctx.arc(0, 0, R * 1.7, 0, Math.PI * 2); ctx.fill();
+                        ctx.lineWidth = R * 0.05;
+                        ctx.strokeStyle = '#f2a7b8'; // a pink band around the saucer's edge
+                        ctx.beginPath(); ctx.arc(0, 0, R * 1.6, 0, Math.PI * 2); ctx.stroke();
+                        ctx.lineWidth = R * 0.02;
+                        ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+                        ctx.beginPath(); ctx.arc(0, 0, R * 1.3, 0, Math.PI * 2); ctx.stroke();
+                        // The handle, then the cup's rim
+                        ctx.fillStyle = '#ffffff';
+                        ctx.strokeStyle = '#d9d2ca';
+                        ctx.lineWidth = R * 0.03;
+                        ctx.beginPath();
+                        ctx.roundRect(R * 1.0, -R * 0.17, R * 0.62, R * 0.34, R * 0.17);
+                        ctx.fill(); ctx.stroke();
+                        const rg = ctx.createRadialGradient(0, 0, R * 0.98, 0, 0, R * 1.16);
+                        rg.addColorStop(0, '#cfc6bc');
+                        rg.addColorStop(0.35, '#ffffff');
+                        rg.addColorStop(1, '#ece6df');
+                        ctx.fillStyle = rg;
+                        ctx.beginPath(); ctx.arc(0, 0, R * 1.16, 0, Math.PI * 2); ctx.fill();
+                    }
+                    // The coffee: dark crema at the edge, pale foam in the middle, with little bubbles
+                    const cg = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
+                    cg.addColorStop(0, '#e6c9a0');
+                    cg.addColorStop(0.62, '#c99560');
+                    cg.addColorStop(0.9, '#8a5328');
+                    cg.addColorStop(1, '#5a3214');
+                    ctx.fillStyle = cg;
+                    ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = 'rgba(255, 244, 225, 0.35)';
+                    for (const b of this.bubbles) { ctx.beginPath(); ctx.arc(b.x * R, b.y * R, b.r * R, 0, Math.PI * 2); ctx.fill(); }
+                    // The latte art, upright on the screen whatever way the cup turned: a heart drawn around "Mom"
+                    ctx.rotate(-lerp(1.1, -0.35, slide));
+                    const foam = '#fdf5e6';
+                    const draw = clamp01((p - 0.2) / 0.3), word = clamp01((p - 0.32) / 0.2);
+                    const k = R * 0.4 / 16; // the heart curve is 32 units wide
+                    const heart = () => {
+                        ctx.beginPath();
+                        for (let i = 0; i <= 120; i++) {
+                            const a = Math.PI * 2 * i / 120;
+                            const x = 16 * Math.pow(Math.sin(a), 3), y = 13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a);
+                            ctx[i ? 'lineTo' : 'moveTo'](x * k, -(y + 2.5) * k);
+                        }
+                    };
+                    if (draw > 0) {
+                        // It draws itself from the top dip around, like milk being poured; the soft wider line is the foam's edge
+                        heart();
+                        const len = 2 * Math.PI * 16 * k * 1.2;
+                        ctx.setLineDash([len * draw, len]);
+                        ctx.lineCap = ctx.lineJoin = 'round';
+                        ctx.strokeStyle = 'rgba(253, 245, 230, 0.35)';
+                        ctx.lineWidth = R * 0.11;
+                        ctx.stroke();
+                        ctx.strokeStyle = foam;
+                        ctx.lineWidth = R * 0.065;
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+                    if (word > 0) {
+                        ctx.save();
+                        ctx.globalAlpha = fade * word;
+                        let size = R * 0.3 * (0.85 + 0.15 * EASE.outBack(word));
+                        ctx.font = `${size}px Lobster, "Brush Script MT", cursive`;
+                        const fit = R * 0.6 / ctx.measureText(this.text).width; // inside the heart's widest part
+                        if (fit < 1) { size *= fit; ctx.font = `${size}px Lobster, "Brush Script MT", cursive`; }
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.lineJoin = 'round';
+                        ctx.lineWidth = size * 0.12;
+                        ctx.strokeStyle = 'rgba(253, 245, 230, 0.4)';
+                        ctx.strokeText(this.text, 0, -R * 0.02);
+                        ctx.fillStyle = foam;
+                        ctx.fillText(this.text, 0, -R * 0.02);
+                        ctx.restore();
+                    }
+                    ctx.restore();
+                    // Steam curling up from the cup while it's small
+                    const steam = (1 - clamp01((zoom - 1) / 0.6)) * clamp01(p / 0.15) * fade;
+                    if (steam > 0) {
+                        const cx = lerp(W + R * 2.6, W / 2, slide);
+                        ctx.lineCap = 'round';
+                        for (let i = 0; i < 3; i++) {
+                            const x0 = cx + (i - 1) * R * 0.45, y0 = H / 2 - R * 0.5;
+                            const g = ctx.createLinearGradient(0, y0, 0, y0 - R * 2);
+                            g.addColorStop(0, `rgba(255, 255, 255, ${0.5 * steam})`);
+                            g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                            ctx.strokeStyle = g;
+                            ctx.lineWidth = R * 0.12;
+                            ctx.beginPath();
+                            ctx.moveTo(x0, y0);
+                            const w = Math.sin(t * 3 + i * 2) * R * 0.25;
+                            ctx.bezierCurveTo(x0 + w, y0 - R * 0.6, x0 - w, y0 - R * 1.2, x0 + w * 0.6, y0 - R * 2);
+                            ctx.stroke();
+                        }
+                    }
+                },
+            };
+
+            // ---------- Comic: POW! ZAP! BAM! bursts pop in one after another around the edges of the screen (never over the
+            // middle, where you are), each with a jolt and a wobble, then shrink away; halftone dots fill the corners. ----------
+            const COMIC_WORDS = ['POW!', 'ZAP!', 'BAM!', 'BOOM!', 'WHAM!', 'KAPOW!', 'ZOK!', 'BIFF!', 'CRASH!', 'SPLAT!', 'KRAK!', 'THWACK!'];
+            const COMIC_STYLES = [ // burst, its outer ring, the word
+                ['#ffd400', '#ff3b30', '#ff3b30'], ['#ff3b30', '#ffd400', '#ffd400'], ['#29b6f6', '#ffffff', '#ffd400'],
+                ['#ffffff', '#ff3b30', '#1565c0'], ['#a64dff', '#ffd400', '#ffffff'], ['#ff7a1a', '#ffffff', '#ffffff'],
+            ];
+            // One burst with its word, drawn once and stamped while it's up
+            const makeComicBurst = (word, style) => {
+                const S = 600, c = document.createElement('canvas');
+                c.width = c.height = S;
+                const x = c.getContext('2d');
+                x.translate(S / 2, S / 2);
+                // Speed lines around it
+                x.strokeStyle = '#111111';
+                x.lineCap = 'round';
+                for (let i = 0; i < 12; i++) {
+                    const a = i * Math.PI / 6 + rand(-0.15, 0.15);
+                    x.lineWidth = rand(4, 8);
+                    x.beginPath();
+                    x.moveTo(Math.cos(a) * S * 0.43, Math.sin(a) * S * 0.36);
+                    x.lineTo(Math.cos(a) * S * rand(0.46, 0.49), Math.sin(a) * S * rand(0.4, 0.47));
+                    x.stroke();
+                }
+                // The burst: a spiky star, wider than tall, with a hard drop shadow
+                const n = Math.floor(rand(13, 18)), pts = [];
+                for (let i = 0; i < n * 2; i++) {
+                    const a = i * Math.PI / n, r = i % 2 ? rand(0.68, 0.8) : rand(0.92, 1.04);
+                    pts.push([Math.cos(a) * r, Math.sin(a) * r]);
+                }
+                const burst = (k, dx = 0) => {
+                    x.beginPath();
+                    pts.forEach(([px, py], i) => x[i ? 'lineTo' : 'moveTo'](px * S * 0.4 * k + dx, py * S * 0.31 * k + dx));
+                    x.closePath();
+                };
+                x.fillStyle = '#111111';
+                burst(1, 14);
+                x.fill();
+                x.fillStyle = style[1];
+                burst(1);
+                x.fill();
+                x.lineJoin = 'round';
+                x.lineWidth = 9;
+                x.strokeStyle = '#111111';
+                x.stroke();
+                x.fillStyle = style[0];
+                burst(0.82);
+                x.fill();
+                // The word: thick black outline and a 3D drop, tilted a little
+                x.rotate(rand(-0.16, 0.08));
+                let size = 150;
+                x.font = `${size}px Bangers, "Changa One", Impact, sans-serif`;
+                size = Math.min(size, size * (S * 0.6) / x.measureText(word).width);
+                x.font = `${size}px Bangers, "Changa One", Impact, sans-serif`;
+                x.textAlign = 'center';
+                x.textBaseline = 'middle';
+                x.lineWidth = size * 0.16;
+                x.strokeStyle = '#111111';
+                x.fillStyle = '#111111';
+                x.fillText(word, size * 0.06, size * 0.1);
+                x.strokeText(word, 0, size * 0.04);
+                x.fillStyle = style[2];
+                x.fillText(word, 0, size * 0.04);
+                return c;
+            };
+            const comic = {
+                init(durationSec) {
+                    this.T = durationSec;
+                    this.bursts = [];
+                    this.next = 0.15;
+                    this.words = [];
+                    this.styleAt = Math.floor(rand(0, COMIC_STYLES.length));
+                    document.fonts.load('80px Bangers').catch(() => {}); // the comic font (it falls back to a bold one)
+                },
+                // Somewhere around the edges, clear of the middle and of the bursts already up
+                spot(size) {
+                    for (let tries = 0; tries < 16; tries++) {
+                        const x = rand(0.1, 0.9) * W, y = rand(0.15, 0.85) * H;
+                        if (Math.abs(x / W - 0.5) < 0.25 && Math.abs(y / H - 0.5) < 0.34) continue;
+                        if (this.bursts.some(b => Math.hypot(b.x - x, b.y - y) < (b.size + size) * 0.42)) continue;
+                        return { x, y };
+                    }
+                    return null;
+                },
+                // The halftone dots in the corners: bigger toward the corners, red in two and blue in the other two
+                dots() {
+                    if (this.dotLayer && this.dotW === W && this.dotH === H) return this.dotLayer;
+                    this.dotW = W;
+                    this.dotH = H;
+                    const c = Object.assign(document.createElement('canvas'), { width: canvas.width, height: canvas.height });
+                    const x = c.getContext('2d'), s = H / 1080, gap = 24 * s;
+                    x.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+                    for (let gy = 0, row = 0; gy < H + gap; gy += gap * 0.87, row++) {
+                        for (let gx = (row % 2) * gap / 2; gx < W + gap; gx += gap) {
+                            const d = Math.hypot((gx - W / 2) / (W / 2), (gy - H / 2) / (H / 2)) / Math.SQRT2;
+                            const r = gap * 0.42 * clamp01((d - 0.55) / 0.4);
+                            if (r < 0.6) continue;
+                            x.fillStyle = (gx < W / 2) === (gy < H / 2) ? 'rgba(255, 59, 48, 0.5)' : 'rgba(41, 121, 255, 0.5)';
+                            x.beginPath();
+                            x.arc(gx, gy, r, 0, Math.PI * 2);
+                            x.fill();
+                        }
+                    }
+                    return (this.dotLayer = c);
+                },
+                frame(dt, t) {
+                    const s = H / 1080;
+                    ctx.clearRect(0, 0, W, H);
+                    ctx.drawImage(this.dots(), 0, 0, W, H);
+                    // A new burst every half second or so, up to four at once (none in the last second, so it ends clear)
+                    if (t >= this.next && t < this.T - 1 && this.bursts.length < 4) {
+                        if (!this.words.length) this.words = shuffle([...COMIC_WORDS]);
+                        const size = rand(300, 420) * s, at = this.spot(size);
+                        if (at) {
+                            this.styleAt = (this.styleAt + 1 + Math.floor(rand(0, COMIC_STYLES.length - 1))) % COMIC_STYLES.length;
+                            this.bursts.push({ ...at, size, born: t, life: rand(1.5, 1.9), rot: rand(-0.25, 0.25),
+                                sprite: makeComicBurst(this.words.pop(), COMIC_STYLES[this.styleAt]) });
+                        }
+                        this.next = t + rand(0.45, 0.8);
+                    }
+                    this.bursts = this.bursts.filter(b => {
+                        const age = t - b.born;
+                        if (age >= b.life) return false;
+                        const pop = EASE.outBack(clamp01(age / 0.18)), out = clamp01((age - (b.life - 0.25)) / 0.25);
+                        const wobble = 1 + 0.05 * Math.sin(age * 22) * Math.exp(-age * 3);
+                        const k = pop * wobble * (1 - EASE.in3(out)), sz = b.size * k;
+                        ctx.save();
+                        ctx.translate(b.x, b.y);
+                        ctx.rotate(b.rot + (1 - clamp01(age / 0.18)) * -0.4); // jolts into place
+                        ctx.globalAlpha = 1 - out;
+                        ctx.drawImage(b.sprite, -sz / 2, -sz / 2, sz, sz);
+                        ctx.restore();
+                        return true;
+                    });
+                    ctx.globalAlpha = 1;
+                },
+            };
+
+            // ---------- Disco Ball: a mirror ball drops down on its cord with a bounce and spins, its mirror tiles catching the
+            // light, while spots of colored light sweep around the screen, soft beams turn from it and the room dims a little. ----------
+            const DISCO_COLORS = ['#ff4fd8', '#4fc3ff', '#ffe14f', '#7dff6a', '#b26bff', '#ff8a3d', '#ffffff'];
+            let DISCO = null; // the sprites, made the first time it's used
+            const disco = {
+                init(durationSec) {
+                    DISCO = DISCO || { spots: DISCO_COLORS.map(c => glowSprite(c, 0.3, 64)), glint: makeSparkle(), halo: glowSprite('#fff4fb', 0, 128) };
+                    this.spots = Array.from({ length: 48 }, () => ({
+                        x: Math.random(), y: rand(0.04, 1), size: rand(26, 64), sprite: Math.floor(rand(0, DISCO_COLORS.length)),
+                        wave: rand(0, Math.PI * 2), tw: rand(2, 5),
+                    }));
+                    this.spots.forEach(sp => { sp.size *= 0.7 + sp.y * 0.6; }); // bigger lower down, as if nearer
+                },
+                frame(dt, t) {
+                    const s = H / 1080, r = 140 * s, cx = W / 2;
+                    const cy = lerp(-r - 60 * s, H * 0.2, EASE.outBounce(clamp01(t / 1.3)));
+                    const lit = clamp01((t - 0.9) / 0.8); // the lights come up once it's down
+                    const rot = t * 0.9;
+                    ctx.clearRect(0, 0, W, H);
+                    if (lit > 0) {
+                        // The room dims a little, so the lights stand out
+                        ctx.fillStyle = `rgba(10, 4, 28, ${0.22 * lit})`;
+                        ctx.fillRect(0, 0, W, H);
+                        ctx.globalCompositeOperation = 'lighter';
+                        // Beams turning from the ball (only the ones pointing down into the room)
+                        for (let i = 0; i < 6; i++) {
+                            const a = i * Math.PI / 3 + t * 0.45;
+                            if (Math.sin(a) < 0.1) continue;
+                            const len = H * 1.4, half = 0.05, col = DISCO_COLORS[i];
+                            const bg = ctx.createLinearGradient(cx, cy, cx + Math.cos(a) * len, cy + Math.sin(a) * len);
+                            bg.addColorStop(0, rgba(col, 0.2 * lit));
+                            bg.addColorStop(1, rgba(col, 0));
+                            ctx.fillStyle = bg;
+                            ctx.beginPath();
+                            ctx.moveTo(cx, cy);
+                            ctx.lineTo(cx + Math.cos(a - half) * len, cy + Math.sin(a - half) * len);
+                            ctx.lineTo(cx + Math.cos(a + half) * len, cy + Math.sin(a + half) * len);
+                            ctx.closePath();
+                            ctx.fill();
+                        }
+                        // Spots of light sweeping across the room as the ball turns, each twinkling
+                        for (const sp of this.spots) {
+                            const x = ((sp.x + t * 0.05 * (0.6 + sp.y)) % 1) * (W + 200 * s) - 100 * s;
+                            const y = sp.y * H + Math.sin(x / W * Math.PI * 2 + sp.wave) * 24 * s;
+                            const sz = sp.size * s;
+                            ctx.globalAlpha = lit * (0.7 + 0.3 * Math.sin(t * sp.tw + sp.wave));
+                            ctx.drawImage(DISCO.spots[sp.sprite], x - sz / 2, y - sz / 2, sz, sz);
+                        }
+                        ctx.globalAlpha = 0.5 * lit;
+                        ctx.drawImage(DISCO.halo, cx - r * 2.4, cy - r * 2.4, r * 4.8, r * 4.8); // a glow around the ball
+                        ctx.globalAlpha = 1;
+                        ctx.globalCompositeOperation = 'source-over';
+                    }
+                    // The cord and the cap on top
+                    ctx.strokeStyle = '#2b2b33';
+                    ctx.lineWidth = 4 * s;
+                    ctx.beginPath();
+                    ctx.moveTo(cx, 0);
+                    ctx.lineTo(cx, cy - r);
+                    ctx.stroke();
+                    ctx.fillStyle = '#555a66';
+                    ctx.fillRect(cx - 16 * s, cy - r - 14 * s, 32 * s, 20 * s);
+                    // The ball: dark underneath (the gaps), then each mirror tile in front, shaded by how it faces the light
+                    const base = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.3, r * 0.1, cx, cy, r);
+                    base.addColorStop(0, '#5a5f6b');
+                    base.addColorStop(1, '#14161b');
+                    ctx.fillStyle = base;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                    ctx.fill();
+                    const bands = 14, glints = [];
+                    for (let i = 0; i < bands; i++) {
+                        const lat = -Math.PI / 2 + (i + 0.5) * Math.PI / bands, cl = Math.cos(lat);
+                        const n = Math.max(6, Math.round(30 * cl)), th = r * (Math.PI / bands) * cl * 0.86;
+                        for (let j = 0; j < n; j++) {
+                            const lon = j * Math.PI * 2 / n + rot + i * 0.37, cn = Math.cos(lon);
+                            if (cn < 0.06) continue; // round the back
+                            const x = cx + r * cl * Math.sin(lon), y = cy - r * Math.sin(lat);
+                            const w = r * cl * (Math.PI * 2 / n) * cn * 0.86;
+                            const face = cl * cn * (0.75 - 0.25 * Math.sin(lat)) + 0.25 * Math.sin(lat); // lit from above and in front
+                            const flash = Math.sin(t * 3 + i * 7.1 + j * 3.7) > 0.985;
+                            ctx.fillStyle = flash ? '#ffffff' : `hsl(${205 + (i * 13 + j * 29) % 30}, 10%, ${Math.round(22 + 74 * clamp01(face * face * 1.2))}%)`;
+                            ctx.fillRect(x - w / 2, y - th / 2, w, th);
+                            if (flash) glints.push([x, y]);
+                        }
+                    }
+                    ctx.globalCompositeOperation = 'lighter';
+                    for (const [x, y] of glints) ctx.drawImage(DISCO.glint, x - 28 * s, y - 28 * s, 56 * s, 56 * s);
+                    ctx.globalCompositeOperation = 'source-over';
+                },
+            };
+
             const EFFECTS = { confetti, colorwave, leaves, snow, fire, underwater, arrested, hottake, sports, spring, storm, tvstatic,
-                fireworks, medical, stpatricks, vhs, hearts, vday, rain, firestinger };
+                fireworks, medical, stpatricks, vhs, hearts, vday, rain, firestinger, pixel, cat, curtains, coffee, comic, disco };
 
             // Runs every frame while an effect is playing
             const loop = () => {
@@ -4111,6 +5143,7 @@
                     effect = EFFECTS[name];
                     if (!effect) return;
                     detail = (typeof effect.detail === 'function' ? effect.detail(opts) : effect.detail) || 1;
+                    canvas.style.imageRendering = effect.pixelated ? 'pixelated' : ''; // 8-Bit: scaled up without smoothing
                     resize();
                     effect.init(durationSec, opts);
                     last = t0 = performance.now();
@@ -4124,6 +5157,26 @@
                     ctx.globalAlpha = 1;
                     ctx.clearRect(0, 0, W, H);
                 },
+                // Gets an effect ready without showing it: its first-time work (its pictures, its font, its
+                // buffers) happens now instead of on its first take, which used to stutter for a moment. It sets
+                // the effect up and draws a few frames along its run, then wipes the canvas, all in one go, so
+                // the browser never paints any of it. Never while an effect is playing. Returns false if it didn't.
+                warm(name, opts = {}) {
+                    const e = EFFECTS[name];
+                    if (!e || effect) return false;
+                    detail = (typeof e.detail === 'function' ? e.detail(opts) : e.detail) || 1;
+                    resize();
+                    const T = 3;
+                    e.init(T, opts);
+                    for (const t of [0.05, 0.6, 1.5, 2.4]) e.frame(1, t);
+                    ctx.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.globalAlpha = 1;
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.clearRect(0, 0, W, H);
+                    return true;
+                },
+                names: () => Object.keys(EFFECTS),
             };
         })();
 
@@ -4228,12 +5281,43 @@
         };
 
 
+        // ---------- Getting ready ----------
+        // The first time each effect played after the display loaded, it had to build its pictures (flames,
+        // curtains, balls, hearts), load its font and decode its images, which made that first take stutter
+        // (up to about 150 ms). The display now does that work in the background after it loads: the
+        // images first, then one canvas effect at a time, in quiet moments and only while nothing is on screen.
+        const WARM_IMAGES = ['l3Large.png', 'kamc.png', 'l3LargeAlt.png', 'largeGif.gif'];
+        const warmUp = () => {
+            WARM_IMAGES.forEach(f => { const img = new Image(); img.src = `./assets/${f}`; img.decode().catch(() => {}); });
+            const jobs = [];
+            FX.names().forEach(name => {
+                if (name === 'sports') Object.keys(SPORTS).forEach(sport => jobs.push([name, { sport }]));
+                else jobs.push([name, {}]);
+            });
+            const quiet = () => $('overlay-box').style.opacity !== '1' && $('display-box').style.visibility !== 'visible';
+            const next = () => {
+                if (!jobs.length) return;
+                const later = () => (window.requestIdleCallback ? requestIdleCallback(next, { timeout: 1500 }) : setTimeout(next, 200));
+                if (!quiet()) { setTimeout(later, 1000); return; } // a graphic is up: try again in a moment
+                const [name, opts] = jobs[0];
+                let done = true;
+                try { done = FX.warm(name, { ...opts, layer: isUnderlay ? 'back' : 'all' }) !== false; }
+                catch (err) { console.warn('Warm-up skipped', name, err); FX.stop(); } // it still works when taken, just not warmed
+                if (done) jobs.shift();
+                setTimeout(later, 150);
+            };
+            setTimeout(next, 2500); // after the page has settled
+        };
+
+
         /* =========================================================
            8. DISPLAY: MESSAGE ROUTER
            Decides what to show for each message from the controller
            ========================================================= */
         const showDisplay = (data) => {
-            if (data.mode === 'clear') { hideLowerThird(); hideOverlay(); return; }
+            // Sounds play on #display only (the underlay is another browser source; it would play them twice)
+            if (data.mode === 'sound' || data.mode === 'soundStop') { if (!isUnderlay) soundMessage(data); return; }
+            if (data.mode === 'clear') { hideLowerThird(); hideOverlay(); if (!isUnderlay) stopAllSounds(); return; }
             if (data.mode === 'hide') { data.layer === 'overlay' ? hideOverlay() : hideLowerThird(); return; } // TOGGLE OFF
             if (data.mode && data.mode !== 'l3' && data.mode !== 'overlay') return; // not a graphic (a request meant for the server)
             const overlay = data.mode === 'overlay' ? data.overlay : data.bgStyle === 'l3Large' ? 'l3Large' : null; // older L3 PNG saves
@@ -4393,7 +5477,7 @@
         // Shows only the fields the current tab and overlay need
         const updateSections = () => {
             const mode = checked('mode');
-            const show = mode === 'show', builder = mode === 'builder';
+            const show = mode === 'show', builder = mode === 'builder', sound = mode === 'sound';
             const cfg = mode === 'overlay' ? OVERLAYS[checked('overlayStyle')] : null;
             $('l3-section').classList.toggle('hidden', mode !== 'l3');
             $('overlay-section').classList.toggle('hidden', mode !== 'overlay');
@@ -4404,7 +5488,7 @@
             $('paragraph-label').textContent = oneBoxLabel(cfg);
             $('paragraph-input').placeholder = oneBoxPlaceholder(cfg);
             $('paragraph-input').rows = oneBoxShort(cfg) ? 1 : 4;
-            $('paragraph-input').maxLength = oneBoxShort(cfg) ? 40 : 400;
+            $('paragraph-input').maxLength = cfg?.max || (oneBoxShort(cfg) ? 40 : 400);
             $('social-field').classList.toggle('hidden', !cfg?.social);
             $('sport-field').classList.toggle('hidden', !cfg?.sport);
             // Stingers: the duration box shows their fixed length, locked
@@ -4417,11 +5501,12 @@
             $('gs-field').classList.toggle('hidden', !cfg?.depth);
             if (cfg?.depth) $('gs-pick').checked = loadGsEffects().includes(checked('overlayStyle'));
             $('import-btn').classList.toggle('hidden', !cfg?.import);
-            $('take-row').classList.toggle('hidden', show || builder);
-            $('saved-wrap').classList.toggle('hidden', show || builder);
+            $('take-row').classList.toggle('hidden', show || builder || sound);
+            $('saved-wrap').classList.toggle('hidden', show || builder || sound);
             $('show-section').classList.toggle('hidden', !show);
             $('builder-section').classList.toggle('hidden', !builder);
-            if (builder) $('text-fields').classList.add('hidden');
+            $('sound-section').classList.toggle('hidden', !sound);
+            if (builder || sound) $('text-fields').classList.add('hidden');
             updateToggleButton();
             updateSummaries();
         };
@@ -4502,7 +5587,7 @@
             $('saved-heading').textContent = checked('mode') === 'overlay' ? 'Saved Overlays' : 'Saved L3s';
             if (checked('mode') === 'show') renderShow();
             else if (checked('mode') === 'builder') renderBuilder();
-            else renderButtons(loadButtonsFromStorage());
+            else if (checked('mode') !== 'sound') renderButtons(loadButtonsFromStorage());
         };
 
         // ---------- Sections that open and close (details.fx-section) ----------
@@ -4581,7 +5666,7 @@
             btn.classList.toggle('opacity-40', fixed);
             btn.title = fixed ? 'Stingers play once and can\'t be toggled' : '';
         };
-        const setToggled = (layer, on) => { toggled[layer] = on; updateToggleButton(); };
+        const setToggled = (layer, on) => { toggled[layer] = on; updateToggleButton(); updateSimpleToggle(); };
 
         // 🔁 TOGGLE: puts the graphic up with no time limit, or takes the toggled one down
         const toggleButton = () => {
@@ -4677,8 +5762,9 @@
 
         // ✖ CLEAR ALL
         const clearAll = () => {
-            if (!sendPayload({ mode: 'clear' })) return;
+            if (!sendPayload({ mode: 'clear' })) return; // also stops any sounds
             stopSeq(false);
+            clearPads();
             setToggled('l3', false);
             setToggled('overlay', false);
             clearLive('l3');
@@ -7854,7 +8940,608 @@
         };
 
         /* =========================================================
-           21. STARTUP
+           21. SOUND PAD
+           The controller sends { mode: 'sound', key, volume } and the display plays it, so the sound
+           comes out of the FX Display browser source (turn on "Control audio via OBS" there). Each
+           sound has its own player: hitting a pad again starts it over, and different pads overlap.
+           ========================================================= */
+
+        // ---------- Display: the players ----------
+        const soundPlayers = {}; // key -> Audio, made the first time it's needed
+        const soundPlayer = (key) => {
+            const s = SOUNDS.find(x => x.key === key);
+            if (!s) return null;
+            if (!soundPlayers[key]) {
+                soundPlayers[key] = new Audio(soundPath(s));
+                soundPlayers[key].preload = 'auto';
+            }
+            return soundPlayers[key];
+        };
+        const stopAllSounds = () => Object.values(soundPlayers).forEach(a => { a.pause(); a.currentTime = 0; });
+        const soundMessage = (data) => {
+            if (data.mode === 'soundStop') { stopAllSounds(); return; }
+            const a = soundPlayer(data.key);
+            if (!a) { console.warn('Unknown sound:', data.key); return; }
+            a.volume = Math.min(Math.max(Number(data.volume ?? 1), 0), 1);
+            a.currentTime = 0;
+            a.play().catch(err => console.warn('Sound did not play:', err));
+        };
+
+        // ---------- Controller: the pads ----------
+        const SOUND_VOLUME_KEY = 'fx_sound_volume';
+        const soundVolume = () => {
+            const v = Number(localStorage.getItem(SOUND_VOLUME_KEY));
+            return localStorage.getItem(SOUND_VOLUME_KEY) === null || Number.isNaN(v) ? 80 : v;
+        };
+        const soundLengths = {}; // key -> seconds, read from each file so a pad can show it playing
+        const padTimers = {};
+
+        const renderSoundPads = () => {
+            const wrap = $('sound-pads');
+            wrap.innerHTML = '';
+            SOUNDS.forEach((s, i) => {
+                const pad = document.createElement('button');
+                pad.type = 'button';
+                pad.className = 'pad';
+                pad.id = `pad-${s.key}`;
+                pad.title = `${s.label} (key ${i + 1})`;
+                pad.style.setProperty('--c1', s.c1);
+                pad.style.setProperty('--c2', s.c2);
+                pad.innerHTML = `<span class="pad-key">${i + 1}</span><span class="pad-time"></span>`
+                    + `<span class="pad-icon" aria-hidden="true">${s.icon}</span><span class="pad-label"></span><span class="pad-bar"></span>`;
+                pad.querySelector('.pad-label').textContent = s.label;
+                // Fires on the press, not the release, so it's on the beat; a keyboard Enter/Space still works
+                pad.addEventListener('pointerdown', (e) => { if (e.button === 0) { e.preventDefault(); hitPad(s.key); } });
+                pad.addEventListener('click', (e) => { if (e.detail === 0) hitPad(s.key); });
+                wrap.append(pad);
+                // How long it is (from the file), shown in the corner
+                const probe = new Audio();
+                probe.preload = 'metadata';
+                probe.onloadedmetadata = () => {
+                    soundLengths[s.key] = probe.duration;
+                    pad.querySelector('.pad-time').textContent = `${Math.round(probe.duration * 10) / 10}s`;
+                };
+                probe.src = soundPath(s);
+            });
+            const vol = $('sound-volume');
+            vol.value = soundVolume();
+            $('sound-volume-value').textContent = `${vol.value}%`;
+        };
+
+        // Lights the pad, and runs its bar down for as long as the sound plays
+        // (The Sound Pad tab's pad, and the same sound's pad in Simple mode)
+        const markPad = (key, on) => {
+            const pads = [$(`pad-${key}`), $(`spad-${key}`)].filter(Boolean);
+            clearTimeout(padTimers[key]);
+            pads.forEach(pad => pad.classList.remove('playing', 'hit'));
+            if (!on) return;
+            const secs = soundLengths[key];
+            pads.forEach(pad => {
+                void pad.offsetWidth; // restarts the bar when hit again
+                pad.classList.add('hit');
+                if (secs) {
+                    pad.style.setProperty('--dur', `${secs}s`);
+                    pad.classList.add('playing');
+                }
+            });
+            padTimers[key] = setTimeout(() => pads.forEach(pad => pad.classList.remove('playing', 'hit')), (secs || 0.3) * 1000);
+        };
+        const clearPads = () => SOUNDS.forEach(s => markPad(s.key, false));
+
+        const hitPad = (key) => {
+            if (!sendPayload({ mode: 'sound', key, volume: soundVolume() / 100 })) return;
+            markPad(key, true);
+            flash(`Sound: ${SOUNDS.find(s => s.key === key)?.label || key}`);
+        };
+        const stopSounds = () => {
+            if (!sendPayload({ mode: 'soundStop' })) return;
+            clearPads();
+            flash('Sounds stopped');
+        };
+
+        // Keys 1-6 hit the pads while the Sound Pad tab is open (not while typing in a box)
+        // In Simple mode, keys 1 and up hit the theme's sounds instead
+        const soundKeys = (e) => {
+            const simple = simpleState().on;
+            if ((!simple && checked('mode') !== 'sound') || e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
+            if (e.target.closest('input, textarea, select, [contenteditable]') || document.querySelector('dialog[open]')) return;
+            const s = simple ? SOUNDS.find(x => x.key === simpleTheme().sounds[Number(e.key) - 1]) : SOUNDS[Number(e.key) - 1];
+            if (s) { e.preventDefault(); hitPad(s.key); }
+        };
+
+
+        /* =========================================================
+           22. CONTROLLER: REMEMBERED PICKS
+           What's picked on each tab (the tab itself, the L3's background, font, color, location and
+           animation, the overlay, the sport) and the L3 duration are kept, so the panel opens the way it
+           was left, and a saved show brings them back too.
+           ========================================================= */
+        const PICKS_KEY = 'fx_picks';
+        const PICK_GROUPS = ['mode', 'bgStyle', 'fontStyle', 'fontColor', 'location', 'animationStyle', 'overlayStyle', 'sportStyle'];
+        const savePicks = () => {
+            const picks = Object.fromEntries(PICK_GROUPS.map(name => [name, checked(name) ?? null]));
+            try { localStorage.setItem(PICKS_KEY, JSON.stringify({ ...picks, l3Duration })); } catch { /* storage blocked */ }
+        };
+        // Picks the option with this value in a group of buttons (false if there's no such option)
+        const pickOption = (name, value) => {
+            const r = [...document.querySelectorAll(`input[name="${name}"]`)].find(x => x.value === value);
+            if (r) r.checked = true;
+            return !!r;
+        };
+        // The name on an option's button, like "Sports" for bgStyle "sports"
+        const optionLabel = (name, value) => {
+            const r = [...document.querySelectorAll(`input[name="${name}"]`)].find(x => x.value === value);
+            return (r && document.querySelector(`label[for="${r.id}"]`)?.textContent.trim()) || value;
+        };
+        const loadPicks = () => {
+            const picks = readJson(PICKS_KEY, {});
+            if (!picks || typeof picks !== 'object') return;
+            PICK_GROUPS.forEach(name => { if (typeof picks[name] === 'string') pickOption(name, picks[name]); });
+            if (Number(picks.l3Duration) > 0) l3Duration = Number(picks.l3Duration);
+        };
+
+
+        /* =========================================================
+           23. CONTROLLER: SHOWS
+           A show is everything this panel is set to, saved as one file in the "shows" folder (through the
+           server) under a number from 001 to 999 and a title: "001 - Morning Show.json". That's every fx_
+           setting kept in this browser: the saved graphics, the rundown and its times, the L3 Builder,
+           Simple mode and its theme, the picks on each tab, light or dark, the timer, the projector on or
+           off, the Sound Pad volume... so opening it on another computer makes the panel look the same.
+           Left out: AKTA (each computer keeps its own, and the keys live with the server), and what's going
+           on in a show right now (Set Show, what's on, the log, started breaks), which start fresh.
+           The show stays open until another one is opened. The chip in the top bar names it, with a dot
+           when something has changed since it was saved, and opening another show asks first whether to
+           save those changes. Number 999 is restricted to engineering, so picking it asks first.
+           ========================================================= */
+        const SHOW_FILE_KEY = 'fx_show_file'; // the show open now: { number, title, hash: its settings when saved or opened }
+        const ENGINEERING_SHOW = '999';
+        const SHOW_OPENED_KEY = 'fx_show_opened'; // (sessionStorage) the message to show once the panel reloads with a new show
+        const SHOW_SKIP = new Set([SHOW_FILE_KEY, AKTA_ON_KEY, SHOW_LOCK_KEY, LAST_PLAYED_KEY, VIEW_KEY, SHOW_STATE_KEY, SHOW_LOG_KEY,
+            TIMING_LIVE_KEY, CUE_BREAK_KEY, PROJECTOR_CLEAR_KEY, 'fx_custom_bg']);
+        const inShowFile = (key) => (key === STORAGE_KEY || key.startsWith('fx_')) && !SHOW_SKIP.has(key);
+        // What goes in a show file: each setting as it's kept in this browser (text). The timer keeps its
+        // mode and length, not a run in progress.
+        const showSettings = () => Object.fromEntries(Object.keys(localStorage).filter(inShowFile).sort()
+            .map(k => [k, k === TIMER_KEY ? JSON.stringify({ ...loadTimer(), ran: 0, since: null }) : localStorage.getItem(k)]));
+        // A short fingerprint of the settings, to tell whether anything has changed since the save
+        const settingsHash = (settings) => {
+            const text = JSON.stringify(settings);
+            let h = 0x811c9dc5;
+            for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 0x01000193);
+            return (h >>> 0).toString(36);
+        };
+        const currentShowFile = () => {
+            const f = readJson(SHOW_FILE_KEY, null);
+            return f && /^\d{3}$/.test(f.number) && typeof f.title === 'string' ? f : null;
+        };
+        const showName = (f) => (f ? `${f.number} · ${f.title}` : 'Untitled show');
+        // Changed since it was saved (or opened)? With no show open yet, it has changes once anything's saved or in the rundown.
+        const showDirty = () => {
+            const f = currentShowFile();
+            return f ? settingsHash(showSettings()) !== f.hash : loadButtonsFromStorage().length > 0 || loadShow().length > 0;
+        };
+        const updateShowChip = () => {
+            const f = currentShowFile(), dirty = showDirty();
+            $('show-chip-text').textContent = showName(f);
+            $('show-chip-dirty').classList.toggle('hidden', !dirty);
+            $('show-chip').title = `${showName(f)}${dirty ? ' (changed since it was saved)' : ''}. Tap to save it, or open another show.`;
+        };
+        // Any change to a setting that goes in a show updates the chip (a moment later, once for a burst of changes)
+        let showChipTimer = null;
+        const watchShowSettings = () => {
+            const set = Storage.prototype.setItem, remove = Storage.prototype.removeItem;
+            const changed = (store, key) => {
+                if (store !== localStorage || !inShowFile(String(key))) return;
+                clearTimeout(showChipTimer);
+                showChipTimer = setTimeout(updateShowChip, 300);
+            };
+            Storage.prototype.setItem = function (key, value) { set.call(this, key, value); changed(this, key); };
+            Storage.prototype.removeItem = function (key) { remove.call(this, key); changed(this, key); };
+        };
+        // The lowest number not used yet (999 is left for engineering)
+        const nextShowNumber = (files) => {
+            const used = new Set(files.map(f => f.number));
+            for (let n = 1; n < 999; n++) {
+                const number = String(n).padStart(3, '0');
+                if (!used.has(number)) return number;
+            }
+            return '';
+        };
+
+        // ---------- Saving ----------
+        // The Save window: resolves to { title, number }, or null if it's cancelled
+        let showDetailsDone = null;
+        const askShowDetails = (title, number) => new Promise(resolve => {
+            showDetailsDone = resolve;
+            $('show-title').value = title;
+            $('show-number').value = number;
+            $('show-save-note').textContent = 'The number is 3 digits, from 001. 999 is restricted to engineering.';
+            $('show-save-dialog').returnValue = '';
+            $('show-save-dialog').showModal();
+            $('show-title').focus();
+        });
+        // Save pressed in that window: checks the title and number, and warns before using 999. False keeps the window open.
+        const checkShowDetails = () => {
+            const title = cleanRundownName($('show-title').value), typed = $('show-number').value.trim(), note = $('show-save-note');
+            if (!title) { note.textContent = 'Give the show a title (letters, numbers, spaces and _ - . only).'; return false; }
+            if (!/^\d{1,3}$/.test(typed) || Number(typed) < 1) { note.textContent = 'The number has to be from 001 to 999.'; return false; }
+            const number = typed.padStart(3, '0');
+            if (number === ENGINEERING_SHOW && !confirm('Show number 999 is restricted to engineering.\n\nOnly use it if you are engineering. Continue?')) return false;
+            $('show-title').value = title;
+            $('show-number').value = number;
+            return true;
+        };
+        const showFileData = (number, title, settings) => ({ app: 'FX Wizard', type: 'show', version: 1, number, title, saved: new Date().toISOString(), settings });
+        // Save (asNew false) saves over the show open now (or asks for a title and number if there isn't one).
+        // Save as… (asNew true) asks for them. Resolves to true once it's saved.
+        const saveShowFile = async (asNew) => {
+            const open = currentShowFile();
+            const listing = await serverRequest({ mode: 'showList' }, 'showFiles');
+            const files = listing?.files || [];
+            let details = open && !asNew ? { number: open.number, title: open.title } : null;
+            if (!details) {
+                details = await askShowDetails(open?.title || '', open && !asNew ? open.number : nextShowNumber(files));
+                if (!details) return false;
+                const taken = files.find(f => f.number === details.number);
+                if (taken && !(open && open.number === taken.number && open.title === details.title)
+                    && !confirm(`Show ${taken.number} is already "${taken.title}". Replace it with this one?`)) return false;
+            }
+            const { number, title } = details;
+            const settings = showSettings();
+            const data = showFileData(number, title, settings);
+            if (!listing) {
+                downloadJson(`${number} - ${title}`, data);
+                flash(`Downloaded ${number} - ${title}.json`, true, 'the server can\'t save shows: move it into the shows folder');
+            } else {
+                const reply = await serverRequest({ mode: 'showSave', number, title, data }, 'showSaved', 5000);
+                if (!reply?.ok) { flash('Couldn\'t save the show', true, reply?.error || 'no answer from the server'); return false; }
+                flash(`Show saved: ${showName({ number, title })}`, false, `shows/${reply.file}`);
+            }
+            localStorage.setItem(SHOW_FILE_KEY, JSON.stringify({ number, title, hash: settingsHash(settings) }));
+            updateShowChip();
+            if ($('shows-dialog').open) renderShowsDialog();
+            return true;
+        };
+
+        // ---------- Opening ----------
+        // The chip opens the Shows window: Save, Save as…, and the saved shows by number
+        const openShowsDialog = () => {
+            if (!$('shows-dialog').open) $('shows-dialog').showModal();
+            renderShowsDialog();
+        };
+        const renderShowsDialog = async () => {
+            const open = currentShowFile(), dirty = showDirty();
+            const now = $('shows-current');
+            now.innerHTML = '<span>Open now:</span> <b></b> <em></em>';
+            now.querySelector('b').textContent = showName(open);
+            now.querySelector('em').textContent = dirty ? (open ? 'changed since it was saved' : 'not saved yet') : 'saved';
+            now.classList.toggle('dirty', dirty);
+            const list = $('shows-list'), note = $('shows-note');
+            list.innerHTML = '';
+            note.textContent = 'Looking in the shows folder…';
+            const listing = await serverRequest({ mode: 'showList' }, 'showFiles');
+            const files = listing?.files || [];
+            list.innerHTML = '';
+            note.textContent = !listing ? 'The server can\'t read the shows folder (not connected, or an older server: restart it after updating). Choose a file instead.'
+                : files.length ? 'Tap one to open it.'
+                : 'No saved shows yet. Save puts this one in the shows folder.';
+            files.forEach(f => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `rundown-file show-pick${open && open.number === f.number ? ' on' : ''}`;
+                btn.innerHTML = '<b><span class="show-num"></span><span class="show-ttl"></span></b><span></span>';
+                btn.querySelector('.show-num').textContent = f.number;
+                btn.querySelector('.show-ttl').textContent = f.title;
+                const when = f.saved ? new Date(f.saved * 1000).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : '';
+                btn.querySelector(':scope > span').textContent = [f.number === ENGINEERING_SHOW ? 'Engineering' : '', open && open.number === f.number ? 'open now' : '', when].filter(Boolean).join(' · ');
+                btn.onclick = () => openShowNumber(f.number);
+                list.append(btn);
+            });
+        };
+        const openShowNumber = async (number) => {
+            const reply = await serverRequest({ mode: 'showLoad', number }, 'showData', 5000);
+            if (!reply?.ok) { flash(`Couldn't open show ${number}`, true, reply?.error || 'no answer from the server'); return; }
+            openShowData(reply.data, { number: reply.number, title: reply.title });
+        };
+        // "Choose a file…": any show file on this computer
+        const importShowFile = (file) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                let data = null;
+                try { data = JSON.parse(reader.result); } catch { /* handled in openShowData */ }
+                openShowData(data, null);
+            };
+            reader.readAsText(file);
+        };
+        // Opening another show while this one has changes: resolves to 'save', 'discard' or 'cancel'
+        const askSaveFirst = (next) => new Promise(resolve => {
+            const dlg = $('show-ask-dialog'), open = currentShowFile();
+            $('show-ask-text').textContent = `${open ? `${showName(open)} has changes since it was last saved` : 'This show hasn\'t been saved'}. Save before opening ${next}? If you don't, those changes are lost.`;
+            dlg.returnValue = '';
+            dlg.addEventListener('close', () => resolve(dlg.returnValue || 'cancel'), { once: true });
+            dlg.showModal();
+        });
+        // Swaps everything for a show's settings, then reloads the panel so every tab shows them.
+        // A show can't be swapped while Set Show is on.
+        const openShowData = async (data, from) => {
+            if (!data || data.type !== 'show' || !data.settings || typeof data.settings !== 'object') { flash('That isn\'t a show file', true); return false; }
+            if (showLocked()) { flash('Turn off Set Show first', true, 'a show can\'t be swapped while it\'s running'); return false; }
+            const number = [from?.number, data.number].find(n => typeof n === 'string' && /^\d{3}$/.test(n)) || null;
+            const title = cleanRundownName(from?.title || data.title) || 'Show';
+            const next = number ? showName({ number, title }) : title;
+            if (showDirty()) {
+                const choice = await askSaveFirst(next);
+                if (choice === 'cancel') return false;
+                if (choice === 'save' && !(await saveShowFile(false))) return false;
+            }
+            if (loadLog().some(e => e.kind !== 'start') && !confirm(`Opening ${next} starts a fresh log. If the log of what ran is needed, Generate Log on the Podcast Rundown first.\n\nOpen it now?`)) return false;
+            // Out with everything that goes in a show, in with this one's
+            Object.keys(localStorage).filter(inShowFile).forEach(k => localStorage.removeItem(k));
+            Object.entries(data.settings).forEach(([k, v]) => { if (inShowFile(k) && typeof v === 'string') localStorage.setItem(k, v); });
+            // A fresh start, like importing a rundown: Set Show off, nothing marked as played, showing ALL, a new log
+            localStorage.setItem(SHOW_LOCK_KEY, '0');
+            localStorage.setItem(VIEW_KEY, 'ALL');
+            localStorage.setItem(PROJECTOR_CLEAR_KEY, '0');
+            [LAST_PLAYED_KEY, SHOW_STATE_KEY, SHOW_LOG_KEY, TIMING_LIVE_KEY, CUE_BREAK_KEY].forEach(k => localStorage.removeItem(k));
+            // fresh: its fingerprint is taken once the panel has loaded it (see finishShowOpen)
+            if (number) localStorage.setItem(SHOW_FILE_KEY, JSON.stringify({ number, title, fresh: true }));
+            else localStorage.removeItem(SHOW_FILE_KEY);
+            try { sessionStorage.setItem(SHOW_OPENED_KEY, `Opened ${next}`); } catch { /* storage blocked: no message */ }
+            location.reload();
+            return true;
+        };
+        // After a reload with a show just opened: its fingerprint (with anything the panel filled in while
+        // loading), and the message that it opened
+        const finishShowOpen = () => {
+            const f = currentShowFile();
+            if (f?.fresh) localStorage.setItem(SHOW_FILE_KEY, JSON.stringify({ number: f.number, title: f.title, hash: settingsHash(showSettings()) }));
+            let opened = null;
+            try { opened = sessionStorage.getItem(SHOW_OPENED_KEY); sessionStorage.removeItem(SHOW_OPENED_KEY); } catch { /* storage blocked */ }
+            if (opened) flash(opened);
+            updateShowChip();
+        };
+
+
+        /* =========================================================
+           24. CONTROLLER: SIMPLE MODE (themes)
+           For anyone who'd rather not build a look of their own. The Simple switch in the top bar swaps
+           the tabs for one page in a theme's look: pick a theme, type a name, and TAKE it (or TOGGLE it,
+           or SAVE it with the saved L3s). Every L3 taken here, saved ones too, wears the theme picked now,
+           so changing the theme restyles them all. Under it are the theme's own overlays, stingers and
+           sounds, one tap each (keys 1 and up hit the sounds). Picking a theme also sets the Animated L3s
+           tab to its look, for when Simple is turned off.
+           To add a theme, add it to THEMES: l3 is its lower third's look (the values of the options on the
+           Animated L3s tab), overlays and stingers are keys from OVERLAYS, sounds are keys from SOUNDS.
+           ========================================================= */
+        const THEMES = {
+            classic:  { label: 'Classic',  icon: '🎙️', c1: '#3b82f6', c2: '#1e3a8a',
+                        l3: { bgStyle: 'blue', fontStyle: 'font-default', fontColor: '', animationStyle: 'anim-slideLeft' },
+                        overlays: ['confetti', 'colorwave', 'social'], stingers: ['stinger', 'colorbars'], sounds: ['victory', 'swish', 'comedy'] },
+            sports:   { label: 'Sports',   icon: '🏆', c1: '#f97316', c2: '#9a3412',
+                        l3: { bgStyle: 'sports', fontStyle: 'font-modern', fontColor: '', animationStyle: 'anim-slam' },
+                        overlays: ['confetti', 'hottake', 'fire'], stingers: ['sportsfx', 'firestinger'], sounds: ['victory', 'swish', 'trombone'] },
+            news:     { label: 'News',     icon: '📰', c1: '#e11d48', c2: '#4c0519',
+                        l3: { bgStyle: 'politics', fontStyle: 'font-classic', fontColor: '', animationStyle: 'anim-slideLeft' },
+                        overlays: ['breaking', 'social'], stingers: ['stinger', 'colorbars'], sounds: ['mystery', 'swish', 'censor'] },
+            tech:     { label: 'Tech & Gaming', icon: '🎮', c1: '#65a30d', c2: '#14532d',
+                        l3: { bgStyle: 'code', fontStyle: 'font-modern', fontColor: '', animationStyle: 'anim-glitch' },
+                        overlays: ['vhs', 'comic'], stingers: ['pixel', 'tvstatic'], sounds: ['victory', 'swish', 'comedy'] },
+            comedy:   { label: 'Comedy',   icon: '😂', c1: '#ec4899', c2: '#7c3aed',
+                        l3: { bgStyle: 'clouds', fontStyle: 'font-fun', fontColor: '', animationStyle: 'anim-bounce' },
+                        overlays: ['comic', 'disco', 'confetti'], stingers: ['curtains', 'cat', 'spring'], sounds: ['comedy', 'trombone', 'censor', 'victory'] },
+            truecrime: { label: 'True Crime', icon: '🔍', c1: '#52525b', c2: '#18181b',
+                        l3: { bgStyle: 'black', fontStyle: 'font-classic', fontColor: '#E53935', animationStyle: 'anim-fade' },
+                        overlays: ['rain', 'arrested', 'vhs'], stingers: ['storm', 'ghost', 'tvstatic'], sounds: ['mystery', 'censor', 'swish'] },
+            business: { label: 'Business', icon: '💼', c1: '#059669', c2: '#064e3b',
+                        l3: { bgStyle: 'finance', fontStyle: 'font-classic', fontColor: '#FFC72C', animationStyle: 'anim-fade' },
+                        overlays: ['breaking', 'colorwave', 'social'], stingers: ['stinger', 'fireworks'], sounds: ['victory', 'swish', 'mystery'] },
+            lifestyle: { label: 'Lifestyle', icon: '☕', c1: '#f472b6', c2: '#78350f',
+                        l3: { bgStyle: 'cafe', fontStyle: 'font-script', fontColor: '', animationStyle: 'anim-fade' },
+                        overlays: ['vday', 'confetti', 'social'], stingers: ['coffee', 'curtains', 'hearts'], sounds: ['victory', 'comedy', 'swish'] },
+            holiday:  { label: 'Holiday',  icon: '🎄', c1: '#dc2626', c2: '#166534',
+                        l3: { bgStyle: 'holiday', fontStyle: 'font-script', fontColor: '', animationStyle: 'anim-fade' },
+                        overlays: ['snow', 'confetti'], stingers: ['xmas', 'fireworks'], sounds: ['victory', 'comedy'] },
+        };
+        const SIMPLE_KEY = 'fx_simple';  // { on, theme, where, long }
+        const SIMPLE_L3_SECONDS = { short: 6, long: 12 }; // how long a TAKE keeps an L3 up (the Short / Long switch)
+        const SIMPLE_MAX_SAVED = 20;     // saved L3s on the Simple page: two per row, 10 rows
+        const SIMPLE_WHERE = { 'Bottom Left': '◀ Left', 'Bottom Middle': 'Middle', 'Bottom Right': 'Right ▶' };
+        const simpleState = () => {
+            const s = readJson(SIMPLE_KEY, {}) || {};
+            return { on: s.on === true, theme: THEMES[s.theme] ? s.theme : 'classic', where: SIMPLE_WHERE[s.where] ? s.where : 'Bottom Left', long: s.long === true };
+        };
+        const simpleTheme = () => THEMES[simpleState().theme];
+        const saveSimple = (changes) => { localStorage.setItem(SIMPLE_KEY, JSON.stringify({ ...simpleState(), ...changes })); renderSimple(); };
+
+        const setSimpleOn = (on) => {
+            saveSimple({ on });
+            if (!on) updateMode(); // the tabs, as they were
+            window.scrollTo(0, 0);
+            flash(on ? `Simple mode: ${simpleTheme().label}` : 'Pro mode', false, on ? 'pick a theme, then TAKE' : 'the tabs are back');
+        };
+        // Picking a theme also gives the Animated L3s tab its look
+        const pickTheme = (key) => {
+            const t = THEMES[key];
+            saveSimple({ theme: key });
+            ['bgStyle', 'fontStyle', 'fontColor', 'animationStyle'].forEach(name => pickOption(name, t.l3[name]));
+            updateSummaries();
+            savePicks();
+            flash(`Theme: ${t.label}`);
+        };
+
+        // ---------- The lower third ----------
+        // A lower third in the theme's look (saved ones are taken through here too)
+        const simpleL3 = (label, title) => {
+            const st = simpleState();
+            return { mode: 'l3', label, title: title || '', location: st.where, ...THEMES[st.theme].l3, duration: SIMPLE_L3_SECONDS[st.long ? 'long' : 'short'] };
+        };
+        const simpleTyped = () => {
+            const label = $('simple-name').value.trim();
+            if (!label) { flash('Enter a name', true); $('simple-name').focus(); return null; }
+            return simpleL3(label, $('simple-title').value.trim());
+        };
+        const simpleTake = () => { const d = simpleTyped(); if (d) flashTake(d); };
+        const simpleToggle = () => {
+            if (toggled.l3) {
+                if (sendPayload({ mode: 'hide', layer: 'l3' })) { setToggled('l3', false); clearLive('l3'); flash('Toggled off'); }
+                return;
+            }
+            const d = simpleTyped();
+            if (!d || !sendPayload({ ...d, hold: true })) return;
+            setToggled('l3', true);
+            clearLive('l3');
+            flash(`On: ${d.label}`, false, 'until toggled off');
+        };
+        const updateSimpleToggle = () => {
+            const btn = $('simple-toggle-btn');
+            btn.textContent = toggled.l3 ? 'TOGGLE OFF' : 'TOGGLE ON';
+            btn.classList.toggle('on', toggled.l3);
+            btn.classList.toggle('animate-pulse', toggled.l3);
+        };
+        // SAVE: kept with the saved L3s, marked as Simple's, then the boxes are emptied for the next one. The Simple page
+        // lists only its own (the ones saved here), so the L3s saved on the Animated L3s tab don't crowd it or count
+        // toward its 20; Simple's also show on the Animated L3s tab. (Older Simple saves are known by their theme.)
+        const savedL3s = () => loadButtonsFromStorage().filter(d => d.mode === 'l3' && (d.simple || d.theme));
+        const simpleSave = () => {
+            const d = simpleTyped();
+            if (!d) return;
+            if (savedL3s().some(x => x.label === d.label && (x.title || '') === d.title)) { flash('Already saved', true, d.label); return; }
+            if (savedL3s().length >= SIMPLE_MAX_SAVED) { flash(`Simple holds ${SIMPLE_MAX_SAVED} saved L3s`, true, 'delete one (✕) to save another'); return; }
+            saveButtonsToStorage([{ id: Date.now(), ...d, simple: true, theme: simpleState().theme }, ...loadButtonsFromStorage()]);
+            $('simple-name').value = '';
+            $('simple-title').value = '';
+            renderSimple();
+            flash('Saved', false, d.label);
+        };
+
+        // ---------- The overlays and stingers ----------
+        // Fired with their usual time and their own words (Breaking News, Hot Take), the sport picked on the
+        // Fullscreen Overlays tab, the socials typed there, and the Greenscreen switch as last set for that one
+        const simpleFire = (key) => {
+            const cfg = OVERLAYS[key];
+            flashTake({
+                mode: 'overlay', overlay: key, label: '', title: '',
+                ...(cfg.sport && { sport: checked('sportStyle') || 'football' }),
+                ...(cfg.social && { socials: currentSocials() }),
+                ...(cfg.depth && loadGsEffects().includes(key) && { gs: true }),
+                duration: cfg.dur ?? 8,
+            });
+        };
+
+        // ---------- The page ----------
+        const renderSimple = () => {
+            const st = simpleState(), theme = THEMES[st.theme];
+            $('controller-view').classList.toggle('simple-on', st.on);
+            $('simple-toggle').checked = st.on;
+            $('simple-switch-text').textContent = st.on ? 'Simple' : 'Pro';
+            if (!st.on) return;
+            const page = $('simple-section');
+            page.style.setProperty('--theme-c1', theme.c1);
+            page.style.setProperty('--theme-c2', theme.c2);
+            // The themes
+            const themes = $('simple-themes');
+            themes.innerHTML = '';
+            Object.entries(THEMES).forEach(([key, t]) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `simple-theme${key === st.theme ? ' on' : ''}`;
+                btn.style.setProperty('--c1', t.c1);
+                btn.style.setProperty('--c2', t.c2);
+                btn.innerHTML = '<span class="st-icon" aria-hidden="true"></span><span class="st-label"></span>';
+                btn.querySelector('.st-icon').textContent = t.icon;
+                btn.querySelector('.st-label').textContent = t.label;
+                btn.title = `${t.label}: ${optionLabel('bgStyle', t.l3.bgStyle)} lower thirds, with its own overlays, stingers and sounds`;
+                btn.onclick = () => pickTheme(key);
+                themes.append(btn);
+            });
+            // The lower third: its look, where it goes, and the saved ones
+            $('simple-l3-look').textContent = ['bgStyle', 'fontStyle', 'animationStyle'].map(name => optionLabel(name, theme.l3[name])).join(' · ');
+            const where = $('simple-where');
+            where.innerHTML = '';
+            Object.entries(SIMPLE_WHERE).forEach(([loc, text]) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = loc === st.where ? 'on' : '';
+                btn.textContent = text;
+                btn.title = `Put it at the ${loc.toLowerCase()}`;
+                btn.onclick = () => saveSimple({ where: loc });
+                where.append(btn);
+            });
+            updateSimpleToggle();
+            // Short / Long: how long a TAKE keeps the L3 up (saved ones too)
+            const len = $('simple-len');
+            len.innerHTML = '';
+            ['short', 'long'].forEach(k => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = (k === 'long') === st.long ? 'on' : '';
+                btn.textContent = `${k === 'long' ? 'Long' : 'Short'} · ${SIMPLE_L3_SECONDS[k]}s`;
+                btn.title = `TAKE keeps the L3 up for ${SIMPLE_L3_SECONDS[k]} seconds`;
+                btn.onclick = () => saveSimple({ long: k === 'long' });
+                len.append(btn);
+            });
+            // The saved ones: two per row, up to 10 rows (the newest SIMPLE_MAX_SAVED), big enough to hit live
+            const saved = $('simple-saved');
+            saved.innerHTML = '';
+            const all = savedL3s();
+            $('simple-saved-head').textContent = all.length ? `Saved ${Math.min(all.length, SIMPLE_MAX_SAVED)} / ${SIMPLE_MAX_SAVED}` : '';
+            all.slice(0, SIMPLE_MAX_SAVED).forEach(d => {
+                const row = document.createElement('div');
+                row.className = 'simple-row';
+                row.innerHTML = `<button type="button" class="sr-take"><b></b><span></span></button><button type="button" class="sr-del" title="Delete">${icon('x')}</button>`;
+                row.querySelector('b').textContent = d.label;
+                row.querySelector('.sr-take span').textContent = d.title || '';
+                row.querySelector('.sr-take').title = `Take ${d.label} in the ${theme.label} look`;
+                row.querySelector('.sr-take').onclick = () => flashTake(simpleL3(d.label, d.title));
+                row.querySelector('.sr-del').onclick = () => {
+                    if (!confirm(`Delete ${d.label}?`)) return;
+                    saveButtonsToStorage(loadButtonsFromStorage().filter(x => x.id !== d.id));
+                    renderSimple();
+                };
+                saved.append(row);
+            });
+            // The overlays and stingers (stingers show their length)
+            [['simple-overlays', theme.overlays], ['simple-stingers', theme.stingers]].forEach(([id, keys]) => {
+                const box = $(id);
+                box.innerHTML = '';
+                keys.filter(k => OVERLAYS[k]).forEach(k => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.textContent = OVERLAYS[k].label;
+                    const len = OVERLAYS[k].length;
+                    if (len !== undefined) {
+                        const tag = document.createElement('small');
+                        tag.textContent = formatTime(Math.round(len * 10) / 10);
+                        btn.append(tag);
+                    }
+                    btn.title = `Take ${OVERLAYS[k].label}`;
+                    btn.onclick = () => simpleFire(k);
+                    box.append(btn);
+                });
+            });
+            // The sounds, like the Sound Pad's (with the volume set there)
+            const pads = $('simple-sounds');
+            pads.innerHTML = '';
+            theme.sounds.map(k => SOUNDS.find(s => s.key === k)).filter(Boolean).forEach((s, i) => {
+                const pad = document.createElement('button');
+                pad.type = 'button';
+                pad.className = 'pad';
+                pad.id = `spad-${s.key}`;
+                pad.title = `${s.label} (key ${i + 1})`;
+                pad.style.setProperty('--c1', s.c1);
+                pad.style.setProperty('--c2', s.c2);
+                pad.innerHTML = `<span class="pad-key">${i + 1}</span><span class="pad-icon" aria-hidden="true">${s.icon}</span><span class="pad-label"></span><span class="pad-bar"></span>`;
+                pad.querySelector('.pad-label').textContent = s.label;
+                pad.addEventListener('pointerdown', (e) => { if (e.button === 0) { e.preventDefault(); hitPad(s.key); } });
+                pad.addEventListener('click', (e) => { if (e.detail === 0) hitPad(s.key); });
+                pads.append(pad);
+            });
+        };
+
+
+        /* =========================================================
+           25. STARTUP
            Opens the display if the address ends in #display (or the
            underlay for #underlay), otherwise opens the controller.
            ========================================================= */
@@ -7878,15 +9565,33 @@
                 $('display-view').classList.remove('hidden');
                 $('display-box').style.opacity = 0;
                 $('overlay-box').style.opacity = 0;
+                warmUp(); // each effect's first-time work, in the background
             } else {
                 $('controller-view').classList.remove('hidden');
                 isController = true;
+                watchShowSettings(); // the show chip's dot, as settings change
                 loadTheme();
+                loadPicks();         // each tab as it was left
+                document.addEventListener('change', (e) => { if (PICK_GROUPS.includes(e.target.name)) savePicks(); });
+                $('simple-toggle').addEventListener('change', (e) => setSimpleOn(e.target.checked));
+                // Shows: opening one from a file, and the Save window (checked when Save is pressed)
+                $('show-file').addEventListener('change', (e) => {
+                    if (e.target.files.length) importShowFile(e.target.files[0]);
+                    e.target.value = '';
+                });
+                $('show-save-dialog').querySelector('form').addEventListener('submit', (e) => {
+                    if ((e.submitter?.value || 'save') === 'save' && !checkShowDetails()) e.preventDefault(); // stays open to fix it
+                });
+                $('show-save-dialog').addEventListener('close', () => {
+                    const done = showDetailsDone;
+                    showDetailsDone = null;
+                    done?.($('show-save-dialog').returnValue === 'save' ? { title: $('show-title').value, number: $('show-number').value } : null);
+                });
                 $('light-toggle').addEventListener('change', (e) => setTheme(e.target.checked));
                 $('gs-pick').addEventListener('change', (e) => setGsPick(e.target.checked));
                 document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener('change', updateMode));
                 document.querySelectorAll('input[name="overlayStyle"]').forEach(r => r.addEventListener('change', () => { fillDuration(); updateSections(); }));
-                $('duration-input').addEventListener('input', (e) => { if (checked('mode') === 'l3') l3Duration = Number(e.target.value) || 5; });
+                $('duration-input').addEventListener('input', (e) => { if (checked('mode') === 'l3') { l3Duration = Number(e.target.value) || 5; savePicks(); } });
                 $('import-file').addEventListener('change', (e) => {
                     if (e.target.files.length) importL3s(e.target.files);
                     e.target.value = ''; // lets the same file be picked again
@@ -7900,6 +9605,13 @@
                 });
                 // Like & Subscribe socials
                 renderSocialField();
+                // Sound Pad
+                renderSoundPads();
+                document.addEventListener('keydown', soundKeys);
+                $('sound-volume').addEventListener('input', (e) => {
+                    try { localStorage.setItem(SOUND_VOLUME_KEY, e.target.value); } catch { /* storage blocked */ }
+                    $('sound-volume-value').textContent = `${e.target.value}%`;
+                });
                 // Saved list search
                 $('saved-search').addEventListener('input', (e) => { savedQuery = e.target.value.trim().toLowerCase(); renderButtons(loadButtonsFromStorage()); });
                 // L3 Builder: its name (kept as it's typed) and the search over the saved L3s
@@ -7971,6 +9683,8 @@
                 initSections();
                 showCustomNames();
                 updateMode();
+                renderSimple();
+                finishShowOpen();
             }
             connectWebSocket();
         };

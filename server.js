@@ -17,9 +17,11 @@ const crypto = require('crypto');
 //   custom    the control panel asks what images are in it
 //   rundowns  saved Podcast Rundowns (one .json file each), saved and opened from the control panel
 //   logs      show logs (one .csv file each), from Generate Log in the control panel
+//   shows     saved shows (one .json file each, "001 - Title.json"): everything the panel is set to
 const CUSTOM_DIR = path.join(__dirname, 'custom');
 const RUNDOWN_DIR = path.join(__dirname, 'rundowns');
 const LOG_DIR = path.join(__dirname, 'logs');
+const SHOW_DIR = path.join(__dirname, 'shows');
 function customImages() {
     try {
         return fs.readdirSync(CUSTOM_DIR)
@@ -48,12 +50,58 @@ function rundownFiles() {
     }
 }
 
+// Saved shows are numbered 001 to 999, one file per number: "<number> - <title>.json"
+const SHOW_FILE = /^(\d{3}) - (.+)\.json$/i;
+const showNumber = (n) => (typeof n === 'string' && /^\d{3}$/.test(n) && n !== '000' ? n : null);
+// Saved shows, by number: number, title, file and when it was saved (in seconds)
+function showFiles() {
+    try {
+        return fs.readdirSync(SHOW_DIR)
+            .map(f => [f, SHOW_FILE.exec(f)])
+            .filter(([, m]) => m && showNumber(m[1]))
+            .map(([f, m]) => ({ number: m[1], title: m[2], file: f, saved: fs.statSync(path.join(SHOW_DIR, f)).mtimeMs / 1000 }))
+            .sort((a, b) => (a.number < b.number ? -1 : a.number > b.number ? 1 : b.saved - a.saved));
+    } catch (err) {
+        return [];
+    }
+}
+// showSave: writes the show, and takes away any other file with the same number (the panel asks first)
+function saveShowFile(request) {
+    const number = showNumber(request.number), title = rundownName(request.title);
+    if (!number || !title || !request.data || typeof request.data !== 'object') return { mode: 'showSaved', ok: false, error: 'Needs a number (001 to 999), a title and the show' };
+    const file = `${number} - ${title}.json`;
+    try {
+        fs.mkdirSync(SHOW_DIR, { recursive: true });
+        fs.writeFileSync(path.join(SHOW_DIR, file), JSON.stringify(request.data, null, 2));
+        for (const old of showFiles()) if (old.number === number && old.file !== file) fs.rmSync(path.join(SHOW_DIR, old.file), { force: true });
+        return { mode: 'showSaved', ok: true, number, title, file };
+    } catch (err) {
+        return { mode: 'showSaved', ok: false, error: err.message };
+    }
+}
+// showLoad: the show saved under that number
+function loadShowFile(request) {
+    const number = showNumber(request.number);
+    const found = number && showFiles().find(f => f.number === number);
+    if (!found) return { mode: 'showData', ok: false, error: `There's no show ${number || ''} in the shows folder` };
+    try {
+        const text = fs.readFileSync(path.join(SHOW_DIR, found.file), 'utf8');
+        const data = JSON.parse(text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text);
+        return { mode: 'showData', ok: true, number, title: found.title, data };
+    } catch (err) {
+        return { mode: 'showData', ok: false, error: `Couldn't read ${found.file} (${err.code || err.name})` };
+    }
+}
+
 // Requests from the control panel that the server answers itself (only to that panel).
 // Returns the reply, or null for everything else (graphics, which get passed on).
 function answerRequest(request) {
     if (!request || typeof request !== 'object') return null;
     if (request.mode === 'customList') return { mode: 'customFiles', files: customImages() };
     if (request.mode === 'rundownList') return { mode: 'rundownFiles', files: rundownFiles() };
+    if (request.mode === 'showList') return { mode: 'showFiles', files: showFiles().map(({ file, ...f }) => f) };
+    if (request.mode === 'showSave') return saveShowFile(request);
+    if (request.mode === 'showLoad') return loadShowFile(request);
     if (request.mode === 'rundownSave') {
         const name = rundownName(request.name);
         if (!name || !request.data || typeof request.data !== 'object') return { mode: 'rundownSaved', ok: false, error: 'Needs a name and a rundown' };
@@ -380,6 +428,7 @@ const wss = new WebSocket.Server({ port: 8080 });
 
 // This Set will hold all connected client sockets
 const clients = new Set(); 
+const STUCK_BYTES = 8 * 1024 * 1024; // a client this far behind on reading gets skipped (see the broadcast below)
 
 console.log("WebSocket Server started on ws://localhost:8080.");
 console.log("Waiting for connections from fx_wizard.html...");
@@ -416,10 +465,11 @@ wss.on('connection', function connection(ws) {
             return;
         }
 
-        // 3. Broadcast the message to ALL connected clients
+        // 3. Broadcast the message to ALL connected clients. send() never waits, so one window that has
+        // stopped reading (a tablet asleep with the projector open) can't hold up the others; one that's
+        // fallen more than STUCK_BYTES behind is skipped until it catches up, so its queue can't grow forever.
         clients.forEach(client => {
-            // Check if the client connection is open before sending
-            if (client.readyState === WebSocket.OPEN) {
+            if (client.readyState === WebSocket.OPEN && client.bufferedAmount < STUCK_BYTES) {
                 client.send(messageText);
             }
         });

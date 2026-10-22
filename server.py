@@ -25,6 +25,7 @@ clients = set()
 #   custom    the control panel asks what images are in it
 #   rundowns  saved Podcast Rundowns (one .json file each), saved and opened from the control panel
 #   logs      show logs (one .csv file each), from Generate Log in the control panel
+#   shows     saved shows (one .json file each, "001 - Title.json"): everything the panel is set to
 try:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 except NameError:
@@ -32,6 +33,7 @@ except NameError:
 CUSTOM_DIR = os.path.join(BASE_DIR, "custom")
 RUNDOWN_DIR = os.path.join(BASE_DIR, "rundowns")
 LOG_DIR = os.path.join(BASE_DIR, "logs")
+SHOW_DIR = os.path.join(BASE_DIR, "shows")
 IMAGE_TYPES = (".png", ".jpg", ".jpeg", ".gif")
 
 def custom_images():
@@ -54,6 +56,55 @@ def rundown_files():
         return []
     found = [{"name": f[:-5], "saved": os.path.getmtime(os.path.join(RUNDOWN_DIR, f))} for f in files]
     return sorted(found, key=lambda f: f["saved"], reverse=True)
+
+# Saved shows are numbered 001 to 999, one file per number: "<number> - <title>.json"
+SHOW_FILE = re.compile(r"^(\d{3}) - (.+)\.json$", re.IGNORECASE)
+
+def show_number(n):
+    """The show number as 3 digits (001 to 999), or None."""
+    return n if isinstance(n, str) and re.fullmatch(r"\d{3}", n) and n != "000" else None
+
+def show_files():
+    """Saved shows, by number: number, title, file and when it was saved."""
+    try:
+        names = os.listdir(SHOW_DIR)
+    except OSError:
+        return []
+    found = []
+    for f in names:
+        m = SHOW_FILE.match(f)
+        if m and show_number(m.group(1)):
+            found.append({"number": m.group(1), "title": m.group(2), "file": f, "saved": os.path.getmtime(os.path.join(SHOW_DIR, f))})
+    return sorted(found, key=lambda f: (f["number"], -f["saved"]))
+
+def save_show_file(request):
+    """showSave: writes the show, and takes away any other file with the same number (the panel asks first)."""
+    number, title = show_number(request.get("number")), rundown_name(request.get("title"))
+    if not number or not title or not isinstance(request.get("data"), dict):
+        return {"mode": "showSaved", "ok": False, "error": "Needs a number (001 to 999), a title and the show"}
+    file = f"{number} - {title}.json"
+    try:
+        os.makedirs(SHOW_DIR, exist_ok=True)
+        with open(os.path.join(SHOW_DIR, file), "w", encoding="utf-8") as f:
+            json.dump(request["data"], f, indent=2, ensure_ascii=False)
+        for old in show_files():
+            if old["number"] == number and old["file"] != file:
+                os.remove(os.path.join(SHOW_DIR, old["file"]))
+    except OSError as e:
+        return {"mode": "showSaved", "ok": False, "error": str(e)}
+    return {"mode": "showSaved", "ok": True, "number": number, "title": title, "file": file}
+
+def load_show_file(request):
+    """showLoad: the show saved under that number."""
+    number = show_number(request.get("number"))
+    found = next((f for f in show_files() if f["number"] == number), None) if number else None
+    if not found:
+        return {"mode": "showData", "ok": False, "error": f"There's no show {number or ''} in the shows folder"}
+    try:
+        with open(os.path.join(SHOW_DIR, found["file"]), encoding="utf-8-sig") as f:
+            return {"mode": "showData", "ok": True, "number": number, "title": found["title"], "data": json.load(f)}
+    except (OSError, ValueError) as e:
+        return {"mode": "showData", "ok": False, "error": f"Couldn't read {found['file']} ({e.__class__.__name__})"}
 
 # The projector, opened from the control panel (launchProjector): fx_wizard.html#projector, next to this
 # script, in Chrome as an app window (no tabs or address bar, just the page), or in Edge if there's no
@@ -115,6 +166,12 @@ def answer_request(message):
         return {"mode": "customFiles", "files": custom_images()}
     if mode == "rundownList":
         return {"mode": "rundownFiles", "files": rundown_files()}
+    if mode == "showList":
+        return {"mode": "showFiles", "files": [{k: v for k, v in f.items() if k != "file"} for f in show_files()]}
+    if mode == "showSave":
+        return save_show_file(request)
+    if mode == "showLoad":
+        return load_show_file(request)
     if mode == "rundownSave":
         name = rundown_name(request.get("name"))
         if not name or not isinstance(request.get("data"), dict):
@@ -482,17 +539,10 @@ async def socket_handler(websocket):
                 await websocket.send(json.dumps(reply))
                 continue
 
-            # BROADCAST LOGIC
+            # BROADCAST LOGIC: to every client at once, never waiting on any one of them (see broadcast)
             if clients:
                 print(f"FXWizard: Broadcasting to {len(clients)} clients...")
-                # We create a list from the set to prevent 'size changed' errors
-                for client in list(clients):
-                    try:
-                        # Direct send; if the client is dead, it will trigger the except
-                        await client.send(message)
-                    except Exception:
-                        # Clean up dead clients on the fly
-                        clients.discard(client)
+                await broadcast(message)
     except Exception as e:
         print(f"FXWizard Socket Error: {e}")
     finally:
@@ -564,12 +614,22 @@ hotkey_ids = {}  # hotkey name -> the id OBS gave it
 server_loop = None  # the event loop the server runs on (made in script_load)
 
 async def broadcast(message):
-    """Sends a message to every connected client, dropping any that have gone."""
-    for client in list(clients):
+    """Sends a message to every connected client without waiting on any of them. Sending to each in turn
+    and waiting meant one window that stopped reading (a tablet gone to sleep with the projector open, a
+    frozen tab) held up the graphics for everyone else. websockets.broadcast() hands the message to every
+    open connection at once; one that's stuck just builds a queue until its keepalive ping times out and
+    the server drops it (about 40 seconds). Older websockets (before 10) don't have it, so they get a
+    send to each with a time limit instead."""
+    targets = list(clients)
+    if hasattr(websockets, "broadcast"):
+        websockets.broadcast(targets, message)
+        return
+    async def send(client):
         try:
-            await client.send(message)
+            await asyncio.wait_for(client.send(message), 0.5)
         except Exception:
             clients.discard(client)
+    await asyncio.gather(*(send(c) for c in targets))
 
 def send_to_panels(data, what):
     """Sends a message to every connected client (the control panels act on it; the graphics ignore it)."""

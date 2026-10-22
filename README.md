@@ -21,6 +21,9 @@
   - [Fullscreen Overlays tab](#fullscreen-overlays-tab)
   - [Importing L3s](#importing-l3s)
   - [L3 Builder](#l3-builder)
+  - [Sound Pad](#sound-pad)
+  - [Simple mode (themes)](#simple-mode-themes)
+  - [Saving shows](#saving-shows)
   - [Running a show](#running-a-show)
   - [Saving rundowns](#saving-rundowns)
   - [Running the show](#running-the-show)
@@ -30,6 +33,7 @@
   - [During the show](#during-the-show)
 - [Customizing](#-customizing)
 - [Advanced Customization](#-advanced-customization) (advanced users only)
+- [Tests](#-tests)
 - [Good to Know](#-good-to-know)
 - [Project Files](#-project-files)
 - [What's Next](#-whats-next)
@@ -40,12 +44,14 @@
 ## ✨ Features
 
 ### Animated lower thirds
-- **10 animated backgrounds:** Blue, Green, Black, Red, Space, Clouds, Tech, Finance, Sports, Politics, plus **Custom** (an image you pick from the `custom` folder)
+- **14 animated backgrounds:** Blue, Green, Black, Red, Space, Clouds, Fantasy, Code, Tech, Finance, Sports, Politics, Holiday, Café (looping WebM videos), plus **Custom** (an image you pick from the `custom` folder)
 - **6 font styles:** Default, Script, Fun, Modern, Classic, Accent
 - **12 font colors:** White (default), Black, Silver, Gold, Yellow, Orange, Red, Pink, Purple, Blue, Sky, Green
 - **9 screen positions:** any corner, any edge, or the center
 - **9 animations:** Slide Up, Slide Down, Slide Left, Slide Right, Fade In, Spin, **Glitch** (flickers in as torn, color-shifted slices, and glitches out the same way), **Bounce** (drops onto its spot and bounces), and **Slam** (comes down hard from big and blurry, with a flash and a shake). All of them except Glitch fade out
 - **Set duration:** how many seconds it stays on screen
+- **Easy to read:** a see-through black wash sits between the background and the text, and the title is set a little heavier
+- **Slanted edge that faces the middle:** on the left or in the middle of the screen the box's slanted edge is on its right; on the right side (Top, Center or Bottom Right) it's on its left
 
 ### Fullscreen overlays
 Each overlay has its own built-in animation, so there's nothing extra to pick.
@@ -56,8 +62,8 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 | **L3 PNG** | Full-width name bar (`assets/l3Large.png`) with an optional title | Slides in from the left | Slides back out to the left |
 | **KAMC** | Like L3 PNG, on `assets/kamc.png`, with its own text: a bigger name, further left, with a softer shadow | Slides in from the left | Slides back out to the left |
 | **L3 Info** | One paragraph of information on `assets/l3LargeAlt.png` in the bottom-left corner. The text is centered in the image's box and wraps onto about 5 lines (up to 400 characters). Line breaks you type are kept | Slides in from the left | Slides back out to the left |
-| **L3 Gif** | Name and title on a bar showing `assets/largeGif.gif`, centered across the screen | Rises up from the bottom | Drops back down |
-| **Custom** | Like L3 Gif, with a PNG, JPG or GIF you pick from the `custom` folder. Square corners, no side borders, and the image fades out at both sides | Rises up from the bottom | Drops back down |
+| **L3 Gif** | Name and title on a bar showing `assets/largeGif.gif`, centered across the screen. Square corners, no side borders, and the GIF fades out at both sides | Rises up from the bottom | Drops back down |
+| **Custom** | Like L3 Gif, with a PNG, JPG or GIF you pick from the `custom` folder | Rises up from the bottom | Drops back down |
 | **Location** | A red map-pin tile and the place you type, top left, like a live report. The pin slides in from the right and the place from the left, crossing as they meet, and the pin gives a little bounce | Pin and place cross in | Slides back out to the left, as one block |
 | **Overlays** | | | |
 | **Color Wave** | Soft, color-changing glow around the edges; the center stays clear | Fades in | Fades out |
@@ -72,6 +78,8 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 | **Like & Subscribe** | **Like**, **Follow** and **Subscribe** buttons pop up along the bottom, a cursor clicks each one (they change to **Liked**, **Following** and **Subscribed**) and the bell rings, all in about 3 seconds. Any socials you add (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web) show above the buttons, each with its icon | Pops up | Fades out |
 | **Breaking News** | **LIVE** in the top-right corner and a red **BREAKING NEWS** bar along the bottom, with your ticker text scrolling across. Leave the ticker text empty and it scrolls **Breaking News \| Breaking News \| ...** | Bar slides up | Fades out |
 | **St. Patrick's** | Shamrocks (now and then a lucky four-leaf clover) and spinning gold coins tumble down, the coins catching the light, with a soft green glow around the edges | Fades in | Fades out |
+| **Comic** | **POW!**, **ZAP!**, **BAM!**, **KAPOW!** and more pop in one after another in spiky comic bursts around the edges of the screen (never over the middle), each with a jolt and a wobble, then shrink away. Red and blue halftone dots fill the corners | Fades in | Fades out |
+| **Disco Ball** | A mirror ball drops down on its cord with a bounce and spins, its tiles glinting, while spots of colored light sweep around the screen, soft beams turn from it and the room dims a little | Drops in | Fades out |
 | **V-Day** | Hearts in reds and pinks float up the screen, swaying and gently beating, with twinkling sparkles and a soft pink glow around the edges | Fades in | Fades out |
 | **Retro VHS** | The picture looks like an old tape playing: scan lines, grain, a soft vignette, the ragged head-switching noise along the bottom, and a tracking glitch that rolls through now and then. The VCR's display shows **PLAY ▶** and **SP** at the top, the tape counter bottom left, and the date and time bottom right, like a camcorder | Fades in | Fades out |
 | **Stingers** | | | |
@@ -86,6 +94,10 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 | **Sports** | Pick a sport (about 2.6 seconds): **Football** (one giant football jets across the screen), **Basketball** (basketballs rain down and pile up until they cover the screen), **Baseball** (home plate spins in on a patch of dirt, with a puff of dust), or **Soccer** (a ball flies straight at the camera, thumps the lens, and bounces away) | Flies, rains or spins in | Leaves the same way |
 | **Spring** | Flowers pop in a few at a time until they cover the screen, butterflies flutter past, then a breeze blows the flowers away (about 3 seconds) | Pops in | Blows away |
 | **Fireworks** | Rockets streak up into a night sky that fills the screen and burst in color (round bursts, rings, drooping gold willows and crackling glitter). The biggest go off just before the halfway point, with a flash, then the sky fades as the last sparks fall (about 3 seconds) | Rockets go up | Sky fades |
+| **8-Bit** | Chunky pixel blocks in rainbow bands stair-step across the screen like an old game console's screen wipe until it's covered, a pixel-art star hops in the middle with twinkles, then the blocks wipe away the same way (about 2.6 seconds) | Blocks step in | Blocks step out |
+| **Cat** | Two paws grab the bottom edge of the screen, then a giant orange tabby's face rises up so big it fills the screen. It looks around, blinks and twitches its whiskers, then ducks back down and the paws let go (about 2.8 seconds) | Rises up | Ducks down |
+| **Curtains** | Red velvet theater curtains sweep in from both sides under a scalloped valance with gold trim and meet in the middle, a warm spotlight glows on them, then they're pulled back to gold tie-backs at the sides like a stage reveal and slide away (about 3 seconds) | Close in | Pulled back |
+| **Coffee** | A cup of coffee on its saucer, seen from above, slides in steaming and turning; the camera zooms into the foam while latte art draws itself, a heart around **Mom** (or your own words, typed in **Text (optional)**, up to 14 characters), until the foam fills the screen; then it zooms on through and fades away (about 3.4 seconds) | Slides in | Zooms through |
 | **Medical** | Blue and white: blue panels sweep in from both sides as a white heartbeat line races across; at the middle a big white medical cross pulses as the heartbeat passes under it, then the panels sweep back out (about 2.4 seconds) | Sweeps in | Sweeps out |
 
 L3 PNG, L3 Info, L3 Gif and Custom text is always shown in capitals. If text is longer than normal, it shrinks to fit instead of getting cut off.
@@ -101,8 +113,10 @@ Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import bu
 - Names already saved (same name and title) are skipped.
 
 ### Control panel
-- **Four tabs, as icons** (hover for the name): Animated L3s (a lower third), Fullscreen Overlays (sparkles), Podcast Rundown (a list) and [L3 Builder](#l3-builder) (stacked bars). Animated L3s and Fullscreen Overlays each have their own saved list.
-- **Sections that open and close:** the lower third options (Background, Font Style, Font Color, Location, Animation) and the overlay groups (Fullscreen L3s, Overlays, Stingers) are big bars you tap to open or close. They all start closed, and opening one closes the others on that tab. On the Animated L3s tab, **▾ Expand all** (above the sections) opens them all at once; **▴ Collapse all** closes them, and closing any one ends it. Each bar has a chevron and shows what's picked inside. Lower thirds start on Blue, Default, White, Bottom Left and Slide Left.
+- **Simple mode:** the **Pro / Simple** switch in the top bar (it reads **Pro** while off, **Simple** while on) swaps the tabs for one page in a theme's look (Classic, Sports, News, Tech & Gaming, Comedy, True Crime, Business, Lifestyle, Holiday): type a name and take it, and the theme's own overlays, stingers and sounds are one tap each. See [Simple mode](#simple-mode-themes).
+- **Shows:** the chip on the left of the top bar names the show that's open (like **001 · Morning Show**), with an amber dot when something has changed since it was saved. Tap it to save the show, everything the panel is set to, as a numbered file in the `shows` folder, or to open another. See [Saving shows](#saving-shows).
+- **Five tabs, as icons** (hover for the name): Animated L3s (a lower third), Fullscreen Overlays (sparkles), [L3 Builder](#l3-builder) (stacked bars), Podcast Rundown (a list) and [Sound Pad](#sound-pad) (a speaker). Animated L3s and Fullscreen Overlays each have their own saved list.
+- **Sections that open and close:** the lower third options (Background, Font Style, Font Color, Location, Animation) and the overlay groups (Fullscreen L3s, Overlays, Stingers) are big bars you tap to open or close. They all start closed, and opening one closes the others on that tab. On the Animated L3s tab, **▾ Expand all** (above the sections) opens them all at once; **▴ Collapse all** closes them, and closing any one ends it. Each bar has a chevron and shows what's picked inside. Lower thirds start on Blue, Default, White, Bottom Left and Slide Left; after that the panel remembers what's picked on each tab (and which tab was open).
 - **Saved graphics:** large, touch-friendly cards, full width (or two per row with the switch on the left of the heading; the panel remembers). The list starts closed: tap the heading, or the chevron under it, to open or close it (each tab separately). Tap a card to take, ✕ to delete, ＋ to add it to the Podcast Rundown. A colored edge shows the background or overlay type. The trash can on the right of the heading deletes everything saved on that tab (it asks first). The spyglass next to the layout switch opens a search box that filters the list by name, title, file or style (Escape closes it).
 - **Podcast Rundown:** the graphics you added with ＋, grouped into **blocks** (A to E to start; tap **+** next to the letters to add F, G and so on). Tap a letter under **Add to** to choose which block ＋ adds to.
   - **Labels:** each card is labeled on the left with its block, number and type: **A1-L3**, **A2-L3**... for lower thirds (animated or fullscreen) and **A1-OV**, **A2-OV**... for overlays and stingers. Lower thirds and overlays are numbered separately in each block, so a graphic in block B is **B1-L3**, **B1-OV** and so on.
@@ -123,13 +137,13 @@ Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import bu
   - **Scene:** which shot to go to. Pick it from the list of scenes in OBS's active scene collection, or tap **Sources** to pick a source instead (a camera, say; audio-only sources are left out), and add a note if you like ("wide on the guest"). ↺ asks OBS again after you add or rename one. It shows in the rundown and on the projector with a yellow **TAKE** marker, so the director and whoever's on next know it's their turn. The list needs server.py running in OBS; without it (server.js, or not connected) you type the name instead. **Firing it:** while **Set Show** is on, tap the yellow **TAKE** (it gets a ⚡) and OBS switches to that scene, with its current transition (in Studio Mode it goes straight to program). It also becomes the current item, and goes in the log. The TAKE that's on program in OBS right now has a green ring, whoever switched it. Firing needs server.py running in OBS; a TAKE that names a source is a cue only and doesn't fire. If the scene is one of your [break scenes](#show-timing), it starts the break the same as switching to it in OBS would. The copy button on a TAKE (while Set Show is off) duplicates it right under it, for going back to the same shot.
   - **Block times:** tap **Set time** on a block's header to give it a planned length (like 6:00); the header also shows the total time of its graphics and when the block is due on air. The planned show length (with the breaks) and the graphics' total sit above the blocks. During the show, the block on air counts down its time left and turns red when it runs over. See [Show timing](#show-timing).
   - **Show timing** (from the OBS Show Timer): the show's start and end times of day, a break after any block, and a timing strip that stays at the top: the clock (red on air), the time left in the block or break on now, **Start Break**, the time to the show's end, and how far over or under the show will run, with **Update** and **÷** to fix it. Breaks can also start from OBS (break scenes and hotkeys) and send AKTA break and return cues. See [Show timing](#show-timing).
-  - The trash can empties the rundown (saved graphics aren't affected, and the blocks stay). **CLEAR ALL** is right at the top.
+  - The trash can empties the rundown (saved graphics aren't affected, and the blocks stay). **CLEAR ALL** floats at the bottom, as on every tab.
   - **Save Rundown / Import Rundown** (shown while Set Show is off): save the whole rundown, its blocks and a full copy of every graphic, as a file in the `rundowns` folder, and bring it back later, like a template. It still works after those graphics are deleted from Saved, and the files can be copied to another computer. See [Saving rundowns](#saving-rundowns).
 - **Duration:** on the right, just above the buttons. Picking an overlay fills in its usual time (for example Snow 15s, Breaking News 30s, Hot Take 7s), which you can still change. The Animated L3s tab keeps whatever you set there. For stingers it shows their fixed length, locked (with a padlock). The stinger buttons show their lengths too, for example **Storm · 2.8s**.
 - **Buttons, two by two:** **TAKE** and **TOGGLE ON** on top, **SAVE** and **＋ RUNDOWN** below. **＋ RUNDOWN** puts what you've set up straight into the Podcast Rundown under **Unsorted**, without saving it first. It only works while Set Show is off; if it's on, it offers to turn it off (or cancel).
 - **TOGGLE ON / TOGGLE OFF:** puts the graphic up with no time limit. The button turns yellow and pulses and reads **TOGGLE OFF** until you press it again, press Clear All, or take something else on the same tab. Stingers play once, so it's greyed out for them.
 - **Message box:** floats at the bottom of the panel on every tab and shows what you just took and how long it will stay up, for example **Taken: Fire** *for 12s*. Then it counts down (*11s left*, *10s left*...) while the graphic is on screen, and says **Off screen: Fire** when it's gone. Any newer message (taking something else, Clear All, OFF, TOGGLE) takes its place. It lights up for each new message (and stays lit while it counts down), dims after 3 seconds, and goes back to a small, faint **Ready** after 15 seconds with nothing new. The panel leaves room at the bottom so it never covers the last card.
-- **Clear All:** takes everything off screen right away, with its normal out animation.
+- **Clear All:** takes everything off screen right away, with its normal out animation. It floats at the very bottom of the panel, under the message box, on every tab and in Simple mode, so it's always one tap away without scrolling.
 - **Greenscreen:** on the overlays that support [Greenscreen Depth](#-greenscreen-depth), a **Greenscreen** switch sits left of Duration. Each effect remembers its own.
 - **Light mode** (the switch under the connection status): shows a moon in dark mode and a sun in light mode. Dark is the default, and the browser remembers your choice.
 - **Connection help:** the wrench in the top bar opens a window with the live connection status and a list of things to check when it isn't **OPEN**.
@@ -290,6 +304,8 @@ Background
 - **Width 1920, Height 1080** (or your canvas size).
 - Turn **off** *Shutdown source when not visible* and *Refresh browser when scene becomes active*, so graphics don't reset or vanish when you change scenes.
 - Optional: turn on *Use custom frame rate* and set **60** for smoother effects (this uses a little more of the computer).
+- Keep **Enable Browser Source Hardware Acceleration** on (OBS **Settings → Advanced → Sources**; it's on unless someone turned it off). In the [tests](#-tests), every effect ran at 55 to 60 frames a second with it, even on a basic Intel graphics chip. Without it, the effects now average under 16 ms a frame (60 fps) after the 2026-10-22 fixes, but a few still have short busier moments.
+- For the [Sound Pad](#sound-pad): turn on **Control audio via OBS** on the FX Display source (not on FX Underlay), so its sounds show in the Audio Mixer and go out on the stream and recording.
 
 ---
 
@@ -310,6 +326,7 @@ Open `fx_wizard.html` in a browser (without `#display`). Check that the top bar 
    - **Custom:** same as the Custom background: tap **Custom…** and pick the image from the `custom` folder.
    - **Like & Subscribe:** under **Socials**, tap an icon (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web) to open a box for that account and type it in. Tap the icon again to leave it out. All of them are optional, and the panel remembers what you typed. Give it at least 4 seconds so the clicks finish.
    - **Hot Take:** type your own text in **Text (optional)**, or leave it blank for **HOT TAKE**.
+   - **Coffee:** type the word for the foam in **Text (optional)** (*Dad*, *Grandma*, your show's name; up to 14 characters, longer words get smaller to fit the heart), or leave it blank for **Mom**.
    - **Breaking News:** type the scrolling text in **Ticker text**, or leave it empty for **Breaking News | Breaking News | ...**. **TOGGLE ON** keeps it up until you turn it off.
    - **Location:** type the place (like *City Hall*).
    - **Sports** (a stinger): pick **Football**, **Basketball**, **Baseball** or **Soccer** under **Sport**.
@@ -327,7 +344,7 @@ Open `fx_wizard.html` in a browser (without `#display`). Check that the top bar 
 3. The names appear under **Saved Overlays**, each labeled with its file name.
 
 ### L3 Builder
-The fourth tab (the stacked bars) chains up to **5 saved lower thirds**, animated or fullscreen, into one **cL3** (complex L3) that plays them one after another: each goes up once the one before has had its time and its exit animation.
+The third tab (the stacked bars) chains up to **5 saved lower thirds**, animated or fullscreen, into one **cL3** (complex L3) that plays them one after another: each goes up once the one before has had its time and its exit animation.
 1. Tap a slot to pick it (it's outlined in gold; it starts on the first empty one), then tap a saved L3 under **Saved L3s** to put it there. The next empty slot is picked for you, so tapping saved L3s fills the slots in order. Search to find one fast.
 2. On each slot: tap its time to change how long it stays up (for this cL3 only), ▲ ▼ to move it, ✕ to take it out. Imported L3s (the toggle ones) get the usual time for their style, 8 seconds, in a cL3.
 3. Give it a name (or it's named after its first two L3s), then **SAVE cL3**. **PLAY** plays the slots now; **＋ RUNDOWN** adds it to the rundown (in the block picked under **Add to**).
@@ -336,6 +353,61 @@ The fourth tab (the stacked bars) chains up to **5 saved lower thirds**, animate
 While one plays, a gold bar shows which L3 is up, with ⏭ **Next** (the one up goes off with its exit animation and the next one comes up) and ⏹ **Stop**. Taking anything else, or Clear All, stops it.
 
 **In the rundown**, a cL3 is labeled like **A1-CL3**, shows its total time, and is taken like any card. While it plays, its card has **NEXT** (with which L3 is next, like 3/4) above its **OFF** button.
+
+### Sound Pad
+The fifth tab (the speaker) is six big, colorful pads: **Victory**, **Sad Trombone**, **Comedy**, **Mystery**, **Swish** and **Censor Beep**. Tap a pad (or press **1**–**6** while the tab is open) and the sound plays on the FX Display browser source, so it goes out through OBS.
+- The pad lights up and a bar along its bottom runs down while the sound plays; its length is in the corner.
+- Tap a pad again to start it over. Different pads play over each other.
+- **STOP** stops every sound. **CLEAR ALL** stops them too.
+- The slider sets how loud the pads are (the panel remembers it). The FX Display source's slider in the OBS Audio Mixer still sets the overall level.
+- **Set up once in OBS:** in the FX Display browser source's properties, turn on **Control audio via OBS**. To hear the pads yourself, open **Advanced Audio Properties** and set FX Display's *Audio Monitoring* to **Monitor and Output**.
+- The sounds come from the browser source, so use one FX Display source (the nested scene in [OBS Recommendations](#️-obs-recommendations)). Two separate FX Display sources would each play every sound.
+
+### Simple mode (themes)
+For anyone who'd rather not build a look of their own. Flip the switch in the top bar from **Pro** to **Simple**, and the tabs give way to one page:
+
+1. **Pick a theme.** Each one has its own lower third look and its own overlays, stingers and sounds:
+
+   | Theme | Lower third | Overlays | Stingers | Sounds |
+   |---|---|---|---|---|
+   | Classic | Blue, Default, Slide Left | Confetti, Color Wave, Like & Subscribe | Standard, Color Bars | Victory, Swish, Comedy |
+   | Sports | Sports, Modern, Slam | Confetti, Hot Take, Fire | Sports, Fire | Victory, Swish, Sad Trombone |
+   | News | Politics, Classic, Slide Left | Breaking News, Like & Subscribe | Standard, Color Bars | Mystery, Swish, Censor Beep |
+   | Tech & Gaming | Code, Modern, Glitch | Retro VHS, Comic | 8-Bit, Static | Victory, Swish, Comedy |
+   | Comedy | Clouds, Fun, Bounce | Comic, Disco Ball, Confetti | Curtains, Cat, Spring | Comedy, Sad Trombone, Censor Beep, Victory |
+   | True Crime | Black, Classic, red text, Fade In | Rain, Arrested, Retro VHS | Storm, Ghost, Static | Mystery, Censor Beep, Swish |
+   | Business | Finance, Classic, gold text, Fade In | Breaking News, Color Wave, Like & Subscribe | Standard, Fireworks | Victory, Swish, Mystery |
+   | Lifestyle | Café, Script, Fade In | V-Day, Confetti, Like & Subscribe | Coffee, Curtains, Hearts | Victory, Comedy, Swish |
+   | Holiday | Holiday, Script, Fade In | Snow, Confetti | Xmas, Fireworks | Victory, Comedy |
+
+2. **Lower third:** type a **Name** and an optional **Title**, pick **Left**, **Middle** or **Right** (along the bottom), pick **Short · 6s** or **Long · 12s** (how long a TAKE keeps it up, saved ones too), then **TAKE**, **TOGGLE ON** (up until you turn it off) or **SAVE**. Saved L3s are big tiles under the buttons, two per row: tap one to take it, the small ✕ in its corner to delete it.
+   - Simple has **its own saved list**: only the L3s saved here show, up to **20 (10 rows)**; SAVE says so when it's full, so delete one first. L3s saved on the Animated L3s tab don't show here or count toward the 20.
+   - Every L3 taken here, the saved ones too, wears the theme picked **now**. Save your guests once, and changing the theme restyles them all.
+   - The ones saved here also show with the saved L3s on the Animated L3s tab (deleting one in either place deletes it from both).
+3. **Overlays and Stingers:** one tap each, with their usual time. Breaking News, Hot Take and Coffee use their own words (**HOT TAKE**, **Mom**); Like & Subscribe uses the socials typed on the Fullscreen Overlays tab; Sports uses the sport picked there.
+4. **Sounds:** the theme's pads from the Sound Pad (keys **1** and up hit them too), at the Sound Pad's volume.
+5. **CLEAR ALL** (floating at the bottom) takes everything off screen.
+
+Picking a theme also sets the Animated L3s tab to its look, so turning Simple off carries on from there. The panel remembers Simple mode and the theme, and a [saved show](#saving-shows) keeps them too. To add or change a theme, see [Add or change a Simple mode theme](#add-or-change-a-simple-mode-theme).
+
+### Saving shows
+Running a dozen shows? Save each one as a **show**: everything the panel is set to, in one file. Open it again later, or on another computer, and the panel looks the same.
+
+1. Tap the show chip on the left of the top bar (it says **Untitled show** until the first save).
+2. **Save as…** asks for a **title** and a **number** from **001** to **999** (it suggests the next free one). Number **999 is restricted to engineering**: picking it warns you first, and Cancel goes back to change it. A number that's already used asks before replacing that show.
+3. It's saved as `shows/<number> - <title>.json`, like `shows/001 - Morning Show.json`. The chip now says **001 · Morning Show**.
+4. **Save** saves over the show that's open (no questions). An amber dot on the chip means something has changed since the last save.
+5. To switch shows, tap the chip and tap a show under **Open a show** (or **Choose a file…** for a show file from anywhere). If the open show has changes, it asks first: **Save, then open**, **Open without saving** (those changes are lost) or **Cancel**. The panel then reloads with the new show.
+
+The show stays open until another one is opened: reloading the panel or restarting the computer keeps it.
+
+**What a show keeps:** the saved L3s, overlays and cL3s; the rundown with its blocks, cues, show times, block lengths and break scenes; the L3 Builder's slots; Simple mode and its theme; what's picked on each tab; light or dark mode; the timer (its mode and length, and whether its box is open); the projector (prompter) on or off; the rundown's Simple or Advanced; the socials; Greenscreen switches; the custom image picked; the Sound Pad volume; and the saved list's layout.
+
+**What it leaves alone:** the **AKTA settings** (keys, encoders, and AKTA on or off) stay with each computer and are never in a show file. What's happening in a show right now starts fresh: Set Show is off, nothing is marked as played, and the log starts over (if there's a log of what ran, it reminds you to **Generate Log** first). A show can't be opened while Set Show is on.
+
+Good to know:
+- Custom images aren't inside the show file. When moving a show to another computer, copy the `custom` folder too.
+- The server does the saving (the current `server.py` or `server.js`; after updating, reload or restart it). With an older server, **Save** downloads the file instead: move it into the `shows` folder.
 
 ### Running a show
 1. Open **Podcast Rundown** and tap the block you're filling under **Add to** (A to start).
@@ -438,8 +510,10 @@ It updates by itself as the director works, as long as **Projector** is on in th
 
 | To change... | Look in | What to edit |
 |---|---|---|
-| Lower third text size | `css/styles.css`, section 4 | `font-size` in `#action-name` and `#action-title` |
-| Add a lower third background | `css/styles.css`, section 5 | Add a class with your GIF from `assets/`, add a button in the **Backgrounds** part of `fx_wizard.html`, and add the name to `BG_CLASSES` in the script |
+| Lower third text size | `css/styles.css`, section 4 | `font-size` in `#action-name` and `#action-title` (`font-weight` there for how heavy) |
+| Lower third readability wash | `css/styles.css`, section 5 | The `rgba(0, 0, 0, 0.3)` in `#display-box::after` (the last number: 0 = none, 1 = solid black) |
+| Sound Pad sounds, names, icons or colors | `assets/sounds/` and `fx_wizard.html`, script section 2 | `SOUNDS`: each pad's `file` (in `assets/sounds`), `label`, `icon` and colors (`c1`, `c2`). Swap a sound by replacing its file with the same name |
+| Add a lower third background | `assets/` and `fx_wizard.html` | Put `yourname.webm` in `assets/`, add a button in the **Backgrounds** part of `fx_wizard.html`, and add the name to `BG_VIDEOS` in the script |
 | L3 PNG image | `assets/l3Large.png` | Replace the image (1920 x 1080) |
 | L3 PNG font or size | `css/styles.css`, section 7 | `#overlay-box.l3Large #overlay-text` and `#overlay-name` |
 | KAMC image | `assets/kamc.png` | Replace the image (1920 x 1080). If the bar moves, adjust the `padding` of `#overlay-box.kamc #overlay-text` |
@@ -453,7 +527,7 @@ It updates by itself as the director works, as long as **Projector** is on in th
 | Breaking News look | `css/styles.css`, section 7 | `.bn-live`, `.bn-bar`, `.bn-label` and `#breaking-text`. Scroll speed is `TICKER_SPEED` in the script |
 | Ghost stinger speed or colors | `css/styles.css`, section 7 | The `--ghost-...` settings at the top of `#ghost` |
 | X-mas stinger speed or colors | `css/styles.css`, section 7 | The `--xmas-...` settings at the top of `#xmas` |
-| Storm, Static, Sports or Spring stinger length | `fx_wizard.html`, script section 2 | `length` on `storm`, `tvstatic`, `sportsfx` or `spring` in `OVERLAYS` (in seconds) |
+| Storm, Static, Sports, Spring, 8-Bit, Cat, Curtains or Coffee stinger length | `fx_wizard.html`, script section 2 | `length` on `storm`, `tvstatic`, `sportsfx`, `spring`, `pixel`, `cat`, `curtains` or `coffee` in `OVERLAYS` (in seconds) |
 | Greenscreen split (how much goes behind or in front) | `fx_wizard.html`, script section 6 | `DEPTH` near the top of the canvas effects |
 | Bars stinger length or colors | `css/styles.css` (`--bars-time`, `--bar-slide`) and `fx_wizard.html` (each bar's color, direction and delay) | |
 | Glitch, Bounce or Slam animation | `css/styles.css`, section 8 | The `glitchIn`, `glitchOut`, `bounceIn` and `slamIn` keyframes |
@@ -478,10 +552,11 @@ Both `styles.css` and the script in `fx_wizard.html` start with a numbered list 
 ### Before you start
 - Use a plain text editor (VS Code, Notepad++, or similar), not a word processor.
 - Three places hold almost everything:
-  - `assets/`: the images and GIFs.
+  - `assets/`: the images, videos and GIFs.
   - `css/styles.css`: how everything looks and moves. It starts with a numbered list of its sections.
+  - (`css/tailwind.css` holds the panel's layout classes, like `grid grid-cols-2 gap-1`. It's built, not edited: see [Fonts and colors](#fonts-and-colors).)
   - `fx_wizard.html`: the control panel and the display. Its script also starts with a numbered list of sections.
-- **After every change,** refresh the control panel dock and the browser sources in OBS (right-click the source > **Refresh**, or open its properties and press **Refresh cache of current page**). OBS caches images, so a replaced GIF may not show until you do.
+- **After every change,** refresh the control panel dock and the browser sources in OBS (right-click the source > **Refresh**, or open its properties and press **Refresh cache of current page**). OBS caches images and videos, so a replaced file may not show until you do.
 - **Preview without OBS:** open `fx_wizard.html` in one browser tab and `fx_wizard.html#display` in another, with the server running. Graphics you take show in the second tab.
 
 ### Image sizes and formats
@@ -489,53 +564,66 @@ Sizes are for a 1920 x 1080 canvas (for 4K, double them). Images are cropped to 
 
 | Image | Where it goes | Best size | Best format | Good to know |
 |---|---|---|---|---|
-| Lower third backgrounds (Blue, Green, Space...) | `assets/` (see the file names below) | 800 x 330 (about 2.4:1) | Animated GIF, 30 frames a second or fewer | The box is about 172 px tall and grows with the text (about 430 px wide for a short name and title, up to 1,400 for a long one). Only the middle band of the image ever shows, so the ones here are cropped to it |
+| Lower third backgrounds (Blue, Green, Space...) | `assets/` (see the file names below) | 1280 x 360 or 1280 x 720 | WebM (VP9), 30 frames a second, no sound, about 2.5 Mb/s or less (a 15-second loop of 5 MB or under) | The box is about 172 px tall and grows with the text (about 430 px wide for a short name and title, up to 1,400 for a long one). The video fills it without stretching, so only its middle band shows; keep the interesting part there |
 | **Custom** background (Animated L3s) | `custom/` | 800 x 330 (about 2.4:1) | GIF, PNG or JPG | Same box and cropping as the backgrounds above |
 | L3 PNG | `assets/l3Large.png` | 1920 x 1080 | PNG with transparency | A full-screen frame: everything except your bar should be transparent |
 | KAMC | `assets/kamc.png` | 1920 x 1080 | PNG with transparency | Same as L3 PNG |
 | L3 Info | `assets/l3LargeAlt.png` | 1920 x 500 | PNG with transparency | Shown at half the screen width (960 x 250) in the bottom-left. The text fits inside its inner box (see below) |
-| L3 Gif | `assets/largeGif.gif` | 1210 x 178 (about 6.8:1) | Animated GIF, under 10 MB | Gets rounded corners and a thin border |
+| L3 Gif | `assets/largeGif.gif` | 1210 x 178 (about 6.8:1) | Animated GIF, under 10 MB | No border; the outer 15% on each side fades out, so keep anything important in the middle |
 | **Custom** Fullscreen L3 | `custom/` | 1210 x 178 (about 6.8:1) | GIF, PNG or JPG | No border; the outer 15% on each side fades out, so keep anything important in the middle |
 
 Which format?
 - **PNG:** when you need transparency or crisp edges and text.
 - **JPG:** for photos. Smallest files, but no transparency.
-- **GIF:** for motion. Short loops keep the file small; big GIFs take a moment to appear the first time. Every frame of a GIF on screen is decoded as it plays, which is the main work the display does, so crop GIFs to what actually shows and keep them to 30 frames a second or fewer. (The backgrounds here are cropped to the band they show: 800 x 330, and 800 x 150 for L3 Gif.)
+- **WebM (VP9):** for the lower third backgrounds. A fraction of a GIF's size, full color, and easier on the computer as it plays. Leave the sound out (it's muted anyway).
+- **GIF:** for motion in L3 Gif and the Custom items. Short loops keep the file small; big GIFs take a moment to appear the first time. Every frame of a GIF on screen is decoded as it plays, which is the main work the display does, so crop GIFs to what actually shows and keep them to 30 frames a second or fewer. (The backgrounds here are cropped to the band they show: 800 x 330, and 800 x 150 for L3 Gif.)
 
 Both **Custom** items use the same image (the one picked with **Custom…**), so pick a size that suits the one you use most.
 
-### Swap a lower third background GIF (no code)
+### Swap a lower third background video (no code)
 Each background button uses one file in `assets/`. Replace the file and keep the **same file name**:
 
 | Button | File |
 |---|---|
-| Blue | `blueGif.gif` |
-| Green | `greenGif.gif` |
-| Black | `blackGif.gif` |
-| Red | `redGif.gif` |
-| Space | `space.gif` |
-| Clouds | `clouds.gif` |
-| Tech | `tech.gif` |
-| Finance | `finance.gif` |
-| Sports | `sports.gif` |
-| Politics | `politics.gif` |
+| Blue | `blue.webm` |
+| Green | `green.webm` |
+| Black | `black.webm` |
+| Red | `red.webm` |
+| Space | `space.webm` |
+| Clouds | `clouds.webm` |
+| Fantasy | `fantasy.webm` |
+| Code | `code.webm` |
+| Tech | `tech.webm` |
+| Finance | `finance.webm` |
+| Sports | `sports.webm` |
+| Politics | `politics.webm` |
+| Holiday | `holiday.webm` |
+| Café | `cafe.webm` |
 
 Tips:
-- See [Image sizes and formats](#image-sizes-and-formats) for the best size (800 x 330, 30 frames a second or fewer).
+- See [Image sizes and formats](#image-sizes-and-formats) for the best size (1280 x 360 or 1280 x 720, WebM, 30 frames a second).
 - Want a different name on the button? Change the label text next to that file's button in the **Backgrounds** section of `fx_wizard.html`.
 
 ### Add a new background (for example, a show-specific one)
-1. Put your GIF in `assets/`, for example `assets/weather.gif`.
-2. In `css/styles.css`, section 5, add a class with the same pattern as the others:
-   ```css
-   .weather  { --l3-bg: url('../assets/weather.gif'); }
-   ```
-3. In `fx_wizard.html`, in the **Backgrounds** section, copy the last button pair (the `<input>` and `<label>` for Politics) and change the `id`, `value`, `for`, the text, and the number in `peer/b10` and `peer-checked/b10` to a new one:
+1. Put your video in `assets/`, named after the background, for example `assets/weather.webm`.
+2. In `fx_wizard.html`, in the **Backgrounds** section, copy the last button pair (the `<input>` and `<label>` for Politics) and change the `id`, `value`, `for`, the text, and the number in `peer/b10` and `peer-checked/b10` to one that isn't used yet (b15 and up):
    ```html
-   <input type="radio" id="bg-weather" name="bgStyle" value="weather" class="hidden peer/b11">
-   <label for="bg-weather" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b11:bg-sky-700">Weather</label>
+   <input type="radio" id="bg-weather" name="bgStyle" value="weather" class="hidden peer/b15">
+   <label for="bg-weather" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b15:bg-sky-700">Weather</label>
    ```
-4. In the script (section 2), add `'weather'` to `BG_CLASSES`. Optionally add `weather: 'border-sky-400'` to `ACCENTS` for the colored edge on saved cards.
+3. In the script (section 2), add `'weather'` to `BG_VIDEOS` (it plays `assets/weather.webm`). Optionally add `weather: 'border-sky-400'` to `ACCENTS` for the colored edge on saved cards.
+
+### Add or change a Simple mode theme
+The themes are in `THEMES`, in the script's **Simple mode** section (section 24). Each one is a few lines:
+```js
+holiday:  { label: 'Holiday',  icon: '🎄', c1: '#dc2626', c2: '#166534',
+            l3: { bgStyle: 'holiday', fontStyle: 'font-script', fontColor: '', animationStyle: 'anim-fade' },
+            overlays: ['snow', 'confetti'], stingers: ['xmas', 'fireworks'], sounds: ['victory', 'comedy'] },
+```
+- `label` and `icon` are on its button; `c1` and `c2` are its colors.
+- `l3` is the lower third's look: the **value** of a background, font, font color and animation option on the Animated L3s tab (`fontColor: ''` is white).
+- `overlays` and `stingers` are keys from `OVERLAYS` (section 2); `sounds` are keys from `SOUNDS`.
+- Copy a theme, give it a new key (like `weather`), and change what you like. Keep each key the same once shows are saved with it.
 
 ### Replace the Fullscreen L3 images
 | Overlay | File | Size | Notes |
@@ -548,9 +636,10 @@ Tips:
 Keep the same file names and the overlays pick up the new images.
 
 ### Fonts and colors
-- **Fonts:** the fonts come from Google Fonts (the `<link>` at the top of `fx_wizard.html`). To add one, add its family to that link, add a `.font-yourname` class in `styles.css` section 6, add a button in the **Font Style** section (same pattern as above), and add `'font-yourname'` to `FONT_CLASSES` in the script.
+- **Fonts:** the fonts are files in `assets/fonts`, listed in `css/fonts.css` (they're Google Fonts, kept in the folder so nothing needs the internet). To add one: download it as `.woff2` (for example from [google-webfonts-helper](https://gwfh.mranftl.com/fonts)) into `assets/fonts`, add an `@font-face` for it at the end of `css/fonts.css` (copy one that's there and change the name and file), add a `.font-yourname` class in `styles.css` section 6, add a button in the **Font Style** section (same pattern as above), and add `'font-yourname'` to `FONT_CLASSES` in the script.
+- **Layout classes (Tailwind):** the panel's layout classes in `fx_wizard.html` (like `p-1 border rounded`) come from `css/tailwind.css`, which is built from the classes the page uses. If you add a class the page didn't use before, rebuild it so it exists: run `npm install` once, then `npm run build:css`. Classes already in the page work as they are. (Until 2026-10-22 these were built in the browser from the internet every time the page opened.)
 - **Font colors:** each swatch in the **Font Color** section is one `<input>` and `<label>`. Copy one and change its `id`, the `value` (the color, like `#FF6600`), the `title` (its name) and the `background`.
-- **The panel's accent color** (picked buttons and tabs) is `primary` near the top of `fx_wizard.html`.
+- **The panel's accent color** (picked buttons and tabs) is `primary` in `tailwind.config.js`; run `npm run build:css` after changing it.
 
 ### Timing, server port, and other settings
 - Most lengths and timings are in the [Customizing](#-customizing) table above (overlay durations, stinger lengths, animations).
@@ -562,13 +651,76 @@ Keep the same file names and the overlays pick up the new images.
 
 ---
 
+## 🧪 Tests
+
+FX Wizard is checked with automated performance tests that drive Google Chrome (the same engine as OBS's Browser Source) with no window open. They measure how long each effect takes to draw, how fast graphics start, how the panel copes with big lists, whether memory builds up, and how quickly the servers pass messages along. Everything in this section was measured on a Core i7-9700 with Intel UHD 630 graphics and 32 GB of memory, **with OBS running** (about 22% CPU in the background), so the numbers are realistic rather than best-case.
+
+### Run them
+
+You need Google Chrome, Node.js (for `server.js`), and Python 3 with `websockets` (`pip install websockets`). OBS can stay open: the servers are tested on ports 8092 and 8093, not 8080.
+
+```
+python tests/perf.py                    every section (about 10 minutes)
+python tests/perf.py canvas gpu         just those sections
+```
+
+Results are printed and saved to `tests/results/perf_results.json`. If Chrome isn't in the usual place, set `FXW_CHROME` to its path. Each section works on a throwaway copy of the panel (`_perf_*.html`, next to `fx_wizard.html`) that it deletes when it's done.
+
+| Section | What it checks | Passes when |
+|---|---|---|
+| `assets` | The size of every file the display loads | Background videos under about 6 MB |
+| `canvas` | Every canvas effect, frame by frame at 1920 x 1080, drawn on the CPU (the worst case: OBS with hardware acceleration off). A warm-up pass first, then the timed one | Under 16.7 ms a frame (60 fps); under 33 ms is still 30 fps |
+| `display` | The display in real time: how soon each background video shows its first frame, and dropped frames while each L3, overlay and stinger plays | First frame under 100 ms |
+| `gpu` | The heaviest effects in real time, drawn on the CPU and then on the graphics chip | 55 fps or more with the graphics chip |
+| `panel` | Opening the panel with 0, 100 and 500 saved graphics (and up to 300 rundown items), drawing the lists and switching tabs | Lists drawn and tabs switched in under 250 ms |
+| `leak` | 156 takes in a row (every overlay and every background, three times), checking memory and page elements after each round | Memory levels off; no elements left behind |
+| `offline` | The panel, display and underlay with every web address blocked | Only graphics on the display and underlay; the panel keeps its layout and fonts; no web requests |
+| `servers` | `server.js` and `server.py`: the time to pass a lower third from the panel to the display (400 in a row, 150 large ones, a burst of 200), and what happens when one connected window stops reading | Under 5 ms; the display keeps getting messages |
+
+### Results (2026-10-22)
+
+The first full run found the problems listed under **Fixed** below; each fix was then measured on its own (the canvas numbers are from the benchmark run after each change; a final full run of every section after all the fixes hasn't been done yet).
+
+| Area | Result |
+|---|---|
+| Canvas effects, CPU drawing, average per frame (60 fps needs under 16.7 ms) | **After the fixes, every effect averages under 16 ms.** Before → after: Hot Take 30 → 9, Underwater 28 → 8, VHS 28 → 8, Hearts 28 → 12, Spring 28 → 16, Baseball 26 → 15, Storm 25 → 14, Basketball 21 → 14, Arrested 18 → 10, Static 17 → 10, Fire 17 → 9, Medical 17 → 4, St. Patrick's 17 → 6, Football 15 → 9, Fire stinger 15 → 11, V-Day 15 → 7, Rain 12 → 4. Spring, Basketball and Baseball still have short busier moments (while things pop in or fall away) |
+| Same effects, graphics chip (before the fixes) | All 55 to 60 fps (Hot Take 57, Underwater 59, VHS 60, Storm 60, Sports 55, Spring 57, Hearts 59, Fire 58, Curtains 57, Coffee 58) |
+| First take of an effect after the display loads | Was up to 156 ms (VHS), 125 (Spring), 40 to 48 (Ghost, Xmas, Curtains, Storm, L3 PNG). The display now gets each effect ready in the background after it loads, so first takes start like later ones |
+| Video backgrounds | First frame in 12 to 46 ms (`code.webm` was 97 ms at 25.8 MB; it's 4.7 MB now) |
+| Panel start | 0.7 to 0.9 s with Tailwind from its website; measured without it, 0.4 to 0.6 s (Tailwind is now a local file). Saved list of 500: 35 ms. Rundown tab with 300 items: 233 ms with the website Tailwind, 117 ms without |
+| Simple mode | Turning it on: 100 ms; changing the theme: 15 ms |
+| Memory | Levels off at about 7.7 MB after 156 takes; element count steady (992 → 996) |
+| Servers | Median 0.3 to 0.7 ms per message (`server.js` and `server.py`); 200 at once in 21 to 33 ms |
+| One window stops reading | Both servers keep sending to everyone else (`server.py` used to stall the display after about 10 large messages) |
+| No internet | Panel, display, underlay and projector all work, with their fonts and layout, and ask the web for nothing |
+
+**Fixed (2026-10-22):**
+- **Offline:** with no internet, the whole control panel showed on the OBS display, and the panel lost its layout. The fonts are now in `assets/fonts` and Tailwind is built into `css/tailwind.css` (same version, 3.4.17; the panel looked pixel for pixel the same in nine views), plus a safety rule in `styles.css` that keeps hidden things hidden.
+- **`server.py` and a frozen window:** it sent to each window in turn and waited, so one that stopped reading held up the rest. It now uses `websockets.broadcast()`, which never waits. `server.js` skips a window that's more than 8 MB behind, so its queue can't grow forever.
+- **Heavy effects:** full-screen gradients, vignettes and scan lines that don't change are painted once and stamped each frame (the eight used last are kept); Hearts and Basketball draw from pre-turned pictures instead of turning them every frame; Fire draws half as many (bigger, brighter) flames; Storm's lightning glow is soft strokes instead of a blur; Spring has bigger, fewer flowers; and the heaviest effects draw at 60 or 75% resolution, which the browser scales up (it looks the same in motion).
+- **First-take stutter:** the display builds each effect's pictures, fonts and images in the background after it loads, one at a time and only while nothing is on screen. Ghost's glow is stacked soft outlines instead of an SVG blur filter.
+- **Big videos:** `code.webm` 25.8 → 4.7 MB, `finance.webm` 6.4 → 2.8 MB, `space.webm` 6.0 → 3.6 MB (VP9, same size and length; the originals are in `assets/originals`).
+
+Still open: `custom/water.gif` is 49 MB. GIFs are decoded by the CPU frame by frame, so crop it to the band the L3 box shows, or keep custom GIFs under 10 MB.
+
+### Earlier checks
+
+- **Fire and Hot Take speed-up (2026-10-21):** both took about 20 ms a frame; drawing the flames at a third of the resolution brought them to about 8 ms then. Re-measured today with OBS running in the background: Fire 17 ms, Hot Take 30 ms on the CPU, both 57 to 58 fps on the graphics chip.
+- **Background GIFs to video (2026-10-21 and 22):** the GIFs were first cropped to the band the L3 box shows, then replaced by WebM videos, which are a fraction of the size and decoded by the graphics chip.
+- **Frame-by-frame pictures:** every new stinger and overlay (Comic, Disco Ball, 8-Bit, Cat, Curtains, Coffee) was checked as stills at points through its run, to see that it covers the screen when it should and is gone at the end.
+- **Panel checks in Chrome:** Simple mode, saved shows, the Pro / Simple switch, the floating CLEAR ALL and the Custom background were checked as screenshots on a test copy of the panel.
+- **In OBS (2026-10-22):** TAKE firing from the rundown, the Custom background on Animated L3s, and the Curtains and Coffee stingers were confirmed working in real OBS.
+
+---
+
 ## 📝 Good to Know
 
-- **Saved graphics and the Podcast Rundown live in the browser.** They're stored on the computer and browser where you saved them. Clearing that browser's data deletes them, and a different computer or browser starts with an empty list. Use **Save Rundown** to keep a rundown as a file.
-- **Large GIFs load the first time.** Some backgrounds are 20–50 MB, so a background can take a moment to appear the first time it's used.
+- **Saved graphics and the Podcast Rundown live in the browser.** They're stored on the computer and browser where you saved them. Clearing that browser's data deletes them, and a different computer or browser starts with an empty list. [Save the show](#saving-shows) to keep all of it as a file (or **Save Rundown** for just a rundown).
+- **No internet needed.** The fonts (`assets/fonts`) and the panel's layout styles (`css/tailwind.css`) are in the project folder, so the panel, the display and the projector all work offline, at a venue with no Wi-Fi or if a website is down.
+- **Large files load the first time.** A big GIF (L3 Gif or a custom one) can take a moment to appear the first time it's used.
 - **Older saves still work.** Graphics saved with earlier versions still open correctly.
 - **Missing custom images:** a card that uses a custom image no longer in the `custom` folder shows a red **!** (saved and rundown cards). Put the file back, or pick a new one with ✎ or by saving it again.
-- **Sharing the project:** `custom/`, `rundowns/` and `logs/` keep your own files out of Git (see `.gitignore`); only their `README.txt` is shared. Python's `__pycache__` and `akta-config.json` (the AKTA keys) are ignored too.
+- **Sharing the project:** `custom/`, `rundowns/`, `logs/` and `shows/` keep your own files out of Git (see `.gitignore`); only their `README.txt` is shared. Python's `__pycache__` and `akta-config.json` (the AKTA keys) are ignored too.
 
 ---
 
@@ -578,14 +730,19 @@ Keep the same file names and the overlays pick up the new images.
 |---|---|
 | `fx_wizard.html` | The control panel, the display (`#display`), the greenscreen underlay (`#underlay`) and the projector (`#projector`), all in one page |
 | `css/styles.css` | All the styles and animations |
-| `assets/` | Background GIFs, the L3 images, and logos |
+| `css/fonts.css`, `assets/fonts/` | The fonts, kept in the folder so nothing needs the internet |
+| `css/tailwind.css` | The panel's layout classes, built by `npm run build:css` from `css/tailwind.src.css` and `tailwind.config.js` (don't edit it by hand) |
+| `assets/` | Background videos, the L3 images and GIF, and logos. `assets/sounds/` holds the Sound Pad sounds |
 | `custom/` | Your own images for the **Custom…** background and the **Custom** Fullscreen L3 (pick one with **Custom…**). Not shared in Git |
 | `rundowns/` | Saved Podcast Rundowns, one `.json` file each. Not shared in Git |
 | `logs/` | Show logs from **Generate Log**, one `.csv` file each. Not shared in Git |
-| `server.py` | Server that runs inside OBS (also lists `custom/`, saves and opens rundowns in `rundowns/`, saves logs in `logs/`, sends AKTA cues, adds the break hotkeys, and tells the panel when OBS changes scene, for break scenes) |
+| `shows/` | Saved shows, one `.json` file each, named by number and title (`001 - Morning Show.json`). Not shared in Git |
+| `server.py` | Server that runs inside OBS (also lists `custom/`, saves and opens rundowns in `rundowns/` and shows in `shows/`, saves logs in `logs/`, sends AKTA cues, adds the break hotkeys, and tells the panel when OBS changes scene, for break scenes) |
 | `server.js` | Standalone Node.js server (same as `server.py`, outside OBS, so without the break hotkeys and break scenes) |
 | `akta-config.json` | Made by the server when you save the AKTA settings. Holds the private key, so it isn't shared in Git |
 | `launch_server.bat` | Double-click launcher for the Node.js server |
+| `assets/originals/` | Full-size originals of background videos that were re-encoded smaller (`code`, `finance`, `space`). On your computer only, not shared in Git; safe to delete |
+| `tests/` | The performance tests (`perf.py`, with `cdp.py` to drive Chrome). Results go in `tests/results/`, which isn't shared in Git. See [Tests](#-tests) |
 
 ---
 

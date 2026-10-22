@@ -118,7 +118,7 @@ body {
 .fx-toast {
   position: fixed;
   left: 50%;
-  bottom: 10px;
+  bottom: 54px; /* above CLEAR ALL (.fx-clear) */
   z-index: 50;
   transform: translateX(-50%);
   width: max-content;
@@ -142,6 +142,29 @@ body {
 .fx-toast.fresh.ok { border-left-color: #22c55e; color: #fff; }
 .fx-toast.fresh.error { border-left-color: #ef4444; color: #fecaca; }
 .toast-detail { margin-left: 6px; font-size: 12px; opacity: 0.75; }
+/* CLEAR ALL: floats at the very bottom, under the message box, on every tab and in Simple mode */
+.fx-clear {
+  position: fixed;
+  left: 50%;
+  bottom: 8px;
+  z-index: 50;
+  transform: translateX(-50%);
+  width: min(284px, calc(100vw - 16px));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 7px 0;
+  border-radius: 10px;
+  border: 2px solid #f87171;
+  background: #374151;
+  color: #fca5a5;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+.fx-clear:hover { background: #6b7280; }
+.fx-clear:active { transform: translateX(-50%) scale(0.95); }
 
 /* Sections that open and close with a tap (Background, Font Style, L3s, Stingers...).
    The bar is a big touch target and shows what's picked inside. */
@@ -181,6 +204,98 @@ body {
 /* The tabs, as icons (the name shows when you hover) */
 .mode-tabs label { display: grid; place-items: center; height: 40px; }
 .mode-tabs .icon { width: 24px; height: 24px; }
+
+/* Sound Pad: six big, colorful pads (two across). Each lights up when hit, and a bar along its bottom
+   runs down for as long as the sound plays (--dur, set by the script). --c1/--c2 are its colors. */
+.sound-pads { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 4px 8px 12px; }
+.sound-pads .pad, .simple-pads .pad { /* in front so Tailwind's button reset doesn't clear the colors */
+  position: relative;
+  aspect-ratio: 1 / 0.85;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  overflow: hidden;
+  border-radius: 16px;
+  color: #fff;
+  background: linear-gradient(145deg, var(--c1), var(--c2));
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), inset 0 -6px 0 rgba(0, 0, 0, 0.25), 0 4px 10px rgba(0, 0, 0, 0.35);
+  transition: transform 0.08s, filter 0.08s, box-shadow 0.08s;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.pad::before { /* a glossy top, like a lit-up rubber pad */
+  content: '';
+  position: absolute;
+  inset: 0 0 55% 0;
+  background: linear-gradient(rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+.pad:hover { filter: brightness(1.08); }
+.pad:active, .pad.hit {
+  transform: translateY(2px) scale(0.97);
+  filter: brightness(1.25) saturate(1.15);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), inset 0 -2px 0 rgba(0, 0, 0, 0.25), 0 0 0 3px #fff, 0 0 22px var(--c1);
+}
+.pad.hit { animation: padHit 0.25s ease-out forwards; }
+@keyframes padHit {
+  to { transform: none; filter: brightness(1.1); }
+}
+.pad.playing { box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), inset 0 -6px 0 rgba(0, 0, 0, 0.25), 0 0 0 3px rgba(255, 255, 255, 0.85), 0 0 18px var(--c1); }
+.pad-icon { font-size: 36px; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35)); }
+.pad.playing .pad-icon { animation: padPulse 0.45s ease-in-out infinite alternate; }
+@keyframes padPulse {
+  to { transform: scale(1.15); }
+}
+.pad-label { font-size: 14px; font-weight: 800; letter-spacing: 0.02em; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45); }
+.pad-key, .pad-time {
+  position: absolute;
+  top: 6px;
+  padding: 0 5px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.pad-key { left: 7px; }
+.pad-time { right: 7px; }
+.pad-time:empty { display: none; }
+.pad-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.9);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.pad.playing .pad-bar { animation: padBar var(--dur, 1s) linear forwards; }
+@keyframes padBar {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+.sound-stop {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 8px;
+  border: 2px solid #f87171;
+  color: #fca5a5;
+  font-size: 12px;
+  font-weight: 800;
+}
+.sound-stop:hover { background: rgba(248, 113, 113, 0.2); }
+.sound-stop:active { transform: scale(0.95); }
+.sound-stop .icon { width: 14px; height: 14px; }
+.sound-volume { display: flex; align-items: center; gap: 8px; margin: 0 10px 8px; font-size: 12px; font-weight: 700; }
+.sound-volume .icon { width: 18px; height: 18px; flex: none; }
+.sound-volume input { flex: 1; min-width: 0; accent-color: #a78bfa; }
+.sound-volume span:last-child { width: 36px; text-align: right; font-variant-numeric: tabular-nums; }
 
 /* L3 Builder: the slots, the buttons, what's playing, and the saved cL3s and L3s */
 .builder-total { font-size: 12px; font-weight: 700; opacity: 0.8; }
@@ -1086,7 +1201,7 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
 .rundown-file span { font-size: 12px; opacity: 0.7; }
 
 /* Edit dialog for one show item, and the Import a rundown dialog */
-#edit-dialog, #rundown-dialog, #timing-dialog, #breaks-dialog, #custom-dialog {
+#edit-dialog, #rundown-dialog, #timing-dialog, #breaks-dialog, #custom-dialog, #shows-dialog, #show-save-dialog, #show-ask-dialog {
   position: fixed;
   inset: 0;
   margin: auto;        /* centered in the window */
@@ -1099,9 +1214,10 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
-#edit-dialog::backdrop, #rundown-dialog::backdrop, #timing-dialog::backdrop, #breaks-dialog::backdrop, #custom-dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
+#edit-dialog::backdrop, #rundown-dialog::backdrop, #timing-dialog::backdrop, #breaks-dialog::backdrop, #custom-dialog::backdrop,
+#shows-dialog::backdrop, #show-save-dialog::backdrop, #show-ask-dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
 #edit-dialog select { background: #3f3f46; color: #fff; }
-#timing-dialog, #breaks-dialog, #custom-dialog { max-height: 88vh; overflow-y: auto; }
+#timing-dialog, #breaks-dialog, #custom-dialog, #shows-dialog { max-height: 88vh; overflow-y: auto; }
 /* Custom image window: a preview and the name of each image in the custom folder; the one in use is outlined */
 .custom-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-height: 50vh; overflow-y: auto; }
 .custom-list:empty { display: none; }
@@ -1128,6 +1244,143 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
   background: repeating-conic-gradient(#52525b 0% 25%, #3f3f46 0% 50%) 50% / 12px 12px;
 }
 .custom-pick span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* The show open now, in the top bar: its number and title, and an amber dot for changes since it was saved */
+.show-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 150px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 700;
+}
+.show-chip:active { transform: scale(0.96); }
+.show-chip .icon { width: 14px; height: 14px; }
+.show-chip-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.show-chip-dirty { flex: none; width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; }
+.show-chip-dirty.hidden { display: none; }
+/* The Shows window: what's open now, and the saved shows by number (the open one outlined) */
+.shows-current { font-size: 13px; }
+.shows-current span { opacity: 0.7; }
+.shows-current em { display: block; font-size: 12px; font-style: normal; color: #86efac; }
+.shows-current.dirty em { color: #fbbf24; }
+.rundown-file.show-pick { border: 2px solid transparent; }
+.rundown-file.show-pick.on { border-color: #a78bfa; }
+.show-pick b { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.show-num {
+  flex: none;
+  padding: 0 5px;
+  border-radius: 5px;
+  background: rgba(167, 139, 250, 0.3);
+  font-variant-numeric: tabular-nums;
+}
+.show-ttl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Simple mode: one page in a theme's look, in place of the tabs (everything else in the panel is hidden).
+   --theme-c1 / --theme-c2 are the theme's colors, set by the script. */
+#controller-view:not(.simple-on) > #simple-section { display: none; }
+#controller-view.simple-on > :not(#simple-section):not(#controller-feedback):not(#clear-btn):not(dialog) { display: none !important; }
+.simple-section { width: 100%; display: flex; flex-direction: column; gap: 10px; padding: 8px; }
+.simple-label { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.75; }
+.simple-themes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.simple-themes .simple-theme {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 56px;
+  padding: 2px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  color: #fff;
+  background: linear-gradient(145deg, var(--c1), var(--c2));
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25), 0 3px 8px rgba(0, 0, 0, 0.3);
+  font-size: 11.5px;
+  font-weight: 800;
+  line-height: 1.1;
+  opacity: 0.6;
+  transition: transform 0.08s, opacity 0.15s;
+}
+.simple-theme:hover { opacity: 0.9; }
+.simple-theme:active { transform: scale(0.95); }
+.simple-themes .simple-theme.on { opacity: 1; border-color: #fff; box-shadow: 0 0 0 2px var(--c1), 0 0 14px var(--c1); }
+.st-icon { font-size: 20px; line-height: 1; }
+.simple-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 12px;
+  border-left: 4px solid var(--theme-c1, #6D28D9);
+  background: rgba(255, 255, 255, 0.06);
+}
+.simple-card h3 { display: flex; align-items: baseline; gap: 6px; font-size: 13px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.simple-card h3 small { margin-left: auto; font-size: 11px; font-weight: 600; letter-spacing: 0; text-transform: none; text-align: right; opacity: 0.7; }
+.simple-where { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.simple-where button { padding: 3px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.35); font-size: 12px; }
+.simple-where button.on { border-color: transparent; background: var(--theme-c1); color: #fff; }
+.simple-len { grid-template-columns: repeat(2, 1fr); } /* Short / Long */
+.simple-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.simple-btns button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 2px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+.simple-btns button:active { transform: scale(0.95); }
+.simple-btns .s-take { background: #4f46e5; }
+.simple-btns .s-take:hover { background: #4338ca; }
+.simple-btns .s-toggle { background: #d97706; font-size: 12px; }
+.simple-btns .s-toggle:hover { background: #b45309; }
+.simple-btns .s-toggle.on { background: #fde047; color: #000; box-shadow: 0 0 0 3px #ef4444; }
+.simple-btns .s-save { background: #f43f5e; }
+.simple-btns .s-save:hover { background: #e11d48; }
+/* The saved L3s: tap one to take it in the theme's look. Two per row, up to 10 rows (all showing, no
+   scrolling inside), each a big target; the small x in the corner deletes it (it asks first). */
+.simple-saved-head { font-size: 11px; font-weight: 700; opacity: 0.6; text-align: right; margin-bottom: -2px; }
+.simple-saved-head:empty { display: none; }
+.simple-saved { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.simple-saved:empty { display: none; }
+.simple-row { position: relative; display: flex; min-height: 54px; overflow: hidden; border-radius: 10px; background: rgba(255, 255, 255, 0.08); border-left: 3px solid var(--theme-c1, #6D28D9); }
+.simple-row .sr-take { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; padding: 6px 22px 6px 8px; text-align: left; }
+.simple-row .sr-take:hover { background: rgba(255, 255, 255, 0.1); }
+.simple-row .sr-take:active { background: rgba(255, 255, 255, 0.2); }
+.simple-row .sr-take b, .simple-row .sr-take span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.simple-row .sr-take b { font-size: 14px; line-height: 1.2; }
+.simple-row .sr-take span { font-size: 11px; opacity: 0.7; }
+.simple-row .sr-take span:empty { display: none; }
+.simple-row .sr-del { position: absolute; top: 0; right: 0; width: 22px; height: 22px; display: grid; place-items: center; border-bottom-left-radius: 8px; opacity: 0.55; }
+.simple-row .sr-del svg { width: 13px; height: 13px; }
+.simple-row .sr-del:hover { background: #b91c1c; color: #fff; opacity: 1; }
+/* The theme's overlays and stingers, one tap each (stingers show their length) */
+.simple-fx { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.simple-fx button {
+  padding: 8px 4px;
+  border-radius: 10px;
+  color: #fff;
+  background: linear-gradient(145deg, var(--theme-c1), var(--theme-c2));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 6px rgba(0, 0, 0, 0.3);
+  font-size: 13px;
+  font-weight: 800;
+}
+.simple-fx button small { margin-left: 4px; font-weight: 600; opacity: 0.75; }
+.simple-fx button:hover { filter: brightness(1.1); }
+.simple-fx button:active { transform: scale(0.95); filter: brightness(1.25); }
+/* The theme's sounds: smaller Sound Pad pads, three across */
+.simple-pads { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.simple-pads .pad { aspect-ratio: 1 / 0.9; border-radius: 12px; }
+.simple-pads .pad-icon { font-size: 24px; }
+.simple-pads .pad-label { font-size: 11px; line-height: 1.1; text-align: center; }
 
 /* Scrollbars: thin and dark, purple while you grab one (light grey in light mode).
    OBS docks are Chromium, so these apply there too. */
@@ -1267,7 +1520,17 @@ html.light .block-at { color: #374151; }
 html.light .show-break:not(.on) { background: #fff7ed; border-color: #fb923c; color: #9a3412; }
 html.light .brk-len { background: rgba(0, 0, 0, 0.07); }
 html.light .brk-btn.reset { background: rgba(0, 0, 0, 0.08); }
-html.light #timing-dialog, html.light #breaks-dialog, html.light #custom-dialog { background: #fff; color: #111827; border-color: #d1d5db; }
+html.light #timing-dialog, html.light #breaks-dialog, html.light #custom-dialog,
+html.light #shows-dialog, html.light #show-save-dialog, html.light #show-ask-dialog { background: #fff; color: #111827; border-color: #d1d5db; }
+html.light .show-chip { border-color: #9ca3af; background: #fff; }
+html.light .rundown-file.show-pick { background: #f3f4f6; }
+html.light .rundown-file.show-pick.on { background: #ede9fe; }
+html.light .show-num { background: #ddd6fe; color: #4c1d95; }
+html.light .shows-current em { color: #15803d; }
+html.light .shows-current.dirty em { color: #b45309; }
+html.light .simple-card { background: rgba(0, 0, 0, 0.04); }
+html.light .simple-where button:not(.on) { border-color: #9ca3af; background: #fff; }
+html.light .simple-row { background: #fff; box-shadow: 0 0 0 1px #e5e7eb; }
 html.light .custom-pick:not(.on) { background: #f3f4f6; }
 html.light .custom-pick img { background: repeating-conic-gradient(#e5e7eb 0% 25%, #fff 0% 50%) 50% / 12px 12px; }
 html.light .tm-times-row input, html.light .tm-format input, html.light .tm-field input, html.light .akta-add input { border-color: #6b7280; }
@@ -1329,6 +1592,13 @@ html.light .tm-error { color: #b91c1c; }
   font-family: 'Bona Nova SC', serif; /* name font when "Default" is picked */
   font-style: normal;
 }
+/* On the right side of the screen (Top, Center or Bottom Right) the slant is on the left instead,
+   so it points in toward the middle. Glitch has mirrored keyframes to match (glitchInL, glitchOutL). */
+#display-box.slant-left {
+  padding-right: 24px;
+  padding-left: 80px; /* keep equal to the slant in clip-path */
+  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 80px 100%); /* slanted left edge */
+}
 
 /* Name (top line) */
 #action-name {
@@ -1344,7 +1614,7 @@ html.light .tm-error { color: #b91c1c; }
 #action-title {
   font-family: 'Newsreader', serif;
   font-size: 2.6rem; /* ~42px */
-  font-weight: 300;
+  font-weight: 500;
   color: #e4dfdf;
   margin: 0;
   padding: 0;
@@ -1353,12 +1623,39 @@ html.light .tm-error { color: #b91c1c; }
 
 /* =========================================================
    5. LOWER THIRD BACKGROUNDS
-   To add one: add a class here, a button in the "Backgrounds"
-   section of fx_wizard.html, and its name in BG_CLASSES.
-   The GIF is drawn on its own layer behind the text (#display-box::before), so each new frame
-   only redraws the picture, not the name and title and their shadows. The GIFs are cropped to
-   the middle band the box can ever show (800x330; the box is about 172px tall at 1080p).
+   Each built-in background is a looping video, assets/<name>.webm, played in #l3-video behind
+   the text. To add one: put the .webm in assets/, add a button in the "Backgrounds" section of
+   fx_wizard.html, and add its name to BG_VIDEOS in the script. Nothing is needed here.
+   The video fills the box without stretching, so only its middle band shows (the box is about
+   172px tall at 1080p and grows wider with the text).
+   A Custom image is drawn on #display-box::before instead. Both are on their own layer behind
+   the text, so each new frame only redraws the picture, not the name and title and their shadows.
    ========================================================= */
+#l3-video {
+  position: absolute;
+  inset: -3px; /* under the double border too */
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
+  z-index: -1;
+  border-radius: inherit;
+  object-fit: cover;
+  pointer-events: none;
+}
+#l3-video[hidden] {
+  display: none;
+}
+/* A see-through black wash over the background (video or Custom image) and under the text, so the
+   name and title read clearly on busy or bright backgrounds. One still layer: next to no extra work.
+   0 = none, 1 = solid black. */
+#display-box::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  z-index: -1;
+  border-radius: inherit;
+  background: rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
 #display-box::before {
   content: '';
   position: absolute;
@@ -1369,16 +1666,6 @@ html.light .tm-error { color: #b91c1c; }
   will-change: transform; /* its own layer */
   pointer-events: none;
 }
-.blue     { --l3-bg: url('../assets/blueGif.gif'); }
-.green    { --l3-bg: url('../assets/greenGif.gif'); }
-.black    { --l3-bg: url('../assets/blackGif.gif'); }
-.red      { --l3-bg: url('../assets/redGif.gif'); }
-.space    { --l3-bg: url('../assets/space.gif'); }
-.clouds   { --l3-bg: url('../assets/clouds.gif'); }
-.tech     { --l3-bg: url('../assets/tech.gif'); }
-.finance  { --l3-bg: url('../assets/finance.gif'); }
-.sports   { --l3-bg: url('../assets/sports.gif'); }
-.politics { --l3-bg: url('../assets/politics.gif'); }
 
 
 /* =========================================================
@@ -1606,7 +1893,8 @@ html.light .tm-error { color: #b91c1c; }
 #overlay-box.l3Custom #overlay-title {
   margin-left: 0; /* L3 PNG nudges the title right; not needed when centered */
 }
-/* Custom: square corners, no side borders, and the image fades out at both sides */
+/* L3 Gif and Custom: square corners, no side borders, and the image fades out at both sides */
+#overlay-box.l3Gif #overlay-gif,
 #overlay-box.l3Custom #overlay-gif {
   border-left: 0;
   border-right: 0;
@@ -2038,8 +2326,12 @@ html.light .tm-error { color: #b91c1c; }
 #overlay-box.ghost .ghost-float svg {
   animation: ghostSway 0.6s ease-in-out infinite alternate;
 }
-/* Aura: a blurred outline behind the ghost */
-.ghost-glow   { fill: none; stroke: var(--ghost-glow); stroke-width: 22; stroke-opacity: 0.7; filter: url(#ghost-blur); }
+/* Aura: soft outlines behind the ghost, wide and faint to narrow and brighter (looks like a blur, costs none) */
+.ghost-glow   { fill: none; stroke: var(--ghost-glow); stroke-linejoin: round; }
+.ghost-glow.g1 { stroke-width: 54; stroke-opacity: 0.07; }
+.ghost-glow.g2 { stroke-width: 40; stroke-opacity: 0.11; }
+.ghost-glow.g3 { stroke-width: 28; stroke-opacity: 0.16; }
+.ghost-glow.g4 { stroke-width: 16; stroke-opacity: 0.28; }
 .ghost-shape  { fill: url(#ghost-fill); }
 .ghost-face   { fill: var(--ghost-face); }
 .ghost-cheeks { fill: var(--ghost-cheeks); opacity: 0.7; }
@@ -2236,6 +2528,34 @@ html.light .tm-error { color: #b91c1c; }
   82%  { opacity: 1; clip-path: polygon(0% 70%, calc(100% - 56px) 70%, calc(100% - 60.8px) 76%, 0% 76%); transform: translateX(24px); filter: hue-rotate(150deg); }
   90%, 100% { opacity: 0; }
 }
+/* The same, mirrored, for a lower third on the right side of the screen (its slant is on the left) */
+@keyframes glitchInL {
+  0%   { opacity: 0; }
+  6%   { opacity: 1; clip-path: polygon(100% 8%, 6.4px 8%, 17.6px 22%, 100% 22%, 100% 60%, 48px 60%, 62.4px 78%, 100% 78%); transform: translateX(18px) skewX(6deg); filter: hue-rotate(110deg) saturate(2.2); }
+  12%  { opacity: 0; }
+  18%  { opacity: 1; clip-path: polygon(100% 30%, 24px 30%, 49.6px 62%, 100% 62%); transform: translateX(-14px); filter: hue-rotate(-70deg) contrast(1.5); }
+  26%  { clip-path: polygon(100% 0%, 0% 0%, 11.2px 14%, 100% 14%, 100% 44%, 35.2px 44%, 72px 90%, 100% 90%); transform: translateX(8px) skewX(-4deg); filter: hue-rotate(40deg) saturate(1.8) brightness(1.3); }
+  34%  { clip-path: polygon(100% 0%, 0% 0%, 80px 100%, 100% 100%); transform: translateX(-6px); filter: none; }
+  40%  { opacity: 0.35; transform: none; }
+  46%  { opacity: 1; clip-path: polygon(100% 12%, 9.6px 12%, 32px 40%, 100% 40%, 100% 70%, 56px 70%, 80px 100%, 100% 100%); transform: translateX(-10px); filter: hue-rotate(-120deg); }
+  54%  { clip-path: polygon(100% 0%, 0% 0%, 80px 100%, 100% 100%); transform: translateX(4px); filter: none; }
+  62%  { clip-path: polygon(100% 48%, 38.4px 48%, 57.6px 72%, 100% 72%); transform: translateX(12px) skewX(3deg); filter: hue-rotate(80deg); }
+  68%  { clip-path: polygon(100% 0%, 0% 0%, 80px 100%, 100% 100%); transform: translateX(-2px); filter: none; }
+  78%  { transform: translateX(2px); filter: brightness(1.25); }
+  88%, 100% { opacity: 1; clip-path: polygon(100% 0%, 0% 0%, 80px 100%, 100% 100%); transform: none; filter: none; }
+}
+@keyframes glitchOutL {
+  0%   { opacity: 1; clip-path: polygon(100% 0%, 0% 0%, 80px 100%, 100% 100%); transform: none; filter: none; }
+  10%  { clip-path: polygon(100% 10%, 8px 10%, 24px 30%, 100% 30%, 100% 55%, 44px 55%, 68px 85%, 100% 85%); transform: translateX(-12px); filter: hue-rotate(90deg); }
+  20%  { clip-path: polygon(100% 0%, 0% 0%, 80px 100%, 100% 100%); transform: translateX(6px); filter: none; }
+  30%  { clip-path: polygon(100% 20%, 16px 20%, 56px 70%, 100% 70%); transform: translateX(16px) skewX(-5deg); filter: hue-rotate(-80deg) contrast(1.5); }
+  40%  { opacity: 0.4; clip-path: polygon(100% 0%, 0% 0%, 80px 100%, 100% 100%); transform: none; filter: none; }
+  50%  { opacity: 1; clip-path: polygon(100% 0%, 0% 0%, 14.4px 18%, 100% 18%, 100% 40%, 32px 40%, 51.2px 64%, 100% 64%); transform: translateX(-10px); filter: brightness(1.4); }
+  62%  { clip-path: polygon(100% 44%, 35.2px 44%, 46.4px 58%, 100% 58%); transform: translateX(20px); filter: saturate(2.5); }
+  74%  { opacity: 0; }
+  82%  { opacity: 1; clip-path: polygon(100% 70%, 56px 70%, 60.8px 76%, 100% 76%); transform: translateX(-24px); filter: hue-rotate(150deg); }
+  90%, 100% { opacity: 0; }
+}
 /* The text's red/cyan split, in step with the box */
 @keyframes glitchTextIn {
   0%, 34%, 40%, 54%, 68%, 88%, 100% { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); }
@@ -2330,6 +2650,12 @@ html.light .tm-error { color: #b91c1c; }
 }
 .anim-glitchOut > * {
   animation: glitchTextOut 0.6s steps(1, end) forwards;
+}
+#display-box.slant-left.anim-glitch {
+  animation-name: glitchInL;
+}
+#display-box.slant-left.anim-glitchOut {
+  animation-name: glitchOutL;
 }
 
 /* =========================================================
@@ -2534,3 +2860,12 @@ html.projector, html.projector body { background: #0b0b10; color: #f4f4f5; overf
   .pj-code { padding: 0 1vw; font-size: 2.4vh; }
   .pj-break { padding: 0.6vh 2vw; font-size: 2.6vh; }
 }
+
+
+/* =========================================================
+   SAFETY NET: "hidden" without Tailwind
+   Tailwind's layout classes are in css/tailwind.css. If that file were ever missing (or not rebuilt),
+   without its "hidden" rule the whole control panel would show on the OBS display (#display) and
+   underlay. This keeps everything marked hidden hidden either way; it's the same as Tailwind's rule.
+   ========================================================= */
+.hidden { display: none !important; }

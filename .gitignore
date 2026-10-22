@@ -9,7 +9,7 @@ build/
 __pycache__/
 *.pyc
 
-# Your own files stay on your computer: custom images and saved rundowns.
+# Your own files stay on your computer: custom images, saved rundowns, logs and saved shows.
 # The folders themselves are shared (each has a README.txt).
 custom/*
 !custom/README.txt
@@ -17,6 +17,12 @@ rundowns/*
 !rundowns/README.txt
 logs/*
 !logs/README.txt
+shows/*
+!shows/README.txt
+# The full-size originals of background videos that were re-encoded smaller (kept on this computer only)
+assets/originals/
+# Performance test results (tests/perf.py): different on every computer
+tests/results/
 
 # The AKTA break/return settings hold the private key, so they never get committed.
 # (The .tmp file only exists for a moment while the settings are being saved.)
