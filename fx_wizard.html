@@ -85,14 +85,14 @@
 
             <div class="space-y-3 p-2 rounded-lg w-full">
 
-                <!-- Tabs, as icons: Animated L3s / Fullscreen Overlays / L3 Builder / Podcast Rundown / Sound Pad -->
+                <!-- Tabs, as icons: Animated L3s / Fullscreen Overlays / Scene Builder / Podcast Rundown / Sound Pad -->
                 <div id="mode-tabs" class="mode-tabs grid grid-cols-5 gap-1 text-sm">
                     <input type="radio" id="mode-l3" name="mode" value="l3" checked class="hidden peer/m1">
                     <label for="mode-l3" title="Animated L3s" aria-label="Animated L3s" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m1:bg-primary"><span data-icon="l3"></span></label>
                     <input type="radio" id="mode-overlay" name="mode" value="overlay" class="hidden peer/m2">
                     <label for="mode-overlay" title="Fullscreen Overlays" aria-label="Fullscreen Overlays" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m2:bg-primary"><span data-icon="sparkles"></span></label>
                     <input type="radio" id="mode-builder" name="mode" value="builder" class="hidden peer/m4">
-                    <label for="mode-builder" title="L3 Builder" aria-label="L3 Builder" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m4:bg-primary"><span data-icon="stack"></span></label>
+                    <label for="mode-builder" title="Scene Builder" aria-label="Scene Builder" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m4:bg-primary"><span data-icon="stack"></span></label>
                     <input type="radio" id="mode-show" name="mode" value="show" class="hidden peer/m3">
                     <label for="mode-show" title="Podcast Rundown" aria-label="Podcast Rundown" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m3:bg-primary"><span data-icon="list"></span></label>
                     <input type="radio" id="mode-sound" name="mode" value="sound" class="hidden peer/m5">
@@ -216,6 +216,15 @@
                             <!-- Like, Follow & Subscribe: a cursor clicks each button; optional socials above -->
                             <input type="radio" id="ov-social" name="overlayStyle" value="social" class="hidden peer/o20">
                             <label for="ov-social" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o20:bg-primary">Like &amp; Subscribe</label>
+
+                            <!-- Content: a TV, almost full screen, showing a picture or video from the "content" folder
+                                 (next to "assets"); Content Full shows it full screen. Tapping either opens the window to
+                                 pick which one (they share the pick). -->
+                            <input type="radio" id="ov-content" name="overlayStyle" value="content" data-content="1" class="hidden peer/o39">
+                            <label for="ov-content" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o39:bg-primary">Content…</label>
+                            <input type="radio" id="ov-contentFull" name="overlayStyle" value="contentFull" data-content="1" class="hidden peer/o40">
+                            <label for="ov-contentFull" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o40:bg-primary">Content Full…</label>
+                            <p id="content-name" class="col-span-2 text-[12px] text-center opacity-75"></p>
                         </div>
                     </details>
 
@@ -629,11 +638,13 @@
                     <button type="button" class="cue-add" onclick="addCue('pic')" title="Add a placeholder for a picture"><span data-icon="pic"></span> PIC</button>
                     <button type="button" class="cue-add" onclick="addCue('scene')" title="Add the scene to take next (picked from OBS's scenes or sources)"><span data-icon="scene"></span> Scene</button>
                     <button type="button" class="cue-add" onclick="addCue('script')" title="Add a script (shown on the projector)"><span data-icon="script"></span> Script</button>
-                    <button type="button" class="cue-add" onclick="addCue('break')" title="Add a break you fire from the rundown (or from OBS / a Stream Deck with Start Break)"><span data-icon="pause"></span> Break</button>
+                    <button type="button" class="cue-add" onclick="addCue('break')" title="Add a break you fire from the rundown (or from OBS / a Stream Deck with Start Break): it takes its break scene in OBS"><span data-icon="pause"></span> Break</button>
                 </div>
                 <p id="show-hint" class="text-xs text-center opacity-75 mb-2 px-2">Arrange the rundown, then turn on <b>Set Show</b> to run it. Cards can't be taken until then.</p>
                 <!-- Planned length of the whole show, the graphics' total, and (during the show) the time so far -->
                 <div id="show-totals" class="show-totals"></div>
+                <!-- While Set Show is off: collapse every section to its header, or open them all again -->
+                <div id="fold-row" class="expand-row fold-row"><button type="button" id="fold-all"></button></div>
                 <div id="show-list" class="flex flex-col p-1 pt-0"></div>
             </div>
 
@@ -654,40 +665,40 @@
                 </label>
             </div>
 
-            <!-- ===== L3 BUILDER TAB =====
-                 Up to 5 saved lower thirds in slots, played one after another. Save them as a cL3, play it,
-                 or add it to the rundown. -->
+            <!-- ===== SCENE BUILDER TAB =====
+                 Up to 8 saved graphics (lower thirds, overlays, stingers, content) in slots, played one after
+                 another. Save them as a complex scene (a cScene), play it, or add it to the rundown. -->
             <div id="builder-section" class="w-full hidden">
                 <div class="flex items-center gap-2 mb-2 pb-1 px-2 border-b border-gray-600">
-                    <h2 class="text-base font-bold">L3 Builder</h2>
+                    <h2 class="text-base font-bold">Scene Builder</h2>
                     <span id="builder-total" class="builder-total ml-auto"></span>
                     <button type="button" title="Empty the slots (start a new one)" onclick="clearBuilder()" class="w-8 h-7 rounded hover:bg-red-700 active:scale-95 grid place-items-center"><span data-icon="trash"></span></button>
                 </div>
                 <div class="px-2 mb-2">
                     <label for="builder-name" class="block text-sm font-medium">Name:</label>
-                    <input type="text" id="builder-name" maxlength="50" placeholder="Name this cL3" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm">
+                    <input type="text" id="builder-name" maxlength="50" placeholder="Name this scene" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm">
                 </div>
                 <div id="builder-slots" class="builder-slots"></div>
                 <div class="builder-btns">
                     <button type="button" class="b-play" onclick="playSeq(builderCl3())" title="Play the slots now, one after another"><span data-icon="play"></span> PLAY</button>
-                    <button type="button" id="builder-save" class="b-save" onclick="saveCl3()" title="Keep it as a cL3, with the saved graphics"></button>
-                    <button type="button" class="b-add" onclick="const d = builderCl3(); if (d.steps.length) addToShow(d); else flash('Put at least one L3 in the slots', true);" title="Add it to the rundown (in the block picked under Add to)"><span data-icon="plus"></span> RUNDOWN</button>
+                    <button type="button" id="builder-save" class="b-save" onclick="saveCl3()" title="Keep it as a complex scene (a cScene), with the saved graphics"></button>
+                    <button type="button" class="b-add" onclick="const d = builderCl3(); if (d.steps.length) addToShow(d); else flash('Put at least one graphic in the slots', true);" title="Add it to the rundown (in the block picked under Add to)"><span data-icon="plus"></span> RUNDOWN</button>
                 </div>
-                <!-- A cL3 playing: which one is up, ⏭ Next and ⏹ Stop -->
+                <!-- A cScene playing: which one is up, ⏭ Next and ⏹ Stop -->
                 <div id="seq-now" class="seq-now hidden">
                     <span data-icon="play"></span>
                     <span id="seq-now-text" class="seq-now-text"></span>
-                    <button type="button" onclick="nextSeq()" title="Skip to the next L3"><span data-icon="next"></span></button>
+                    <button type="button" onclick="nextSeq()" title="Skip to the next one"><span data-icon="next"></span></button>
                     <button type="button" onclick="stopSeq(true)" title="Stop, and take it down"><span data-icon="stop"></span></button>
                 </div>
                 <div id="builder-saved-wrap" class="hidden">
-                    <h3 class="builder-heading">Saved cL3s</h3>
+                    <h3 class="builder-heading">Saved complex scenes</h3>
                     <div id="builder-saved" class="grid grid-cols-1 gap-2 p-1 pt-0"></div>
                 </div>
-                <h3 class="builder-heading">Saved L3s <small>tap one to put it in the picked slot</small></h3>
+                <h3 class="builder-heading">Saved graphics <small>tap one to put it in the picked slot</small></h3>
                 <div class="saved-search builder-search">
                     <span data-icon="search"></span>
-                    <input type="text" id="builder-search" placeholder="Search saved L3s" autocomplete="off" spellcheck="false">
+                    <input type="text" id="builder-search" placeholder="Search saved L3s and overlays" autocomplete="off" spellcheck="false">
                 </div>
                 <div id="builder-picks" class="grid grid-cols-2 gap-2 p-1 pt-0"></div>
             </div>
@@ -716,6 +727,18 @@
                 </form>
             </dialog>
 
+            <!-- Content…: the pictures and videos in the "content" folder, to pick the one the TV shows -->
+            <dialog id="content-dialog">
+                <form method="dialog" class="flex flex-col gap-2">
+                    <h3 class="font-bold">Content</h3>
+                    <p id="content-note" class="text-xs opacity-75"></p>
+                    <div id="content-list" class="custom-list"></div>
+                    <button type="button" class="py-2 rounded bg-gray-600 text-white font-bold" onclick="$('content-file').click()" title="Pick it yourself (it has to be in the content folder for the display to show it)"><span data-icon="file"></span> Choose a file…</button>
+                    <button value="cancel" class="py-2 rounded bg-gray-500 font-bold">Close</button>
+                </form>
+            </dialog>
+            <input type="file" id="content-file" accept="image/png,image/jpeg,image/gif,image/webp,video/mp4,video/webm" class="hidden">
+
             <dialog id="edit-dialog">
                 <form method="dialog" class="flex flex-col gap-2">
                     <h3 id="edit-heading" class="font-bold">Edit for this rundown</h3>
@@ -727,11 +750,12 @@
                         <label for="edit-title" class="block text-sm">Title:</label>
                         <input type="text" id="edit-title" maxlength="50" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm">
                     </div>
-                    <!-- Scene cues: the scene (or source) to take, from OBS's active scene collection. Without
-                         server.py in OBS there's no list, so the name is typed instead. -->
+                    <!-- Scene cues: the scene (or source) to take, from OBS's active scene collection. Break cues
+                         use it too, for their break scene (scenes only). Without server.py in OBS there's no
+                         list, so the name is typed instead. -->
                     <div id="edit-scene-wrap" class="hidden">
                         <div class="scene-pick-head">
-                            <label for="edit-scene" class="text-sm">Take:</label>
+                            <label id="edit-scene-label" for="edit-scene" class="text-sm">Take:</label>
                             <div class="scene-kinds">
                                 <button type="button" id="edit-kind-scene" onclick="setSceneKind('scene')">Scenes</button>
                                 <button type="button" id="edit-kind-source" onclick="setSceneKind('source')">Sources</button>
@@ -749,7 +773,7 @@
                         <input type="file" id="edit-txt-file" accept=".txt,text/plain" class="hidden">
                     </div>
                     <div id="edit-socials-wrap" class="flex flex-col gap-1"></div>
-                    <!-- Break cues: how long the break is -->
+                    <!-- Break cues: how long the break is (and, above, the break scene it takes) -->
                     <div id="edit-break-wrap" class="hidden">
                         <label for="edit-break-len" class="block text-sm">Length (minutes:seconds):</label>
                         <input type="text" id="edit-break-len" inputmode="numeric" maxlength="8" placeholder="2:00" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm">
@@ -990,6 +1014,27 @@
                         <div class="bn-ticker"><span id="breaking-text"></span></div>
                     </div>
                 </div>
+                <!-- Content: a TV, almost full screen, showing a picture or video from the "content" folder. It rises
+                     into place and its screen powers on; at the end the screen powers off and it drops away.
+                     Content Full shows the same picture full screen, without the TV. Timing is in styles.css. -->
+                <div id="content-tv">
+                    <div class="tv">
+                        <div class="tv-set">
+                            <div class="tv-screen">
+                                <div id="content-picture" class="tv-picture">
+                                    <img id="content-img" alt="" hidden>
+                                    <video id="content-video" playsinline preload="auto" hidden></video>
+                                    <span class="tv-nosignal">No signal</span>
+                                    <i class="tv-flash"></i>
+                                </div>
+                                <i class="tv-glare"></i>
+                            </div>
+                            <i class="tv-badge"></i>
+                            <i class="tv-led"></i>
+                        </div>
+                        <div class="tv-stand"><i class="tv-neck"></i><i class="tv-foot"></i></div>
+                    </div>
+                </div>
                 <!-- Like, Follow & Subscribe: three buttons pop up, a cursor clicks each one (they change
                      to Liked, Following and Subscribed), and the bell rings. Any socials entered show
                      above the buttons. Timing is in styles.css. -->
@@ -1130,6 +1175,8 @@
         const SHOW_KEY = 'fx_show';                 // the Rundown list
         const CUSTOM_FOLDER = 'custom';             // custom backgrounds live here, next to "assets"
         let customFolderFiles = null;               // what the server last said is in it (null = not known yet)
+        const CONTENT_FOLDER = 'content';           // pictures and videos for the Content overlay's TV, next to "assets"
+        let contentFolderFiles = null;              // what the server last said is in it (null = not known yet)
 
         let ws = null;
         let isController = false;
@@ -1153,6 +1200,8 @@
         //   import:  true = can be filled from .txt files (shows the Import button)
         //   paragraph: true = one wrapping paragraph instead of Name and Title
         //   custom:  true = uses the image from the "custom" folder
+        //   content: true = shows a picture or video from the "content" folder (Content… / Content Full…). A video
+        //            starts once the picture is fully up (lead, in seconds), and its Duration fills in so all of it plays
         //   ticker:  true = one text box, scrolled along the Breaking News bar
         //   sport:   true = shows the Sport picker (Football, Basketball, Baseball, Soccer)
         //   social:  true = shows the Socials picker (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web)
@@ -1190,6 +1239,10 @@
             comic:     { label: 'Comic',      text: false, dur: 10, effect: 'comic', animIn: 'anim-fade', animOut: 'anim-hide' },
             disco:     { label: 'Disco Ball', text: false, dur: 15, effect: 'disco', animIn: 'anim-fade', animOut: 'anim-hide' },
             locpin:    { label: 'Location',   text: false, dur: 8, place: true, effect: null, animIn: '', animOut: 'anim-slideOutLeft' }, // leaves as one block, like L3 PNG
+            // A TV rises up almost full screen and its screen powers on (in styles.css); anim-tvOff powers it off and drops it away
+            content:   { label: 'Content',    text: false, dur: 15, content: true, lead: 1.2, effect: null, animIn: '', animOut: 'anim-tvOff' },
+            // The same picture or video, full screen (no TV), dissolving in and out
+            contentFull: { label: 'Content Full', text: false, dur: 15, content: true, lead: 0.6, effect: null, animIn: 'anim-fade', animOut: 'anim-hide' },
             // Stingers: CSS stinger lengths are read from styles.css, so the speed is only set there
             stinger:   { label: 'Standard', text: false, effect: null, animIn: '', animOut: '',
                          get length() { return cssSeconds('stinger', '--stinger-time', 2); } },
@@ -1284,7 +1337,7 @@
             stpatricks: 'border-green-500', vhs: 'border-fuchsia-500', fireworks: 'border-yellow-400', medical: 'border-blue-500',
             rain: 'border-slate-300', vday: 'border-pink-400', hearts: 'border-rose-400', firestinger: 'border-orange-600',
             comic: 'border-yellow-400', disco: 'border-fuchsia-400', pixel: 'border-lime-400', cat: 'border-orange-400',
-            curtains: 'border-red-600', coffee: 'border-amber-600',
+            curtains: 'border-red-600', coffee: 'border-amber-600', content: 'border-sky-300', contentFull: 'border-sky-500',
         };
 
 
@@ -1308,10 +1361,12 @@
 
         // Imported L3s go up as a toggle: they stay up until they're turned off (TOGGLE OFF, or OFF on a
         // rundown card), instead of for a set time. (Older imports, saved with 5 minutes, work the same.)
-        // One put in a cL3 gets toggle: false and a time, like any other.
+        // One put in a cScene gets toggle: false and a time, like any other.
         const holdsOn = (data) => isOverlayItem(data) && !!(data.toggle ?? data.source);
-        // A cL3 (complex L3, from the L3 Builder): up to 5 lower thirds played one after another. Each goes up
-        // once the one before has had its time and its exit animation (SEQ_GAP).
+        // A cScene (complex scene, from the Scene Builder): up to 8 saved graphics (lower thirds, overlays,
+        // stingers, content) played one after another. Each goes up once the one before has had its time and
+        // its exit animation (SEQ_GAP). It's kept as mode 'cl3' (it started out as a cL3, of lower thirds only),
+        // so cL3s saved before work the same.
         const SEQ_GAP = 0.9;
         const cl3Steps = (d) => (Array.isArray(d.steps) ? d.steps.filter(Boolean) : []);
         const cl3Seconds = (d) => {
@@ -1325,6 +1380,11 @@
 
         // Where a custom background file is, relative to this page
         const customPath = (file) => `${CUSTOM_FOLDER}/${encodeURIComponent(file)}`;
+        // Where a Content file is (a picture, or a video: MP4 or WebM)
+        const contentPath = (file) => `${CONTENT_FOLDER}/${encodeURIComponent(file)}`;
+        const VIDEO_FILE = /\.(mp4|webm)$/i;
+        // A video's Duration so all of it plays: its length, after the overlay's lead-in, rounded up
+        const wholeVideoSecs = (cfg, length) => Math.ceil(length + (cfg?.lead || 0) + 0.3);
 
         // Simple outline icons (24x24, drawn in the text color). In the page, <span data-icon="trash"></span>
         // is filled in at startup; in the script, icon('trash') gives the SVG.
@@ -1358,6 +1418,8 @@
             l3:     '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M6 13h9M6 16h6"/>',
             layers: '<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
             next:   '<path d="M9 5l7 7-7 7"/>',
+            chevron: '<path d="M6 9l6 6 6-6"/>',
+            focus:  '<path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5"/><circle cx="12" cy="12" r="2.5" class="icon-fill"/>',
             message: '<path d="M4 5h16v11H10l-5 4v-4H4z"/>',
             log:    '<path d="M6 3h12v18H6z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
             script: '<path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 8h6M9 11h6M9 14h6M9 17h3"/>',
@@ -1375,7 +1437,7 @@
            4. ANIMATIONS
            ========================================================= */
         const ANIMS = ['anim-slideUp', 'anim-slideDown', 'anim-slideLeft', 'anim-slideRight', 'anim-fade', 'anim-spinIn', 'anim-hide', 'anim-slideOutLeft',
-                       'anim-riseUp', 'anim-dropDown', 'anim-glitch', 'anim-glitchOut', 'anim-bounce', 'anim-slam'];
+                       'anim-riseUp', 'anim-dropDown', 'anim-glitch', 'anim-glitchOut', 'anim-bounce', 'anim-slam', 'anim-tvOff'];
         // Lower third animations with their own way out (the others fade out)
         const L3_OUT = { 'anim-glitch': 'anim-glitchOut' };
         const clearAnimationClasses = (el) => el.classList.remove(...ANIMS);
@@ -5225,6 +5287,9 @@
             // Bar image: the custom file for Custom; L3 Gif uses largeGif.gif from styles.css
             $('overlay-gif').style.backgroundImage = cfg.custom && data.customBg ? `url("${customPath(data.customBg)}")` : '';
 
+            // Content: the picture or video on the TV's screen, or full screen (any other overlay stops a video that was playing)
+            setContent(cfg.content ? data.content : null, cfg.lead);
+
             // Name and title (L3 PNG, L3 Gif, Custom), or the paragraph (L3 Info)
             if (cfg.text) {
                 $('overlay-name').textContent = data.label || '';
@@ -5277,7 +5342,48 @@
             overlayCleanup = setTimeout(() => {
                 box.style.visibility = 'hidden';
                 FX.stop();
+                setContent(null); // a Content video stops once the TV has gone
             }, outTime);
+        };
+
+        // Content: the file on the TV's screen, or full screen (null = none). A video waits on its first frame until
+        // the picture is fully up (lead seconds), then plays from the start, once, with its sound (turn on "Control
+        // audio via OBS" on the browser source, as for the Sound Pad), and holds its last frame; if the browser won't
+        // play sound by itself, it plays muted. A file that won't load shows "No signal".
+        let contentPlay = null; // the timer that starts a video
+        const setContent = (file, lead = 0) => {
+            const img = $('content-img'), video = $('content-video'), picture = $('content-picture');
+            clearTimeout(contentPlay);
+            if (!file && !img.hasAttribute('src') && !video.hasAttribute('src')) return; // nothing on it already
+            const isVideo = !!file && VIDEO_FILE.test(file);
+            img.onerror = video.onerror = null;
+            picture.classList.remove('no-signal');
+            if (!isVideo && video.hasAttribute('src')) {
+                video.pause();
+                video.removeAttribute('src');
+                video.load(); // lets go of the old file
+            }
+            if (isVideo || !file) img.removeAttribute('src');
+            img.hidden = !file || isVideo;
+            video.hidden = !isVideo;
+            if (!file) return;
+            const fail = () => picture.classList.add('no-signal');
+            if (!isVideo) {
+                img.onerror = fail;
+                img.src = contentPath(file);
+                return;
+            }
+            video.onerror = fail;
+            const src = contentPath(file);
+            if (video.getAttribute('src') !== src || video.error) video.src = src; // (again after an error, to say No signal again)
+            video.pause();
+            video.currentTime = 0;
+            video.muted = false;
+            contentPlay = setTimeout(() => video.play().catch(err => {
+                if (err.name !== 'NotAllowedError') return; // stopped before it started (something else was taken)
+                video.muted = true;
+                video.play().catch(() => {});
+            }), lead * 1000);
         };
 
 
@@ -5341,7 +5447,7 @@
             ws.onopen = () => {
                 const el = $('controller-connection');
                 if (el) { el.className = "text-green-400 font-bold"; el.textContent = "OPEN"; }
-                if (isController) { askCustomList(); broadcastProjector(); loadAktaSettings(); askObsProgram(); } // checks the custom image is still there; the TAKE tally
+                if (isController) { askCustomList(); askContentList(); broadcastProjector(); loadAktaSettings(); askObsProgram(); } // checks the custom image and content files are still there; the TAKE tally
                 if (isProjector) ws.send(JSON.stringify({ mode: 'projectorHello' }));
             };
             // The display shows graphics. The control panel listens for the server's replies (the
@@ -5450,7 +5556,7 @@
 
         // Sends a graphic and shows "Taken: Name  for 5s", counting down until it's off screen
         const flashTake = (data) => {
-            if (seq) stopSeq(false); // taking something else ends a cL3 that's playing (its own L3s don't come through here)
+            if (seq) stopSeq(false); // taking something else ends a cScene that's playing (its own graphics don't come through here)
             const hold = holdsOn(data); // an imported L3: up until it's turned off
             if (!sendPayload(hold ? { ...data, hold: true } : data)) return false;
             const layer = isOverlayItem(data) ? 'overlay' : 'l3';
@@ -5570,14 +5676,16 @@
         };
 
         // ---------- Duration ----------
-        // Picking an overlay fills in its usual time (you can still change it). The Animated L3s
-        // tab keeps whatever you set there.
+        // Picking an overlay fills in its usual time (you can still change it). For Content with a video picked,
+        // that's long enough for the whole video (once its length is known). The Animated L3s tab keeps whatever
+        // you set there.
         let l3Duration = 5;
         const fillDuration = () => {
             const mode = checked('mode');
             const cfg = OVERLAYS[checked('overlayStyle')];
+            const video = cfg?.content && contentLengths[contentFile];
             if (mode === 'l3') $('duration-input').value = l3Duration;
-            else if (mode === 'overlay' && cfg?.length === undefined) $('duration-input').value = cfg?.dur ?? 8;
+            else if (mode === 'overlay' && cfg?.length === undefined) $('duration-input').value = video ? wholeVideoSecs(cfg, video) : cfg?.dur ?? 8;
         };
 
         // Switching tabs also switches which list is shown
@@ -5607,6 +5715,9 @@
                     out.append(swatch, label.title);
                 } else if (input.dataset.custom) {
                     out.textContent = customFile ? `Custom: ${customFile}` : 'Custom (no image found)';
+                } else if (input.dataset.content) {
+                    const name = OVERLAYS[input.value].label;
+                    out.textContent = contentFile ? `${name}: ${contentFile}` : `${name} (nothing picked)`;
                 } else {
                     out.textContent = d.dataset.show === 'value' ? input.value : label.textContent.trim();
                 }
@@ -5699,12 +5810,15 @@
                 const text = oneBox ? $('paragraph-input').value.trim() : label;
                 if ((cfg.text || cfg.place) && !text) { flash(cfg.place ? 'Enter the location' : oneBox ? 'Enter some text' : 'Enter a name', true); return null; }
                 if (cfg.custom && !customFile) { flash(`Put a PNG, JPG or GIF in the "${CUSTOM_FOLDER}" folder, then tap Custom…`, true); return null; }
+                if (cfg.content && !contentFile) { flash(`Put a picture or video in the "${CONTENT_FOLDER}" folder, then tap Content…`, true); return null; }
                 return {
                     mode: 'overlay',
                     overlay,
-                    label: oneBox || cfg.text ? text : '',
+                    // Content is named after its file (like "interview"), so its cards and rundown rows tell them apart
+                    label: oneBox || cfg.text ? text : cfg.content ? contentFile.replace(/\.[^.]+$/, '') : '',
                     title: cfg.text && !oneBox ? title : '',
                     ...(cfg.custom && { customBg: customFile }),
+                    ...(cfg.content && { content: contentFile }),
                     ...(cfg.sport && { sport: checked('sportStyle') }),
                     ...(cfg.social && { socials: currentSocials() }),
                     ...(cfg.depth && $('gs-pick').checked && { gs: true }), // Greenscreen (saved with it too)
@@ -5827,9 +5941,9 @@
             const kind = OVERLAYS[ovKey]?.length !== undefined ? 'STINGER' : 'OVERLAY';
             // Second line: file name for imported L3s, otherwise the style
             const cl3 = data.mode === 'cl3';
-            const sub = cl3 ? `cL3 | ${cl3Steps(data).length} L3s in a row`
+            const sub = cl3 ? `Complex scene | ${cl3Steps(data).length} in a row`
                 : isOverlay
-                ? (data.source && holdsOn(data) ? `${data.source} | toggle` : data.source || `${kind} | ${OVERLAYS[ovKey]?.label || ovKey}${data.customBg ? `: ${data.customBg}` : ''}${data.sport ? `: ${SPORTS[data.sport] || data.sport}` : ''}`)
+                ? (data.source && holdsOn(data) ? `${data.source} | toggle` : data.source || `${kind} | ${OVERLAYS[ovKey]?.label || ovKey}${data.customBg ? `: ${data.customBg}` : ''}${data.content ? `: ${data.content}` : ''}${data.sport ? `: ${SPORTS[data.sport] || data.sport}` : ''}`)
                 : `${data.bgStyle === 'custom' ? `custom: ${data.customBg}` : data.bgStyle} | ${data.fontStyle?.replace('font-', '')}`;
 
             const card = document.createElement('div');
@@ -5841,13 +5955,18 @@
             const b = document.createElement('b');
             b.className = 'block truncate pr-7 text-[14px] leading-tight';
             b.textContent = name;
-            // Uses a custom image that's no longer in the custom folder: a red !
+            // Uses a custom image (or a Content file) that's no longer in its folder: a red !
+            const inFolder = (files, file) => !files || files.some(f => f.toLowerCase() === file.toLowerCase());
             const usesCustom = isOverlay ? OVERLAYS[ovKey]?.custom : data.bgStyle === 'custom';
-            if (usesCustom && (!data.customBg || (customFolderFiles && !customFolderFiles.some(f => f.toLowerCase() === data.customBg.toLowerCase())))) {
+            const usesContent = isOverlay && OVERLAYS[ovKey]?.content;
+            const missing = usesCustom ? (!data.customBg ? 'No custom image picked' : !inFolder(customFolderFiles, data.customBg) && `${data.customBg} isn't in the ${CUSTOM_FOLDER} folder`)
+                : usesContent ? (!data.content ? 'No content picked' : !inFolder(contentFolderFiles, data.content) && `${data.content} isn't in the ${CONTENT_FOLDER} folder`)
+                : '';
+            if (missing) {
                 const warn = document.createElement('span');
                 warn.className = 'card-missing';
                 warn.textContent = '!';
-                warn.title = data.customBg ? `${data.customBg} isn't in the ${CUSTOM_FOLDER} folder` : 'No custom image picked';
+                warn.title = missing;
                 b.prepend(warn);
             }
             if (code) {
@@ -5911,7 +6030,7 @@
             renderButtons(loadButtonsFromStorage());
             if (open) $('saved-search').focus();
         };
-        const savedSearchText = (d) => [d.label, d.title, d.source, d.customBg, d.bgStyle, OVERLAYS[d.overlay]?.label,
+        const savedSearchText = (d) => [d.label, d.title, d.source, d.customBg, d.content, d.bgStyle, OVERLAYS[d.overlay]?.label,
             ...Object.values(d.socials || {})].filter(Boolean).join(' ').toLowerCase();
 
         const toggleSavedOpen = () => {
@@ -5921,11 +6040,11 @@
         };
 
         const renderButtons = (buttons) => {
-            if (checked('mode') === 'builder') { renderBuilder(); return; } // the L3 Builder has its own lists
+            if (checked('mode') === 'builder') { renderBuilder(); return; } // the Scene Builder has its own lists
             const container = $('saved-buttons-container');
             container.innerHTML = '';
 
-            // Only show graphics for the current tab (cL3s are on the L3 Builder tab)
+            // Only show graphics for the current tab (cScenes are on the Scene Builder tab)
             const showOverlays = checked('mode') === 'overlay';
             let list = buttons.filter(d => d.mode !== 'cl3' && isOverlayItem(d) === showOverlays);
             const closed = !savedOpen[checked('mode')];
@@ -5964,7 +6083,7 @@
         const clearSaved = () => {
             const overlays = checked('mode') === 'overlay';
             const all = loadButtonsFromStorage();
-            const mine = (d) => d.mode !== 'cl3' && isOverlayItem(d) === overlays; // cL3s stay (they're on the L3 Builder tab)
+            const mine = (d) => d.mode !== 'cl3' && isOverlayItem(d) === overlays; // cScenes stay (they're on the Scene Builder tab)
             const n = all.filter(mine).length;
             if (!n) { flash('Nothing to delete', true); return; }
             if (!confirm(`Delete all ${n} saved ${overlays ? 'overlays' : 'L3s'}? This can't be undone.`)) return;
@@ -5998,10 +6117,10 @@
         const VIEW_KEY = 'fx_block_view';     // while Set Show is on: 'ALL' or the one block shown
         const DEFAULT_BLOCKS = ['A', 'B', 'C', 'D', 'E'];
         const UNSORTED = 'unsorted'; // ＋ RUNDOWN puts graphics here, at the bottom, until they're dragged into a block
-        // Sections with no letter of their own: the Open (optional, first), the Tease (before block A) and the
-        // Close (optional, after the last block). They show with block A (the Open and Tease) or the last
-        // block (the Close), have no "Add to" letter, and aren't timed. The Open and Close take anything, and
-        // are hidden during the show while they're empty.
+        // Sections with no letter of their own: the Tease (first of all, before the rundown), the Open (optional,
+        // after the Tease) and the Close (optional, after the last block). They show with block A (the Tease and
+        // Open) or the last block (the Close), have no "Add to" letter, and aren't timed. The Open and Close take
+        // anything, and are hidden during the show while they're empty.
         const OPEN = 'open', TEASE = 'tease', CLOSE = 'close';
         const SECTIONS = { open: { name: 'Open', code: 'OP' }, tease: { name: 'Tease', code: 'T' }, close: { name: 'Close', code: 'CL' } };
         // The Tease takes notes, scripts, scenes, one clip (the T1-TEASE) and one lower third (the T-L3).
@@ -6020,7 +6139,7 @@
             return null;
         };
         const blockName = (b) => SECTIONS[b]?.name || `Block ${b}`;
-        // A block's items, with the Open and Tease counted in the first block and the Close in the last
+        // A block's items, with the Tease and Open counted in the first block and the Close in the last
         const blockItems = (list, b, blocks) => list.filter(d => d.block === b
             || ((d.block === OPEN || d.block === TEASE) && b === blocks[0]) || (d.block === CLOSE && b === blocks[blocks.length - 1]));
         // Cues: notes and placeholders for things that aren't graphics, and scripts for the projector.
@@ -6036,8 +6155,9 @@
         };
         // A Scene cue is the OBS scene (or source) to take next: { cue: 'scene', obsName, obsKind: 'source'
         // (left out for a scene), text: an optional note }. It shows with a yellow TAKE marker.
-        // A Break cue fires a break: { cue: 'break', secs: its length, text: an optional name }. It shows
-        // with an orange BREAK marker and its length.
+        // A Break cue fires a break and takes its break scene in OBS: { cue: 'break', secs: its length, obsName:
+        // the break scene, text: an optional name }. It shows with an orange BREAK marker, its length and the
+        // scene. (Break cues from before they had a scene still fire, without taking one.)
         const cueMarker = (word, text, cls, title) => {
             const pill = document.createElement('span');
             pill.className = cls;
@@ -6047,10 +6167,11 @@
             return pill;
         };
         const takeMarker = (d, cls = 'take-pill') => cueMarker('TAKE', d.obsName || 'Scene', cls, d.obsKind === 'source' ? 'The OBS source to take' : 'The OBS scene to take');
-        const breakMarker = (d, cls = 'take-pill brk-pill') => cueMarker('BREAK', clock(d.secs || 0), cls, 'A break this long');
+        const breakMarker = (d, cls = 'take-pill brk-pill') => cueMarker('BREAK', `${clock(d.secs || 0)} · ${d.obsName || 'no scene'}`, cls,
+            d.obsName ? `A break this long, on ${d.obsName}` : 'A break this long, with no break scene (✎ to pick one)');
         const newSid = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
         let lastTakenSid = localStorage.getItem(LAST_PLAYED_KEY); // gets the ★
-        const liveByLayer = { l3: null, overlay: null, seq: null }; // rundown card on screen now, per layer (seq: a cL3 playing)
+        const liveByLayer = { l3: null, overlay: null, seq: null }; // rundown card on screen now, per layer (seq: a cScene playing)
         const liveEnds = { l3: 0, overlay: 0, seq: 0 };            // when each one goes off
         const liveTimers = { l3: null, overlay: null, seq: null };
         let liveTicker = null;                                     // counts down the OFF buttons
@@ -6074,8 +6195,8 @@
         const showLocked = () => localStorage.getItem(SHOW_LOCK_KEY) === '1';
 
         // L3 for lower thirds (animated or fullscreen), OV for overlays and stingers; cues have their own
-        // (Location counts as an L3: it's one of the Fullscreen L3s. A cL3 is CL3.)
-        const itemType = (d) => (d.cue ? CUES[d.cue]?.code || 'NOTE' : d.mode === 'cl3' ? 'CL3'
+        // (Location counts as an L3: it's one of the Fullscreen L3s. A cScene is CS.)
+        const itemType = (d) => (d.cue ? CUES[d.cue]?.code || 'NOTE' : d.mode === 'cl3' ? 'CS'
             : (isOverlayItem(d) ? OVERLAYS[d.overlay || 'l3Large']?.text || OVERLAYS[d.overlay]?.place : true) ? 'L3' : 'OV');
         // Its label, like "A1-L3": its block, then its place among that block's items of the same type.
         // Unsorted ones just show their type; notes have none. In the Tease: T1-TEASE (its clip), T-L3,
@@ -6107,7 +6228,7 @@
             document.querySelectorAll('.show-card').forEach(c => {
                 const layer = Object.keys(liveByLayer).find(l => liveByLayer[l] === c.dataset.sid);
                 c.classList.toggle('show-live', !!layer);
-                c.classList.toggle('live-seq', layer === 'seq'); // a cL3 playing: NEXT above OFF
+                c.classList.toggle('live-seq', layer === 'seq'); // a cScene playing: NEXT above OFF
                 c.classList.toggle('show-last', c.dataset.sid === lastTakenSid);
                 c.classList.toggle('show-current', showLocked() && c.dataset.sid === showState().current);
                 let off = c.querySelector('.show-offair');
@@ -6124,13 +6245,13 @@
                     off = null;
                 }
                 if (off) off.lastChild.textContent = liveEnds[layer] === Infinity ? 'OFF' : `OFF ${formatTime(Math.max(0, Math.ceil((liveEnds[layer] - now) / 1000)))}`;
-                // A cL3 playing: ⏭ NEXT skips to its next L3
+                // A cScene playing: ⏭ NEXT skips to the next graphic in it
                 let next = c.querySelector('.show-next');
                 if (layer === 'seq' && !next) {
                     next = document.createElement('button');
                     next.type = 'button';
                     next.className = 'show-next';
-                    next.title = 'Skip to the next L3 in it';
+                    next.title = 'Skip to the next graphic in it';
                     next.onclick = () => nextSeq();
                     next.innerHTML = `${icon('next')}<span>NEXT</span>`;
                     c.append(next);
@@ -6150,7 +6271,7 @@
             if (!Object.values(liveByLayer).some(Boolean)) { clearInterval(liveTicker); liveTicker = null; }
             updateLiveMarks();
         };
-        // ⏹ OFF: takes the graphic on that layer down now (for a cL3: stops it, and takes down its L3 that's up)
+        // ⏹ OFF: takes the graphic on that layer down now (for a cScene: stops it, and takes down its graphic that's up)
         const takeOff = (layer) => {
             if (layer === 'seq') { stopSeq(true); flash('Taken off'); return; }
             if (!sendPayload({ mode: 'hide', layer })) return;
@@ -6162,7 +6283,7 @@
         // Tapping a rundown card (only once Set Show is on)
         const takeFromRundown = (data) => {
             if (!showLocked()) { flash('Turn on Set Show to run the rundown', true); return; }
-            if (data.mode === 'cl3') { // a cL3: its L3s one after another, with ⏭ NEXT and OFF on the card
+            if (data.mode === 'cl3') { // a cScene: its graphics one after another, with ⏭ NEXT and OFF on the card
                 if (!playSeq(data, data.sid)) return;
                 lastTakenSid = data.sid;
                 localStorage.setItem(LAST_PLAYED_KEY, data.sid);
@@ -6192,6 +6313,58 @@
             return blocks.includes(v) && blockItems(list, v, blocks).length ? v : 'ALL';
         };
         const setView = (v) => { localStorage.setItem(VIEW_KEY, v); renderShow(); };
+
+        // While Set Show is off, any section (a block, the Tease, Open, Close or Unsorted) collapses to just its
+        // header: tap its arrow or its name. ◎ on a header collapses all the others, to work on one. A card
+        // dragged onto a collapsed section's header goes to the end of it. Remembered on this computer (not
+        // in show files); while the show runs everything shows.
+        const COLLAPSED_KEY = 'fx_block_collapsed';
+        const loadCollapsed = () => { const c = readJson(COLLAPSED_KEY, []); return Array.isArray(c) ? c : []; };
+        const saveCollapsed = (keys) => { localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...new Set(keys)])); renderShow(); };
+        const rundownSections = () => [TEASE, OPEN, ...loadBlocks(), CLOSE, UNSORTED];
+        const sectionName = (key) => (key === UNSORTED ? 'Unsorted' : blockName(key));
+        const toggleCollapsed = (key) => {
+            const c = loadCollapsed();
+            saveCollapsed(c.includes(key) ? c.filter(k => k !== key) : [...c, key]);
+        };
+        const collapseOthers = (key) => {
+            saveCollapsed(rundownSections().filter(k => k !== key));
+            flash(`Only ${sectionName(key)} open`, false, '▾ Expand all opens the rest');
+        };
+        // The arrow (and the name) on a section's header, and ◎ (before ✕ on the last block)
+        const addFold = (section, head, key, locked) => {
+            if (locked) return;
+            const folded = loadCollapsed().includes(key), name = sectionName(key);
+            section.classList.toggle('collapsed', folded);
+            const fold = document.createElement('button');
+            fold.type = 'button';
+            fold.className = 'block-fold';
+            fold.innerHTML = icon('chevron');
+            fold.title = folded ? `Expand ${name}` : `Collapse ${name}`;
+            fold.setAttribute('aria-expanded', String(!folded));
+            fold.onclick = () => toggleCollapsed(key);
+            head.prepend(fold);
+            const title = fold.nextElementSibling;
+            title.classList.add('fold-title');
+            title.title = fold.title;
+            title.onclick = fold.onclick;
+            const solo = document.createElement('button');
+            solo.type = 'button';
+            solo.className = 'block-solo';
+            solo.innerHTML = icon('focus');
+            solo.title = `Only ${name}: collapse the others`;
+            solo.onclick = () => collapseOthers(key);
+            const del = head.querySelector('.block-remove');
+            if (del) del.before(solo); else head.append(solo);
+        };
+        // ▾ Expand all / ▴ Collapse all, above the rundown (while Set Show is off)
+        const updateFoldAll = (locked, list) => {
+            const anyFolded = loadCollapsed().some(k => rundownSections().includes(k));
+            $('fold-row').classList.toggle('hidden', locked || !list.length);
+            $('fold-all').textContent = anyFolded ? '▾ Expand all' : '▴ Collapse all';
+            $('fold-all').title = anyFolded ? 'Open every section of the rundown' : 'Collapse every section to its header';
+            $('fold-all').onclick = () => saveCollapsed(anyFolded ? [] : rundownSections());
+        };
 
         // The letters at the top.
         // Set Show on: ALL shows the whole rundown, a letter shows just that block; empty blocks are greyed out.
@@ -6228,7 +6401,9 @@
                 chip.title = `Add to block ${b}`;
                 chip.onclick = () => {
                     localStorage.setItem(ADD_BLOCK_KEY, b);
-                    renderBlockChips(loadBlocks(), false, loadShow());
+                    const folded = loadCollapsed();
+                    if (folded.includes(b)) saveCollapsed(folded.filter(k => k !== b)); // jumping to it opens it
+                    else renderBlockChips(loadBlocks(), false, loadShow());
                     document.querySelector(`.show-block[data-block="${b}"]`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
                 };
                 bar.append(chip);
@@ -6298,7 +6473,7 @@
                     const fire = document.createElement('button');
                     fire.type = 'button';
                     fire.className = 'take-fire';
-                    fire.title = `Fire: start ${data.text || 'the break'} (${clock(data.secs || 0)})`;
+                    fire.title = `Fire: start ${data.text || 'the break'} (${clock(data.secs || 0)})${data.obsName ? ` and switch OBS to ${data.obsName}` : ''}`;
                     pill.insertAdjacentHTML('beforeend', `<i class="take-go">${icon('zap')}</i>`);
                     fire.append(pill);
                     fire.onclick = (e) => { e.stopPropagation(); fireBreak(data); };
@@ -6382,6 +6557,7 @@
         // - Otherwise it's a break of the cue's own length: "In break" and its countdown here and on the
         //   projector. With AKTA on (Advanced), an AKTA break goes out with it and the return when it ends.
         // It ends by itself when its time is up, or early with End (or Reset Break, which also lets it fire again).
+        // Either way it takes its break scene as it fires (server.py switches OBS, like a TAKE).
         const CUE_BREAK_KEY = 'fx_cue_break'; // the cue break on now: { sid, label, secs, since, block, akta }
         const loadCueBreak = () => { const b = readJson(CUE_BREAK_KEY, null); return b && b.since && b.secs ? b : null; };
         const firedBreaks = () => showState().breaksFired || [];
@@ -6392,6 +6568,19 @@
             saveShowState(st);
         };
         const nextBreakCue = () => showFlow().find(d => d.cue === 'break' && !firedBreaks().includes(d.sid)) || null;
+        // The scene a Break cue just took: OBS going to it is this break, so it mustn't start another one
+        // (it may well be one of the break scenes). { scene, until }
+        let breakSceneTaken = null;
+        const takeBreakScene = async (d) => {
+            if (!d.obsName) return; // a Break cue from before they had a scene
+            breakSceneTaken = { scene: d.obsName, until: Date.now() + 10000 };
+            takeInFlight = true; // one switch at a time: a TAKE tapped meanwhile does nothing, as while a TAKE fires
+            const reply = await serverRequest({ mode: 'obsTake', scene: d.obsName }, 'obsTakeResult', 6000);
+            takeInFlight = false;
+            logEvent('fire', d, loadShow(), { scene: d.obsName, ok: !!reply?.ok, error: reply?.ok ? '' : reply?.error || 'no answer from the server' });
+            if (reply?.ok) setObsProgram(d.obsName);
+            else flash(`Couldn't take ${d.obsName}`, true, reply?.error || 'switching to the break scene needs server.py, running in OBS');
+        };
         const fireBreak = (d) => {
             if (!showLocked()) { flash('Turn on Set Show to run the rundown', true); return; }
             const on = loadCueBreak();
@@ -6403,6 +6592,7 @@
                     markBreakFired(d.sid);
                     setCurrent(d.sid);
                     startBreak(d.block);
+                    takeBreakScene(d);
                     renderShow();
                     return;
                 }
@@ -6413,7 +6603,8 @@
             setCurrent(d.sid);
             logEvent('break', null, undefined, { block: d.block, label: b.label, planned: b.secs });
             if (b.akta) aktaCue('break', b.secs, d.block);
-            flash(`${b.label}: ${clock(b.secs)}`, false, b.akta ? 'AKTA break sent' : 'in break');
+            takeBreakScene(d);
+            flash(`${b.label}: ${clock(b.secs)}`, false, `${d.obsName ? `on ${d.obsName} · ` : ''}${b.akta ? 'AKTA break sent' : 'in break'}`);
             renderShow();
         };
         // early: End (or Reset Break) before its time was up. late: it was up a while ago (the panel was closed),
@@ -6518,7 +6709,7 @@
             return row;
         };
 
-        // The Open, the Tease and the Close (sections with no letter). Each is hidden during the show while
+        // The Tease, the Open and the Close (sections with no letter). Each is hidden during the show while
         // it's empty. While Set Show is off, the empty Open and Close are just their header (drag things
         // onto it), and the Tease has an empty slot for each of its one-only items: tap the T1-TEASE one to
         // add the clip, drag a lower third onto the T-L3 one.
@@ -6553,6 +6744,7 @@
             listEl.append(empty);
             items.forEach(data => listEl.append(makeShowCard(data, itemCode(data, items), locked)));
             section.append(head, listEl);
+            addFold(section, head, kind, locked);
             if (kind !== TEASE) return section;
             if (!locked && !items.some(d => teaseSlot(d) === 'clip')) {
                 const slot = document.createElement('button');
@@ -6598,6 +6790,7 @@
             renderTimer();
             renderTotals(list);
             renderBlockChips(blocks, locked, list);
+            updateFoldAll(locked, list);
             box.innerHTML = '';
             const view = locked ? viewBlock(blocks, list) : 'ALL';
             const lengths = advanced ? loadBlockLengths() : {}; // block lengths are part of the show times
@@ -6606,7 +6799,7 @@
             blocks.forEach((block, bi) => {
                 const items = list.filter(d => d.block === block);
                 if (view !== 'ALL' && block !== view) return; // showing just one block
-                if (bi === 0) [OPEN, TEASE].forEach(kind => { const s = makeExtraSection(kind, list, locked); if (s) box.append(s); }); // they go with the first block
+                if (bi === 0) [TEASE, OPEN].forEach(kind => { const s = makeExtraSection(kind, list, locked); if (s) box.append(s); }); // they go with the first block
                 if (locked && !items.length && !lengths[block]) return; // empty blocks get out of the way during the show (unless they're timed)
                 const section = document.createElement('section');
                 section.className = 'show-block';
@@ -6673,6 +6866,7 @@
                 listEl.append(empty);
                 items.forEach(data => listEl.append(makeShowCard(data, itemCode(data, items), locked)));
                 section.append(head, listEl);
+                addFold(section, head, block, locked);
                 if (breaks[block]) section.append(makeBreakRow(breaks[block], locked ? tl?.events.find(e => e.kind === 'break' && e.block === block) : null, locked));
                 box.append(section);
             });
@@ -6708,6 +6902,7 @@
                 listEl.append(empty);
                 unsorted.forEach(data => listEl.append(makeShowCard(data, itemCode(data, unsorted), locked)));
                 section.append(head, listEl);
+                addFold(section, head, UNSORTED, locked);
                 box.append(section);
             }
             if (locked && !list.some(d => d.block !== UNSORTED)) {
@@ -6763,6 +6958,9 @@
                 // The Tease only takes notes, scripts and one clip: anything else goes back where it was
                 const problem = teaseProblem(order);
                 if (problem) { flash(problem, true); renderShow(); return; }
+                // Dropped on a collapsed section: it's out of sight now, so say where it went
+                const into = card.closest('.show-block');
+                if (into?.classList.contains('collapsed')) flash(`Moved to ${sectionName(into.dataset.block)}`, false, 'at the end');
                 saveShow(order);
             };
             window.addEventListener('pointermove', move);
@@ -6780,11 +6978,11 @@
         const fillBlockSelect = (value, item = null) => {
             const sel = $('edit-block');
             sel.innerHTML = '';
-            sel.append(new Option('Open', OPEN));
             if (item && teaseFits(item) && !teaseTaken(loadShow(), item)) {
                 const slot = teaseSlot(item);
                 sel.append(new Option(slot ? `Tease (${TEASE_SLOT_CODES[slot]})` : 'Tease', TEASE));
             }
+            sel.append(new Option('Open', OPEN));
             loadBlocks().forEach(b => sel.append(new Option(`Block ${b}`, b)));
             sel.append(new Option('Close', CLOSE));
             sel.append(new Option('Unsorted', UNSORTED));
@@ -6855,9 +7053,12 @@
             if (want && !(names || []).includes(want)) sel.append(new Option(names ? `${want} (not in OBS now)` : want, want));
             sel.value = want;
         };
-        const openScenePick = (item) => {
-            const kind = item?.obsKind === 'source' ? 'source' : 'scene';
+        // forBreak: a Break cue's break scene (scenes only, no Sources)
+        const openScenePick = (item, forBreak = false) => {
+            const kind = !forBreak && item?.obsKind === 'source' ? 'source' : 'scene';
             scenePick = { kind, names: { scene: '', source: '', [kind]: item?.obsName || '' } };
+            $('edit-scene-wrap').classList.toggle('scene-only', forBreak);
+            $('edit-scene-label').textContent = forBreak ? 'Break scene:' : 'Take:';
             renderScenePick();
             loadObsNames();
         };
@@ -6872,8 +7073,9 @@
             scriptFields(type === 'script');
             $('edit-socials-wrap').innerHTML = '';
             $('edit-socials-wrap').classList.add('hidden');
-            showEditFields({ para: true, scene: type === 'scene', brk: type === 'break' });
+            showEditFields({ para: true, scene: type === 'scene' || type === 'break', brk: type === 'break' });
             if (type === 'scene') openScenePick(null);
+            if (type === 'break') openScenePick({ obsName: loadBreakScenes()[0] || '' }, true); // starts on the first break scene (the gear)
             $('edit-break-len').value = '2:00';
             $('edit-para-label').textContent = CUES[type].hint;
             $('edit-para').value = '';
@@ -6893,8 +7095,8 @@
             $('edit-socials-wrap').classList.add('hidden');
             scriptFields(item.cue === 'script');
             if (item.cue) {
-                showEditFields({ para: true, scene: item.cue === 'scene', brk: item.cue === 'break' });
-                if (item.cue === 'scene') openScenePick(item);
+                showEditFields({ para: true, scene: item.cue === 'scene' || item.cue === 'break', brk: item.cue === 'break' });
+                if (item.cue === 'scene' || item.cue === 'break') openScenePick(item, item.cue === 'break');
                 $('edit-break-len').value = clock(item.secs || 120);
                 $('edit-para-label').textContent = (CUES[item.cue] || CUES.note).hint;
                 $('edit-para').value = item.text || '';
@@ -6903,7 +7105,7 @@
                 $('edit-dialog').showModal();
                 return;
             }
-            if (item.mode === 'cl3') { // a cL3: its name (its L3s are changed on the L3 Builder tab)
+            if (item.mode === 'cl3') { // a cScene: its name (its graphics are changed on the Scene Builder tab)
                 showEditFields({ name: true });
                 $('edit-title-wrap').classList.add('hidden');
                 $('edit-name').value = item.label || '';
@@ -6934,25 +7136,27 @@
             $('edit-dialog').returnValue = '';
             $('edit-dialog').showModal();
         };
+        // Returns false when something's missing: the dialog stays open (with what was typed) to fix it
         const finishEdit = (button) => {
             const saving = button === 'save';
             let list = loadShow();
             // A new cue
             if (newCue) {
                 const type = newCue;
-                newCue = null;
-                if (!saving) return;
+                if (!saving) { newCue = null; return; }
                 const text = $('edit-para').value.trim();
-                if (type === 'note' && !text) { flash('Type the note first', true); return; }
-                if (type === 'script' && !text) { flash('Type or load the script first', true); return; }
+                if (type === 'note' && !text) { flash('Type the note first', true); return false; }
+                if (type === 'script' && !text) { flash('Type or load the script first', true); return false; }
                 const obsName = scenePick.names[scenePick.kind].trim();
-                if (type === 'scene' && !obsName) { flash(`Pick the ${scenePick.kind} to take first`, true); return; }
+                if (type === 'scene' && !obsName) { flash(`Pick the ${scenePick.kind} to take first`, true); return false; }
                 const secs = parseClock($('edit-break-len').value);
-                if (type === 'break' && !secs) { flash('Set the break\'s length, like 2:00', true); return; }
+                if (type === 'break' && !secs) { flash('Set the break\'s length, like 2:00', true); return false; }
+                if (type === 'break' && !obsName) { flash('Pick the break scene first', true, 'OBS switches to it when the break fires'); return false; }
+                newCue = null;
                 const item = {
                     cue: type, ...(text && { text }),
                     ...(type === 'scene' && { obsName, ...(scenePick.kind === 'source' && { obsKind: 'source' }) }),
-                    ...(type === 'break' && { secs }),
+                    ...(type === 'break' && { secs, obsName }),
                     block: $('edit-block').value, sid: newSid(),
                 };
                 list.push(item);
@@ -6968,13 +7172,14 @@
                 const text = $('edit-para').value.trim();
                 if (text) item.text = text;
                 else if (item.cue !== 'note' && item.cue !== 'script') delete item.text; // a note or script keeps its text
-                // A scene keeps the one it had if nothing's picked
+                // A scene (or a break's scene) keeps the one it had if nothing's picked
                 const obsName = scenePick.names[scenePick.kind].trim();
-                if (item.cue === 'scene' && obsName) {
+                if ((item.cue === 'scene' || item.cue === 'break') && obsName) {
                     item.obsName = obsName;
                     if (scenePick.kind === 'source') item.obsKind = 'source';
                     else delete item.obsKind;
                 }
+                if (item.cue === 'break' && !item.obsName) { flash('Pick the break scene', true, 'OBS switches to it when the break fires'); return false; }
                 const secs = parseClock($('edit-break-len').value);
                 if (item.cue === 'break' && secs) item.secs = secs; // a break keeps its length if this isn't one
             } else if (item.mode === 'cl3') {
@@ -7003,7 +7208,7 @@
                 list = [...list.filter(d => d !== item), item];
             }
             const problem = teaseProblem(list);
-            if (problem) { flash(problem, true); return; }
+            if (problem) { flash(problem, true); return false; }
             saveShow(list);
             flash('Updated for this rundown');
         };
@@ -7159,17 +7364,18 @@
 
 
         /* =========================================================
-           15b. CONTROLLER: L3 BUILDER (cL3s, complex L3s)
-           Up to 5 saved lower thirds (animated L3s or Fullscreen L3s) in slots, played one after another:
-           each goes up once the one before has had its time and its exit animation. Tap a slot to pick it,
-           then a saved L3 to put it there (or just tap saved L3s and they fill the slots in order). Save it
-           as a cL3: it's kept with the saved graphics, listed here, and can go in the rundown, where it
-           works like an L3 for its total time, with ⏭ NEXT on its card to skip ahead while it plays.
+           15b. CONTROLLER: SCENE BUILDER (cScenes, complex scenes)
+           Up to 8 saved graphics (animated L3s, and anything from the Fullscreen Overlays tab: Fullscreen L3s,
+           overlays, stingers, Content) in slots, played one after another: each goes up once the one before
+           has had its time and its exit animation. Tap a slot to pick it, then a saved graphic to put it there
+           (or just tap saved graphics and they fill the slots in order). Save it as a cScene: it's kept with
+           the saved graphics, listed here, and can go in the rundown (CS), where it plays for its total time,
+           with ⏭ NEXT on its card to skip ahead while it plays. (Kept as mode 'cl3': see cl3Steps.)
            ========================================================= */
-        const BUILDER_KEY = 'fx_builder'; // the slots being built: { name, steps: [5 graphics or null], editing: the saved cL3 being changed }
-        const SLOTS = 5;
-        let builderTarget = null; // the slot the next saved L3 goes in (to start with, the first empty one)
-        let builderQuery = '';  // the search over the saved L3s
+        const BUILDER_KEY = 'fx_builder'; // the slots being built: { name, steps: [8 graphics or null], editing: the saved cScene being changed }
+        const SLOTS = 8;
+        let builderTarget = null; // the slot the next saved graphic goes in (to start with, the first empty one)
+        let builderQuery = '';  // the search over the saved graphics
         const loadBuilder = () => {
             const b = readJson(BUILDER_KEY, {});
             return {
@@ -7179,15 +7385,22 @@
             };
         };
         const saveBuilder = (b) => { localStorage.setItem(BUILDER_KEY, JSON.stringify(b)); renderBuilder(); };
-        // The saved graphics that can go in a slot: lower thirds, animated or fullscreen
-        const builderPicks = () => loadButtonsFromStorage().filter(d => d.mode !== 'cl3' && itemType(d) === 'L3');
+        // The saved graphics that can go in a slot: everything saved except other cScenes
+        const builderPicks = () => loadButtonsFromStorage().filter(d => d.mode !== 'cl3');
         // A saved graphic as a step: a copy, with an imported (toggle) L3 given a time like the others
         const asStep = (d) => {
             const { id, sid, block, ...copy } = d;
             if (holdsOn(copy)) Object.assign(copy, { toggle: false, duration: OVERLAYS[copy.overlay || 'l3Large']?.dur || 8 });
             return copy;
         };
-        const stepName = (d) => d.label || OVERLAYS[d.overlay]?.label || 'L3';
+        const stepName = (d) => d.label || OVERLAYS[isOverlayItem(d) ? d.overlay || 'l3Large' : '']?.label || 'Graphic';
+        // What a step is, under its name: "L3 | blue", "Fullscreen L3 | L3 PNG", "Overlay | Snow", "Stinger | Storm"
+        const stepKind = (d) => {
+            if (!isOverlayItem(d)) return `L3 | ${d.bgStyle || ''}`;
+            const cfg = OVERLAYS[d.overlay || 'l3Large'];
+            const kind = cfg?.length !== undefined ? 'Stinger' : itemType(d) === 'L3' ? 'Fullscreen L3' : 'Overlay';
+            return `${kind} | ${cfg?.label || d.overlay}${d.content ? `: ${d.content}` : ''}`;
+        };
         const pickedSlot = (b) => {
             if (builderTarget === null) { const empty = b.steps.findIndex(x => !x); builderTarget = empty >= 0 ? empty : 0; }
             return builderTarget;
@@ -7203,26 +7416,26 @@
         };
         const builderCl3 = () => {
             const b = loadBuilder(), steps = b.steps.filter(Boolean);
-            const name = b.name.trim() || steps.map(stepName).slice(0, 2).join(' + ') || 'cL3';
+            const name = b.name.trim() || steps.map(stepName).slice(0, 2).join(' + ') || 'cScene';
             return { mode: 'cl3', label: name, steps };
         };
-        // 💾 Saves the slots as a cL3 (changing the one loaded with ✎, if it's still saved)
+        // 💾 Saves the slots as a cScene (changing the one loaded with ✎, if it's still saved)
         const saveCl3 = () => {
             const b = loadBuilder(), item = builderCl3();
-            if (!item.steps.length) { flash('Put at least one L3 in the slots', true); return; }
+            if (!item.steps.length) { flash('Put at least one graphic in the slots', true); return; }
             const all = loadButtonsFromStorage(), i = b.editing ? all.findIndex(x => x.id === b.editing) : -1;
             item.id = i >= 0 ? all[i].id : Date.now();
             if (i >= 0) all[i] = item; else all.unshift(item);
             localStorage.setItem(BUILDER_KEY, JSON.stringify({ ...b, name: item.label, editing: item.id }));
             saveButtonsToStorage(all);
-            flash(i >= 0 ? 'cL3 updated' : 'cL3 saved', false, item.label);
+            flash(i >= 0 ? 'cScene updated' : 'cScene saved', false, item.label);
         };
-        // ✎ on a saved cL3: its L3s go back in the slots, to change it
+        // ✎ on a saved cScene: its graphics go back in the slots, to change it
         const editCl3 = (d) => {
             const steps = cl3Steps(d);
             builderTarget = Math.min(steps.length, SLOTS - 1);
             saveBuilder({ name: d.label || '', steps: Array.from({ length: SLOTS }, (_, i) => steps[i] || null), editing: d.id });
-            flash(`Editing: ${d.label}`, false, 'SAVE cL3 keeps the changes');
+            flash(`Editing: ${d.label}`, false, 'UPDATE keeps the changes');
         };
         const clearBuilder = () => {
             builderTarget = 0;
@@ -7267,7 +7480,7 @@
             b.steps.forEach((st, i) => {
                 const row = document.createElement('div');
                 row.className = `builder-slot${i === builderTarget ? ' target' : ''}${st ? '' : ' empty'}`;
-                row.title = 'Tap to put the next saved L3 here';
+                row.title = 'Tap to put the next saved graphic here';
                 row.onclick = () => { builderTarget = i; renderBuilder(); };
                 const num = document.createElement('span');
                 num.className = 'slot-num';
@@ -7278,26 +7491,26 @@
                 if (st) {
                     text.innerHTML = '<b></b><small></small>';
                     text.firstChild.textContent = stepName(st);
-                    text.lastChild.textContent = isOverlayItem(st) ? OVERLAYS[st.overlay || 'l3Large']?.label || 'Fullscreen L3' : `L3 | ${st.bgStyle || ''}`;
+                    text.lastChild.textContent = stepKind(st);
                     const time = document.createElement('button');
                     time.type = 'button';
                     time.className = 'slot-time';
                     time.textContent = formatTime(graphicSeconds(st));
-                    time.title = 'How long it stays up (tap to change, for this cL3)';
+                    time.title = 'How long it stays up (tap to change, for this cScene)';
                     time.onclick = (e) => { e.stopPropagation(); setStepTime(i); };
                     row.append(time,
                         button('prev', 'Move it up', () => moveStep(i, -1), 'up'),
                         button('next', 'Move it down', () => moveStep(i, 1), 'down'),
                         button('x', 'Take it out', () => { const nb = loadBuilder(); nb.steps[i] = null; builderTarget = i; saveBuilder(nb); }, 'del'));
                 } else {
-                    text.textContent = i === builderTarget ? 'Tap a saved L3 below to put it here' : 'Empty';
+                    text.textContent = i === builderTarget ? 'Tap a saved graphic below to put it here' : 'Empty';
                 }
                 box.append(row);
             });
             const steps = b.steps.filter(Boolean);
-            $('builder-total').textContent = steps.length ? `${steps.length} L3${steps.length > 1 ? 's' : ''} · ${clock(cl3Seconds({ steps }))}` : '';
-            $('builder-save').innerHTML = `${icon('save')} ${b.editing && loadButtonsFromStorage().some(x => x.id === b.editing) ? 'UPDATE cL3' : 'SAVE cL3'}`;
-            // The saved cL3s: tap to play, ✎ to change, ＋ for the rundown, ✕ to delete
+            $('builder-total').textContent = steps.length ? `${steps.length} of ${SLOTS} · ${clock(cl3Seconds({ steps }))}` : '';
+            $('builder-save').innerHTML = `${icon('save')} ${b.editing && loadButtonsFromStorage().some(x => x.id === b.editing) ? 'UPDATE' : 'SAVE'}`;
+            // The saved cScenes: tap to play, ✎ to change, ＋ for the rundown, ✕ to delete
             const saved = $('builder-saved');
             saved.innerHTML = '';
             const cl3s = loadButtonsFromStorage().filter(d => d.mode === 'cl3');
@@ -7318,7 +7531,7 @@
                 card.classList.add('cl3-card');
                 saved.append(card);
             });
-            // The saved L3s to pick from
+            // The saved graphics to pick from
             const picks = $('builder-picks');
             picks.innerHTML = '';
             let list = builderPicks();
@@ -7326,7 +7539,7 @@
             if (!list.length) {
                 const empty = document.createElement('p');
                 empty.className = 'col-span-2 text-center text-gray-400 text-sm';
-                empty.textContent = builderQuery ? 'No matches' : 'Save some L3s first (on the Animated L3s or Fullscreen Overlays tab)';
+                empty.textContent = builderQuery ? 'No matches' : 'Save some graphics first (on the Animated L3s or Fullscreen Overlays tab)';
                 picks.append(empty);
             }
             list.forEach(d => {
@@ -7338,15 +7551,15 @@
             renderSeqNow();
         };
 
-        // ---------- Playing a cL3 ----------
-        let seq = null; // the cL3 playing: { d, sid (its rundown card, if it's from the rundown), steps, i, layer, timer }
+        // ---------- Playing a cScene ----------
+        let seq = null; // the cScene playing: { d, sid (its rundown card, if it's from the rundown), steps, i, layer, timer }
         const seqLeft = (from) => { // seconds from the start of step "from" to the end
             const rest = seq.steps.slice(from);
             return rest.reduce((sum, x) => sum + graphicSeconds(x), 0) + SEQ_GAP * Math.max(0, rest.length - 1);
         };
         const playSeq = (d, sid = null) => {
             const steps = cl3Steps(d);
-            if (!steps.length) { flash('That cL3 is empty', true); return false; }
+            if (!steps.length) { flash('That cScene is empty', true); return false; }
             if (!ws || ws.readyState !== WebSocket.OPEN) { flash('Not connected', true); return false; }
             stopSeq(false);
             // It takes over both layers: anything toggled or up from the rundown there makes way
@@ -7370,24 +7583,24 @@
             const secs = graphicSeconds(st);
             seq.timer = setTimeout(() => seqStep(i + 1), (secs + SEQ_GAP) * 1000);
             if (seq.sid) liveEnds.seq = Date.now() + seqLeft(i) * 1000;
-            flash(`${seq.d.label || 'cL3'} ${i + 1}/${seq.steps.length}: ${stepName(st)}`, false, `for ${formatTime(secs)}`);
+            flash(`${seq.d.label || 'cScene'} ${i + 1}/${seq.steps.length}: ${stepName(st)}`, false, `for ${formatTime(secs)}`);
             startTakeCountdown(`${i + 1}/${seq.steps.length} ${stepName(st)}`, secs);
             renderSeqNow();
             updateLiveMarks();
         };
-        // ⏭ NEXT: the L3 that's up goes off (with its exit animation), then the next one goes up
+        // ⏭ NEXT: the graphic that's up goes off (with its exit animation), then the next one goes up
         const nextSeq = () => {
             if (!seq) return;
             clearTimeout(seq.timer);
             stopTakeCountdown();
             sendPayload({ mode: 'hide', layer: seq.layer });
             const next = seq.i + 1;
-            if (next >= seq.steps.length) { stopSeq(false); flash('cL3 done'); return; }
+            if (next >= seq.steps.length) { stopSeq(false); flash('cScene done'); return; }
             seq.timer = setTimeout(() => seqStep(next), SEQ_GAP * 1000);
             if (seq.sid) liveEnds.seq = Date.now() + (SEQ_GAP + seqLeft(next)) * 1000;
             updateLiveMarks();
         };
-        // The end: hide = true takes down the L3 that's up (⏹ stop / OFF); false when the last one went off by itself
+        // The end: hide = true takes down the graphic that's up (⏹ stop / OFF); false when the last one went off by itself
         const stopSeq = (hide = true) => {
             if (!seq) return;
             clearTimeout(seq.timer);
@@ -7397,11 +7610,11 @@
             if (sid) clearLive('seq');
             renderSeqNow();
         };
-        // On the L3 Builder tab: what's playing, with ⏭ Next and ⏹ Stop
+        // On the Scene Builder tab: what's playing, with ⏭ Next and ⏹ Stop
         const renderSeqNow = () => {
             const bar = $('seq-now');
             bar.classList.toggle('hidden', !seq);
-            if (seq) $('seq-now-text').textContent = `${seq.d.label || 'cL3'} · ${seq.i + 1}/${seq.steps.length}: ${seq.steps[seq.i] ? stepName(seq.steps[seq.i]) : ''}`;
+            if (seq) $('seq-now-text').textContent = `${seq.d.label || 'cScene'} · ${seq.i + 1}/${seq.steps.length}: ${seq.steps[seq.i] ? stepName(seq.steps[seq.i]) : ''}`;
         };
 
 
@@ -7415,6 +7628,8 @@
            picks one by hand (for an older server that can't list the
            folder). The pick is remembered; until there is one, or if it's
            taken out of the folder, the first image by name is used.
+           Content… and Content Full… (the Content overlays) work the same
+           way, with the pictures and videos in the "content" folder.
            ========================================================= */
         const CUSTOM_KEY = 'fx_custom_file';
         const IMAGE_FILE = /\.(png|jpe?g|gif)$/i;
@@ -7505,6 +7720,121 @@
                 if (confirm(`"${name}" wasn't found in the "${CUSTOM_FOLDER}" folder next to "assets". The display can only show it from there.\n\nUse it anyway?`)) accept();
             };
             img.src = customPath(name);
+        };
+
+        // ---------- Content… and Content Full… ----------
+        // The same for the "content" folder: tapping Content… (the TV) or Content Full… opens a window of its
+        // pictures (PNG, JPG, GIF, WebP) and videos (MP4, WebM), each with a preview; tap one to show it. The
+        // pick is shared and remembered, and each saved Content overlay (and rundown card) keeps the file it was
+        // saved with. A video's length is read here, so its Duration covers all of it.
+        const CONTENT_KEY = 'fx_content_file';
+        const CONTENT_FILE = /\.(png|jpe?g|gif|webp|mp4|webm)$/i;
+        let contentFile = localStorage.getItem(CONTENT_KEY) || '';
+        const contentLengths = {}; // video lengths in seconds, by file (once read)
+
+        const showContentName = () => {
+            const length = contentLengths[contentFile];
+            $('content-name').textContent = !contentFile ? `Nothing picked from the ${CONTENT_FOLDER} folder`
+                : `${CONTENT_FOLDER}/${contentFile}${length ? ` · video ${clock(Math.ceil(length))}, plays to the end` : ''}`;
+            updateSummaries();
+        };
+        // Reads a video's length (from its file, next to this panel), then fills in the Duration if a Content
+        // overlay is picked. A panel that can't reach the file keeps the usual 15 seconds.
+        const readContentLength = (name) => {
+            const done = () => {
+                if (name !== contentFile) return;
+                showContentName();
+                if (checked('mode') === 'overlay' && OVERLAYS[checked('overlayStyle')]?.content) fillDuration();
+            };
+            if (!VIDEO_FILE.test(name) || contentLengths[name]) { done(); return; }
+            const probe = document.createElement('video');
+            probe.preload = 'metadata';
+            probe.muted = true;
+            probe.onloadedmetadata = () => {
+                if (Number.isFinite(probe.duration) && probe.duration > 0) contentLengths[name] = probe.duration;
+                probe.removeAttribute('src');
+                probe.load(); // lets go of the file
+                done();
+            };
+            probe.src = contentPath(name);
+        };
+        const setContentFile = (name) => {
+            contentFile = name;
+            localStorage.setItem(CONTENT_KEY, name);
+            showContentName();
+            readContentLength(name);
+        };
+        // Asks the server what's in the content folder: for the window, and the red ! on cards whose file is gone
+        const askContentList = async () => {
+            const reply = await serverRequest({ mode: 'contentList' }, 'contentFiles');
+            if (reply) {
+                const files = (reply.files || []).filter(f => typeof f === 'string' && CONTENT_FILE.test(f));
+                const changed = JSON.stringify(files) !== JSON.stringify(contentFolderFiles);
+                contentFolderFiles = files;
+                if (changed && checked('mode') === 'show') renderShow();
+                else if (changed) renderButtons(loadButtonsFromStorage());
+            }
+            if (!$('content-dialog').open) return;
+            $('content-note').textContent = !reply ? 'The server can\'t list the content folder (not connected, or an older server). Use Choose a file… and pick it from the content folder.'
+                : contentFolderFiles.length ? 'Tap the picture or video to show (a video plays to the end).'
+                : `Nothing in the "${CONTENT_FOLDER}" folder yet. Put pictures (PNG, JPG, GIF, WebP) or videos (MP4, WebM) there (next to "assets"), then open this again.`;
+            renderContentList();
+        };
+        const pickContent = () => {
+            $('content-note').textContent = 'Looking in the content folder…';
+            renderContentList();
+            if (!$('content-dialog').open) $('content-dialog').showModal();
+            askContentList();
+        };
+        // The window's list: a preview (a video's first moments) and the name of each file; the one in use is marked
+        const renderContentList = () => {
+            const box = $('content-list');
+            box.innerHTML = '';
+            (contentFolderFiles || []).forEach(name => {
+                const video = VIDEO_FILE.test(name);
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `custom-pick${name.toLowerCase() === contentFile.toLowerCase() ? ' on' : ''}`;
+                btn.title = `Show ${name}`;
+                const preview = document.createElement(video ? 'video' : 'img');
+                const label = document.createElement('span');
+                label.textContent = `${video ? '▶ ' : ''}${name}`;
+                if (video) {
+                    preview.muted = true;
+                    preview.preload = 'metadata';
+                    preview.onloadedmetadata = () => { // its length, after the name
+                        if (!Number.isFinite(preview.duration) || preview.duration <= 0) return;
+                        contentLengths[name] = preview.duration;
+                        label.textContent = `▶ ${name} · ${clock(Math.ceil(preview.duration))}`;
+                    };
+                    preview.src = `${contentPath(name)}#t=0.5`;
+                } else {
+                    preview.alt = '';
+                    preview.loading = 'lazy';
+                    preview.src = contentPath(name);
+                }
+                preview.onerror = () => preview.remove(); // a panel on another computer can't show the preview
+                btn.append(preview, label);
+                btn.onclick = () => {
+                    setContentFile(name);
+                    flash('Content', false, name);
+                    $('content-dialog').close();
+                };
+                box.append(btn);
+            });
+        };
+        // Choose a file…: checks the file really is in the content folder
+        const useContentFile = (name) => {
+            if (!CONTENT_FILE.test(name)) { flash('Content must be a picture (PNG, JPG, GIF, WebP) or a video (MP4, WebM)', true, name); return; }
+            const accept = () => { setContentFile(name); flash('Content', false, name); if ($('content-dialog').open) $('content-dialog').close(); };
+            const video = VIDEO_FILE.test(name), probe = document.createElement(video ? 'video' : 'img');
+            probe[video ? 'onloadedmetadata' : 'onload'] = accept;
+            probe.onerror = () => {
+                // It can't be checked if this panel is on another device, so allow it after a warning
+                if (confirm(`"${name}" wasn't found in the "${CONTENT_FOLDER}" folder next to "assets". The display can only show it from there.\n\nUse it anyway?`)) accept();
+            };
+            if (video) probe.preload = 'metadata';
+            probe.src = contentPath(name);
         };
 
 
@@ -7660,8 +7990,8 @@
             return parts.length === 1 ? parts[0] * 60 : parts.reduce((total, n) => total * 60 + n, 0);
         };
 
-        // The rundown in show order: the Open, the Tease, every block, then the Close, without notes or Unsorted
-        const showFlow = (list = loadShow(), blocks = loadBlocks()) => [OPEN, TEASE, ...blocks, CLOSE].flatMap(b => list.filter(d => d.block === b && d.cue !== 'note'));
+        // The rundown in show order: the Tease, the Open, every block, then the Close, without notes or Unsorted
+        const showFlow = (list = loadShow(), blocks = loadBlocks()) => [TEASE, OPEN, ...blocks, CLOSE].flatMap(b => list.filter(d => d.block === b && d.cue !== 'note'));
         // An item's name, as the rundown and projector show it
         const itemLabel = (d) => (d.cue ? (d.cue === 'script' ? scriptTitle(d)
                 : d.cue === 'scene' ? `TAKE ${d.obsName || 'Scene'}${d.text ? ` (${d.text})` : ''}`
@@ -7911,10 +8241,10 @@
                     sid: d.sid, block: d.block, code: itemCode(d, list), type: itemType(d), kind: d.cue || 'graphic',
                     label: itemLabel(d), ...(d.cue === 'script' && { script: d.text || '' }),
                     ...(d.cue === 'scene' && { obsName: d.obsName || '', note: d.text || '' }),
-                    ...(d.cue === 'break' && { secs: d.secs || 0, note: d.text || '' }),
+                    ...(d.cue === 'break' && { secs: d.secs || 0, note: d.text || '', obsName: d.obsName || '' }),
                 })),
                 blocks: [
-                    ...[OPEN, TEASE].filter(k => flow.some(d => d.block === k)).map(name => ({ name, planned: 0 })),
+                    ...[TEASE, OPEN].filter(k => flow.some(d => d.block === k)).map(name => ({ name, planned: 0 })),
                     ...blocks.filter(b => lengths[b] || flow.some(d => d.block === b)).map(b => ({
                         name: b, planned: lengths[b] || 0, ...(breaks[b] && { brk: { label: breaks[b].label, secs: breaks[b].secs } }),
                     })),
@@ -8343,11 +8673,15 @@
                 else flash('No break to reset', true);
             }
         };
-        // OBS went to a scene: if it's a break scene, the next break starts. With AKTA on, its delay (from when
-        // the transition starts) or waiting for the transition to end holds it back, to line the cue up with a stinger.
+        // OBS went to a scene: if it's a break scene, the next break starts (unless a Break cue's break is on, or
+        // a Break cue just took it). With AKTA on, its delay (from when the transition starts) or waiting for the
+        // transition to end holds it back, to line the cue up with a stinger.
         const obsSceneChanged = (scene) => {
             setObsProgram(scene); // the TAKE tally
+            // A Break cue just took this scene: that break is already on
+            if (breakSceneTaken?.scene === scene && Date.now() < breakSceneTaken.until) { breakSceneTaken = null; return; }
             if (!showLocked() || !advancedMode() || typeof scene !== 'string' || !loadBreakScenes().includes(scene)) return; // no show running, or Simple
+            if (loadCueBreak()) return; // a break from a Break cue is on
             const now = Date.now(), tl = buildTimeline(now), nb = nextBreak(tl);
             if (!nb || pendingBreak || activeEvent(tl, now)?.ev.kind === 'break') return; // nothing to start, or a break is on
             const akta = aktaOn() ? aktaSettings : null;
@@ -8777,7 +9111,7 @@
             row.innerHTML = '<span class="pj-tag"></span><span class="pj-code"></span><span class="pj-icon"></span><span class="pj-text"></span>';
             row.querySelector('.pj-tag').textContent = tag || '';
             row.querySelector('.pj-code').textContent = it.code;
-            row.querySelector('.pj-icon').innerHTML = icon(CUES[it.kind]?.icon || (it.type === 'CL3' ? 'stack' : it.type === 'L3' ? 'l3' : 'layers'));
+            row.querySelector('.pj-icon').innerHTML = icon(CUES[it.kind]?.icon || (it.type === 'CS' ? 'stack' : it.type === 'L3' ? 'l3' : 'layers'));
             pjName(row.querySelector('.pj-text'), it);
             return row;
         };
@@ -9085,11 +9419,12 @@
            23. CONTROLLER: SHOWS
            A show is everything this panel is set to, saved as one file in the "shows" folder (through the
            server) under a number from 001 to 999 and a title: "001 - Morning Show.json". That's every fx_
-           setting kept in this browser: the saved graphics, the rundown and its times, the L3 Builder,
+           setting kept in this browser: the saved graphics, the rundown and its times, the Scene Builder,
            Simple mode and its theme, the picks on each tab, light or dark, the timer, the projector on or
            off, the Sound Pad volume... so opening it on another computer makes the panel look the same.
-           Left out: AKTA (each computer keeps its own, and the keys live with the server), and what's going
-           on in a show right now (Set Show, what's on, the log, started breaks), which start fresh.
+           Left out: AKTA (each computer keeps its own, and the keys live with the server), which rundown
+           sections are collapsed, and what's going on in a show right now (Set Show, what's on, the log,
+           started breaks), which start fresh.
            The show stays open until another one is opened. The chip in the top bar names it, with a dot
            when something has changed since it was saved, and opening another show asks first whether to
            save those changes. Number 999 is restricted to engineering, so picking it asks first.
@@ -9098,7 +9433,7 @@
         const ENGINEERING_SHOW = '999';
         const SHOW_OPENED_KEY = 'fx_show_opened'; // (sessionStorage) the message to show once the panel reloads with a new show
         const SHOW_SKIP = new Set([SHOW_FILE_KEY, AKTA_ON_KEY, SHOW_LOCK_KEY, LAST_PLAYED_KEY, VIEW_KEY, SHOW_STATE_KEY, SHOW_LOG_KEY,
-            TIMING_LIVE_KEY, CUE_BREAK_KEY, PROJECTOR_CLEAR_KEY, 'fx_custom_bg']);
+            TIMING_LIVE_KEY, CUE_BREAK_KEY, PROJECTOR_CLEAR_KEY, COLLAPSED_KEY, 'fx_custom_bg']);
         const inShowFile = (key) => (key === STORAGE_KEY || key.startsWith('fx_')) && !SHOW_SKIP.has(key);
         // What goes in a show file: each setting as it's kept in this browser (text). The timer keeps its
         // mode and length, not a run in progress.
@@ -9603,6 +9938,13 @@
                     if (e.target.files.length) useCustomFile(e.target.files[0].name);
                     e.target.value = '';
                 });
+                // Content…: the same, for the Content overlay's picture or video
+                $('ov-content').addEventListener('click', pickContent);
+                $('ov-contentFull').addEventListener('click', pickContent);
+                $('content-file').addEventListener('change', (e) => {
+                    if (e.target.files.length) useContentFile(e.target.files[0].name);
+                    e.target.value = '';
+                });
                 // Like & Subscribe socials
                 renderSocialField();
                 // Sound Pad
@@ -9614,7 +9956,7 @@
                 });
                 // Saved list search
                 $('saved-search').addEventListener('input', (e) => { savedQuery = e.target.value.trim().toLowerCase(); renderButtons(loadButtonsFromStorage()); });
-                // L3 Builder: its name (kept as it's typed) and the search over the saved L3s
+                // Scene Builder: its name (kept as it's typed) and the search over the saved graphics
                 $('builder-name').addEventListener('input', (e) => localStorage.setItem(BUILDER_KEY, JSON.stringify({ ...loadBuilder(), name: e.target.value })));
                 $('builder-search').addEventListener('input', (e) => { builderQuery = e.target.value.trim().toLowerCase(); renderBuilder(); });
                 $('saved-search').addEventListener('keydown', (e) => { if (e.key === 'Escape') toggleSavedSearch(false); });
@@ -9656,7 +9998,9 @@
                     if (e.target.checked && unsorted) flash(`${unsorted} unsorted item${unsorted === 1 ? ' isn\'t' : 's aren\'t'} in the show`, true, 'turn off Set Show to drag them into a block');
                 });
                 // Saves the moment Save is pressed (not when the dialog's close event arrives later)
-                $('edit-dialog').querySelector('form').addEventListener('submit', (e) => finishEdit(e.submitter?.value || 'save'));
+                $('edit-dialog').querySelector('form').addEventListener('submit', (e) => {
+                    if (finishEdit(e.submitter?.value || 'save') === false) e.preventDefault(); // something's missing: stays open to fix it
+                });
                 // Show timing: its dialogs, a Show Timer schedule, the AKTA switch, and the clock (always running)
                 $('timing-dialog').querySelector('form').addEventListener('submit', (e) => {
                     if ((e.submitter?.value || 'save') === 'save' && !saveTimingDialog()) e.preventDefault(); // stays open to fix it
@@ -9682,7 +10026,9 @@
                 $('timer-from').addEventListener('keydown', (e) => { if (e.key === 'Enter') e.target.blur(); });
                 initSections();
                 showCustomNames();
+                showContentName();
                 updateMode();
+                if (contentFile) readContentLength(contentFile); // a video picked last time: its length, for the Duration
                 renderSimple();
                 finishShowOpen();
             }

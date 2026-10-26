@@ -23,6 +23,7 @@ clients = set()
 
 # The folders next to this script:
 #   custom    the control panel asks what images are in it
+#   content   pictures and videos for the Content overlay (the TV); the control panel asks what's in it
 #   rundowns  saved Podcast Rundowns (one .json file each), saved and opened from the control panel
 #   logs      show logs (one .csv file each), from Generate Log in the control panel
 #   shows     saved shows (one .json file each, "001 - Title.json"): everything the panel is set to
@@ -31,15 +32,24 @@ try:
 except NameError:
     BASE_DIR = obs.script_path()
 CUSTOM_DIR = os.path.join(BASE_DIR, "custom")
+CONTENT_DIR = os.path.join(BASE_DIR, "content")
 RUNDOWN_DIR = os.path.join(BASE_DIR, "rundowns")
 LOG_DIR = os.path.join(BASE_DIR, "logs")
 SHOW_DIR = os.path.join(BASE_DIR, "shows")
 IMAGE_TYPES = (".png", ".jpg", ".jpeg", ".gif")
+CONTENT_TYPES = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".mp4", ".webm")
 
 def custom_images():
     """Image files in the custom folder, sorted by name."""
     try:
         return sorted((f for f in os.listdir(CUSTOM_DIR) if f.lower().endswith(IMAGE_TYPES)), key=str.lower)
+    except OSError:
+        return []
+
+def content_files():
+    """Pictures and videos in the content folder, sorted by name."""
+    try:
+        return sorted((f for f in os.listdir(CONTENT_DIR) if f.lower().endswith(CONTENT_TYPES)), key=str.lower)
     except OSError:
         return []
 
@@ -164,6 +174,8 @@ def answer_request(message):
     mode = request.get("mode")
     if mode == "customList":
         return {"mode": "customFiles", "files": custom_images()}
+    if mode == "contentList":
+        return {"mode": "contentFiles", "files": content_files()}
     if mode == "rundownList":
         return {"mode": "rundownFiles", "files": rundown_files()}
     if mode == "showList":

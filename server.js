@@ -15,10 +15,12 @@ const crypto = require('crypto');
 
 // The folders next to this file:
 //   custom    the control panel asks what images are in it
+//   content   pictures and videos for the Content overlay (the TV); the control panel asks what's in it
 //   rundowns  saved Podcast Rundowns (one .json file each), saved and opened from the control panel
 //   logs      show logs (one .csv file each), from Generate Log in the control panel
 //   shows     saved shows (one .json file each, "001 - Title.json"): everything the panel is set to
 const CUSTOM_DIR = path.join(__dirname, 'custom');
+const CONTENT_DIR = path.join(__dirname, 'content');
 const RUNDOWN_DIR = path.join(__dirname, 'rundowns');
 const LOG_DIR = path.join(__dirname, 'logs');
 const SHOW_DIR = path.join(__dirname, 'shows');
@@ -26,6 +28,16 @@ function customImages() {
     try {
         return fs.readdirSync(CUSTOM_DIR)
             .filter(f => /\.(png|jpe?g|gif)$/i.test(f))
+            .sort((a, b) => (a.toLowerCase() < b.toLowerCase() ? -1 : 1));
+    } catch (err) {
+        return [];
+    }
+}
+// Pictures and videos in the content folder, sorted by name
+function contentFiles() {
+    try {
+        return fs.readdirSync(CONTENT_DIR)
+            .filter(f => /\.(png|jpe?g|gif|webp|mp4|webm)$/i.test(f))
             .sort((a, b) => (a.toLowerCase() < b.toLowerCase() ? -1 : 1));
     } catch (err) {
         return [];
@@ -98,6 +110,7 @@ function loadShowFile(request) {
 function answerRequest(request) {
     if (!request || typeof request !== 'object') return null;
     if (request.mode === 'customList') return { mode: 'customFiles', files: customImages() };
+    if (request.mode === 'contentList') return { mode: 'contentFiles', files: contentFiles() };
     if (request.mode === 'rundownList') return { mode: 'rundownFiles', files: rundownFiles() };
     if (request.mode === 'showList') return { mode: 'showFiles', files: showFiles().map(({ file, ...f }) => f) };
     if (request.mode === 'showSave') return saveShowFile(request);

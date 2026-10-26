@@ -1048,7 +1048,7 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
 .show-unsorted .show-block-head { color: #9ca3af; }
 .show-unsorted .unsorted-hint { font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; opacity: 0.8; }
 .show-unsorted .show-code { background: #4b5563; }
-/* The Tease (at the top of block A) and its empty T1-TEASE slot */
+/* The Tease (first of all, before the Open and block A) and its empty T1-TEASE slot */
 .show-tease .show-block-head { color: #7dd3fc; }
 .show-tease .show-block-head .count { background: rgba(125, 211, 252, 0.18); }
 .tease-slot {
@@ -1080,6 +1080,20 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
 .show-open .show-block-head .count, .show-close .show-block-head .count { background: rgba(165, 180, 252, 0.18); }
 .show-extra.is-empty:not(.show-tease) { margin-bottom: 0; }
 .show-extra.is-empty:not(.show-tease) .show-block-head { opacity: 0.75; }
+
+/* Building the rundown (Set Show off): any section collapses to its header (the arrow, or tapping its name), and
+   ◎ collapses all the others. A card dragged onto a collapsed section shows under its header until it's dropped. */
+.block-fold, .block-solo { flex: none; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; color: inherit; opacity: 0.8; }
+.block-fold:hover, .block-solo:hover { opacity: 1; background: rgba(255, 255, 255, 0.1); }
+.block-fold:active, .block-solo:active { transform: scale(0.92); }
+.block-fold .icon, .block-solo .icon { width: 15px; height: 15px; stroke-width: 2.4; }
+.block-fold .icon { transition: transform 0.15s; }
+.block-solo .icon { width: 14px; height: 14px; }
+.fold-title { cursor: pointer; }
+.show-block.collapsed .block-fold .icon { transform: rotate(-90deg); }
+.show-block.collapsed .block-list > :not(.dragging), .show-block.collapsed .tease-slot { display: none; }
+.show-block.collapsed { margin-bottom: 2px; }
+.fold-row { margin: -2px 6px 2px; }
 
 /* Scene cues: a yellow TAKE marker with the scene's name, so it stands out from the greyed-out cues.
    It gets a line of its own under the code and the note, so a long name has room in a narrow dock. */
@@ -1156,6 +1170,8 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
 .scene-kinds button { flex: 1; padding: 3px 6px; font-size: 12px; font-weight: 700; opacity: 0.75; }
 .scene-kinds button.active { background: #facc15; color: #1c1917; opacity: 1; }
 .scene-reload { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: rgba(0, 0, 0, 0.3); }
+/* A Break cue's break scene: scenes only (the Scenes / Sources switch keeps its room, so ↺ stays put) */
+#edit-scene-wrap.scene-only .scene-kinds { visibility: hidden; }
 .scene-reload:active { transform: scale(0.92); }
 
 /* Socials picker (Like, Follow & Subscribe): small icons, colored when picked */
@@ -1201,7 +1217,7 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
 .rundown-file span { font-size: 12px; opacity: 0.7; }
 
 /* Edit dialog for one show item, and the Import a rundown dialog */
-#edit-dialog, #rundown-dialog, #timing-dialog, #breaks-dialog, #custom-dialog, #shows-dialog, #show-save-dialog, #show-ask-dialog {
+#edit-dialog, #rundown-dialog, #timing-dialog, #breaks-dialog, #custom-dialog, #content-dialog, #shows-dialog, #show-save-dialog, #show-ask-dialog {
   position: fixed;
   inset: 0;
   margin: auto;        /* centered in the window */
@@ -1215,10 +1231,11 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 #edit-dialog::backdrop, #rundown-dialog::backdrop, #timing-dialog::backdrop, #breaks-dialog::backdrop, #custom-dialog::backdrop,
-#shows-dialog::backdrop, #show-save-dialog::backdrop, #show-ask-dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
+#content-dialog::backdrop, #shows-dialog::backdrop, #show-save-dialog::backdrop, #show-ask-dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
 #edit-dialog select { background: #3f3f46; color: #fff; }
-#timing-dialog, #breaks-dialog, #custom-dialog, #shows-dialog { max-height: 88vh; overflow-y: auto; }
-/* Custom image window: a preview and the name of each image in the custom folder; the one in use is outlined */
+#timing-dialog, #breaks-dialog, #custom-dialog, #content-dialog, #shows-dialog { max-height: 88vh; overflow-y: auto; }
+/* Custom image window: a preview and the name of each image in the custom folder; the one in use is outlined.
+   The Content window is the same, for the content folder's pictures and videos. */
 .custom-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-height: 50vh; overflow-y: auto; }
 .custom-list:empty { display: none; }
 .custom-pick {
@@ -1235,7 +1252,7 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
 .custom-pick:hover { background: rgba(255, 255, 255, 0.16); }
 .custom-pick:active { transform: scale(0.97); }
 .custom-pick.on { border-color: #a78bfa; background: rgba(109, 40, 217, 0.25); }
-.custom-pick img {
+.custom-pick img, .custom-pick video {
   width: 100%;
   aspect-ratio: 16 / 9;
   object-fit: contain;
@@ -1485,6 +1502,7 @@ html.light .show-block-head { color: #6D28D9; }
 html.light .show-block-head .count { background: rgba(109, 40, 217, 0.12); }
 html.light .show-block-head .line { background: #d1d5db; }
 html.light .block-remove { background: rgba(0, 0, 0, 0.08); color: #4b5563; }
+html.light .block-fold:hover, html.light .block-solo:hover { background: rgba(0, 0, 0, 0.07); }
 html.light .block-empty { border-color: #9ca3af; color: #6b7280; }
 html.light .show-tease .show-block-head { color: #0369a1; }
 html.light .show-tease .show-block-head .count { background: rgba(3, 105, 161, 0.12); }
@@ -1520,7 +1538,7 @@ html.light .block-at { color: #374151; }
 html.light .show-break:not(.on) { background: #fff7ed; border-color: #fb923c; color: #9a3412; }
 html.light .brk-len { background: rgba(0, 0, 0, 0.07); }
 html.light .brk-btn.reset { background: rgba(0, 0, 0, 0.08); }
-html.light #timing-dialog, html.light #breaks-dialog, html.light #custom-dialog,
+html.light #timing-dialog, html.light #breaks-dialog, html.light #custom-dialog, html.light #content-dialog,
 html.light #shows-dialog, html.light #show-save-dialog, html.light #show-ask-dialog { background: #fff; color: #111827; border-color: #d1d5db; }
 html.light .show-chip { border-color: #9ca3af; background: #fff; }
 html.light .rundown-file.show-pick { background: #f3f4f6; }
@@ -1532,7 +1550,7 @@ html.light .simple-card { background: rgba(0, 0, 0, 0.04); }
 html.light .simple-where button:not(.on) { border-color: #9ca3af; background: #fff; }
 html.light .simple-row { background: #fff; box-shadow: 0 0 0 1px #e5e7eb; }
 html.light .custom-pick:not(.on) { background: #f3f4f6; }
-html.light .custom-pick img { background: repeating-conic-gradient(#e5e7eb 0% 25%, #fff 0% 50%) 50% / 12px 12px; }
+html.light .custom-pick img, html.light .custom-pick video { background: repeating-conic-gradient(#e5e7eb 0% 25%, #fff 0% 50%) 50% / 12px 12px; }
 html.light .tm-times-row input, html.light .tm-format input, html.light .tm-field input, html.light .akta-add input { border-color: #6b7280; }
 html.light .tm-times-row input { color-scheme: light; }
 html.light .akta-add select { background: #fff; color: #111827; border-color: #6b7280; }
@@ -2195,6 +2213,192 @@ html.light .tm-error { color: #b91c1c; }
   0%, 100% { transform: none; }
   40%      { transform: translateY(-0.9vh); }
 }
+
+/* ---------- Content: a TV, almost full screen, showing a picture or video from the "content" folder ----------
+   The stream behind dims a little and the TV rises into place, then its screen powers on like an old set: a dot
+   stretches to a bright line, the line opens out to the picture as the flash fades, and a glint sweeps across the
+   glass. At the end (anim-tvOff) the screen powers off, the picture squeezing back to a line and then a dot, and
+   the TV drops away. The picture fits inside the screen (black around it), whatever its shape. */
+#content-tv {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+#overlay-box.content #content-tv { display: flex; }
+#content-tv [hidden] { display: none; }
+#content-tv i { display: block; }
+#content-tv::before { /* the dimmed stream around the TV */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0.3) 35%, rgba(0, 0, 0, 0.72) 100%);
+  animation: fadeIn 0.5s ease-out both;
+}
+.tv {
+  position: relative;
+  width: min(84vw, 148vh); /* 16:9 inside the bezel, with room for the stand: about 88% of the height */
+  animation: tvRise 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.08) both;
+}
+.tv-set {
+  position: relative;
+  padding: 1.5vh;
+  border-radius: 1.4vh;
+  background: linear-gradient(172deg, #3b3e46 0%, #18191d 20%, #0d0e11 72%, #1e2025 100%);
+  box-shadow:
+    inset 0 0 0 0.2vh rgba(255, 255, 255, 0.13), /* the bezel's bright edge */
+    inset 0 0.35vh 0.7vh rgba(255, 255, 255, 0.07),
+    0 2.6vh 6vh rgba(0, 0, 0, 0.75);             /* its shadow on the stream */
+}
+.tv-screen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 0.5vh;
+  background: #000;
+  box-shadow: 0 0 0 0.12vh rgba(255, 255, 255, 0.07);
+}
+.tv-picture {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  animation: tvPowerOn 0.75s 0.45s cubic-bezier(0.3, 0.7, 0.2, 1) both;
+}
+#content-img, #content-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+/* Powering on and off: bright white, fading to the picture */
+.tv-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, #fff 0%, #e6f6ff 45%, #a9d8ff 100%);
+  animation: tvFlash 0.75s 0.45s ease-out both;
+}
+/* A file that won't load (gone from the content folder, or a format the browser can't play) */
+.tv-nosignal {
+  position: absolute;
+  inset: 0;
+  display: none;
+  place-items: center;
+  background: radial-gradient(ellipse at 50% 50%, #1f2937 0%, #0b0f17 100%);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Oswald', sans-serif;
+  font-size: 6vh;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+.tv-picture.no-signal .tv-nosignal { display: grid; }
+/* The glass: a soft sheen across the top left, and a glint that sweeps across once the picture is up */
+.tv-glare {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(118deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.025) 28%, rgba(255, 255, 255, 0) 42%);
+}
+.tv-glare::after {
+  content: '';
+  position: absolute;
+  top: -10%;
+  bottom: -10%;
+  left: 0;
+  width: 22%;
+  background: linear-gradient(100deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.16) 50%, rgba(255, 255, 255, 0) 100%);
+  transform: translateX(-130%) skewX(-12deg);
+  animation: tvGlint 1.1s 1.05s ease-in-out both;
+}
+/* A little plate in the middle of the bottom bezel, and the power light: red, then blue once it's on */
+.tv-badge {
+  position: absolute;
+  left: 50%;
+  bottom: 0.45vh;
+  width: 3.4vh;
+  height: 0.55vh;
+  margin-left: -1.7vh;
+  border-radius: 0.3vh;
+  background: linear-gradient(#a1a1aa, #52525b);
+  opacity: 0.6;
+}
+.tv-led {
+  position: absolute;
+  right: 2.6vh;
+  bottom: 0.5vh;
+  width: 0.55vh;
+  height: 0.55vh;
+  border-radius: 50%;
+  animation: tvLed 0.5s 0.45s steps(1, end) both;
+}
+.tv-stand { display: flex; flex-direction: column; align-items: center; }
+.tv-neck { width: 9%; height: 2.4vh; background: linear-gradient(90deg, #17181c, #3b3e46 50%, #17181c); }
+.tv-foot {
+  width: 30%;
+  height: 1.1vh;
+  border-radius: 0.6vh 0.6vh 0.3vh 0.3vh;
+  background: linear-gradient(#474a52, #16171a);
+  box-shadow: 0 1.2vh 2.5vh rgba(0, 0, 0, 0.6);
+}
+@keyframes tvRise {
+  from { opacity: 0; transform: translateY(14vh) scale(0.82); }
+  55%  { opacity: 1; }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes tvPowerOn {
+  0%   { transform: scale(0.02, 0.006); }
+  35%  { transform: scale(1, 0.006); }
+  100% { transform: none; }
+}
+@keyframes tvFlash {
+  0%, 35% { opacity: 1; }
+  100%    { opacity: 0; }
+}
+@keyframes tvGlint {
+  from { transform: translateX(-130%) skewX(-12deg); }
+  to   { transform: translateX(560%) skewX(-12deg); }
+}
+@keyframes tvLed {
+  from { background: #ef4444; box-shadow: 0 0 0.6vh #ef4444; }
+  to   { background: #60a5fa; box-shadow: 0 0 0.6vh #3b82f6; }
+}
+/* Leaving: the box stays up (the page has already set it to 0) while the screen powers off and the TV drops */
+#overlay-box.anim-tvOff { animation: tvBoxOut 0.9s linear forwards; }
+#overlay-box.anim-tvOff .tv-picture { animation: tvPowerOff 0.42s cubic-bezier(0.6, 0, 0.8, 0.4) both; }
+#overlay-box.anim-tvOff .tv-flash { animation: tvFlashOn 0.42s ease-in both; }
+#overlay-box.anim-tvOff .tv-led { animation: none; background: #ef4444; box-shadow: 0 0 0.6vh #ef4444; }
+#overlay-box.anim-tvOff .tv { animation: tvDrop 0.48s 0.4s cubic-bezier(0.5, 0, 0.75, 0) both; }
+#overlay-box.anim-tvOff #content-tv::before { animation: fadeOut 0.45s 0.43s ease-in both; }
+@keyframes tvBoxOut {
+  0%, 99% { opacity: 1; }
+  100%    { opacity: 0; }
+}
+@keyframes tvPowerOff {
+  0%   { transform: none; }
+  55%  { transform: scale(1, 0.006); }
+  85%  { transform: scale(0.02, 0.006); }
+  100% { transform: scale(0, 0); }
+}
+@keyframes tvFlashOn {
+  0%       { opacity: 0; }
+  50%, to  { opacity: 1; }
+}
+@keyframes tvDrop {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateY(12vh) scale(0.9); }
+}
+/* Content Full: the same picture or video, filling the screen (black around one that isn't 16:9), with no TV.
+   It dissolves in and out (anim-fade, anim-hide on the box). */
+#overlay-box.contentFull #content-tv { display: flex; }
+#overlay-box.contentFull #content-tv::before,
+#overlay-box.contentFull .tv-flash, #overlay-box.contentFull .tv-glare, #overlay-box.contentFull .tv-badge,
+#overlay-box.contentFull .tv-led, #overlay-box.contentFull .tv-stand { display: none; }
+#overlay-box.contentFull .tv, #overlay-box.contentFull .tv-set, #overlay-box.contentFull .tv-screen { width: 100%; height: 100%; }
+#overlay-box.contentFull .tv, #overlay-box.contentFull .tv-picture { animation: none; }
+#overlay-box.contentFull .tv-set { padding: 0; border-radius: 0; background: none; box-shadow: none; }
+#overlay-box.contentFull .tv-screen { aspect-ratio: auto; border-radius: 0; box-shadow: none; }
 
 /* ---------- Breaking News: LIVE in the top-right corner, red ticker bar along the bottom ---------- */
 #breaking {

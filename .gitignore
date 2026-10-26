@@ -9,10 +9,12 @@ build/
 __pycache__/
 *.pyc
 
-# Your own files stay on your computer: custom images, saved rundowns, logs and saved shows.
+# Your own files stay on your computer: custom images, content, saved rundowns, logs and saved shows.
 # The folders themselves are shared (each has a README.txt).
 custom/*
 !custom/README.txt
+content/*
+!content/README.txt
 rundowns/*
 !rundowns/README.txt
 logs/*
