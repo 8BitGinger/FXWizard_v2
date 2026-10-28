@@ -327,6 +327,19 @@
                         </div>
                     </div>
 
+                    <!-- Content TV and Content Phone: what's behind the TV or phone. Dimmed (the stream darkens around it,
+                         as before) suits it filling the screen; Clear leaves the stream as it is, for a small TV or
+                         phone placed in a corner (size and place its browser source in OBS). -->
+                    <div id="backdrop-field" class="hidden">
+                        <p class="block text-sm font-medium mb-1 text-center">Behind it:</p>
+                        <div class="grid grid-cols-2 gap-1 text-[12px]">
+                            <input type="radio" id="back-dim" name="contentBack" value="dim" checked class="hidden peer/k1">
+                            <label for="back-dim" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/k1:bg-primary" title="The stream dims around the TV or phone">Dimmed</label>
+                            <input type="radio" id="back-clear" name="contentBack" value="clear" class="hidden peer/k2">
+                            <label for="back-clear" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/k2:bg-primary" title="Nothing behind the TV or phone: the stream shows as it is">Clear</label>
+                        </div>
+                    </div>
+
                     <!-- Retro VHS: the date and time on the tape, both optional. Left empty it shows today's date and the
                          time now, as before; set, the camcorder clock starts there and runs on. ✕ empties both. -->
                     <div id="vhs-field" class="hidden">
@@ -839,6 +852,11 @@
                         <input type="text" id="edit-content-text" maxlength="120" placeholder="File name in the content folder (optional)" class="hidden w-full p-1 rounded border-2 border-white bg-transparent text-sm" oninput="pickCueContent(this.value.trim())">
                         <p id="edit-content-note" class="text-xs opacity-75 mt-1"></p>
                     </div>
+                    <!-- Content TV and Content Phone (and cues playing on them): Clear = no dimming behind it -->
+                    <label id="edit-clear-wrap" class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" id="edit-clear">
+                        <span>Clear behind it (no dimming)</span>
+                    </label>
                     <div id="edit-socials-wrap" class="flex flex-col gap-1"></div>
                     <!-- Retro VHS: the date and time on the tape (both optional, as on the Fullscreen Overlays tab) -->
                     <div id="edit-vhs-wrap" class="hidden">
@@ -1301,6 +1319,7 @@
         //   content: true = shows a picture or video from the "content" folder (Content TV… / Phone… / Full…), on its own
         //            layer and browser source (#content: see layerOf). A video starts once the picture is fully up
         //            (lead, in seconds), and its Duration fills in so all of it plays
+        //   backdrop: true = shows the Behind it picker (Content TV and Phone): Dimmed, or Clear (sent as clear: true)
         //   ticker:  true = one text box, scrolled along the Breaking News bar
         //   sport:   true = shows the Sport picker (Football, Basketball, Baseball, Soccer)
         //   social:  true = shows the Socials picker (YouTube, Facebook, Twitter, Instagram, LinkedIn, GitHub, Web)
@@ -1340,10 +1359,10 @@
             disco:     { label: 'Disco Ball', text: false, dur: 15, effect: 'disco', animIn: 'anim-fade', animOut: 'anim-hide' },
             locpin:    { label: 'Location',   text: false, dur: 8, place: true, effect: null, animIn: '', animOut: 'anim-slideOutLeft' }, // leaves as one block, like L3 PNG
             // A TV rises up almost full screen and its screen powers on (in styles.css); anim-tvOff powers it off and drops it away
-            content:   { label: 'Content TV', text: false, dur: 15, content: true, lead: 1.2, effect: null, animIn: '', animOut: 'anim-tvOff' },
+            content:   { label: 'Content TV', text: false, dur: 15, content: true, backdrop: true, lead: 1.2, effect: null, animIn: '', animOut: 'anim-tvOff' },
             // A phone, for tall 9:16 pictures and videos: it rises up and its screen wakes; anim-tvOff (with the phone's
             // own steps in styles.css) puts the screen to sleep and drops it away
-            contentPhone: { label: 'Content Phone', text: false, dur: 15, content: true, lead: 1.1, effect: null, animIn: '', animOut: 'anim-tvOff' },
+            contentPhone: { label: 'Content Phone', text: false, dur: 15, content: true, backdrop: true, lead: 1.1, effect: null, animIn: '', animOut: 'anim-tvOff' },
             // The same picture or video, full screen (no TV), dissolving in and out
             contentFull: { label: 'Content Full', text: false, dur: 15, content: true, lead: 0.6, effect: null, animIn: 'anim-fade', animOut: 'anim-hide' },
             // Stingers: CSS stinger lengths are read from styles.css, so the speed is only set there
@@ -5473,6 +5492,7 @@
             box.classList.remove(...Object.keys(OVERLAYS));
             void box.offsetWidth;
             box.classList.add(data.overlay);
+            box.classList.toggle('clear-back', !!data.clear && !!cfg.backdrop); // Clear: the stream isn't dimmed behind it
             currentContent = data.overlay;
             setContent(data.content, cfg.lead, !!data.muted);
             // The phone's status bar shows the time now (like 9:41), kept up to date while it's up
@@ -5808,6 +5828,7 @@
             $('social-field').classList.toggle('hidden', !cfg?.social);
             $('sport-field').classList.toggle('hidden', !cfg?.sport);
             $('vhs-field').classList.toggle('hidden', !cfg?.stamp);
+            $('backdrop-field').classList.toggle('hidden', !cfg?.backdrop);
             // Stingers: the duration box shows their fixed length, locked
             const fixed = cfg?.length !== undefined;
             $('duration-input').disabled = fixed;
@@ -6050,6 +6071,7 @@
                     ...(cfg.sport && { sport: checked('sportStyle') }),
                     ...(cfg.social && { socials: currentSocials() }),
                     ...(cfg.stamp && tapeStamp('vhs')),
+                    ...(cfg.backdrop && checked('contentBack') === 'clear' && { clear: true }), // nothing dimmed behind it
                     ...(cfg.depth && $('gs-pick').checked && { gs: true }), // Greenscreen (saved with it too)
                     duration,
                     animationStyle,
@@ -6172,7 +6194,8 @@
                 const name = contentFolderFiles ? contentFolderFiles.find(f => f.toLowerCase() === picked.toLowerCase()) : picked;
                 if (!name) { outside++; continue; }
                 const item = { id: Date.now() + added.length, mode: 'overlay', overlay, label: name.replace(/\.[^.]+$/, ''), title: '',
-                    content: name, duration: OVERLAYS[overlay].dur, animationStyle: checked('animationStyle') };
+                    content: name, duration: OVERLAYS[overlay].dur, animationStyle: checked('animationStyle'),
+                    ...(OVERLAYS[overlay].backdrop && checked('contentBack') === 'clear' && { clear: true }) };
                 if (existing.has(keyOf(item))) { dupes++; continue; }
                 existing.add(keyOf(item));
                 const length = await videoLength(name);
@@ -6204,7 +6227,7 @@
             const cl3 = data.mode === 'cl3';
             const sub = cl3 ? `Complex scene | ${cl3Steps(data).length} in a row`
                 : isOverlay
-                ? (data.source && holdsOn(data) ? `${data.source} | toggle` : data.source || `${kind} | ${OVERLAYS[ovKey]?.label || ovKey}${data.customBg ? `: ${data.customBg}` : ''}${data.content ? `: ${data.content}` : ''}${data.sport ? `: ${SPORTS[data.sport] || data.sport}` : ''}${data.tapeDate || data.tapeTime ? `: ${tapeLabel(data)}` : ''}`)
+                ? (data.source && holdsOn(data) ? `${data.source} | toggle` : data.source || `${kind} | ${OVERLAYS[ovKey]?.label || ovKey}${data.customBg ? `: ${data.customBg}` : ''}${data.content ? `: ${data.content}${data.clear ? ' (clear)' : ''}` : ''}${data.sport ? `: ${SPORTS[data.sport] || data.sport}` : ''}${data.tapeDate || data.tapeTime ? `: ${tapeLabel(data)}` : ''}`)
                 : `${data.bgStyle === 'custom' ? `custom: ${data.customBg}` : data.bgStyle} | ${data.fontStyle?.replace('font-', '')}`;
 
             const card = document.createElement('div');
@@ -6429,7 +6452,8 @@
         const cueGraphic = (d) => ({
             mode: 'overlay', overlay: cueContentStyle(d), content: d.content,
             label: d.text || d.content.replace(/\.[^.]+$/, ''), title: '', duration: cueSeconds(d),
-            cue: d.cue, ...(d.text && { text: d.text }), ...(cueMuted(d) && { muted: true }), sid: d.sid, block: d.block,
+            cue: d.cue, ...(d.text && { text: d.text }), ...(cueMuted(d) && { muted: true }),
+            ...(d.clear && OVERLAYS[cueContentStyle(d)].backdrop && { clear: true }), sid: d.sid, block: d.block,
         });
         // A Scene cue is the OBS scene (or source) to take next: { cue: 'scene', obsName, obsKind: 'source'
         // (left out for a scene), text: an optional note }. It shows with a yellow TAKE marker.
@@ -6763,7 +6787,7 @@
                 row.classList.add('cue-content');
                 const line = document.createElement('span');
                 line.className = 'take-line';
-                const secs = cueSeconds(data), where = `${CONTENT_WHERE[cueContentStyle(data)]}${cueMuted(data) ? ', muted' : ''}`;
+                const secs = cueSeconds(data), where = `${CONTENT_WHERE[cueContentStyle(data)]}${data.clear ? ', clear behind' : ''}${cueMuted(data) ? ', muted' : ''}`;
                 const gone = !!contentFolderFiles && !contentFolderFiles.some(f => f.toLowerCase() === data.content.toLowerCase());
                 const pill = cueMarker(gone ? 'PLAY !' : 'PLAY', `${data.content} · ${formatTime(secs)}${cueMuted(data) ? ' · muted' : ''}`, `take-pill play-pill${gone ? ' play-missing' : ''}`,
                     gone ? `${data.content} isn't in the ${CONTENT_FOLDER} folder` : `Plays ${data.content} ${where}, for ${formatTime(secs)}`);
@@ -7296,8 +7320,9 @@
         const scriptTitle = (d) => (d.text || '').split('\n').map(l => l.trim()).find(Boolean) || 'Script';
 
         // Shows only the dialog fields that fit
-        const showEditFields = ({ name = false, para = false, duration = false, gs = false, scene = false, brk = false, content = false, vhs = false } = {}) => {
+        const showEditFields = ({ name = false, para = false, duration = false, gs = false, scene = false, brk = false, content = false, vhs = false, clear = false } = {}) => {
             $('edit-vhs-wrap').classList.toggle('hidden', !vhs);
+            $('edit-clear-wrap').classList.toggle('hidden', !clear);
             $('edit-name-wrap').classList.toggle('hidden', !name);
             $('edit-title-wrap').classList.toggle('hidden', !name);
             $('edit-scene-wrap').classList.toggle('hidden', !scene);
@@ -7359,6 +7384,7 @@
         let cueContent = { file: '', style: 'content', cue: 'clip' }; // the dialog's pick, and the cue's type (a Clip plays muted)
         const openCueContent = async (item, cue = item?.cue) => {
             cueContent = { file: item?.content || '', style: cueContentStyle(item || {}), cue };
+            $('edit-clear').checked = !!item?.clear;
             $('edit-duration').value = item?.content ? cueSeconds(item) : OVERLAYS.content.dur;
             renderCueContent();
             await askContentList();
@@ -7382,6 +7408,7 @@
             $('edit-content-phone').classList.toggle('active', cueContent.style === 'contentPhone');
             $('edit-content-full').classList.toggle('active', cueContent.style === 'contentFull');
             $('edit-content-wrap').classList.toggle('no-file', !want);
+            $('edit-clear-wrap').classList.toggle('hidden', !want || !OVERLAYS[cueContent.style].backdrop);
             $('edit-duration-wrap').classList.toggle('hidden', !want);
             const length = contentLengths[want];
             const sound = !VIDEO_FILE.test(want) ? '' : cueMuted({ cue: cueContent.cue, content: want }) ? ' A Clip plays muted.' : ' It plays with its sound.';
@@ -7482,7 +7509,8 @@
                 const socials = item.socials || (item.label ? { youtube: item.label } : {});
                 Object.keys(SOCIALS).forEach(k => socialsWrap.append(socialRow(k, socials[k], `edit-social-${k}`).row));
             }
-            showEditFields({ name: hasText && !oneBox, para: !!oneBox, duration: cfg?.length === undefined && !holdsOn(item), gs: !!cfg?.depth, vhs: !!cfg?.stamp });
+            showEditFields({ name: hasText && !oneBox, para: !!oneBox, duration: cfg?.length === undefined && !holdsOn(item), gs: !!cfg?.depth, vhs: !!cfg?.stamp, clear: !!cfg?.backdrop });
+            $('edit-clear').checked = !!item.clear;
             $('edit-vhs-date').value = item.tapeDate || '';
             $('edit-vhs-time').value = item.tapeTime || '';
             $('edit-name').value = item.label || '';
@@ -7517,6 +7545,7 @@
                     ...(type === 'break' && { secs, obsName }),
                     ...(CONTENT_CUES.includes(type) && cueContent.file && {
                         content: cueContent.file, contentStyle: cueContent.style, duration: Number($('edit-duration').value) || OVERLAYS.content.dur,
+                        ...(OVERLAYS[cueContent.style].backdrop && $('edit-clear').checked && { clear: true }),
                     }),
                     block: $('edit-block').value, sid: newSid(),
                 };
@@ -7546,10 +7575,13 @@
                 // A clip, SOT or PIC: the content it plays, or none (a placeholder)
                 if (CONTENT_CUES.includes(item.cue) && cueContent.file) {
                     Object.assign(item, { content: cueContent.file, contentStyle: cueContent.style, duration: Number($('edit-duration').value) || cueSeconds(item) });
+                    if (OVERLAYS[cueContent.style].backdrop && $('edit-clear').checked) item.clear = true;
+                    else delete item.clear;
                 } else if (CONTENT_CUES.includes(item.cue)) {
                     delete item.content;
                     delete item.contentStyle;
                     delete item.duration;
+                    delete item.clear;
                 }
             } else if (item.mode === 'cl3') {
                 item.label = $('edit-name').value.trim() || item.label;
@@ -7569,6 +7601,10 @@
             if (cfg?.depth) {
                 if ($('edit-gs').checked) item.gs = true;
                 else delete item.gs;
+            }
+            if (cfg?.backdrop) { // Content TV and Phone: Clear, or dimmed behind it
+                if ($('edit-clear').checked) item.clear = true;
+                else delete item.clear;
             }
             if (cfg?.stamp) { // Retro VHS: the tape's date and time, or neither (the date and time now)
                 delete item.tapeDate;
@@ -9779,7 +9815,7 @@
            was left, and a saved show brings them back too.
            ========================================================= */
         const PICKS_KEY = 'fx_picks';
-        const PICK_GROUPS = ['mode', 'bgStyle', 'fontStyle', 'fontColor', 'location', 'animationStyle', 'overlayStyle', 'sportStyle'];
+        const PICK_GROUPS = ['mode', 'bgStyle', 'fontStyle', 'fontColor', 'location', 'animationStyle', 'overlayStyle', 'sportStyle', 'contentBack'];
         const savePicks = () => {
             const picks = Object.fromEntries(PICK_GROUPS.map(name => [name, checked(name) ?? null]));
             try { localStorage.setItem(PICKS_KEY, JSON.stringify({ ...picks, l3Duration })); } catch { /* storage blocked */ }
