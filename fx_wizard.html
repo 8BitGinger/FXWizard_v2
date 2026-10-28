@@ -127,7 +127,7 @@
 
 
                 <!-- ===== FULLSCREEN OVERLAY TAB =====
-                     Three sections that open and close with a tap. The bar shows what's picked in it. -->
+                     Four sections that open and close with a tap. The bar shows what's picked in it. -->
                 <div id="overlay-section" class="hidden space-y-2">
                     <details class="fx-section" data-key="ov-l3s">
                         <summary><span>Fullscreen L3s</span><span class="fx-value"></span></summary>
@@ -216,15 +216,6 @@
                             <!-- Like, Follow & Subscribe: a cursor clicks each button; optional socials above -->
                             <input type="radio" id="ov-social" name="overlayStyle" value="social" class="hidden peer/o20">
                             <label for="ov-social" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o20:bg-primary">Like &amp; Subscribe</label>
-
-                            <!-- Content: a TV, almost full screen, showing a picture or video from the "content" folder
-                                 (next to "assets"); Content Full shows it full screen. Tapping either opens the window to
-                                 pick which one (they share the pick). -->
-                            <input type="radio" id="ov-content" name="overlayStyle" value="content" data-content="1" class="hidden peer/o39">
-                            <label for="ov-content" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o39:bg-primary">Content…</label>
-                            <input type="radio" id="ov-contentFull" name="overlayStyle" value="contentFull" data-content="1" class="hidden peer/o40">
-                            <label for="ov-contentFull" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o40:bg-primary">Content Full…</label>
-                            <p id="content-name" class="col-span-2 text-[12px] text-center opacity-75"></p>
                         </div>
                     </details>
 
@@ -285,6 +276,21 @@
                             <!-- Coffee: a cup slides in, then the camera zooms into the foam: latte art of a heart around "Mom" (or your own text) -->
                             <input type="radio" id="ov-coffee" name="overlayStyle" value="coffee" class="hidden peer/o38">
                             <label for="ov-coffee" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o38:bg-primary">Coffee</label>
+                        </div>
+                    </details>
+
+                    <!-- Content: a picture or video from the "content" folder (next to "assets"), on its own browser
+                         source (fx_wizard.html#content), so it stays up while lower thirds and overlays come and go.
+                         Content… shows it on a TV, almost full screen; Content Full… fills the source. Tapping either
+                         opens the window to pick which one (they share the pick). -->
+                    <details class="fx-section" data-key="ov-content">
+                        <summary><span>Content</span><span class="fx-value"></span></summary>
+                        <div class="grid grid-cols-2 gap-1 text-[12px]">
+                            <input type="radio" id="ov-content" name="overlayStyle" value="content" data-content="1" class="hidden peer/o39">
+                            <label for="ov-content" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o39:bg-primary">Content…</label>
+                            <input type="radio" id="ov-contentFull" name="overlayStyle" value="contentFull" data-content="1" class="hidden peer/o40">
+                            <label for="ov-contentFull" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o40:bg-primary">Content Full…</label>
+                            <p id="content-name" class="col-span-2 text-[12px] text-center opacity-75"></p>
                         </div>
                     </details>
 
@@ -1014,27 +1020,6 @@
                         <div class="bn-ticker"><span id="breaking-text"></span></div>
                     </div>
                 </div>
-                <!-- Content: a TV, almost full screen, showing a picture or video from the "content" folder. It rises
-                     into place and its screen powers on; at the end the screen powers off and it drops away.
-                     Content Full shows the same picture full screen, without the TV. Timing is in styles.css. -->
-                <div id="content-tv">
-                    <div class="tv">
-                        <div class="tv-set">
-                            <div class="tv-screen">
-                                <div id="content-picture" class="tv-picture">
-                                    <img id="content-img" alt="" hidden>
-                                    <video id="content-video" playsinline preload="auto" hidden></video>
-                                    <span class="tv-nosignal">No signal</span>
-                                    <i class="tv-flash"></i>
-                                </div>
-                                <i class="tv-glare"></i>
-                            </div>
-                            <i class="tv-badge"></i>
-                            <i class="tv-led"></i>
-                        </div>
-                        <div class="tv-stand"><i class="tv-neck"></i><i class="tv-foot"></i></div>
-                    </div>
-                </div>
                 <!-- Like, Follow & Subscribe: three buttons pop up, a cursor clicks each one (they change
                      to Liked, Following and Subscribed), and the bell rings. Any socials entered show
                      above the buttons. Timing is in styles.css. -->
@@ -1128,6 +1113,31 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Content: only on fx_wizard.html#content, its own browser source, so it stays up while lower thirds and
+                 overlays come and go on #display. A TV, almost full screen, showing a picture or video from the "content"
+                 folder: it rises into place and its screen powers on; at the end the screen powers off and it drops away.
+                 Content Full shows the same picture filling the source, without the TV. Timing is in styles.css. -->
+            <div id="content-box">
+                <div id="content-tv">
+                    <div class="tv">
+                        <div class="tv-set">
+                            <div class="tv-screen">
+                                <div id="content-picture" class="tv-picture">
+                                    <img id="content-img" alt="" hidden>
+                                    <video id="content-video" playsinline preload="auto" hidden></video>
+                                    <span class="tv-nosignal">No signal</span>
+                                    <i class="tv-flash"></i>
+                                </div>
+                                <i class="tv-glare"></i>
+                            </div>
+                            <i class="tv-badge"></i>
+                            <i class="tv-led"></i>
+                        </div>
+                        <div class="tv-stand"><i class="tv-neck"></i><i class="tv-foot"></i></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1138,6 +1148,7 @@
              fx_wizard.html           → Controller (the control panel)
              fx_wizard.html#display   → Display (what OBS shows)
              fx_wizard.html#underlay  → Underlay (Greenscreen: what OBS shows behind your keyed camera)
+             fx_wizard.html#content   → Content (the pictures and videos, on their own browser source)
 
            1.  Settings
            2.  Graphic options
@@ -1145,7 +1156,7 @@
            4.  Animations
            5.  Display: lower third
            6.  Display: canvas effects (Color Wave, Confetti, Fall, Snow, Fire, Underwater, St. Patrick's, Retro VHS, Sports, Storm, Static, Fireworks, Medical)
-           7.  Display: fullscreen overlays
+           7.  Display: fullscreen overlays (and Content, on #content)
            8.  Display: message router
            9.  Connection to the server
            10. Controller: status messages
@@ -1175,12 +1186,13 @@
         const SHOW_KEY = 'fx_show';                 // the Rundown list
         const CUSTOM_FOLDER = 'custom';             // custom backgrounds live here, next to "assets"
         let customFolderFiles = null;               // what the server last said is in it (null = not known yet)
-        const CONTENT_FOLDER = 'content';           // pictures and videos for the Content overlay's TV, next to "assets"
+        const CONTENT_FOLDER = 'content';           // pictures and videos for Content (the TV, or Content Full), next to "assets"
         let contentFolderFiles = null;              // what the server last said is in it (null = not known yet)
 
         let ws = null;
         let isController = false;
         let isUnderlay = false;       // true on fx_wizard.html#underlay
+        let isContentPage = false;    // true on fx_wizard.html#content
         let isProjector = false;      // true on fx_wizard.html#projector
         let l3Timeout = null;         // timer that hides the lower third
         let l3Cleanup = null;         // timer that fully hides it after the out animation
@@ -1188,6 +1200,9 @@
         let overlayTimeout = null;    // timer that hides the overlay
         let overlayCleanup = null;    // timer that fully hides it after the out animation
         let currentOverlay = null;    // which overlay is on screen now
+        let contentTimeout = null;    // the same three for Content (on #content)
+        let contentCleanup = null;
+        let currentContent = null;
 
 
         /* =========================================================
@@ -1200,8 +1215,9 @@
         //   import:  true = can be filled from .txt files (shows the Import button)
         //   paragraph: true = one wrapping paragraph instead of Name and Title
         //   custom:  true = uses the image from the "custom" folder
-        //   content: true = shows a picture or video from the "content" folder (Content… / Content Full…). A video
-        //            starts once the picture is fully up (lead, in seconds), and its Duration fills in so all of it plays
+        //   content: true = shows a picture or video from the "content" folder (Content… / Content Full…), on its own
+        //            layer and browser source (#content: see layerOf). A video starts once the picture is fully up
+        //            (lead, in seconds), and its Duration fills in so all of it plays
         //   ticker:  true = one text box, scrolled along the Breaking News bar
         //   sport:   true = shows the Sport picker (Football, Basketball, Baseball, Soccer)
         //   social:  true = shows the Socials picker (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web)
@@ -1358,6 +1374,10 @@
 
         // True for overlays. Older saves stored L3 PNG (then "L3 Large") as a lower third with bgStyle "l3Large".
         const isOverlayItem = (data) => data.mode === 'overlay' || data.bgStyle === 'l3Large';
+        // Which layer a graphic is on: 'l3' (lower thirds), 'overlay' (the rest of the Fullscreen Overlays tab, on #display),
+        // or 'content' (Content and Content Full, on their own browser source, #content). Taking a graphic only replaces
+        // what's on its own layer, so Content stays up while lower thirds and overlays come and go.
+        const layerOf = (data) => (!isOverlayItem(data) ? 'l3' : OVERLAYS[data.overlay]?.content ? 'content' : 'overlay');
 
         // Imported L3s go up as a toggle: they stay up until they're turned off (TOGGLE OFF, or OFF on a
         // rundown card), instead of for a set time. (Older imports, saved with 5 minutes, work the same.)
@@ -5287,9 +5307,6 @@
             // Bar image: the custom file for Custom; L3 Gif uses largeGif.gif from styles.css
             $('overlay-gif').style.backgroundImage = cfg.custom && data.customBg ? `url("${customPath(data.customBg)}")` : '';
 
-            // Content: the picture or video on the TV's screen, or full screen (any other overlay stops a video that was playing)
-            setContent(cfg.content ? data.content : null, cfg.lead);
-
             // Name and title (L3 PNG, L3 Gif, Custom), or the paragraph (L3 Info)
             if (cfg.text) {
                 $('overlay-name').textContent = data.label || '';
@@ -5342,13 +5359,48 @@
             overlayCleanup = setTimeout(() => {
                 box.style.visibility = 'hidden';
                 FX.stop();
-                setContent(null); // a Content video stops once the TV has gone
             }, outTime);
+        };
+
+        // ---------- Content (fx_wizard.html#content) ----------
+        // Content and Content Full have their own layer, #content-box, with its own timers, on their own browser
+        // source. Lower thirds and overlays on #display (and #underlay) come and go without touching it, so in OBS it
+        // can sit full screen, or in a box beside the cameras, for as long as it's up.
+        const showContent = (data) => {
+            const cfg = OVERLAYS[data.overlay];
+            const box = $('content-box');
+            clearTimeout(contentTimeout);
+            clearTimeout(contentCleanup);
+            const duration = Number(data.duration) || 5;
+
+            // Switch to the TV or Content Full (restarting the TV's rise and power-on if it was already up)
+            box.classList.remove(...Object.keys(OVERLAYS));
+            void box.offsetWidth;
+            box.classList.add(data.overlay);
+            currentContent = data.overlay;
+            setContent(data.content, cfg.lead);
+
+            // Show it, then hide it when the duration is up (toggled: stays up until hidden)
+            box.style.visibility = 'visible';
+            playIn(box, cfg.animIn);
+            if (!data.hold) contentTimeout = setTimeout(hideContent, duration * 1000);
+        };
+
+        const hideContent = () => {
+            const box = $('content-box');
+            clearTimeout(contentTimeout);
+            clearTimeout(contentCleanup);
+            const out = OVERLAYS[currentContent]?.animOut ?? 'anim-hide';
+            playOut(box, out);
+            contentCleanup = setTimeout(() => {
+                box.style.visibility = 'hidden';
+                setContent(null); // a video stops once the TV has gone
+            }, out === 'anim-hide' ? 600 : 900);
         };
 
         // Content: the file on the TV's screen, or full screen (null = none). A video waits on its first frame until
         // the picture is fully up (lead seconds), then plays from the start, once, with its sound (turn on "Control
-        // audio via OBS" on the browser source, as for the Sound Pad), and holds its last frame; if the browser won't
+        // audio via OBS" on the #content browser source), and holds its last frame; if the browser won't
         // play sound by itself, it plays muted. A file that won't load shows "No signal".
         let contentPlay = null; // the timer that starts a video
         const setContent = (file, lead = 0) => {
@@ -5421,12 +5473,19 @@
            Decides what to show for each message from the controller
            ========================================================= */
         const showDisplay = (data) => {
+            // #content shows Content and nothing else; the other pages leave Content to it
+            if (isContentPage) { contentMessage(data); return; }
             // Sounds play on #display only (the underlay is another browser source; it would play them twice)
             if (data.mode === 'sound' || data.mode === 'soundStop') { if (!isUnderlay) soundMessage(data); return; }
             if (data.mode === 'clear') { hideLowerThird(); hideOverlay(); if (!isUnderlay) stopAllSounds(); return; }
-            if (data.mode === 'hide') { data.layer === 'overlay' ? hideOverlay() : hideLowerThird(); return; } // TOGGLE OFF
+            if (data.mode === 'hide') { // TOGGLE OFF, OFF
+                if (data.layer === 'overlay') hideOverlay();
+                else if (data.layer !== 'content') hideLowerThird();
+                return;
+            }
             if (data.mode && data.mode !== 'l3' && data.mode !== 'overlay') return; // not a graphic (a request meant for the server)
             const overlay = data.mode === 'overlay' ? data.overlay : data.bgStyle === 'l3Large' ? 'l3Large' : null; // older L3 PNG saves
+            if (OVERLAYS[overlay]?.content) return; // Content: on #content, and whatever's up here stays up
             const depth = data.gs && OVERLAYS[overlay]?.depth; // Greenscreen: split between behind and in front
             if (isUnderlay) {
                 // The underlay only ever shows the part of an overlay that goes behind you
@@ -5436,6 +5495,12 @@
             }
             if (overlay) showOverlay({ ...data, overlay }, depth ? 'front' : 'all');
             else showLowerThird(data);
+        };
+        // On #content: Content goes up, and comes down for its OFF, TOGGLE OFF or Clear All. Lower thirds, overlays
+        // and sounds are for #display. (A Content video's sound comes from this source.)
+        const contentMessage = (data) => {
+            if (data.mode === 'clear' || (data.mode === 'hide' && data.layer === 'content')) hideContent();
+            else if (data.mode === 'overlay' && OVERLAYS[data.overlay]?.content) showContent(data);
         };
 
 
@@ -5559,7 +5624,7 @@
             if (seq) stopSeq(false); // taking something else ends a cScene that's playing (its own graphics don't come through here)
             const hold = holdsOn(data); // an imported L3: up until it's turned off
             if (!sendPayload(hold ? { ...data, hold: true } : data)) return false;
-            const layer = isOverlayItem(data) ? 'overlay' : 'l3';
+            const layer = layerOf(data);
             setToggled(layer, hold);  // it replaces anything toggled on that layer (and a toggle shows TOGGLE OFF)
             clearLive(layer);         // ...and any rundown card that was on screen there
             const ovKey = isOverlayItem(data) ? (data.overlay || 'l3Large') : null;
@@ -5759,9 +5824,10 @@
            12. CONTROLLER: TAKE / TOGGLE / SAVE / CLEAR ALL
            ========================================================= */
 
-        // What's toggled on right now, per layer. The TOGGLE button shows the current tab's layer.
-        const toggled = { l3: false, overlay: false };
-        const currentLayer = () => checked('mode') === 'overlay' ? 'overlay' : 'l3';
+        // What's toggled on right now, per layer (see layerOf). The TOGGLE button shows the layer of what's picked:
+        // on the Fullscreen Overlays tab, Content has its own, so a toggled Content stays up while overlays are taken.
+        const toggled = { l3: false, overlay: false, content: false };
+        const currentLayer = () => (checked('mode') !== 'overlay' ? 'l3' : OVERLAYS[checked('overlayStyle')]?.content ? 'content' : 'overlay');
 
         const TOGGLE_OFF_CLASSES = ['bg-amber-600', 'hover:bg-amber-700'];
         const TOGGLE_ON_CLASSES = ['bg-yellow-300', 'text-black', 'ring-4', 'ring-red-500', 'animate-pulse'];
@@ -5876,13 +5942,10 @@
 
         // ✖ CLEAR ALL
         const clearAll = () => {
-            if (!sendPayload({ mode: 'clear' })) return; // also stops any sounds
+            if (!sendPayload({ mode: 'clear' })) return; // also stops any sounds, and takes Content down
             stopSeq(false);
             clearPads();
-            setToggled('l3', false);
-            setToggled('overlay', false);
-            clearLive('l3');
-            clearLive('overlay');
+            ['l3', 'overlay', 'content'].forEach(l => { setToggled(l, false); clearLive(l); });
             flash('Cleared');
         };
 
@@ -6171,9 +6234,9 @@
             d.obsName ? `A break this long, on ${d.obsName}` : 'A break this long, with no break scene (✎ to pick one)');
         const newSid = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
         let lastTakenSid = localStorage.getItem(LAST_PLAYED_KEY); // gets the ★
-        const liveByLayer = { l3: null, overlay: null, seq: null }; // rundown card on screen now, per layer (seq: a cScene playing)
-        const liveEnds = { l3: 0, overlay: 0, seq: 0 };            // when each one goes off
-        const liveTimers = { l3: null, overlay: null, seq: null };
+        const liveByLayer = { l3: null, overlay: null, content: null, seq: null }; // rundown card on screen now, per layer (seq: a cScene playing)
+        const liveEnds = { l3: 0, overlay: 0, content: 0, seq: 0 };            // when each one goes off
+        const liveTimers = { l3: null, overlay: null, content: null, seq: null };
         let liveTicker = null;                                     // counts down the OFF buttons
 
         const loadBlocks = () => {
@@ -6292,7 +6355,7 @@
                 return;
             }
             if (!flashTake(data)) return;
-            const layer = isOverlayItem(data) ? 'overlay' : 'l3';
+            const layer = layerOf(data);
             const secs = graphicSeconds(data);
             liveByLayer[layer] = data.sid;
             if (holdsOn(data)) liveEnds[layer] = Infinity; // up until OFF (or TOGGLE OFF)
@@ -7562,8 +7625,10 @@
             if (!steps.length) { flash('That cScene is empty', true); return false; }
             if (!ws || ws.readyState !== WebSocket.OPEN) { flash('Not connected', true); return false; }
             stopSeq(false);
-            // It takes over both layers: anything toggled or up from the rundown there makes way
-            ['l3', 'overlay'].forEach(l => { setToggled(l, false); clearLive(l); });
+            // It takes over the lower third and overlay layers (and Content's, if it has Content in it): anything
+            // toggled or up from the rundown there makes way. Content up on its own stays up through the rest.
+            ['l3', 'overlay', ...(steps.some(st => layerOf(st) === 'content') ? ['content'] : [])]
+                .forEach(l => { setToggled(l, false); clearLive(l); });
             seq = { d, sid, steps, i: -1, layer: null, timer: null };
             if (sid) {
                 liveByLayer.seq = sid;
@@ -7579,7 +7644,7 @@
             const st = seq.steps[i];
             if (!sendPayload(st)) { stopSeq(false); return; }
             seq.i = i;
-            seq.layer = isOverlayItem(st) ? 'overlay' : 'l3';
+            seq.layer = layerOf(st);
             const secs = graphicSeconds(st);
             seq.timer = setTimeout(() => seqStep(i + 1), (secs + SEQ_GAP) * 1000);
             if (seq.sid) liveEnds.seq = Date.now() + seqLeft(i) * 1000;
@@ -7934,6 +7999,7 @@
   <li>Set the Browser Source size to your canvas, for example 1920 x 1080.</li>
   <li>Right-click the Browser Source and choose <b>Refresh</b>.</li>
   <li><b>Using Greenscreen on an effect?</b> Add <code>fx_wizard.html#underlay</code> as a second Browser Source <i>below</i> your keyed camera, with <code>#display</code> above it.</li>
+  <li><b>Content not showing?</b> Content and Content Full have their own Browser Source: <code>fx_wizard.html#content</code>, below <code>#display</code>. For a video's sound, turn on <b>Control audio via OBS</b> on it.</li>
 </ul>
 </body></html>`);
             win.document.close();
@@ -9877,8 +9943,9 @@
 
         /* =========================================================
            25. STARTUP
-           Opens the display if the address ends in #display (or the
-           underlay for #underlay), otherwise opens the controller.
+           Opens the display if the address ends in #display (the
+           underlay for #underlay, Content for #content), otherwise
+           opens the controller.
            ========================================================= */
         const initializeView = () => {
             const hash = window.location.hash;
@@ -9892,15 +9959,17 @@
                 showProjectorMessage('');
                 setInterval(tickProjector, 250);
                 window.addEventListener('resize', fitScript);
-            } else if (hash === '#display' || hash === '#underlay') {
+            } else if (hash === '#display' || hash === '#underlay' || hash === '#content') {
                 isUnderlay = hash === '#underlay';
+                isContentPage = hash === '#content';
                 document.body.style.backgroundColor = 'transparent';
                 $('controller-status').style.display = 'none';
                 $('toggle-bar').style.display = 'none';
                 $('display-view').classList.remove('hidden');
                 $('display-box').style.opacity = 0;
                 $('overlay-box').style.opacity = 0;
-                warmUp(); // each effect's first-time work, in the background
+                $('content-box').style.opacity = 0;
+                if (!isContentPage) warmUp(); // each effect's first-time work, in the background (#content has no effects)
             } else {
                 $('controller-view').classList.remove('hidden');
                 isController = true;

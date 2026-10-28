@@ -82,8 +82,6 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 | **Disco Ball** | A mirror ball drops down on its cord with a bounce and spins, its tiles glinting, while spots of colored light sweep around the screen, soft beams turn from it and the room dims a little | Drops in | Fades out |
 | **V-Day** | Hearts in reds and pinks float up the screen, swaying and gently beating, with twinkling sparkles and a soft pink glow around the edges | Fades in | Fades out |
 | **Retro VHS** | The picture looks like an old tape playing: scan lines, grain, a soft vignette, the ragged head-switching noise along the bottom, and a tracking glitch that rolls through now and then. The VCR's display shows **PLAY ▶** and **SP** at the top, the tape counter bottom left, and the date and time bottom right, like a camcorder | Fades in | Fades out |
-| **Content** | A TV, almost full screen, showing a picture (PNG, JPG, GIF or WebP) or a video (MP4 or WebM) you pick from the `content` folder. The stream around it dims a little. A picture stays up 15 seconds; a video plays all the way through, once, with its sound (it starts as soon as the screen is on, and its Duration fills in with its length). A file that's gone from the folder shows **No signal** | The TV rises into place, then its screen powers on (a bright line opens out to the picture) | The screen powers off to a line, then a dot, and the TV drops away |
-| **Content Full** | The same pictures and videos, full screen with no TV (black at the sides of one that isn't 16:9). Pictures 15 seconds, videos all the way through | Dissolves in | Dissolves out |
 | **Stingers** | | | |
 | **Standard** | A wide band of red, white and blue stripes (some with stars) sweeps from top-left to bottom-right, covering the whole screen at the halfway point; the stripes drift slightly (about 2 seconds) | Sweeps in | Sweeps off |
 | **Storm** | Storm clouds roll down with rain and lightning, cover the screen, then clear (about 2.8 seconds) | Rolls in | Clears |
@@ -102,6 +100,12 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 | **Coffee** | A cup of coffee on its saucer, seen from above, slides in steaming and turning; the camera zooms into the foam while latte art draws itself, a heart around **Mom** (or your own words, typed in **Text (optional)**, up to 14 characters), until the foam fills the screen; then it zooms on through and fades away (about 3.4 seconds) | Slides in | Zooms through |
 | **Medical** | Blue and white: blue panels sweep in from both sides as a white heartbeat line races across; at the middle a big white medical cross pulses as the heartbeat passes under it, then the panels sweep back out (about 2.4 seconds) | Sweeps in | Sweeps out |
 
+| **Content** | | | |
+| **Content** | A TV, almost full screen, showing a picture (PNG, JPG, GIF or WebP) or a video (MP4 or WebM) you pick from the `content` folder. The stream around it dims a little. A picture stays up 15 seconds; a video plays all the way through, once, with its sound (it starts as soon as the screen is on, and its Duration fills in with its length). A file that's gone from the folder shows **No signal** | The TV rises into place, then its screen powers on (a bright line opens out to the picture) | The screen powers off to a line, then a dot, and the TV drops away |
+| **Content Full** | The same pictures and videos, filling the source with no TV (black at the sides of one that isn't 16:9). Pictures 15 seconds, videos all the way through | Dissolves in | Dissolves out |
+
+📺 **Content has its own browser source:** Content and Content Full show on `fx_wizard.html#content`, not on `#display`, so they stay up while lower thirds, overlays and stingers come and go (and taking one of those never takes Content down). In OBS you can make it full screen in one scene and a smaller box beside the cameras in another. See [OBS Recommendations](#️-obs-recommendations).
+
 L3 PNG, L3 Info, L3 Gif and Custom text is always shown in capitals. If text is longer than normal, it shrinks to fit instead of getting cut off.
 
 🟩 **Greenscreen depth:** Color Wave, Confetti, Fall, Snow, Fire, Rain, Underwater, Arrested, Hot Take, V-Day and St. Patrick's each have a **Greenscreen** switch. With it on, they show partly *behind* you and partly *in front of* you. See [Greenscreen Depth](#-greenscreen-depth).
@@ -118,7 +122,7 @@ Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import bu
 - **Simple mode:** the **Pro / Simple** switch in the top bar (it reads **Pro** while off, **Simple** while on) swaps the tabs for one page in a theme's look (Classic, Sports, News, Tech & Gaming, Comedy, True Crime, Business, Lifestyle, Holiday): type a name and take it, and the theme's own overlays, stingers and sounds are one tap each. See [Simple mode](#simple-mode-themes).
 - **Shows:** the chip on the left of the top bar names the show that's open (like **001 · Morning Show**), with an amber dot when something has changed since it was saved. Tap it to save the show, everything the panel is set to, as a numbered file in the `shows` folder, or to open another. See [Saving shows](#saving-shows).
 - **Five tabs, as icons** (hover for the name): Animated L3s (a lower third), Fullscreen Overlays (sparkles), [Scene Builder](#scene-builder) (stacked bars), Podcast Rundown (a list) and [Sound Pad](#sound-pad) (a speaker). Animated L3s and Fullscreen Overlays each have their own saved list.
-- **Sections that open and close:** the lower third options (Background, Font Style, Font Color, Location, Animation) and the overlay groups (Fullscreen L3s, Overlays, Stingers) are big bars you tap to open or close. They all start closed, and opening one closes the others on that tab. On the Animated L3s tab, **▾ Expand all** (above the sections) opens them all at once; **▴ Collapse all** closes them, and closing any one ends it. Each bar has a chevron and shows what's picked inside. Lower thirds start on Blue, Default, White, Bottom Left and Slide Left; after that the panel remembers what's picked on each tab (and which tab was open).
+- **Sections that open and close:** the lower third options (Background, Font Style, Font Color, Location, Animation) and the overlay groups (Fullscreen L3s, Overlays, Stingers, Content) are big bars you tap to open or close. They all start closed, and opening one closes the others on that tab. On the Animated L3s tab, **▾ Expand all** (above the sections) opens them all at once; **▴ Collapse all** closes them, and closing any one ends it. Each bar has a chevron and shows what's picked inside. Lower thirds start on Blue, Default, White, Bottom Left and Slide Left; after that the panel remembers what's picked on each tab (and which tab was open).
 - **Saved graphics:** large, touch-friendly cards, full width (or two per row with the switch on the left of the heading; the panel remembers). The list starts closed: tap the heading, or the chevron under it, to open or close it (each tab separately). Tap a card to take, ✕ to delete, ＋ to add it to the Podcast Rundown. A colored edge shows the background or overlay type. The trash can on the right of the heading deletes everything saved on that tab (it asks first). The spyglass next to the layout switch opens a search box that filters the list by name, title, file or style (Escape closes it).
 - **Podcast Rundown:** the graphics you added with ＋, grouped into **blocks** (A to E to start; tap **+** next to the letters to add F, G and so on). Tap a letter under **Add to** to choose which block ＋ adds to.
   - **Labels:** each card is labeled on the left with its block, number and type: **A1-L3**, **A2-L3**... for lower thirds (animated or fullscreen) and **A1-OV**, **A2-OV**... for overlays and stingers. Lower thirds and overlays are numbered separately in each block, so a graphic in block B is **B1-L3**, **B1-OV** and so on.
@@ -165,6 +169,7 @@ Control panel  ──►  Server (port 8080)  ──►  Display page in OBS
 - **Control panel:** `fx_wizard.html`, opened in any browser. An OBS dock is recommended (see [Open the Control Panel](#️-open-the-control-panel)).
 - **Display:** the same file with `#display` on the end, added to OBS as a Browser Source.
 - **Underlay** (optional, for Greenscreen): the same file with `#underlay` on the end, added to OBS *below* your keyed camera.
+- **Content** (for Content and Content Full): the same file with `#content` on the end, added to OBS below the display. It shows only the pictures and videos from the `content` folder, so they stay up while graphics come and go on the display.
 - **Projector** (optional): the same file with `#projector` on the end, opened in a browser on a screen the anchor and guests can see.
 - **Server:** passes each message from the control panel to the display. It can run inside OBS (Python) or on its own (Node.js).
 
@@ -219,6 +224,7 @@ _Runs in its own window, separate from OBS._
 2. Check **Local file** and choose `fx_wizard.html`.
 3. Add `#display` to the end of the file path.
 4. Set the size to your canvas, for example **1920 x 1080**. Fullscreen overlays are designed for 1920 x 1080.
+5. For **Content** (pictures and videos from the `content` folder), add a second Browser Source the same way, with `#content` on the end instead, **below** the `#display` one. Turn on **Control audio via OBS** on it so a video's sound goes out.
 
 Using FX Wizard in more than one scene, or with a greenscreen? See [OBS Recommendations](#️-obs-recommendations) for the setup we use.
 
@@ -279,29 +285,35 @@ The **Greenscreen** switch only shows on the eight effects above, and each one r
 
 Every OBS setup is a little different, but this one works well, especially with one or more greenscreen shots.
 
-### Put FX Wizard in two nested scenes
-In OBS, a scene can be added to another scene like any other source. Make two scenes that hold nothing but FX Wizard:
+### Put FX Wizard in nested scenes
+In OBS, a scene can be added to another scene like any other source. Make these scenes that hold nothing but FX Wizard:
 
 1. **FX Display:** one Browser Source with `fx_wizard.html#display`, full screen (1920 x 1080).
-2. **FX Underlay** (only needed with a greenscreen): one Browser Source with `fx_wizard.html#underlay`, full screen.
+2. **FX Content** (for Content and Content Full): one Browser Source with `fx_wizard.html#content`, full screen.
+3. **FX Underlay** (only needed with a greenscreen): one Browser Source with `fx_wizard.html#underlay`, full screen.
 
 Then, in each of your show scenes:
 
 - **FX Display goes on top** in every scene where graphics should appear. The only things above it should be what's meant to cover everything, like a closer or a full-screen bumper (OBS transitions and stingers already play over the whole scene).
+- **FX Content goes just below FX Display**, so lower thirds and overlays play over the pictures and videos. Put it above the cameras in a scene where Content fills the screen.
 - **FX Underlay goes behind your keyed camera.** Put it just above the background and below the camera (or shot) that's keyed over that background. With several greenscreen cameras in one scene, put it below all of them.
 
 ```
 Closer / full-screen bumper (if any)
 FX Display          ← nested scene, on top
+FX Content          ← nested scene: the pictures and videos, under the graphics
 Camera 2 (Chroma Key)
 Camera 1 (Chroma Key)
 FX Underlay         ← nested scene, behind the people
 Background
 ```
 
+### Content beside the cameras
+Content stays up on its own layer while lower thirds and overlays come and go, so it can share a scene with the cameras. In a scene where it should sit to the side (say the host on the left and the picture on the right), select **FX Content** in that scene and drag its corners, or right-click it and use **Transform > Edit Transform**, to make it the box you want. Each show scene keeps its own size and spot for it, so one scene can have it full screen and another a box on the right, and the same picture stays up when you switch between them. **Content Full** fills whatever box you give it, so it's the one to use there; **Content** (the TV) is made to fill the screen.
+
 ### Why nested scenes
-- **One copy of each page, shared by every scene.** OBS runs a separate browser for every Browser Source, even in scenes that aren't on screen, and the animated effects take real work to draw. Nesting means just two pages, so they're always in step: a graphic that's up stays up when you change scenes.
-- **Change it once.** Resize, crop or move FX Display or FX Underlay in its own scene, and every show scene follows.
+- **One copy of each page, shared by every scene.** OBS runs a separate browser for every Browser Source, even in scenes that aren't on screen, and the animated effects take real work to draw. Nesting means one page each, so they're always in step: a graphic that's up stays up when you change scenes.
+- **Change it once.** Resize, crop or move FX Display, FX Content or FX Underlay in its own scene, and every show scene follows. (To change it in just one show scene, like Content in a box beside the cameras, transform it in that scene instead.)
 - **The layering is always right.** Graphics stay on top, and the behind-you effects stay behind the people, even in a scene with several greenscreen shots.
 
 ### Browser Source settings
@@ -310,6 +322,7 @@ Background
 - Optional: turn on *Use custom frame rate* and set **60** for smoother effects (this uses a little more of the computer).
 - Keep **Enable Browser Source Hardware Acceleration** on (OBS **Settings → Advanced → Sources**; it's on unless someone turned it off). In the [tests](#-tests), every effect ran at 55 to 60 frames a second with it, even on a basic Intel graphics chip. Without it, the effects now average under 16 ms a frame (60 fps) after the 2026-10-22 fixes, but a few still have short busier moments.
 - For the [Sound Pad](#sound-pad): turn on **Control audio via OBS** on the FX Display source (not on FX Underlay), so its sounds show in the Audio Mixer and go out on the stream and recording.
+- For a Content video's sound: turn on **Control audio via OBS** on the FX Content source too. It shows in the Audio Mixer as its own channel, so you can set its level apart from the Sound Pad.
 
 ---
 
@@ -325,7 +338,7 @@ Open `fx_wizard.html` in a browser (without `#display`). Check that the top bar 
 4. Press **TAKE** to put it on screen now, **TOGGLE ON** to keep it up until you turn it off, **SAVE** to add it to Saved L3s, or **＋ RUNDOWN** to put it straight into the Podcast Rundown (under Unsorted).
 
 ### Fullscreen Overlays tab
-1. Open **Fullscreen L3s**, **Overlays** or **Stingers** and pick one (opening one closes the others).
+1. Open **Fullscreen L3s**, **Overlays**, **Stingers** or **Content** and pick one (opening one closes the others).
 2. For L3 PNG, L3 Gif and Custom, type a **Name** and an optional **Title**. For L3 Info, type the paragraph in **Text**.
    - **Custom:** same as the Custom background: tap **Custom…** and pick the image from the `custom` folder.
    - **Like & Subscribe:** under **Socials**, tap an icon (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web) to open a box for that account and type it in. Tap the icon again to leave it out. All of them are optional, and the panel remembers what you typed. Give it at least 4 seconds so the clicks finish.
@@ -334,8 +347,9 @@ Open `fx_wizard.html` in a browser (without `#display`). Check that the top bar 
    - **Breaking News:** type the scrolling text in **Ticker text**, or leave it empty for **Breaking News | Breaking News | ...**. **TOGGLE ON** keeps it up until you turn it off.
    - **Location:** type the place (like *City Hall*).
    - **Sports** (a stinger): pick **Football**, **Basketball**, **Baseball** or **Soccer** under **Sport**.
-   - **Content** and **Content Full** (at the end of **Overlays**): put pictures (PNG, JPG, GIF or WebP) and videos (MP4 or WebM) in the `content` folder next to `assets`, then tap **Content…** (on a TV) or **Content Full…** (full screen). A window shows everything in the folder with a preview (videos are marked ▶, with their length): tap the one to show. The two share the pick. The panel remembers it, and each saved Content overlay (named after its file) keeps its own.
-     - **Duration:** 15 seconds for a picture. For a video it fills in with the video's length, plus the moment the TV (or the dissolve) takes to come up, so the whole video plays (a 45-second video on the TV gets 47), and the panel says so under the buttons: `content/clip.mp4 · video 0:45, plays to the end`. You can still change it: shorter cuts the video off, longer holds its last frame. A panel that can't open the file itself (on another computer) keeps 15, so set it by hand there. **Choose a file…** picks it by hand (for an older server that can't list the folder); pick it from the `content` folder, because that's where the display looks. For a video's sound, turn on **Control audio via OBS** on the FX Display browser source, as for the [Sound Pad](#sound-pad).
+   - **Content** and **Content Full** (in their own section, **Content**): put pictures (PNG, JPG, GIF or WebP) and videos (MP4 or WebM) in the `content` folder next to `assets`, then tap **Content…** (on a TV) or **Content Full…** (full screen). A window shows everything in the folder with a preview (videos are marked ▶, with their length): tap the one to show. The two share the pick. The panel remembers it, and each saved Content overlay (named after its file) keeps its own.
+     - **Its own layer:** Content shows on the `#content` browser source (see [Add the Display to OBS](#-add-the-display-to-obs)), so taking a lower third, an overlay or a stinger leaves it up, and taking Content leaves those up. Taking another Content replaces the one that's up. **TOGGLE ON** keeps it up until you turn it off: with Content picked, the TOGGLE button is Content's own (pick an overlay and it's the overlay's), so Content can stay toggled on while you take and toggle overlays. **CLEAR ALL** takes Content down too.
+     - **Duration:** 15 seconds for a picture. For a video it fills in with the video's length, plus the moment the TV (or the dissolve) takes to come up, so the whole video plays (a 45-second video on the TV gets 47), and the panel says so under the buttons: `content/clip.mp4 · video 0:45, plays to the end`. You can still change it: shorter cuts the video off, longer holds its last frame. A panel that can't open the file itself (on another computer) keeps 15, so set it by hand there. **Choose a file…** picks it by hand (for an older server that can't list the folder); pick it from the `content` folder, because that's where the display looks. For a video's sound, turn on **Control audio via OBS** on the FX Content browser source (`#content`).
 3. Check the **Duration**: it fills in with the overlay's usual time when you pick it. Stingers show their fixed length, locked.
 4. Press **TAKE**, **TOGGLE ON**, **SAVE**, or **＋ RUNDOWN**.
 
@@ -563,7 +577,7 @@ Both `styles.css` and the script in `fx_wizard.html` start with a numbered list 
   - (`css/tailwind.css` holds the panel's layout classes, like `grid grid-cols-2 gap-1`. It's built, not edited: see [Fonts and colors](#fonts-and-colors).)
   - `fx_wizard.html`: the control panel and the display. Its script also starts with a numbered list of sections.
 - **After every change,** refresh the control panel dock and the browser sources in OBS (right-click the source > **Refresh**, or open its properties and press **Refresh cache of current page**). OBS caches images and videos, so a replaced file may not show until you do.
-- **Preview without OBS:** open `fx_wizard.html` in one browser tab and `fx_wizard.html#display` in another, with the server running. Graphics you take show in the second tab.
+- **Preview without OBS:** open `fx_wizard.html` in one browser tab and `fx_wizard.html#display` in another, with the server running. Graphics you take show in the second tab (Content shows in a third, `fx_wizard.html#content`).
 
 ### Image sizes and formats
 Sizes are for a 1920 x 1080 canvas (for 4K, double them). Images are cropped to fill their space, never stretched, so keep the important part toward the middle.
@@ -653,7 +667,7 @@ Keep the same file names and the overlays pick up the new images.
 
 ### Things not to change
 - The **code names** of overlays in `OVERLAYS` (like `l3Large`, `snow`, `hottake`) and of backgrounds (like `blue`). Saved graphics and rundown files refer to them by these names; rename one and older saves stop finding it. Change the **label** instead.
-- The `#display` and `#underlay` endings: OBS uses them to know which page to show.
+- The `#display`, `#underlay` and `#content` endings: OBS uses them to know which page to show.
 
 ---
 
@@ -680,7 +694,7 @@ Results are printed and saved to `tests/results/perf_results.json`. If Chrome is
 | `gpu` | The heaviest effects in real time, drawn on the CPU and then on the graphics chip | 55 fps or more with the graphics chip |
 | `panel` | Opening the panel with 0, 100 and 500 saved graphics (and up to 300 rundown items), drawing the lists and switching tabs | Lists drawn and tabs switched in under 250 ms |
 | `leak` | 156 takes in a row (every overlay and every background, three times), checking memory and page elements after each round | Memory levels off; no elements left behind |
-| `offline` | The panel, display and underlay with every web address blocked | Only graphics on the display and underlay; the panel keeps its layout and fonts; no web requests |
+| `offline` | The panel, display, underlay and content pages with every web address blocked | Only graphics on the display, underlay and content pages; the panel keeps its layout and fonts; no web requests |
 | `servers` | `server.js` and `server.py`: the time to pass a lower third from the panel to the display (400 in a row, 150 large ones, a burst of 200), and what happens when one connected window stops reading | Under 5 ms; the display keeps getting messages |
 
 ### Results (2026-10-22)
@@ -734,13 +748,13 @@ Still open: `custom/water.gif` is 49 MB. GIFs are decoded by the CPU frame by fr
 
 | File | What it is |
 |---|---|
-| `fx_wizard.html` | The control panel, the display (`#display`), the greenscreen underlay (`#underlay`) and the projector (`#projector`), all in one page |
+| `fx_wizard.html` | The control panel, the display (`#display`), the greenscreen underlay (`#underlay`), Content (`#content`) and the projector (`#projector`), all in one page |
 | `css/styles.css` | All the styles and animations |
 | `css/fonts.css`, `assets/fonts/` | The fonts, kept in the folder so nothing needs the internet |
 | `css/tailwind.css` | The panel's layout classes, built by `npm run build:css` from `css/tailwind.src.css` and `tailwind.config.js` (don't edit it by hand) |
 | `assets/` | Background videos, the L3 images and GIF, and logos. `assets/sounds/` holds the Sound Pad sounds |
 | `custom/` | Your own images for the **Custom…** background and the **Custom** Fullscreen L3 (pick one with **Custom…**). Not shared in Git |
-| `content/` | Your pictures and videos for the **Content** overlay's TV (pick one with **Content…**). Not shared in Git |
+| `content/` | Your pictures and videos for **Content** and **Content Full**, shown on `#content` (pick one with **Content…**). Not shared in Git |
 | `rundowns/` | Saved Podcast Rundowns, one `.json` file each. Not shared in Git |
 | `logs/` | Show logs from **Generate Log**, one `.csv` file each. Not shared in Git |
 | `shows/` | Saved shows, one `.json` file each, named by number and title (`001 - Morning Show.json`). Not shared in Git |

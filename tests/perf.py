@@ -367,10 +367,10 @@ def gpu():
 
 # ---------------------------------------------------------------- H. no internet: everything still works
 def offline():
-    """Every web address blocked (http and https; the page's own files still load). The display and underlay
-    show nothing but graphics, the panel keeps its layout, the fonts load, and the page asks the web for nothing."""
+    """Every web address blocked (http and https; the page's own files still load). The display, underlay and
+    content pages show nothing but graphics, the panel keeps its layout, the fonts load, and the page asks the web for nothing."""
     out = {}
-    for hash in ("#display", "#underlay", ""):
+    for hash in ("#display", "#underlay", "#content", ""):
         p = test_page("offline")
         pg = Page("about:blank", size=(1280, 720))
         pg.send("Network.enable")

@@ -2215,10 +2215,22 @@ html.light .tm-error { color: #b91c1c; }
 }
 
 /* ---------- Content: a TV, almost full screen, showing a picture or video from the "content" folder ----------
+   It has its own full-screen layer, #content-box, shown only on fx_wizard.html#content (its own browser source), so
+   it stays up while lower thirds and overlays come and go on #display.
    The stream behind dims a little and the TV rises into place, then its screen powers on like an old set: a dot
    stretches to a bright line, the line opens out to the picture as the flash fades, and a glint sweeps across the
    glass. At the end (anim-tvOff) the screen powers off, the picture squeezing back to a line and then a dot, and
    the TV drops away. The picture fits inside the screen (black around it), whatever its shape. */
+#content-box {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0;
+  visibility: hidden; /* shown on TAKE, hidden again after it leaves */
+  overflow: hidden;
+  pointer-events: none;
+}
 #content-tv {
   position: absolute;
   inset: 0;
@@ -2226,7 +2238,7 @@ html.light .tm-error { color: #b91c1c; }
   align-items: center;
   justify-content: center;
 }
-#overlay-box.content #content-tv { display: flex; }
+#content-box.content #content-tv { display: flex; }
 #content-tv [hidden] { display: none; }
 #content-tv i { display: block; }
 #content-tv::before { /* the dimmed stream around the TV */
@@ -2365,12 +2377,12 @@ html.light .tm-error { color: #b91c1c; }
   to   { background: #60a5fa; box-shadow: 0 0 0.6vh #3b82f6; }
 }
 /* Leaving: the box stays up (the page has already set it to 0) while the screen powers off and the TV drops */
-#overlay-box.anim-tvOff { animation: tvBoxOut 0.9s linear forwards; }
-#overlay-box.anim-tvOff .tv-picture { animation: tvPowerOff 0.42s cubic-bezier(0.6, 0, 0.8, 0.4) both; }
-#overlay-box.anim-tvOff .tv-flash { animation: tvFlashOn 0.42s ease-in both; }
-#overlay-box.anim-tvOff .tv-led { animation: none; background: #ef4444; box-shadow: 0 0 0.6vh #ef4444; }
-#overlay-box.anim-tvOff .tv { animation: tvDrop 0.48s 0.4s cubic-bezier(0.5, 0, 0.75, 0) both; }
-#overlay-box.anim-tvOff #content-tv::before { animation: fadeOut 0.45s 0.43s ease-in both; }
+#content-box.anim-tvOff { animation: tvBoxOut 0.9s linear forwards; }
+#content-box.anim-tvOff .tv-picture { animation: tvPowerOff 0.42s cubic-bezier(0.6, 0, 0.8, 0.4) both; }
+#content-box.anim-tvOff .tv-flash { animation: tvFlashOn 0.42s ease-in both; }
+#content-box.anim-tvOff .tv-led { animation: none; background: #ef4444; box-shadow: 0 0 0.6vh #ef4444; }
+#content-box.anim-tvOff .tv { animation: tvDrop 0.48s 0.4s cubic-bezier(0.5, 0, 0.75, 0) both; }
+#content-box.anim-tvOff #content-tv::before { animation: fadeOut 0.45s 0.43s ease-in both; }
 @keyframes tvBoxOut {
   0%, 99% { opacity: 1; }
   100%    { opacity: 0; }
@@ -2389,16 +2401,16 @@ html.light .tm-error { color: #b91c1c; }
   from { opacity: 1; transform: none; }
   to   { opacity: 0; transform: translateY(12vh) scale(0.9); }
 }
-/* Content Full: the same picture or video, filling the screen (black around one that isn't 16:9), with no TV.
+/* Content Full: the same picture or video, filling the source (black around one that isn't 16:9), with no TV.
    It dissolves in and out (anim-fade, anim-hide on the box). */
-#overlay-box.contentFull #content-tv { display: flex; }
-#overlay-box.contentFull #content-tv::before,
-#overlay-box.contentFull .tv-flash, #overlay-box.contentFull .tv-glare, #overlay-box.contentFull .tv-badge,
-#overlay-box.contentFull .tv-led, #overlay-box.contentFull .tv-stand { display: none; }
-#overlay-box.contentFull .tv, #overlay-box.contentFull .tv-set, #overlay-box.contentFull .tv-screen { width: 100%; height: 100%; }
-#overlay-box.contentFull .tv, #overlay-box.contentFull .tv-picture { animation: none; }
-#overlay-box.contentFull .tv-set { padding: 0; border-radius: 0; background: none; box-shadow: none; }
-#overlay-box.contentFull .tv-screen { aspect-ratio: auto; border-radius: 0; box-shadow: none; }
+#content-box.contentFull #content-tv { display: flex; }
+#content-box.contentFull #content-tv::before,
+#content-box.contentFull .tv-flash, #content-box.contentFull .tv-glare, #content-box.contentFull .tv-badge,
+#content-box.contentFull .tv-led, #content-box.contentFull .tv-stand { display: none; }
+#content-box.contentFull .tv, #content-box.contentFull .tv-set, #content-box.contentFull .tv-screen { width: 100%; height: 100%; }
+#content-box.contentFull .tv, #content-box.contentFull .tv-picture { animation: none; }
+#content-box.contentFull .tv-set { padding: 0; border-radius: 0; background: none; box-shadow: none; }
+#content-box.contentFull .tv-screen { aspect-ratio: auto; border-radius: 0; box-shadow: none; }
 
 /* ---------- Breaking News: LIVE in the top-right corner, red ticker bar along the bottom ---------- */
 #breaking {
