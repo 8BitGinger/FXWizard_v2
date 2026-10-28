@@ -31,9 +31,12 @@
             <button type="button" id="show-chip" class="show-chip" onclick="openShowsDialog()" title="Shows: save this show, or open another">
                 <span data-icon="folder"></span><span id="show-chip-text" class="show-chip-text"></span><span id="show-chip-dirty" class="show-chip-dirty hidden"></span>
             </button>
+            <!-- Edit the layout (Pro only): hide the tabs, sections and buttons this show doesn't need.
+                 The layout is kept with the show. -->
+            <button type="button" id="layout-btn" class="layout-btn ml-auto" onclick="setLayoutEdit(!layoutEditing)" title="Edit the layout: hide the tabs, sections and buttons this show doesn't need"><span data-icon="wrench"></span></button>
             <!-- Simple mode: pick a theme, and its lower third, overlays, stingers and sounds are all on one page.
                  It says "Pro" while it's off (the full panel, with the tabs) and "Simple" while it's on. -->
-            <label class="fx-switch ml-auto" title="Simple mode: pick a theme and use its own lower thirds, overlays, stingers and sounds">
+            <label class="fx-switch" title="Simple mode: pick a theme and use its own lower thirds, overlays, stingers and sounds">
                 <span id="simple-switch-text">Pro</span>
                 <input type="checkbox" id="simple-toggle">
                 <span class="fx-track"></span>
@@ -49,14 +52,17 @@
         <!-- ===== CONTROLLER ===== -->
         <div id="controller-view" class="pb-28 hidden controller-max-width mx-auto">
             <!-- ===== SIMPLE MODE (the Simple switch in the top bar) =====
-                 Everything on one page, in the look of the theme picked: its lower third (TAKE, TOGGLE, SAVE,
-                 and the saved L3s, which all take in the theme's look), then its overlays, stingers and sounds.
+                 Everything on one page, in the look of the theme picked: its lower third (the theme's looks, TAKE,
+                 TOGGLE, SAVE, and the saved L3s, which all take in the look picked), then its overlays, stingers
+                 and sounds.
                  The tabs come back when Simple is turned off. Filled in by the script (THEMES). -->
             <div id="simple-section" class="simple-section">
                 <div class="simple-label">Theme</div>
                 <div id="simple-themes" class="simple-themes"></div>
                 <section class="simple-card">
                     <h3>Lower third <small id="simple-l3-look"></small></h3>
+                    <!-- The theme's looks: animated lower thirds in its colors, and the Fullscreen L3s that suit it -->
+                    <div id="simple-looks" class="simple-where simple-looks"></div>
                     <input type="text" id="simple-name" placeholder="Name" maxlength="50" autocomplete="off" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm text-violet-300 focus:text-white focus:bg-gray-700">
                     <input type="text" id="simple-title" placeholder="Title (optional)" maxlength="50" autocomplete="off" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm text-violet-300 focus:text-white focus:bg-gray-700">
                     <div id="simple-where" class="simple-where"></div>
@@ -81,6 +87,15 @@
                     <h3>Sounds</h3>
                     <div id="simple-sounds" class="simple-pads"></div>
                 </section>
+            </div>
+
+            <!-- Editing the layout (the wrench in the top bar): tap a button to hide it or bring it back, or the eye
+                 on a tab or section for all of it. Hidden ones show faded until Done. -->
+            <div id="layout-bar" class="layout-bar hidden">
+                <span data-icon="wrench"></span>
+                <div class="layout-bar-text"><b>Editing the layout</b><span>Tap a button to hide it, or the eye on a tab or section</span></div>
+                <button type="button" onclick="restoreLayout()" title="Bring back every tab, section and button">Restore all</button>
+                <button type="button" class="layout-done" onclick="setLayoutEdit(false)">Done</button>
             </div>
 
             <div class="space-y-3 p-2 rounded-lg w-full">
@@ -281,15 +296,18 @@
 
                     <!-- Content: a picture or video from the "content" folder (next to "assets"), on its own browser
                          source (fx_wizard.html#content), so it stays up while lower thirds and overlays come and go.
-                         Content… shows it on a TV, almost full screen; Content Full… fills the source. Tapping either
-                         opens the window to pick which one (they share the pick). -->
+                         Content TV… shows it on a TV, almost full screen; Content Phone… on a phone, for tall 9:16 pictures
+                         and videos; Content Full… fills the source. Tapping any of them opens the window to pick which
+                         one (they share the pick). -->
                     <details class="fx-section" data-key="ov-content">
                         <summary><span>Content</span><span class="fx-value"></span></summary>
                         <div class="grid grid-cols-2 gap-1 text-[12px]">
                             <input type="radio" id="ov-content" name="overlayStyle" value="content" data-content="1" class="hidden peer/o39">
-                            <label for="ov-content" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o39:bg-primary">Content…</label>
+                            <label for="ov-content" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o39:bg-primary">Content TV…</label>
+                            <input type="radio" id="ov-contentPhone" name="overlayStyle" value="contentPhone" data-content="1" class="hidden peer/o41">
+                            <label for="ov-contentPhone" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o41:bg-primary">Content Phone…</label>
                             <input type="radio" id="ov-contentFull" name="overlayStyle" value="contentFull" data-content="1" class="hidden peer/o40">
-                            <label for="ov-contentFull" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o40:bg-primary">Content Full…</label>
+                            <label for="ov-contentFull" class="col-span-2 p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o40:bg-primary">Content Full…</label>
                             <p id="content-name" class="col-span-2 text-[12px] text-center opacity-75"></p>
                         </div>
                     </details>
@@ -309,10 +327,25 @@
                         </div>
                     </div>
 
+                    <!-- Retro VHS: the date and time on the tape, both optional. Left empty it shows today's date and the
+                         time now, as before; set, the camcorder clock starts there and runs on. ✕ empties both. -->
+                    <div id="vhs-field" class="hidden">
+                        <p class="block text-sm font-medium mb-1">Date and time on the tape (optional):</p>
+                        <div class="vhs-stamp">
+                            <input type="date" id="vhs-date" aria-label="Date on the tape" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm text-violet-300 focus:text-white focus:bg-gray-700">
+                            <input type="time" id="vhs-time" aria-label="Time on the tape" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm text-violet-300 focus:text-white focus:bg-gray-700">
+                            <button type="button" onclick="clearVhsStamp('vhs')" title="Back to today's date and the time now"><span data-icon="x"></span></button>
+                        </div>
+                    </div>
+
                     <!-- Import L3s: each line of a .txt file becomes a saved L3 ("Name" or "Name | Title";
                          for L3 Info each line is one paragraph). Only shown for L3 PNG and L3 Info. -->
                     <input type="file" id="import-file" accept=".txt,text/plain" multiple class="hidden">
                     <button id="import-btn" class="py-1 w-full hover:bg-teal-600 active:scale-95 bg-teal-700 font-bold rounded text-sm" onclick="$('import-file').click()"><span data-icon="file"></span> IMPORT L3s (.txt)</button>
+                    <!-- Import content: each picture or video picked from the content folder becomes a saved card, on the
+                         TV, a phone or full screen (whichever is picked), for all of its length. Only shown for the Content ones. -->
+                    <input type="file" id="import-content-file" accept="image/png,image/jpeg,image/gif,image/webp,video/mp4,video/webm" multiple class="hidden">
+                    <button id="import-content-btn" class="hidden py-1 w-full hover:bg-teal-600 active:scale-95 bg-teal-700 font-bold rounded text-sm" onclick="$('import-content-file').click()" title="Pick pictures and videos in the content folder: each one becomes a saved card"><span data-icon="file"></span> IMPORT CONTENT</button>
                 </div>
 
                 <!-- ===== LOWER THIRD TAB =====
@@ -483,6 +516,15 @@
             <!-- Message box ("Taken: Name for 5s"): floats at the bottom of the panel on every tab,
                  lights up for each new message, then dims but keeps showing the last one -->
             <div id="controller-feedback" class="fx-toast idle" role="status" aria-live="polite">Ready</div>
+            <!-- Content on screen: its name and time left (or how long it's been up, when toggled), on every tab, so
+                 it stays in sight while lower thirds and overlays are taken over it. ⏹ OFF takes it down. -->
+            <div id="content-clock" class="content-clock hidden">
+                <span class="cc-icon" data-icon="monitor"></span>
+                <span class="cc-text"><b id="cc-kind"></b><span id="cc-name"></span></span>
+                <span class="cc-time"><b id="cc-left"></b><small id="cc-of"></small></span>
+                <button type="button" onclick="takeOff('content')" title="Take the content off screen now"><span data-icon="stop"></span> OFF</button>
+                <i id="cc-bar" class="cc-bar"></i>
+            </div>
             <!-- CLEAR ALL floats under the message box, on every tab and in Simple mode, so it never needs a scroll -->
             <button id="clear-btn" type="button" class="fx-clear" onclick="clearAll()"><span data-icon="x"></span> CLEAR ALL</button>
 
@@ -634,14 +676,15 @@
                     <div id="block-chips" class="block-chips"></div>
                 </div>
                 <!-- Cues: notes and placeholders for things that aren't graphics (clips, SOTs, pictures, the
-                     scene to take). They show greyed out in the rundown (a scene with a yellow TAKE) and can't
-                     be taken. Only while Set Show is off. -->
+                     scene to take). They show greyed out in the rundown (a scene with a yellow TAKE). A clip, SOT
+                     or PIC can be given a file from the content folder, and then it plays (a blue PLAY) while
+                     Set Show is on. Only while Set Show is off. -->
                 <div id="cue-row" class="cue-row">
                     <span class="text-xs opacity-75 flex-none">Cue:</span>
                     <button type="button" class="cue-add" onclick="addCue('note')" title="Add a producer note"><span data-icon="note"></span> Note</button>
-                    <button type="button" class="cue-add" onclick="addCue('clip')" title="Add a placeholder for a clip"><span data-icon="clip"></span> Clip</button>
-                    <button type="button" class="cue-add" onclick="addCue('sot')" title="Add a placeholder for a SOT (sound on tape)"><span data-icon="sot"></span> SOT</button>
-                    <button type="button" class="cue-add" onclick="addCue('pic')" title="Add a placeholder for a picture"><span data-icon="pic"></span> PIC</button>
+                    <button type="button" class="cue-add" onclick="addCue('clip')" title="Add a clip: a placeholder, or a video from the content folder to play"><span data-icon="clip"></span> Clip</button>
+                    <button type="button" class="cue-add" onclick="addCue('sot')" title="Add a SOT (sound on tape): a placeholder, or a video from the content folder to play"><span data-icon="sot"></span> SOT</button>
+                    <button type="button" class="cue-add" onclick="addCue('pic')" title="Add a picture: a placeholder, or a picture from the content folder to show"><span data-icon="pic"></span> PIC</button>
                     <button type="button" class="cue-add" onclick="addCue('scene')" title="Add the scene to take next (picked from OBS's scenes or sources)"><span data-icon="scene"></span> Scene</button>
                     <button type="button" class="cue-add" onclick="addCue('script')" title="Add a script (shown on the projector)"><span data-icon="script"></span> Script</button>
                     <button type="button" class="cue-add" onclick="addCue('break')" title="Add a break you fire from the rundown (or from OBS / a Stream Deck with Start Break): it takes its break scene in OBS"><span data-icon="pause"></span> Break</button>
@@ -733,7 +776,7 @@
                 </form>
             </dialog>
 
-            <!-- Content…: the pictures and videos in the "content" folder, to pick the one the TV shows -->
+            <!-- Content TV… and Content Full…: the pictures and videos in the "content" folder, to pick the one to show -->
             <dialog id="content-dialog">
                 <form method="dialog" class="flex flex-col gap-2">
                     <h3 class="font-bold">Content</h3>
@@ -778,7 +821,34 @@
                         <button type="button" id="edit-load-txt" class="hidden w-full mt-1 py-1 rounded bg-gray-600 text-white text-sm font-bold" onclick="$('edit-txt-file').click()"><span data-icon="file"></span> Load a .txt file</button>
                         <input type="file" id="edit-txt-file" accept=".txt,text/plain" class="hidden">
                     </div>
+                    <!-- Clip, SOT and PIC cues: a picture or video from the "content" folder that the cue plays while
+                         Set Show is on, on the TV, a phone or full screen (like Content TV…, Content Phone… and
+                         Content Full…). Optional: with
+                         none, the cue is just a placeholder. Without a list from the server the name is typed.
+                         A Clip's video plays muted; a SOT's plays with its sound. -->
+                    <div id="edit-content-wrap" class="hidden">
+                        <div class="scene-pick-head">
+                            <label for="edit-content" class="text-sm">Plays:</label>
+                            <div id="edit-content-kinds" class="scene-kinds">
+                                <button type="button" id="edit-content-tv" onclick="setCueContentStyle('content')">TV</button>
+                                <button type="button" id="edit-content-phone" onclick="setCueContentStyle('contentPhone')">Phone</button>
+                                <button type="button" id="edit-content-full" onclick="setCueContentStyle('contentFull')">Full screen</button>
+                            </div>
+                        </div>
+                        <select id="edit-content" class="w-full p-1 rounded border-2 border-white text-sm" onchange="pickCueContent(this.value)"></select>
+                        <input type="text" id="edit-content-text" maxlength="120" placeholder="File name in the content folder (optional)" class="hidden w-full p-1 rounded border-2 border-white bg-transparent text-sm" oninput="pickCueContent(this.value.trim())">
+                        <p id="edit-content-note" class="text-xs opacity-75 mt-1"></p>
+                    </div>
                     <div id="edit-socials-wrap" class="flex flex-col gap-1"></div>
+                    <!-- Retro VHS: the date and time on the tape (both optional, as on the Fullscreen Overlays tab) -->
+                    <div id="edit-vhs-wrap" class="hidden">
+                        <span class="block text-sm">Date and time on the tape (optional):</span>
+                        <div class="vhs-stamp">
+                            <input type="date" id="edit-vhs-date" aria-label="Date on the tape" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm">
+                            <input type="time" id="edit-vhs-time" aria-label="Time on the tape" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm">
+                            <button type="button" onclick="clearVhsStamp('edit-vhs')" title="Back to today's date and the time now"><span data-icon="x"></span></button>
+                        </div>
+                    </div>
                     <!-- Break cues: how long the break is (and, above, the break scene it takes) -->
                     <div id="edit-break-wrap" class="hidden">
                         <label for="edit-break-len" class="block text-sm">Length (minutes:seconds):</label>
@@ -1117,7 +1187,8 @@
             <!-- Content: only on fx_wizard.html#content, its own browser source, so it stays up while lower thirds and
                  overlays come and go on #display. A TV, almost full screen, showing a picture or video from the "content"
                  folder: it rises into place and its screen powers on; at the end the screen powers off and it drops away.
-                 Content Full shows the same picture filling the source, without the TV. Timing is in styles.css. -->
+                 Content Phone is the same, made over into a phone (a tall 9:16 picture fills its screen). Content Full
+                 shows the same picture filling the source, without the TV. Timing is in styles.css. -->
             <div id="content-box">
                 <div id="content-tv">
                     <div class="tv">
@@ -1129,6 +1200,17 @@
                                     <span class="tv-nosignal">No signal</span>
                                     <i class="tv-flash"></i>
                                 </div>
+                                <!-- Content Phone only: the status bar (the time, signal, Wi-Fi, battery), the camera cutout and the home bar -->
+                                <div class="ph-status ph-only">
+                                    <b id="ph-time"></b>
+                                    <span class="ph-icons">
+                                        <svg class="ph-signal" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+                                        <svg class="ph-wifi" viewBox="0 0 16 12"><path d="M8 11.6 5.7 9.2a3.3 3.3 0 0 1 4.6 0z"/><path d="M3.5 7a6.4 6.4 0 0 1 9 0l-1.4 1.4a4.4 4.4 0 0 0-6.2 0z"/><path d="M1.2 4.7a9.7 9.7 0 0 1 13.6 0l-1.4 1.4a7.7 7.7 0 0 0-10.8 0z"/></svg>
+                                        <svg class="ph-battery" viewBox="0 0 27 12"><rect x="0.6" y="0.6" width="22" height="10.8" rx="3" fill="none" stroke="currentColor" stroke-opacity="0.5" stroke-width="1.2"/><rect x="2.2" y="2.2" width="17" height="7.6" rx="1.6"/><path d="M24.2 4.2v3.6a1.9 1.9 0 0 0 0-3.6z" fill-opacity="0.5"/></svg>
+                                    </span>
+                                </div>
+                                <i class="ph-island ph-only"></i>
+                                <i class="ph-home ph-only"></i>
                                 <i class="tv-glare"></i>
                             </div>
                             <i class="tv-badge"></i>
@@ -1162,7 +1244,7 @@
            10. Controller: status messages
            11. Controller: tabs and sections
            12. Controller: TAKE / TOGGLE / SAVE / CLEAR ALL
-           13. Controller: Import L3s
+           13. Controller: Import L3s and content
            14. Controller: saved graphics list
            15. Controller: Podcast Rundown (and saving / importing rundowns)
            16. Controller: custom files
@@ -1174,7 +1256,8 @@
            22. Controller: remembered picks (what's picked on each tab)
            23. Controller: shows (saved, numbered shows in the "shows" folder)
            24. Controller: Simple mode (themes)
-           25. Startup
+           25. Controller: layout (hiding the tabs, sections and buttons a show doesn't need)
+           26. Startup
            ========================================================= */
 
 
@@ -1215,16 +1298,17 @@
         //   import:  true = can be filled from .txt files (shows the Import button)
         //   paragraph: true = one wrapping paragraph instead of Name and Title
         //   custom:  true = uses the image from the "custom" folder
-        //   content: true = shows a picture or video from the "content" folder (Content… / Content Full…), on its own
+        //   content: true = shows a picture or video from the "content" folder (Content TV… / Phone… / Full…), on its own
         //            layer and browser source (#content: see layerOf). A video starts once the picture is fully up
         //            (lead, in seconds), and its Duration fills in so all of it plays
         //   ticker:  true = one text box, scrolled along the Breaking News bar
         //   sport:   true = shows the Sport picker (Football, Basketball, Baseball, Soccer)
-        //   social:  true = shows the Socials picker (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web)
+        //   social:  true = shows the Socials picker (YouTube, Facebook, Twitter, Instagram, LinkedIn, GitHub, Web)
         //   caption: one optional line of text, with this as the default (Hot Take, Coffee)
         //   max:     the most characters that text can have (default 40)
         //   place:   one line of text, the place (Location)
-        //   dur:     usual time in seconds, filled in when it's picked (not for stingers)
+        //   stamp:   true = shows the tape's date and time picker (Retro VHS; both optional, sent as tapeDate / tapeTime)
+        //   dur:    usual time in seconds, filled in when it's picked (not for stingers)
         //   depth:   true = shows a Greenscreen switch; taken with it on, it splits: the far part shows
         //            on #underlay (behind you) and the near part on #display (in front of you)
         //   effect:  canvas animation to run (see section 6)
@@ -1249,14 +1333,17 @@
             breaking:  { label: 'Breaking News', text: false, dur: 30, ticker: true, effect: null, animIn: 'anim-fade', animOut: 'anim-hide' },
             social:    { label: 'Like & Subscribe', text: false, dur: 6, social: true, effect: null, animIn: 'anim-fade', animOut: 'anim-hide' },
             stpatricks: { label: "St. Patrick's", text: false, dur: 15, effect: 'stpatricks', animIn: 'anim-fade', animOut: 'anim-hide', depth: true },
-            vhs:       { label: 'Retro VHS',  text: false, dur: 15, effect: 'vhs', animIn: 'anim-fade', animOut: 'anim-hide' },
+            vhs:       { label: 'Retro VHS',  text: false, dur: 15, stamp: true, effect: 'vhs', animIn: 'anim-fade', animOut: 'anim-hide' },
             rain:      { label: 'Rain',       text: false, dur: 15, effect: 'rain', animIn: 'anim-fade', animOut: 'anim-hide', depth: true },
             vday:      { label: 'V-Day',      text: false, dur: 15, effect: 'vday', animIn: 'anim-fade', animOut: 'anim-hide', depth: true },
             comic:     { label: 'Comic',      text: false, dur: 10, effect: 'comic', animIn: 'anim-fade', animOut: 'anim-hide' },
             disco:     { label: 'Disco Ball', text: false, dur: 15, effect: 'disco', animIn: 'anim-fade', animOut: 'anim-hide' },
             locpin:    { label: 'Location',   text: false, dur: 8, place: true, effect: null, animIn: '', animOut: 'anim-slideOutLeft' }, // leaves as one block, like L3 PNG
             // A TV rises up almost full screen and its screen powers on (in styles.css); anim-tvOff powers it off and drops it away
-            content:   { label: 'Content',    text: false, dur: 15, content: true, lead: 1.2, effect: null, animIn: '', animOut: 'anim-tvOff' },
+            content:   { label: 'Content TV', text: false, dur: 15, content: true, lead: 1.2, effect: null, animIn: '', animOut: 'anim-tvOff' },
+            // A phone, for tall 9:16 pictures and videos: it rises up and its screen wakes; anim-tvOff (with the phone's
+            // own steps in styles.css) puts the screen to sleep and drops it away
+            contentPhone: { label: 'Content Phone', text: false, dur: 15, content: true, lead: 1.1, effect: null, animIn: '', animOut: 'anim-tvOff' },
             // The same picture or video, full screen (no TV), dissolving in and out
             contentFull: { label: 'Content Full', text: false, dur: 15, content: true, lead: 0.6, effect: null, animIn: 'anim-fade', animOut: 'anim-hide' },
             // Stingers: CSS stinger lengths are read from styles.css, so the speed is only set there
@@ -1312,6 +1399,7 @@
             twitter:   { label: 'Twitter', placeholder: '@yourhandle', icon: '<path d="M4 4l16 16M20 4L4 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>' },
             instagram: { label: 'Instagram', placeholder: '@yourhandle', icon: '<rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="17.3" cy="6.7" r="1.3"/>' },
             linkedin:  { label: 'LinkedIn', placeholder: 'in/yourname', icon: '<path fill-rule="evenodd" d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2.2 7.5V17h2.4v-6.5zM8.4 6.4a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8zm3 4.1V17h2.4v-3.4c0-1 .5-1.6 1.3-1.6s1.2.6 1.2 1.6V17h2.4v-3.9c0-2-1.1-2.8-2.6-2.8-1 0-1.8.5-2.3 1.2v-1z"/>' },
+            github:    { label: 'GitHub', placeholder: 'yourname', icon: '<path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>' },
             web:       { label: 'Web', placeholder: 'yoursite.com', icon: '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z" fill="none" stroke="currentColor" stroke-width="2"/>' },
         };
         const socialIcon = (key) => `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${SOCIALS[key].icon}</svg>`;
@@ -1353,7 +1441,7 @@
             stpatricks: 'border-green-500', vhs: 'border-fuchsia-500', fireworks: 'border-yellow-400', medical: 'border-blue-500',
             rain: 'border-slate-300', vday: 'border-pink-400', hearts: 'border-rose-400', firestinger: 'border-orange-600',
             comic: 'border-yellow-400', disco: 'border-fuchsia-400', pixel: 'border-lime-400', cat: 'border-orange-400',
-            curtains: 'border-red-600', coffee: 'border-amber-600', content: 'border-sky-300', contentFull: 'border-sky-500',
+            curtains: 'border-red-600', coffee: 'border-amber-600', content: 'border-sky-300', contentPhone: 'border-sky-400', contentFull: 'border-sky-500',
         };
 
 
@@ -1375,7 +1463,7 @@
         // True for overlays. Older saves stored L3 PNG (then "L3 Large") as a lower third with bgStyle "l3Large".
         const isOverlayItem = (data) => data.mode === 'overlay' || data.bgStyle === 'l3Large';
         // Which layer a graphic is on: 'l3' (lower thirds), 'overlay' (the rest of the Fullscreen Overlays tab, on #display),
-        // or 'content' (Content and Content Full, on their own browser source, #content). Taking a graphic only replaces
+        // or 'content' (Content TV, Content Phone and Content Full, on their own browser source, #content). Taking a graphic only replaces
         // what's on its own layer, so Content stays up while lower thirds and overlays come and go.
         const layerOf = (data) => (!isOverlayItem(data) ? 'l3' : OVERLAYS[data.overlay]?.content ? 'content' : 'overlay');
 
@@ -1425,6 +1513,8 @@
             copy:   '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
             scene:  '<rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/>',
             wrench: '<path d="M15 4a5 5 0 0 0-4.6 6.9L3 18.3 5.7 21l7.4-7.4A5 5 0 0 0 20 9l-3 1-2-2 1-3z"/>',
+            eye:    '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+            eyeOff: '<path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.2M6.6 6.6C3.9 8.3 2 12 2 12s3.6 7 10 7c1.8 0 3.4-.5 4.8-1.3"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
             zap:    '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
             moon:   '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
             sun:    '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
@@ -3944,10 +4034,16 @@
             // ---------- Retro VHS: the picture looks like an old tape playing. Scan lines, grain, a soft
             // vignette and a washed-out tint; the head-switching noise along the bottom edge; a tracking glitch
             // that rolls through now and then; and the VCR's on-screen display: PLAY ▶ and SP at the top, the
-            // tape counter and a camcorder date and time at the bottom. ----------
+            // tape counter and a camcorder date and time at the bottom. That's today's date and the time now, or
+            // the tape's own (tapeDate 'YYYY-MM-DD' and tapeTime 'HH:MM', either or both), running on from there. ----------
             const vhs = {
-                init(durationSec) {
+                init(durationSec, opts = {}) {
                     this.T = durationSec;
+                    const d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(opts.tapeDate || ''), tm = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(opts.tapeTime || '');
+                    const start = new Date();
+                    if (d) start.setFullYear(+d[1], +d[2] - 1, +d[3]);
+                    if (tm) start.setHours(+tm[1], +tm[2], +(tm[3] || 0), 0);
+                    this.stampAt = d || tm ? start.getTime() : 0; // 0: the real clock
                     // Grain is made at a quarter of the screen size and scaled up
                     this.buf = this.buf || document.createElement('canvas');
                     this.buf.width = Math.ceil(W / 4);
@@ -4045,7 +4141,7 @@
                     this.osd('SP', W - pad + jx, top, big, 'right');
                     const secs = Math.floor(t);
                     this.osd(`${Math.floor(secs / 3600)}:${String(Math.floor(secs / 60) % 60).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`, pad + jx, bottom, small);
-                    const now = new Date();
+                    const now = this.stampAt ? new Date(this.stampAt + t * 1000) : new Date();
                     const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
                     const date = now.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).toUpperCase().replace(',', '');
                     this.osd(time, W - pad + jx, bottom - small * 1.05, small, 'right');
@@ -5363,7 +5459,7 @@
         };
 
         // ---------- Content (fx_wizard.html#content) ----------
-        // Content and Content Full have their own layer, #content-box, with its own timers, on their own browser
+        // Content TV, Phone and Full have their own layer, #content-box, with its own timers, on their own browser
         // source. Lower thirds and overlays on #display (and #underlay) come and go without touching it, so in OBS it
         // can sit full screen, or in a box beside the cameras, for as long as it's up.
         const showContent = (data) => {
@@ -5373,12 +5469,19 @@
             clearTimeout(contentCleanup);
             const duration = Number(data.duration) || 5;
 
-            // Switch to the TV or Content Full (restarting the TV's rise and power-on if it was already up)
+            // Switch to the TV, the phone or Content Full (restarting the rise and power-on if it was already up)
             box.classList.remove(...Object.keys(OVERLAYS));
             void box.offsetWidth;
             box.classList.add(data.overlay);
             currentContent = data.overlay;
-            setContent(data.content, cfg.lead);
+            setContent(data.content, cfg.lead, !!data.muted);
+            // The phone's status bar shows the time now (like 9:41), kept up to date while it's up
+            clearInterval(phoneClock);
+            if (data.overlay === 'contentPhone') {
+                const tick = () => { $('ph-time').textContent = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(/\s*[AP]M$/i, ''); };
+                tick();
+                phoneClock = setInterval(tick, 10000);
+            }
 
             // Show it, then hide it when the duration is up (toggled: stays up until hidden)
             box.style.visibility = 'visible';
@@ -5395,15 +5498,18 @@
             contentCleanup = setTimeout(() => {
                 box.style.visibility = 'hidden';
                 setContent(null); // a video stops once the TV has gone
+                clearInterval(phoneClock);
             }, out === 'anim-hide' ? 600 : 900);
         };
+        let phoneClock = null; // updates the phone's time while it's up
 
         // Content: the file on the TV's screen, or full screen (null = none). A video waits on its first frame until
         // the picture is fully up (lead seconds), then plays from the start, once, with its sound (turn on "Control
         // audio via OBS" on the #content browser source), and holds its last frame; if the browser won't
-        // play sound by itself, it plays muted. A file that won't load shows "No signal".
+        // play sound by itself, it plays muted. muted: no sound at all (a Clip cue from the rundown).
+        // A file that won't load shows "No signal".
         let contentPlay = null; // the timer that starts a video
-        const setContent = (file, lead = 0) => {
+        const setContent = (file, lead = 0, muted = false) => {
             const img = $('content-img'), video = $('content-video'), picture = $('content-picture');
             clearTimeout(contentPlay);
             if (!file && !img.hasAttribute('src') && !video.hasAttribute('src')) return; // nothing on it already
@@ -5430,9 +5536,9 @@
             if (video.getAttribute('src') !== src || video.error) video.src = src; // (again after an error, to say No signal again)
             video.pause();
             video.currentTime = 0;
-            video.muted = false;
+            video.muted = muted;
             contentPlay = setTimeout(() => video.play().catch(err => {
-                if (err.name !== 'NotAllowedError') return; // stopped before it started (something else was taken)
+                if (err.name !== 'NotAllowedError' || video.muted) return; // stopped before it started (something else was taken)
                 video.muted = true;
                 video.play().catch(() => {});
             }), lead * 1000);
@@ -5560,7 +5666,7 @@
                 const { gs, ...rest } = payload;
                 payload = rest;
             }
-            if (ws && ws.readyState === WebSocket.OPEN) { ws.send(JSON.stringify(payload)); return true; }
+            if (ws && ws.readyState === WebSocket.OPEN) { ws.send(JSON.stringify(payload)); contentSent(payload); return true; }
             flash('Not connected', true);
             return false;
         };
@@ -5640,6 +5746,45 @@
             return true;
         };
 
+        // Content on screen: the message box only counts down what was taken last, so while Content is up it gets a
+        // bar of its own above CLEAR ALL, on every tab: Content TV, Phone or Full, its name, and its time left (for
+        // one toggled on, how long it's been up). Lower thirds and overlays taken over it leave it be. Everything
+        // sent goes through sendPayload, which starts it for Content and stops it for Clear All or Content's OFF.
+        let contentClock = null; // { kind, name, muted, start, ends (Infinity when toggled), secs }
+        let contentClockTimer = null;
+        const contentSent = (p) => {
+            if (p.mode === 'clear' || (p.mode === 'hide' && p.layer === 'content')) stopContentClock();
+            else if (p.mode === 'overlay' && OVERLAYS[p.overlay]?.content) {
+                const secs = Number(p.duration) || 5, now = Date.now();
+                contentClock = {
+                    kind: OVERLAYS[p.overlay].label, name: p.label || p.content || '', muted: !!p.muted && VIDEO_FILE.test(p.content || ''),
+                    start: now, ends: p.hold ? Infinity : now + secs * 1000, secs,
+                };
+                clearInterval(contentClockTimer);
+                contentClockTimer = setInterval(tickContentClock, 250);
+                tickContentClock();
+            }
+        };
+        const stopContentClock = () => {
+            clearInterval(contentClockTimer);
+            contentClockTimer = contentClock = null;
+            $('content-clock').classList.add('hidden');
+            $('controller-view').classList.remove('content-on');
+        };
+        const tickContentClock = () => {
+            const c = contentClock, now = Date.now();
+            if (!c) return;
+            if (now >= c.ends) { stopContentClock(); return; } // its time is up: the display has taken it down
+            const held = c.ends === Infinity, up = (now - c.start) / 1000;
+            $('cc-kind').textContent = c.kind;
+            $('cc-name').textContent = `${c.name}${c.muted ? ' · muted' : ''}`;
+            $('cc-left').textContent = held ? clock(Math.floor(up)) : clock(Math.ceil((c.ends - now) / 1000));
+            $('cc-of').textContent = held ? 'up · toggled' : `left of ${clock(Math.ceil(c.secs))}`;
+            $('cc-bar').style.width = held ? '0' : `${Math.min(100, (up / c.secs) * 100)}%`;
+            $('content-clock').classList.remove('hidden');
+            $('controller-view').classList.add('content-on');
+        };
+
 
         /* =========================================================
            11. CONTROLLER: TABS AND SECTIONS
@@ -5662,6 +5807,7 @@
             $('paragraph-input').maxLength = cfg?.max || (oneBoxShort(cfg) ? 40 : 400);
             $('social-field').classList.toggle('hidden', !cfg?.social);
             $('sport-field').classList.toggle('hidden', !cfg?.sport);
+            $('vhs-field').classList.toggle('hidden', !cfg?.stamp);
             // Stingers: the duration box shows their fixed length, locked
             const fixed = cfg?.length !== undefined;
             $('duration-input').disabled = fixed;
@@ -5672,6 +5818,7 @@
             $('gs-field').classList.toggle('hidden', !cfg?.depth);
             if (cfg?.depth) $('gs-pick').checked = loadGsEffects().includes(checked('overlayStyle'));
             $('import-btn').classList.toggle('hidden', !cfg?.import);
+            $('import-content-btn').classList.toggle('hidden', !cfg?.content);
             $('take-row').classList.toggle('hidden', show || builder || sound);
             $('saved-wrap').classList.toggle('hidden', show || builder || sound);
             $('show-section').classList.toggle('hidden', !show);
@@ -5738,6 +5885,21 @@
                 input.oninput = () => { socialState.values[key] = input.value; saveSocialState(); };
                 inputs.append(row);
             });
+        };
+
+        // ---------- Retro VHS: the date and time on the tape ----------
+        // Both optional, from the boxes with this id prefix ('vhs' on the tab, 'edit-vhs' in the edit dialog). Only the
+        // ones set are sent (tapeDate 'YYYY-MM-DD', tapeTime 'HH:MM'), so with neither it shows the date and time now.
+        const tapeStamp = (prefix) => {
+            const date = $(`${prefix}-date`).value, time = $(`${prefix}-time`).value;
+            return { ...(date && { tapeDate: date }), ...(time && { tapeTime: time }) };
+        };
+        const clearVhsStamp = (prefix) => { $(`${prefix}-date`).value = ''; $(`${prefix}-time`).value = ''; };
+        // As saved cards show it: "Oct 27, 1994 3:42 PM" (or just one of them)
+        const tapeLabel = (d) => {
+            const [y, m, day] = (d.tapeDate || '').split('-').map(Number), [h, min] = (d.tapeTime || '').split(':').map(Number);
+            return [d.tapeDate && new Date(y, m - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                d.tapeTime && new Date(2000, 0, 1, h, min).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })].filter(Boolean).join(' ');
         };
 
         // ---------- Duration ----------
@@ -5876,7 +6038,7 @@
                 const text = oneBox ? $('paragraph-input').value.trim() : label;
                 if ((cfg.text || cfg.place) && !text) { flash(cfg.place ? 'Enter the location' : oneBox ? 'Enter some text' : 'Enter a name', true); return null; }
                 if (cfg.custom && !customFile) { flash(`Put a PNG, JPG or GIF in the "${CUSTOM_FOLDER}" folder, then tap Custom…`, true); return null; }
-                if (cfg.content && !contentFile) { flash(`Put a picture or video in the "${CONTENT_FOLDER}" folder, then tap Content…`, true); return null; }
+                if (cfg.content && !contentFile) { flash(`Put a picture or video in the "${CONTENT_FOLDER}" folder, then tap ${cfg.label}…`, true); return null; }
                 return {
                     mode: 'overlay',
                     overlay,
@@ -5887,6 +6049,7 @@
                     ...(cfg.content && { content: contentFile }),
                     ...(cfg.sport && { sport: checked('sportStyle') }),
                     ...(cfg.social && { socials: currentSocials() }),
+                    ...(cfg.stamp && tapeStamp('vhs')),
                     ...(cfg.depth && $('gs-pick').checked && { gs: true }), // Greenscreen (saved with it too)
                     duration,
                     animationStyle,
@@ -5951,7 +6114,7 @@
 
 
         /* =========================================================
-           13. CONTROLLER: IMPORT L3s
+           13. CONTROLLER: IMPORT L3s (and content, below)
            Each line of each .txt file becomes a saved L3, using the
            selected L3 type (L3 PNG, KAMC or L3 Info; the Import button
            only shows for those).
@@ -5988,6 +6151,41 @@
             flash(`Imported ${added.length}${skipped ? `, skipped ${skipped} duplicate${skipped > 1 ? 's' : ''}` : ''}`, !added.length);
         };
 
+        // ---------- Import content ----------
+        // The same for Content TV, Phone and Full: each picture or video picked becomes a saved card, on the TV, phone or
+        // full screen (whichever is picked), named after its file. They're timed like any other card, not toggles:
+        // a video for all of its length (read from the file), a picture for the usual 15 seconds. The display can
+        // only show files from the content folder, so ones that aren't in it are skipped (when the server can say
+        // what's in it), and so are ones already saved the same way.
+        const importContent = async (fileList) => {
+            const selected = checked('overlayStyle');
+            const overlay = OVERLAYS[selected]?.content ? selected : 'content';
+            const names = [...fileList].map(f => f.name).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+            await askContentList();
+            const b = loadButtonsFromStorage();
+            const keyOf = (d) => `${d.overlay}|${d.content}`.toLowerCase();
+            const existing = new Set(b.filter(d => isOverlayItem(d) && OVERLAYS[d.overlay]?.content).map(keyOf));
+            const added = [];
+            let dupes = 0, outside = 0;
+            for (const picked of names.filter(n => CONTENT_FILE.test(n))) {
+                // As the folder spells it (the server's list), or as picked if the server can't say
+                const name = contentFolderFiles ? contentFolderFiles.find(f => f.toLowerCase() === picked.toLowerCase()) : picked;
+                if (!name) { outside++; continue; }
+                const item = { id: Date.now() + added.length, mode: 'overlay', overlay, label: name.replace(/\.[^.]+$/, ''), title: '',
+                    content: name, duration: OVERLAYS[overlay].dur, animationStyle: checked('animationStyle') };
+                if (existing.has(keyOf(item))) { dupes++; continue; }
+                existing.add(keyOf(item));
+                const length = await videoLength(name);
+                if (length) item.duration = wholeVideoSecs(OVERLAYS[overlay], length);
+                added.push(item);
+            }
+            const other = names.length - names.filter(n => CONTENT_FILE.test(n)).length;
+            if (added.length) saveButtonsToStorage([...added, ...b]); // new ones go at the top, in file order
+            const skipped = [dupes && `${dupes} already saved`, outside && `${outside} not in the ${CONTENT_FOLDER} folder`,
+                other && `${other} not a picture or video`].filter(Boolean).join(', ');
+            flash(`Imported ${added.length} as ${OVERLAYS[overlay].label}`, !added.length, skipped && `skipped ${skipped}`);
+        };
+
 
         /* =========================================================
            14. CONTROLLER: SAVED GRAPHICS LIST
@@ -6006,7 +6204,7 @@
             const cl3 = data.mode === 'cl3';
             const sub = cl3 ? `Complex scene | ${cl3Steps(data).length} in a row`
                 : isOverlay
-                ? (data.source && holdsOn(data) ? `${data.source} | toggle` : data.source || `${kind} | ${OVERLAYS[ovKey]?.label || ovKey}${data.customBg ? `: ${data.customBg}` : ''}${data.content ? `: ${data.content}` : ''}${data.sport ? `: ${SPORTS[data.sport] || data.sport}` : ''}`)
+                ? (data.source && holdsOn(data) ? `${data.source} | toggle` : data.source || `${kind} | ${OVERLAYS[ovKey]?.label || ovKey}${data.customBg ? `: ${data.customBg}` : ''}${data.content ? `: ${data.content}` : ''}${data.sport ? `: ${SPORTS[data.sport] || data.sport}` : ''}${data.tapeDate || data.tapeTime ? `: ${tapeLabel(data)}` : ''}`)
                 : `${data.bgStyle === 'custom' ? `custom: ${data.customBg}` : data.bgStyle} | ${data.fontStyle?.replace('font-', '')}`;
 
             const card = document.createElement('div');
@@ -6216,6 +6414,23 @@
             script: { label: 'Script', icon: 'script', code: 'SCRIPT', hint: 'Script (shown on the projector):' },
             break: { label: 'Break', icon: 'pause', code: 'BREAK', hint: 'Name (optional, like "Break 1"):' },
         };
+        // A Clip, SOT or PIC cue can play a picture or video from the content folder: { content: the file,
+        // contentStyle: 'content' (on the TV), 'contentPhone' or 'contentFull', duration: seconds }. While Set Show is on, its blue
+        // PLAY marker takes it, the same as a Content card in the rundown (with OFF and its countdown). Without a
+        // file it's a placeholder, as before. A SOT's video plays with its sound; a Clip's plays muted, in case
+        // it has background noise.
+        const CONTENT_CUES = ['clip', 'sot', 'pic'];
+        const cueContentStyle = (d) => (OVERLAYS[d.contentStyle]?.content ? d.contentStyle : 'content');
+        const CONTENT_WHERE = { content: 'on the TV', contentPhone: 'on the phone', contentFull: 'full screen' };
+        const cueSeconds = (d) => Number(d.duration) || OVERLAYS[cueContentStyle(d)].dur;
+        const cueMuted = (d) => d.cue === 'clip' && VIDEO_FILE.test(d.content || '');
+        // The Content graphic it takes. It keeps the cue's sid (so its row shows it's on screen), and its cue and
+        // text (so the log names it the way the rundown does).
+        const cueGraphic = (d) => ({
+            mode: 'overlay', overlay: cueContentStyle(d), content: d.content,
+            label: d.text || d.content.replace(/\.[^.]+$/, ''), title: '', duration: cueSeconds(d),
+            cue: d.cue, ...(d.text && { text: d.text }), ...(cueMuted(d) && { muted: true }), sid: d.sid, block: d.block,
+        });
         // A Scene cue is the OBS scene (or source) to take next: { cue: 'scene', obsName, obsKind: 'source'
         // (left out for a scene), text: an optional note }. It shows with a yellow TAKE marker.
         // A Break cue fires a break and takes its break scene in OBS: { cue: 'break', secs: its length, obsName:
@@ -6540,6 +6755,26 @@
                     pill.insertAdjacentHTML('beforeend', `<i class="take-go">${icon('zap')}</i>`);
                     fire.append(pill);
                     fire.onclick = (e) => { e.stopPropagation(); fireBreak(data); };
+                    line.append(fire);
+                } else line.append(pill);
+                row.append(line);
+            }
+            if (CONTENT_CUES.includes(data.cue) && data.content) { // PLAY and its file in blue, on a line of its own; Set Show on: tap it to play it
+                row.classList.add('cue-content');
+                const line = document.createElement('span');
+                line.className = 'take-line';
+                const secs = cueSeconds(data), where = `${CONTENT_WHERE[cueContentStyle(data)]}${cueMuted(data) ? ', muted' : ''}`;
+                const gone = !!contentFolderFiles && !contentFolderFiles.some(f => f.toLowerCase() === data.content.toLowerCase());
+                const pill = cueMarker(gone ? 'PLAY !' : 'PLAY', `${data.content} · ${formatTime(secs)}${cueMuted(data) ? ' · muted' : ''}`, `take-pill play-pill${gone ? ' play-missing' : ''}`,
+                    gone ? `${data.content} isn't in the ${CONTENT_FOLDER} folder` : `Plays ${data.content} ${where}, for ${formatTime(secs)}`);
+                if (locked) {
+                    const fire = document.createElement('button');
+                    fire.type = 'button';
+                    fire.className = 'take-fire';
+                    fire.title = `Play ${data.content} ${where} (${formatTime(secs)})`;
+                    pill.insertAdjacentHTML('beforeend', `<i class="take-go">${icon('zap')}</i>`);
+                    fire.append(pill);
+                    fire.onclick = (e) => { e.stopPropagation(); takeFromRundown(cueGraphic(data)); };
                     line.append(fire);
                 } else line.append(pill);
                 row.append(line);
@@ -6881,7 +7116,7 @@
                 // Planned length (tap to set while editing), when it's due on air, and the graphics' total.
                 // While it's on air (by the show's times), the length becomes the time it has left.
                 const planned = lengths[block] || 0;
-                const gfx = items.filter(d => !d.cue && d.block !== UNSORTED).reduce((sum, d) => sum + graphicSeconds(d), 0);
+                const gfx = items.filter(d => (!d.cue || d.content) && d.block !== UNSORTED).reduce((sum, d) => sum + graphicSeconds(d), 0);
                 if (advanced) { // Simple has no block lengths
                     const time = document.createElement(locked ? 'span' : 'button');
                     time.className = `block-time${planned ? '' : ' unset'}`;
@@ -7061,11 +7296,13 @@
         const scriptTitle = (d) => (d.text || '').split('\n').map(l => l.trim()).find(Boolean) || 'Script';
 
         // Shows only the dialog fields that fit
-        const showEditFields = ({ name = false, para = false, duration = false, gs = false, scene = false, brk = false } = {}) => {
+        const showEditFields = ({ name = false, para = false, duration = false, gs = false, scene = false, brk = false, content = false, vhs = false } = {}) => {
+            $('edit-vhs-wrap').classList.toggle('hidden', !vhs);
             $('edit-name-wrap').classList.toggle('hidden', !name);
             $('edit-title-wrap').classList.toggle('hidden', !name);
             $('edit-scene-wrap').classList.toggle('hidden', !scene);
             $('edit-break-wrap').classList.toggle('hidden', !brk);
+            $('edit-content-wrap').classList.toggle('hidden', !content);
             $('edit-para-wrap').classList.toggle('hidden', !para);
             $('edit-duration-wrap').classList.toggle('hidden', !duration);
             $('edit-gs-wrap').classList.toggle('hidden', !gs);
@@ -7116,6 +7353,60 @@
             if (want && !(names || []).includes(want)) sel.append(new Option(names ? `${want} (not in OBS now)` : want, want));
             sel.value = want;
         };
+        // ---------- Clip, SOT and PIC cues: the content they play ----------
+        // A list of the content folder's files (from the server), or a box to type the name in without one.
+        // Picking a video fills in the Duration with all of it, the same as Content TV… on the Fullscreen Overlays tab.
+        let cueContent = { file: '', style: 'content', cue: 'clip' }; // the dialog's pick, and the cue's type (a Clip plays muted)
+        const openCueContent = async (item, cue = item?.cue) => {
+            cueContent = { file: item?.content || '', style: cueContentStyle(item || {}), cue };
+            $('edit-duration').value = item?.content ? cueSeconds(item) : OVERLAYS.content.dur;
+            renderCueContent();
+            await askContentList();
+            renderCueContent();
+        };
+        const renderCueContent = () => {
+            const files = contentFolderFiles, want = cueContent.file;
+            const sel = $('edit-content'), typed = $('edit-content-text');
+            sel.classList.toggle('hidden', files === null);
+            typed.classList.toggle('hidden', files !== null);
+            if (files === null) {
+                if (typed.value.trim() !== want) typed.value = want;
+            } else {
+                sel.innerHTML = '';
+                sel.append(new Option('Nothing: just a placeholder', ''));
+                files.forEach(f => sel.append(new Option(`${VIDEO_FILE.test(f) ? '▶ ' : ''}${f}`, f)));
+                if (want && !files.includes(want)) sel.append(new Option(`${want} (not in the folder now)`, want));
+                sel.value = want;
+            }
+            $('edit-content-tv').classList.toggle('active', cueContent.style === 'content');
+            $('edit-content-phone').classList.toggle('active', cueContent.style === 'contentPhone');
+            $('edit-content-full').classList.toggle('active', cueContent.style === 'contentFull');
+            $('edit-content-wrap').classList.toggle('no-file', !want);
+            $('edit-duration-wrap').classList.toggle('hidden', !want);
+            const length = contentLengths[want];
+            const sound = !VIDEO_FILE.test(want) ? '' : cueMuted({ cue: cueContent.cue, content: want }) ? ' A Clip plays muted.' : ' It plays with its sound.';
+            $('edit-content-note').textContent = !want
+                ? (files === null ? 'The server can\'t list the content folder. Type the file\'s name to play it from the rundown, or leave it empty for a placeholder.'
+                    : files.length ? 'Pick a picture or video to play from the rundown while Set Show is on, or leave it as a placeholder.'
+                    : `Nothing in the "${CONTENT_FOLDER}" folder yet. Put pictures or videos there to play them from the rundown.`)
+                : length ? `A video, ${clock(Math.ceil(length))}: the Duration plays all of it.${sound}`
+                : VIDEO_FILE.test(want) ? `A video: it plays for the Duration.${sound}` : 'A picture: it stays up for the Duration.';
+        };
+        const pickCueContent = async (name) => {
+            cueContent.file = name;
+            renderCueContent();
+            const length = await videoLength(name);
+            if (!length || cueContent.file !== name) return;
+            $('edit-duration').value = wholeVideoSecs(OVERLAYS[cueContent.style], length);
+            renderCueContent();
+        };
+        const setCueContentStyle = (style) => {
+            cueContent.style = style;
+            const length = contentLengths[cueContent.file];
+            if (length) $('edit-duration').value = wholeVideoSecs(OVERLAYS[style], length); // the TV takes a little longer to come up
+            renderCueContent();
+        };
+
         // forBreak: a Break cue's break scene (scenes only, no Sources)
         const openScenePick = (item, forBreak = false) => {
             const kind = !forBreak && item?.obsKind === 'source' ? 'source' : 'scene';
@@ -7136,7 +7427,8 @@
             scriptFields(type === 'script');
             $('edit-socials-wrap').innerHTML = '';
             $('edit-socials-wrap').classList.add('hidden');
-            showEditFields({ para: true, scene: type === 'scene' || type === 'break', brk: type === 'break' });
+            showEditFields({ para: true, scene: type === 'scene' || type === 'break', brk: type === 'break', content: CONTENT_CUES.includes(type) });
+            if (CONTENT_CUES.includes(type)) openCueContent(null, type);
             if (type === 'scene') openScenePick(null);
             if (type === 'break') openScenePick({ obsName: loadBreakScenes()[0] || '' }, true); // starts on the first break scene (the gear)
             $('edit-break-len').value = '2:00';
@@ -7158,7 +7450,8 @@
             $('edit-socials-wrap').classList.add('hidden');
             scriptFields(item.cue === 'script');
             if (item.cue) {
-                showEditFields({ para: true, scene: item.cue === 'scene' || item.cue === 'break', brk: item.cue === 'break' });
+                showEditFields({ para: true, scene: item.cue === 'scene' || item.cue === 'break', brk: item.cue === 'break', content: CONTENT_CUES.includes(item.cue) });
+                if (CONTENT_CUES.includes(item.cue)) openCueContent(item);
                 if (item.cue === 'scene' || item.cue === 'break') openScenePick(item, item.cue === 'break');
                 $('edit-break-len').value = clock(item.secs || 120);
                 $('edit-para-label').textContent = (CUES[item.cue] || CUES.note).hint;
@@ -7189,7 +7482,9 @@
                 const socials = item.socials || (item.label ? { youtube: item.label } : {});
                 Object.keys(SOCIALS).forEach(k => socialsWrap.append(socialRow(k, socials[k], `edit-social-${k}`).row));
             }
-            showEditFields({ name: hasText && !oneBox, para: !!oneBox, duration: cfg?.length === undefined && !holdsOn(item), gs: !!cfg?.depth });
+            showEditFields({ name: hasText && !oneBox, para: !!oneBox, duration: cfg?.length === undefined && !holdsOn(item), gs: !!cfg?.depth, vhs: !!cfg?.stamp });
+            $('edit-vhs-date').value = item.tapeDate || '';
+            $('edit-vhs-time').value = item.tapeTime || '';
             $('edit-name').value = item.label || '';
             $('edit-title').value = item.title || '';
             $('edit-para').value = item.label || '';
@@ -7220,6 +7515,9 @@
                     cue: type, ...(text && { text }),
                     ...(type === 'scene' && { obsName, ...(scenePick.kind === 'source' && { obsKind: 'source' }) }),
                     ...(type === 'break' && { secs, obsName }),
+                    ...(CONTENT_CUES.includes(type) && cueContent.file && {
+                        content: cueContent.file, contentStyle: cueContent.style, duration: Number($('edit-duration').value) || OVERLAYS.content.dur,
+                    }),
                     block: $('edit-block').value, sid: newSid(),
                 };
                 list.push(item);
@@ -7245,6 +7543,14 @@
                 if (item.cue === 'break' && !item.obsName) { flash('Pick the break scene', true, 'OBS switches to it when the break fires'); return false; }
                 const secs = parseClock($('edit-break-len').value);
                 if (item.cue === 'break' && secs) item.secs = secs; // a break keeps its length if this isn't one
+                // A clip, SOT or PIC: the content it plays, or none (a placeholder)
+                if (CONTENT_CUES.includes(item.cue) && cueContent.file) {
+                    Object.assign(item, { content: cueContent.file, contentStyle: cueContent.style, duration: Number($('edit-duration').value) || cueSeconds(item) });
+                } else if (CONTENT_CUES.includes(item.cue)) {
+                    delete item.content;
+                    delete item.contentStyle;
+                    delete item.duration;
+                }
             } else if (item.mode === 'cl3') {
                 item.label = $('edit-name').value.trim() || item.label;
             } else if (cfg?.caption || cfg?.ticker) {
@@ -7263,6 +7569,11 @@
             if (cfg?.depth) {
                 if ($('edit-gs').checked) item.gs = true;
                 else delete item.gs;
+            }
+            if (cfg?.stamp) { // Retro VHS: the tape's date and time, or neither (the date and time now)
+                delete item.tapeDate;
+                delete item.tapeTime;
+                Object.assign(item, tapeStamp('edit-vhs'));
             }
             // A new block: it goes to the end of that block
             const block = $('edit-block').value;
@@ -7693,7 +8004,7 @@
            picks one by hand (for an older server that can't list the
            folder). The pick is remembered; until there is one, or if it's
            taken out of the folder, the first image by name is used.
-           Content… and Content Full… (the Content overlays) work the same
+           Content TV… and Content Full… (the Content overlays) work the same
            way, with the pictures and videos in the "content" folder.
            ========================================================= */
         const CUSTOM_KEY = 'fx_custom_file';
@@ -7787,8 +8098,8 @@
             img.src = customPath(name);
         };
 
-        // ---------- Content… and Content Full… ----------
-        // The same for the "content" folder: tapping Content… (the TV) or Content Full… opens a window of its
+        // ---------- Content TV… and Content Full… ----------
+        // The same for the "content" folder: tapping Content TV… or Content Full… opens a window of its
         // pictures (PNG, JPG, GIF, WebP) and videos (MP4, WebM), each with a preview; tap one to show it. The
         // pick is shared and remembered, and each saved Content overlay (and rundown card) keeps the file it was
         // saved with. A video's length is read here, so its Duration covers all of it.
@@ -7803,26 +8114,33 @@
                 : `${CONTENT_FOLDER}/${contentFile}${length ? ` · video ${clock(Math.ceil(length))}, plays to the end` : ''}`;
             updateSummaries();
         };
-        // Reads a video's length (from its file, next to this panel), then fills in the Duration if a Content
-        // overlay is picked. A panel that can't reach the file keeps the usual 15 seconds.
-        const readContentLength = (name) => {
-            const done = () => {
-                if (name !== contentFile) return;
-                showContentName();
-                if (checked('mode') === 'overlay' && OVERLAYS[checked('overlayStyle')]?.content) fillDuration();
-            };
-            if (!VIDEO_FILE.test(name) || contentLengths[name]) { done(); return; }
+        // A video's length in seconds, read from its file (next to this panel) and kept in contentLengths.
+        // Null for a picture, or a file this panel can't reach.
+        const videoLength = (name) => new Promise(resolve => {
+            if (!VIDEO_FILE.test(name)) { resolve(null); return; }
+            if (contentLengths[name]) { resolve(contentLengths[name]); return; }
             const probe = document.createElement('video');
             probe.preload = 'metadata';
             probe.muted = true;
-            probe.onloadedmetadata = () => {
-                if (Number.isFinite(probe.duration) && probe.duration > 0) contentLengths[name] = probe.duration;
+            const done = () => {
                 probe.removeAttribute('src');
                 probe.load(); // lets go of the file
+                resolve(contentLengths[name] || null);
+            };
+            probe.onloadedmetadata = () => {
+                if (Number.isFinite(probe.duration) && probe.duration > 0) contentLengths[name] = probe.duration;
                 done();
             };
+            probe.onerror = done;
             probe.src = contentPath(name);
-        };
+        });
+        // Reads a video's length, then fills in the Duration if a Content overlay is picked. A panel that can't
+        // reach the file keeps the usual 15 seconds.
+        const readContentLength = (name) => videoLength(name).then(() => {
+            if (name !== contentFile) return;
+            showContentName();
+            if (checked('mode') === 'overlay' && OVERLAYS[checked('overlayStyle')]?.content) fillDuration();
+        });
         const setContentFile = (name) => {
             contentFile = name;
             localStorage.setItem(CONTENT_KEY, name);
@@ -7999,7 +8317,7 @@
   <li>Set the Browser Source size to your canvas, for example 1920 x 1080.</li>
   <li>Right-click the Browser Source and choose <b>Refresh</b>.</li>
   <li><b>Using Greenscreen on an effect?</b> Add <code>fx_wizard.html#underlay</code> as a second Browser Source <i>below</i> your keyed camera, with <code>#display</code> above it.</li>
-  <li><b>Content not showing?</b> Content and Content Full have their own Browser Source: <code>fx_wizard.html#content</code>, below <code>#display</code>. For a video's sound, turn on <b>Control audio via OBS</b> on it.</li>
+  <li><b>Content not showing?</b> Content TV, Content Phone and Content Full have their own Browser Source: <code>fx_wizard.html#content</code>, below <code>#display</code>. For a video's sound, turn on <b>Control audio via OBS</b> on it.</li>
 </ul>
 </body></html>`);
             win.document.close();
@@ -8062,7 +8380,7 @@
         const itemLabel = (d) => (d.cue ? (d.cue === 'script' ? scriptTitle(d)
                 : d.cue === 'scene' ? `TAKE ${d.obsName || 'Scene'}${d.text ? ` (${d.text})` : ''}`
                 : d.cue === 'break' ? `${d.text || 'Break'} ${clock(d.secs || 0)}`
-                : d.text || CUES[d.cue]?.label || 'Cue')
+                : d.text || d.content?.replace(/\.[^.]+$/, '') || CUES[d.cue]?.label || 'Cue')
             : d.label || OVERLAYS[d.overlay || 'l3Large']?.label || 'Graphic');
 
         // ---------- The log ----------
@@ -8071,7 +8389,7 @@
             log.push({
                 t: Date.now(), kind, ...(d && {
                     sid: d.sid, code: itemCode(d, list), label: itemLabel(d), type: itemType(d), block: d.block,
-                    cue: d.cue || null, planned: d.cue ? 0 : graphicSeconds(d),
+                    cue: d.cue || null, planned: d.cue && !d.content ? 0 : graphicSeconds(d),
                 }), ...extra,
             });
             try { localStorage.setItem(SHOW_LOG_KEY, JSON.stringify(log.slice(-LOG_LIMIT))); } catch { /* storage full: the log stops growing */ }
@@ -8130,7 +8448,7 @@
             const format = showFormat();
             const planned = format.reduce((sum, p) => sum + p.secs, 0);
             const breaks = format.filter(p => p.kind === 'break').reduce((sum, p) => sum + p.secs, 0);
-            const gfx = list.filter(d => !d.cue && d.block !== UNSORTED).reduce((sum, d) => sum + graphicSeconds(d), 0);
+            const gfx = list.filter(d => (!d.cue || d.content) && d.block !== UNSORTED).reduce((sum, d) => sum + graphicSeconds(d), 0);
             const parts = [];
             if (planned) parts.push(`<b>Show</b> ${clock(planned)} planned${breaks ? ` (breaks ${clock(breaks)})` : ''}`);
             if (gfx) parts.push(`graphics ${clock(gfx)}`);
@@ -9385,6 +9703,8 @@
                 pad.className = 'pad';
                 pad.id = `pad-${s.key}`;
                 pad.title = `${s.label} (key ${i + 1})`;
+                pad.dataset.lay = `snd:${s.key}`; // can be hidden from the layout
+                pad.classList.add('lay-leaf');
                 pad.style.setProperty('--c1', s.c1);
                 pad.style.setProperty('--c2', s.c2);
                 pad.innerHTML = `<span class="pad-key">${i + 1}</span><span class="pad-time"></span>`
@@ -9439,14 +9759,16 @@
             flash('Sounds stopped');
         };
 
-        // Keys 1-6 hit the pads while the Sound Pad tab is open (not while typing in a box)
+        // Keys 1-6 hit the pads while the Sound Pad tab is open (not while typing in a box, and not a hidden pad)
         // In Simple mode, keys 1 and up hit the theme's sounds instead
         const soundKeys = (e) => {
             const simple = simpleState().on;
             if ((!simple && checked('mode') !== 'sound') || e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
             if (e.target.closest('input, textarea, select, [contenteditable]') || document.querySelector('dialog[open]')) return;
             const s = simple ? SOUNDS.find(x => x.key === simpleTheme().sounds[Number(e.key) - 1]) : SOUNDS[Number(e.key) - 1];
-            if (s) { e.preventDefault(); hitPad(s.key); }
+            if (!s || (!simple && (layoutEditing || loadHidden().has(`snd:${s.key}`)))) return; // a pad hidden from the layout stays quiet
+            e.preventDefault();
+            hitPad(s.key);
         };
 
 
@@ -9707,75 +10029,113 @@
         /* =========================================================
            24. CONTROLLER: SIMPLE MODE (themes)
            For anyone who'd rather not build a look of their own. The Simple switch in the top bar swaps
-           the tabs for one page in a theme's look: pick a theme, type a name, and TAKE it (or TOGGLE it,
-           or SAVE it with the saved L3s). Every L3 taken here, saved ones too, wears the theme picked now,
-           so changing the theme restyles them all. Under it are the theme's own overlays, stingers and
-           sounds, one tap each (keys 1 and up hit the sounds). Picking a theme also sets the Animated L3s
-           tab to its look, for when Simple is turned off.
-           To add a theme, add it to THEMES: l3 is its lower third's look (the values of the options on the
-           Animated L3s tab), overlays and stingers are keys from OVERLAYS, sounds are keys from SOUNDS.
+           the tabs for one page in a theme's look: pick a theme and one of its looks, type a name, and TAKE
+           it (or TOGGLE it, or SAVE it with the saved L3s). Every L3 taken here, saved ones too, wears the
+           theme and look picked now, so changing them restyles them all. Under it are the theme's own
+           overlays, stingers and sounds, one tap each (keys 1 and up hit the sounds). Picking a theme also
+           sets the Animated L3s tab to its look, for when Simple is turned off.
+           Between them the themes use every background, font, animation, overlay, stinger and sound there
+           is, so Simple shows off everything. KAMC is one show's own, so it's never in Simple.
+           To add a theme, add it to THEMES. looks: its lower thirds, the first one its own. Each is an
+           Animated L3 (bgStyle, fontStyle, fontColor, animationStyle: the values of the options on the
+           Animated L3s tab) or a Fullscreen L3 with a name and title (overlay: 'l3Large' or 'l3Gif').
+           overlays and stingers are keys from OVERLAYS (Location shows the place typed in Name), sounds
+           are keys from SOUNDS.
            ========================================================= */
         const THEMES = {
             classic:  { label: 'Classic',  icon: '🎙️', c1: '#3b82f6', c2: '#1e3a8a',
-                        l3: { bgStyle: 'blue', fontStyle: 'font-default', fontColor: '', animationStyle: 'anim-slideLeft' },
-                        overlays: ['confetti', 'colorwave', 'social'], stingers: ['stinger', 'colorbars'], sounds: ['victory', 'swish', 'comedy'] },
+                        looks: [{ name: 'Blue', bgStyle: 'blue', fontStyle: 'font-default', fontColor: '', animationStyle: 'anim-slideLeft' },
+                                { name: 'Green', bgStyle: 'green', fontStyle: 'font-default', fontColor: '', animationStyle: 'anim-slideUp' },
+                                { name: 'L3 PNG', overlay: 'l3Large' }, { name: 'L3 Gif', overlay: 'l3Gif' }],
+                        overlays: ['confetti', 'colorwave', 'disco', 'social'], stingers: ['stinger', 'colorbars', 'fireworks'], sounds: ['victory', 'swish', 'comedy', 'trombone'] },
             sports:   { label: 'Sports',   icon: '🏆', c1: '#f97316', c2: '#9a3412',
-                        l3: { bgStyle: 'sports', fontStyle: 'font-modern', fontColor: '', animationStyle: 'anim-slam' },
-                        overlays: ['confetti', 'hottake', 'fire'], stingers: ['sportsfx', 'firestinger'], sounds: ['victory', 'swish', 'trombone'] },
+                        looks: [{ name: 'Sports', bgStyle: 'sports', fontStyle: 'font-modern', fontColor: '', animationStyle: 'anim-slam' },
+                                { name: 'Red', bgStyle: 'red', fontStyle: 'font-modern', fontColor: '', animationStyle: 'anim-bounce' }],
+                        overlays: ['confetti', 'hottake', 'fire', 'locpin'], stingers: ['sportsfx', 'firestinger', 'fireworks'], sounds: ['victory', 'swish', 'trombone', 'censor'] },
             news:     { label: 'News',     icon: '📰', c1: '#e11d48', c2: '#4c0519',
-                        l3: { bgStyle: 'politics', fontStyle: 'font-classic', fontColor: '', animationStyle: 'anim-slideLeft' },
-                        overlays: ['breaking', 'social'], stingers: ['stinger', 'colorbars'], sounds: ['mystery', 'swish', 'censor'] },
+                        looks: [{ name: 'Politics', bgStyle: 'politics', fontStyle: 'font-classic', fontColor: '', animationStyle: 'anim-slideLeft' },
+                                { name: 'Blue', bgStyle: 'blue', fontStyle: 'font-classic', fontColor: '', animationStyle: 'anim-slideRight' },
+                                { name: 'L3 PNG', overlay: 'l3Large' }],
+                        overlays: ['breaking', 'locpin', 'rain', 'social'], stingers: ['stinger', 'colorbars', 'medical', 'storm'], sounds: ['mystery', 'swish', 'censor'] },
             tech:     { label: 'Tech & Gaming', icon: '🎮', c1: '#65a30d', c2: '#14532d',
-                        l3: { bgStyle: 'code', fontStyle: 'font-modern', fontColor: '', animationStyle: 'anim-glitch' },
-                        overlays: ['vhs', 'comic'], stingers: ['pixel', 'tvstatic'], sounds: ['victory', 'swish', 'comedy'] },
+                        looks: [{ name: 'Code', bgStyle: 'code', fontStyle: 'font-modern', fontColor: '', animationStyle: 'anim-glitch' },
+                                { name: 'Tech', bgStyle: 'tech', fontStyle: 'font-modern', fontColor: '', animationStyle: 'anim-glitch' },
+                                { name: 'Space', bgStyle: 'space', fontStyle: 'font-accent', fontColor: '#4FC3F7', animationStyle: 'anim-spinIn' }],
+                        overlays: ['vhs', 'comic', 'colorwave', 'confetti'], stingers: ['pixel', 'tvstatic', 'colorbars'], sounds: ['victory', 'swish', 'trombone', 'comedy'] },
             comedy:   { label: 'Comedy',   icon: '😂', c1: '#ec4899', c2: '#7c3aed',
-                        l3: { bgStyle: 'clouds', fontStyle: 'font-fun', fontColor: '', animationStyle: 'anim-bounce' },
-                        overlays: ['comic', 'disco', 'confetti'], stingers: ['curtains', 'cat', 'spring'], sounds: ['comedy', 'trombone', 'censor', 'victory'] },
+                        looks: [{ name: 'Clouds', bgStyle: 'clouds', fontStyle: 'font-fun', fontColor: '', animationStyle: 'anim-bounce' },
+                                { name: 'Fantasy', bgStyle: 'fantasy', fontStyle: 'font-fun', fontColor: '', animationStyle: 'anim-spinIn' }],
+                        overlays: ['comic', 'disco', 'confetti', 'underwater'], stingers: ['curtains', 'cat', 'spring'], sounds: ['comedy', 'trombone', 'censor', 'victory'] },
             truecrime: { label: 'True Crime', icon: '🔍', c1: '#52525b', c2: '#18181b',
-                        l3: { bgStyle: 'black', fontStyle: 'font-classic', fontColor: '#E53935', animationStyle: 'anim-fade' },
+                        looks: [{ name: 'Black', bgStyle: 'black', fontStyle: 'font-classic', fontColor: '#E53935', animationStyle: 'anim-fade' },
+                                { name: 'Red', bgStyle: 'red', fontStyle: 'font-classic', fontColor: '', animationStyle: 'anim-slideDown' }],
                         overlays: ['rain', 'arrested', 'vhs'], stingers: ['storm', 'ghost', 'tvstatic'], sounds: ['mystery', 'censor', 'swish'] },
             business: { label: 'Business', icon: '💼', c1: '#059669', c2: '#064e3b',
-                        l3: { bgStyle: 'finance', fontStyle: 'font-classic', fontColor: '#FFC72C', animationStyle: 'anim-fade' },
-                        overlays: ['breaking', 'colorwave', 'social'], stingers: ['stinger', 'fireworks'], sounds: ['victory', 'swish', 'mystery'] },
+                        looks: [{ name: 'Finance', bgStyle: 'finance', fontStyle: 'font-classic', fontColor: '#FFC72C', animationStyle: 'anim-fade' },
+                                { name: 'Black', bgStyle: 'black', fontStyle: 'font-modern', fontColor: '#FFC72C', animationStyle: 'anim-slideUp' },
+                                { name: 'L3 PNG', overlay: 'l3Large' }],
+                        overlays: ['breaking', 'colorwave', 'confetti', 'social'], stingers: ['stinger', 'fireworks', 'colorbars'], sounds: ['victory', 'swish', 'mystery'] },
             lifestyle: { label: 'Lifestyle', icon: '☕', c1: '#f472b6', c2: '#78350f',
-                        l3: { bgStyle: 'cafe', fontStyle: 'font-script', fontColor: '', animationStyle: 'anim-fade' },
-                        overlays: ['vday', 'confetti', 'social'], stingers: ['coffee', 'curtains', 'hearts'], sounds: ['victory', 'comedy', 'swish'] },
+                        looks: [{ name: 'Café', bgStyle: 'cafe', fontStyle: 'font-script', fontColor: '', animationStyle: 'anim-fade' },
+                                { name: 'Fantasy', bgStyle: 'fantasy', fontStyle: 'font-script', fontColor: '', animationStyle: 'anim-slideDown' }],
+                        overlays: ['vday', 'fall', 'underwater', 'social'], stingers: ['coffee', 'curtains', 'hearts', 'spring'], sounds: ['victory', 'comedy', 'swish'] },
             holiday:  { label: 'Holiday',  icon: '🎄', c1: '#dc2626', c2: '#166534',
-                        l3: { bgStyle: 'holiday', fontStyle: 'font-script', fontColor: '', animationStyle: 'anim-fade' },
-                        overlays: ['snow', 'confetti'], stingers: ['xmas', 'fireworks'], sounds: ['victory', 'comedy'] },
+                        looks: [{ name: 'Holiday', bgStyle: 'holiday', fontStyle: 'font-script', fontColor: '', animationStyle: 'anim-fade' },
+                                { name: 'Green', bgStyle: 'green', fontStyle: 'font-script', fontColor: '#FFC72C', animationStyle: 'anim-bounce' }],
+                        overlays: ['snow', 'fall', 'stpatricks', 'vday', 'confetti', 'colorwave'], stingers: ['xmas', 'fireworks', 'hearts', 'spring'], sounds: ['victory', 'comedy', 'swish'] },
         };
-        const SIMPLE_KEY = 'fx_simple';  // { on, theme, where, long }
+        const SIMPLE_KEY = 'fx_simple';  // { on, theme, where, long, looks: { theme: the look picked, by its place in looks } }
         const SIMPLE_L3_SECONDS = { short: 6, long: 12 }; // how long a TAKE keeps an L3 up (the Short / Long switch)
         const SIMPLE_MAX_SAVED = 20;     // saved L3s on the Simple page: two per row, 10 rows
         const SIMPLE_WHERE = { 'Bottom Left': '◀ Left', 'Bottom Middle': 'Middle', 'Bottom Right': 'Right ▶' };
         const simpleState = () => {
             const s = readJson(SIMPLE_KEY, {}) || {};
-            return { on: s.on === true, theme: THEMES[s.theme] ? s.theme : 'classic', where: SIMPLE_WHERE[s.where] ? s.where : 'Bottom Left', long: s.long === true };
+            return {
+                on: s.on === true, theme: THEMES[s.theme] ? s.theme : 'classic', where: SIMPLE_WHERE[s.where] ? s.where : 'Bottom Left', long: s.long === true,
+                looks: s.looks && typeof s.looks === 'object' ? s.looks : {},
+            };
         };
         const simpleTheme = () => THEMES[simpleState().theme];
+        // The look picked for the theme (each theme remembers its own), and the Animated L3 nearest it
+        const simpleLook = (st = simpleState()) => THEMES[st.theme].looks[st.looks[st.theme]] || THEMES[st.theme].looks[0];
+        const animatedLook = (st = simpleState()) => (simpleLook(st).overlay ? THEMES[st.theme].looks[0] : simpleLook(st));
+        // An Animated L3 look sets the Animated L3s tab to it too, for when Simple is turned off
+        const pickAnimatedLook = (look) => {
+            ['bgStyle', 'fontStyle', 'fontColor', 'animationStyle'].forEach(name => pickOption(name, look[name]));
+            updateSummaries();
+            savePicks();
+        };
         const saveSimple = (changes) => { localStorage.setItem(SIMPLE_KEY, JSON.stringify({ ...simpleState(), ...changes })); renderSimple(); };
 
         const setSimpleOn = (on) => {
+            if (on) setLayoutEdit(false); // editing the layout is for Pro
             saveSimple({ on });
-            if (!on) updateMode(); // the tabs, as they were
+            if (!on) { applyLayout(); updateMode(); } // the tabs, as they were (a theme may have picked something the layout hides)
             window.scrollTo(0, 0);
             flash(on ? `Simple mode: ${simpleTheme().label}` : 'Pro mode', false, on ? 'pick a theme, then TAKE' : 'the tabs are back');
         };
         // Picking a theme also gives the Animated L3s tab its look
         const pickTheme = (key) => {
-            const t = THEMES[key];
             saveSimple({ theme: key });
-            ['bgStyle', 'fontStyle', 'fontColor', 'animationStyle'].forEach(name => pickOption(name, t.l3[name]));
-            updateSummaries();
-            savePicks();
-            flash(`Theme: ${t.label}`);
+            pickAnimatedLook(animatedLook());
+            flash(`Theme: ${THEMES[key].label}`, false, simpleLook().name);
+        };
+        const pickLook = (i) => {
+            const st = simpleState();
+            saveSimple({ looks: { ...st.looks, [st.theme]: i } });
+            const look = simpleLook();
+            if (!look.overlay) pickAnimatedLook(look);
+            flash(`Look: ${look.name}`, false, look.overlay ? 'fullscreen' : optionLabel('animationStyle', look.animationStyle));
         };
 
         // ---------- The lower third ----------
-        // A lower third in the theme's look (saved ones are taken through here too)
+        // A lower third in the theme's look (saved ones are taken through here too): an Animated L3 where it's
+        // put (Left, Middle, Right), or a Fullscreen L3 (in its own place)
         const simpleL3 = (label, title) => {
-            const st = simpleState();
-            return { mode: 'l3', label, title: title || '', location: st.where, ...THEMES[st.theme].l3, duration: SIMPLE_L3_SECONDS[st.long ? 'long' : 'short'] };
+            const st = simpleState(), { name, overlay, ...l3 } = simpleLook(st);
+            const duration = SIMPLE_L3_SECONDS[st.long ? 'long' : 'short'];
+            return overlay ? { mode: 'overlay', overlay, label, title: title || '', duration }
+                : { mode: 'l3', label, title: title || '', location: st.where, ...l3, duration };
         };
         const simpleTyped = () => {
             const label = $('simple-name').value.trim();
@@ -9783,22 +10143,26 @@
             return simpleL3(label, $('simple-title').value.trim());
         };
         const simpleTake = () => { const d = simpleTyped(); if (d) flashTake(d); };
+        // TOGGLE: an Animated L3 is on the lower third's layer, a Fullscreen L3 on the overlays'. TOGGLE OFF takes
+        // down whichever is toggled on (so changing the look in between doesn't leave one stuck up).
+        const simpleToggled = () => ['l3', 'overlay'].filter(l => toggled[l]);
         const simpleToggle = () => {
-            if (toggled.l3) {
-                if (sendPayload({ mode: 'hide', layer: 'l3' })) { setToggled('l3', false); clearLive('l3'); flash('Toggled off'); }
+            const on = simpleToggled();
+            if (on.length) {
+                if (on.every(layer => sendPayload({ mode: 'hide', layer }))) { on.forEach(layer => { setToggled(layer, false); clearLive(layer); }); flash('Toggled off'); }
                 return;
             }
             const d = simpleTyped();
             if (!d || !sendPayload({ ...d, hold: true })) return;
-            setToggled('l3', true);
-            clearLive('l3');
+            setToggled(layerOf(d), true);
+            clearLive(layerOf(d));
             flash(`On: ${d.label}`, false, 'until toggled off');
         };
         const updateSimpleToggle = () => {
-            const btn = $('simple-toggle-btn');
-            btn.textContent = toggled.l3 ? 'TOGGLE OFF' : 'TOGGLE ON';
-            btn.classList.toggle('on', toggled.l3);
-            btn.classList.toggle('animate-pulse', toggled.l3);
+            const btn = $('simple-toggle-btn'), on = simpleToggled().length > 0;
+            btn.textContent = on ? 'TOGGLE OFF' : 'TOGGLE ON';
+            btn.classList.toggle('on', on);
+            btn.classList.toggle('animate-pulse', on);
         };
         // SAVE: kept with the saved L3s, marked as Simple's, then the boxes are emptied for the next one. The Simple page
         // lists only its own (the ones saved here), so the L3s saved on the Animated L3s tab don't crowd it or count
@@ -9809,7 +10173,11 @@
             if (!d) return;
             if (savedL3s().some(x => x.label === d.label && (x.title || '') === d.title)) { flash('Already saved', true, d.label); return; }
             if (savedL3s().length >= SIMPLE_MAX_SAVED) { flash(`Simple holds ${SIMPLE_MAX_SAVED} saved L3s`, true, 'delete one (✕) to save another'); return; }
-            saveButtonsToStorage([{ id: Date.now(), ...d, simple: true, theme: simpleState().theme }, ...loadButtonsFromStorage()]);
+            // Kept as an Animated L3 in the theme's look (for the Animated L3s tab), even with a Fullscreen L3 look
+            // picked: here it takes in whatever look is picked anyway
+            const st = simpleState(), { name, ...l3 } = animatedLook(st);
+            saveButtonsToStorage([{ id: Date.now(), mode: 'l3', label: d.label, title: d.title, location: st.where, ...l3, duration: d.duration, simple: true, theme: st.theme },
+                ...loadButtonsFromStorage()]);
             $('simple-name').value = '';
             $('simple-title').value = '';
             renderSimple();
@@ -9818,11 +10186,14 @@
 
         // ---------- The overlays and stingers ----------
         // Fired with their usual time and their own words (Breaking News, Hot Take), the sport picked on the
-        // Fullscreen Overlays tab, the socials typed there, and the Greenscreen switch as last set for that one
+        // Fullscreen Overlays tab, the socials typed there, and the Greenscreen switch as last set for that one.
+        // Location shows the place typed in Name.
         const simpleFire = (key) => {
             const cfg = OVERLAYS[key];
+            const place = cfg.place ? $('simple-name').value.trim() : '';
+            if (cfg.place && !place) { flash('Type the place in Name first', true, 'like City Hall'); $('simple-name').focus(); return; }
             flashTake({
-                mode: 'overlay', overlay: key, label: '', title: '',
+                mode: 'overlay', overlay: key, label: place, title: '',
                 ...(cfg.sport && { sport: checked('sportStyle') || 'football' }),
                 ...(cfg.social && { socials: currentSocials() }),
                 ...(cfg.depth && loadGsEffects().includes(key) && { gs: true }),
@@ -9836,6 +10207,7 @@
             $('controller-view').classList.toggle('simple-on', st.on);
             $('simple-toggle').checked = st.on;
             $('simple-switch-text').textContent = st.on ? 'Simple' : 'Pro';
+            $('layout-btn').classList.toggle('hidden', st.on);
             if (!st.on) return;
             const page = $('simple-section');
             page.style.setProperty('--theme-c1', theme.c1);
@@ -9852,13 +10224,28 @@
                 btn.innerHTML = '<span class="st-icon" aria-hidden="true"></span><span class="st-label"></span>';
                 btn.querySelector('.st-icon').textContent = t.icon;
                 btn.querySelector('.st-label').textContent = t.label;
-                btn.title = `${t.label}: ${optionLabel('bgStyle', t.l3.bgStyle)} lower thirds, with its own overlays, stingers and sounds`;
+                btn.title = `${t.label}: ${t.looks.map(l => l.name).join(', ')} lower thirds, with its own overlays, stingers and sounds`;
                 btn.onclick = () => pickTheme(key);
                 themes.append(btn);
             });
-            // The lower third: its look, where it goes, and the saved ones
-            $('simple-l3-look').textContent = ['bgStyle', 'fontStyle', 'animationStyle'].map(name => optionLabel(name, theme.l3[name])).join(' · ');
+            // The lower third: the theme's looks, where it goes (Animated L3s only), and the saved ones
+            const look = simpleLook(st);
+            $('simple-l3-look').textContent = look.overlay ? `${OVERLAYS[look.overlay].label} · fullscreen`
+                : ['bgStyle', 'fontStyle', 'animationStyle'].map(name => optionLabel(name, look[name])).join(' · ');
+            const looks = $('simple-looks');
+            looks.innerHTML = '';
+            looks.style.gridTemplateColumns = `repeat(${theme.looks.length}, minmax(0, 1fr))`;
+            theme.looks.forEach((l, i) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = l === look ? 'on' : '';
+                btn.textContent = l.name;
+                btn.title = l.overlay ? `${OVERLAYS[l.overlay].label}: a Fullscreen L3` : `${optionLabel('bgStyle', l.bgStyle)} background, ${optionLabel('fontStyle', l.fontStyle)} font, ${optionLabel('animationStyle', l.animationStyle)}`;
+                btn.onclick = () => pickLook(i);
+                looks.append(btn);
+            });
             const where = $('simple-where');
+            where.classList.toggle('hidden', !!look.overlay); // a Fullscreen L3 has its own place
             where.innerHTML = '';
             Object.entries(SIMPLE_WHERE).forEach(([loc, text]) => {
                 const btn = document.createElement('button');
@@ -9893,7 +10280,7 @@
                 row.innerHTML = `<button type="button" class="sr-take"><b></b><span></span></button><button type="button" class="sr-del" title="Delete">${icon('x')}</button>`;
                 row.querySelector('b').textContent = d.label;
                 row.querySelector('.sr-take span').textContent = d.title || '';
-                row.querySelector('.sr-take').title = `Take ${d.label} in the ${theme.label} look`;
+                row.querySelector('.sr-take').title = `Take ${d.label} in the ${theme.label} look (${look.name})`;
                 row.querySelector('.sr-take').onclick = () => flashTake(simpleL3(d.label, d.title));
                 row.querySelector('.sr-del').onclick = () => {
                     if (!confirm(`Delete ${d.label}?`)) return;
@@ -9911,12 +10298,12 @@
                     btn.type = 'button';
                     btn.textContent = OVERLAYS[k].label;
                     const len = OVERLAYS[k].length;
-                    if (len !== undefined) {
+                    if (len !== undefined || OVERLAYS[k].place) {
                         const tag = document.createElement('small');
-                        tag.textContent = formatTime(Math.round(len * 10) / 10);
+                        tag.textContent = OVERLAYS[k].place ? '📍 Name' : formatTime(Math.round(len * 10) / 10);
                         btn.append(tag);
                     }
-                    btn.title = `Take ${OVERLAYS[k].label}`;
+                    btn.title = OVERLAYS[k].place ? `Take ${OVERLAYS[k].label}: the place typed in Name` : `Take ${OVERLAYS[k].label}`;
                     btn.onclick = () => simpleFire(k);
                     box.append(btn);
                 });
@@ -9942,7 +10329,132 @@
 
 
         /* =========================================================
-           25. STARTUP
+           25. CONTROLLER: LAYOUT
+           Each show can leave out what it doesn't need, for a slimmer dock. The wrench in the top bar (Pro
+           only) turns on editing: tap a button (a background, font, animation, overlay, stinger, sound pad or
+           cue button) to hide it or bring it back, or the eye on a tab or a section to hide all of it. While
+           editing, hidden ones show faded; Done takes them away. The layout is a setting like any other, so it
+           goes in the show file, and Done saves it to the show open now. Restore all brings everything back.
+           Simple mode has its own page, so it's never affected.
+           ========================================================= */
+        const LAYOUT_KEY = 'fx_layout'; // { hidden: [keys] }, keys like 'tab:sound', 'sec:ov-stingers', 'opt:overlayStyle:kamc', 'snd:victory', 'cue:sot'
+        const LAYOUT_GROUPS = ['bgStyle', 'fontStyle', 'animationStyle', 'overlayStyle']; // the option buttons that can be hidden
+        let layoutEditing = false;
+        let layoutBefore = '';  // the layout when editing started, to tell whether Done has anything to save
+        const loadHidden = () => { const l = readJson(LAYOUT_KEY, null); return new Set(Array.isArray(l?.hidden) ? l.hidden : []); };
+        const saveHidden = (hidden) => {
+            if (hidden.size) localStorage.setItem(LAYOUT_KEY, JSON.stringify({ hidden: [...hidden].sort() }));
+            else localStorage.removeItem(LAYOUT_KEY); // the standard layout
+            applyLayout();
+        };
+
+        // Marks what can be hidden (once, at startup; the sound pads mark themselves). Tabs and sections get an
+        // eye, since tapping them opens them; every other one is hidden by tapping it while editing.
+        const initLayout = () => {
+            const eye = (el) => {
+                const b = document.createElement('span');
+                b.className = 'lay-eye';
+                b.setAttribute('role', 'button');
+                el.append(b);
+            };
+            document.querySelectorAll('#mode-tabs input[name="mode"]').forEach(r => {
+                const label = document.querySelector(`label[for="${r.id}"]`);
+                label.dataset.lay = `tab:${r.value}`;
+                eye(label);
+            });
+            document.querySelectorAll('#l3-section details.fx-section, #overlay-section details.fx-section').forEach(d => {
+                d.dataset.lay = `sec:${d.dataset.key}`;
+                eye(d.querySelector('summary'));
+            });
+            LAYOUT_GROUPS.forEach(name => document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+                const label = document.querySelector(`label[for="${r.id}"]`);
+                label.dataset.lay = `opt:${name}:${r.value}`;
+                label.classList.add('lay-leaf');
+            }));
+            document.querySelectorAll('#cue-row .cue-add').forEach(btn => {
+                btn.dataset.lay = `cue:${btn.getAttribute('onclick').match(/addCue\('(\w+)'\)/)[1]}`;
+                btn.classList.add('lay-leaf');
+            });
+            // While editing, a tap hides or brings back instead of doing what it usually does (a sound pad
+            // plays on the press, so that's stopped too)
+            document.addEventListener('click', (e) => {
+                if (!layoutEditing) return;
+                const el = e.target.closest('.lay-eye')?.closest('[data-lay]') || e.target.closest('.lay-leaf');
+                if (!el) return;
+                e.preventDefault();
+                e.stopPropagation();
+                toggleHidden(el.dataset.lay);
+            }, true);
+            document.addEventListener('pointerdown', (e) => { if (layoutEditing && e.target.closest('.lay-leaf, .lay-eye')) e.stopPropagation(); }, true);
+            applyLayout();
+        };
+        const isHidden = (el) => el.classList.contains('lay-off') || !!el.closest('details.lay-off');
+        const toggleHidden = (key) => {
+            const hidden = loadHidden();
+            if (!hidden.delete(key)) hidden.add(key);
+            saveHidden(hidden);
+        };
+
+        // Shows the layout: hidden ones are gone (faded while editing), the tabs share the bar, and a pick
+        // that's been hidden moves to the first one still showing, so TAKE never sends something you can't see
+        const applyLayout = () => {
+            const hidden = loadHidden();
+            document.querySelectorAll('[data-lay]').forEach(el => {
+                const off = hidden.has(el.dataset.lay);
+                el.classList.toggle('lay-off', off);
+                const eye = el.matches('details') ? el.querySelector('summary > .lay-eye') : el.querySelector(':scope > .lay-eye');
+                if (eye) {
+                    eye.innerHTML = icon(off ? 'eyeOff' : 'eye');
+                    eye.title = off ? 'Hidden: tap to bring it back' : 'Tap to hide it';
+                }
+            });
+            $('controller-view').classList.toggle('layout-edit', layoutEditing);
+            $('layout-bar').classList.toggle('hidden', !layoutEditing);
+            $('layout-btn').classList.toggle('on', layoutEditing);
+            const tabs = [...document.querySelectorAll('#mode-tabs label[data-lay]')];
+            const shown = layoutEditing ? tabs.length : tabs.filter(t => !t.classList.contains('lay-off')).length;
+            $('mode-tabs').style.gridTemplateColumns = `repeat(${Math.max(1, shown)}, minmax(0, 1fr))`;
+            if (layoutEditing) return;
+            const visible = (r) => !isHidden(document.querySelector(`label[for="${r.id}"]`));
+            let moved = false;
+            ['mode', ...LAYOUT_GROUPS].forEach(name => {
+                const all = [...document.querySelectorAll(`input[name="${name}"]`)];
+                const on = all.find(r => r.checked);
+                if (on && visible(on)) return;
+                const first = all.find(visible);
+                if (first) { first.checked = true; moved = true; }
+            });
+            if (moved) { savePicks(); updateMode(); }
+        };
+
+        const setLayoutEdit = (on) => {
+            if (on && simpleState().on) return; // Pro only
+            if (on === layoutEditing) return;
+            layoutEditing = on;
+            if (on) {
+                layoutBefore = localStorage.getItem(LAYOUT_KEY) || '';
+                applyLayout();
+                flash('Editing the layout', false, 'tap what this show doesn\'t need');
+                return;
+            }
+            applyLayout();
+            if ((localStorage.getItem(LAYOUT_KEY) || '') === layoutBefore) { flash('Layout unchanged'); return; }
+            // Saved to the show that's open (with the rest of its settings, as Save does)
+            if (!currentShowFile()) flash('Layout set', false, 'save the show (the chip) to keep it with a show');
+            else if (!ws || ws.readyState !== WebSocket.OPEN) flash('Layout set', true, 'not connected: save the show (the chip) once it is');
+            else saveShowFile(false);
+        };
+        // Restore all: every tab, section and button back (still editing, so it can be checked before Done)
+        const restoreLayout = () => {
+            if (!loadHidden().size) { flash('Nothing is hidden'); return; }
+            if (!confirm('Bring back every tab, section and button?')) return;
+            saveHidden(new Set());
+            flash('Layout restored', false, 'everything is back');
+        };
+
+
+        /* =========================================================
+           26. STARTUP
            Opens the display if the address ends in #display (the
            underlay for #underlay, Content for #content), otherwise
            opens the controller.
@@ -10000,6 +10512,10 @@
                     if (e.target.files.length) importL3s(e.target.files);
                     e.target.value = ''; // lets the same file be picked again
                 });
+                $('import-content-file').addEventListener('change', (e) => {
+                    if (e.target.files.length) importContent([...e.target.files]);
+                    e.target.value = '';
+                });
                 // Custom files: tapping either Custom… opens the file picker
                 $('bg-custom').addEventListener('click', pickCustom);
                 $('ov-l3Custom').addEventListener('click', pickCustom);
@@ -10007,8 +10523,9 @@
                     if (e.target.files.length) useCustomFile(e.target.files[0].name);
                     e.target.value = '';
                 });
-                // Content…: the same, for the Content overlay's picture or video
+                // Content TV… and Content Full…: the same, for the Content overlay's picture or video
                 $('ov-content').addEventListener('click', pickContent);
+                $('ov-contentPhone').addEventListener('click', pickContent);
                 $('ov-contentFull').addEventListener('click', pickContent);
                 $('content-file').addEventListener('change', (e) => {
                     if (e.target.files.length) useContentFile(e.target.files[0].name);
@@ -10094,6 +10611,7 @@
                 $('timer-from').addEventListener('change', (e) => setTimerFrom(e.target.value));
                 $('timer-from').addEventListener('keydown', (e) => { if (e.key === 'Enter') e.target.blur(); });
                 initSections();
+                initLayout();        // what this show leaves out
                 showCustomNames();
                 showContentName();
                 updateMode();

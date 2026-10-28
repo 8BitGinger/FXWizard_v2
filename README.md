@@ -20,10 +20,12 @@
   - [Animated L3s tab](#animated-l3s-tab)
   - [Fullscreen Overlays tab](#fullscreen-overlays-tab)
   - [Importing L3s](#importing-l3s)
+  - [Importing content](#importing-content)
   - [Scene Builder](#scene-builder)
   - [Sound Pad](#sound-pad)
   - [Simple mode (themes)](#simple-mode-themes)
   - [Saving shows](#saving-shows)
+  - [Editing the layout](#editing-the-layout)
   - [Running a show](#running-a-show)
   - [Saving rundowns](#saving-rundowns)
   - [Running the show](#running-the-show)
@@ -75,13 +77,13 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 | **Underwater** | Blue-green water with swaying light rays, rising bubbles, and small schools of fish swimming by every few seconds | Fades in | Fades out |
 | **Arrested** | Police lights flash red and blue, then a steel jail cell door slams down over the screen with a shake (the wide gaps between the bars show the scene behind). It lifts away in the last second | Lights flash, door drops | Door lifts, fades out |
 | **Hot Take** | The bottom of the screen catches fire, a flaming **HOT TAKE** badge slams in just above the flames (clear of the host's face) and its heat meter maxes out, with embers flying. Type your own text (for example *Unpopular Opinion*) or leave it blank | Slams in | Fades out |
-| **Like & Subscribe** | **Like**, **Follow** and **Subscribe** buttons pop up along the bottom, a cursor clicks each one (they change to **Liked**, **Following** and **Subscribed**) and the bell rings, all in about 3 seconds. Any socials you add (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web) show above the buttons, each with its icon | Pops up | Fades out |
+| **Like & Subscribe** | **Like**, **Follow** and **Subscribe** buttons pop up along the bottom, a cursor clicks each one (they change to **Liked**, **Following** and **Subscribed**) and the bell rings, all in about 3 seconds. Any socials you add (YouTube, Facebook, Twitter, Instagram, LinkedIn, GitHub, Web) show above the buttons, each with its icon | Pops up | Fades out |
 | **Breaking News** | **LIVE** in the top-right corner and a red **BREAKING NEWS** bar along the bottom, with your ticker text scrolling across. Leave the ticker text empty and it scrolls **Breaking News \| Breaking News \| ...** | Bar slides up | Fades out |
 | **St. Patrick's** | Shamrocks (now and then a lucky four-leaf clover) and spinning gold coins tumble down, the coins catching the light, with a soft green glow around the edges | Fades in | Fades out |
 | **Comic** | **POW!**, **ZAP!**, **BAM!**, **KAPOW!** and more pop in one after another in spiky comic bursts around the edges of the screen (never over the middle), each with a jolt and a wobble, then shrink away. Red and blue halftone dots fill the corners | Fades in | Fades out |
 | **Disco Ball** | A mirror ball drops down on its cord with a bounce and spins, its tiles glinting, while spots of colored light sweep around the screen, soft beams turn from it and the room dims a little | Drops in | Fades out |
 | **V-Day** | Hearts in reds and pinks float up the screen, swaying and gently beating, with twinkling sparkles and a soft pink glow around the edges | Fades in | Fades out |
-| **Retro VHS** | The picture looks like an old tape playing: scan lines, grain, a soft vignette, the ragged head-switching noise along the bottom, and a tracking glitch that rolls through now and then. The VCR's display shows **PLAY ▶** and **SP** at the top, the tape counter bottom left, and the date and time bottom right, like a camcorder | Fades in | Fades out |
+| **Retro VHS** | The picture looks like an old tape playing: scan lines, grain, a soft vignette, the ragged head-switching noise along the bottom, and a tracking glitch that rolls through now and then. The VCR's display shows **PLAY ▶** and **SP** at the top, the tape counter bottom left, and the date and time bottom right, like a camcorder: today's date and the time now, or a date and time you set (both optional), running on from there | Fades in | Fades out |
 | **Stingers** | | | |
 | **Standard** | A wide band of red, white and blue stripes (some with stars) sweeps from top-left to bottom-right, covering the whole screen at the halfway point; the stripes drift slightly (about 2 seconds) | Sweeps in | Sweeps off |
 | **Storm** | Storm clouds roll down with rain and lightning, cover the screen, then clear (about 2.8 seconds) | Rolls in | Clears |
@@ -101,10 +103,11 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 | **Medical** | Blue and white: blue panels sweep in from both sides as a white heartbeat line races across; at the middle a big white medical cross pulses as the heartbeat passes under it, then the panels sweep back out (about 2.4 seconds) | Sweeps in | Sweeps out |
 
 | **Content** | | | |
-| **Content** | A TV, almost full screen, showing a picture (PNG, JPG, GIF or WebP) or a video (MP4 or WebM) you pick from the `content` folder. The stream around it dims a little. A picture stays up 15 seconds; a video plays all the way through, once, with its sound (it starts as soon as the screen is on, and its Duration fills in with its length). A file that's gone from the folder shows **No signal** | The TV rises into place, then its screen powers on (a bright line opens out to the picture) | The screen powers off to a line, then a dot, and the TV drops away |
+| **Content TV** | A TV, almost full screen, showing a picture (PNG, JPG, GIF or WebP) or a video (MP4 or WebM) you pick from the `content` folder. The stream around it dims a little. A picture stays up 15 seconds; a video plays all the way through, once, with its sound (muted for a Clip cue in the rundown; it starts as soon as the screen is on, and its Duration fills in with its length). A file that's gone from the folder shows **No signal** | The TV rises into place, then its screen powers on (a bright line opens out to the picture) | The screen powers off to a line, then a dot, and the TV drops away |
+| **Content Phone** | The same, on a phone instead of a TV: made for tall 9:16 pictures and videos (shot on a phone, or made for Reels, Shorts and TikTok), which fill its screen. It has a status bar with the time now, signal, Wi-Fi and battery, a camera cutout and a home bar, and the stream around it dims a little | The phone rises into place with a little tilt, then its screen wakes and the picture brightens in | The screen goes dark, and the phone drops away |
 | **Content Full** | The same pictures and videos, filling the source with no TV (black at the sides of one that isn't 16:9). Pictures 15 seconds, videos all the way through | Dissolves in | Dissolves out |
 
-📺 **Content has its own browser source:** Content and Content Full show on `fx_wizard.html#content`, not on `#display`, so they stay up while lower thirds, overlays and stingers come and go (and taking one of those never takes Content down). In OBS you can make it full screen in one scene and a smaller box beside the cameras in another. See [OBS Recommendations](#️-obs-recommendations).
+📺 **Content has its own browser source:** Content TV, Content Phone and Content Full show on `fx_wizard.html#content`, not on `#display`, so they stay up while lower thirds, overlays and stingers come and go (and taking one of those never takes Content down). In OBS you can make it full screen in one scene and a smaller box beside the cameras in another. See [OBS Recommendations](#️-obs-recommendations).
 
 L3 PNG, L3 Info, L3 Gif and Custom text is always shown in capitals. If text is longer than normal, it shrinks to fit instead of getting cut off.
 
@@ -118,9 +121,16 @@ Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import bu
 - Imported L3s go up as a **toggle**: they stay up until they're turned off, with **TOGGLE OFF**, or **OFF** on their card in the Podcast Rundown (where they show **TOGGLE** instead of a time). Ones imported before this work the same way.
 - Names already saved (same name and title) are skipped.
 
+### Import content
+Turn the pictures and videos in the `content` folder into saved cards in one go. The **IMPORT CONTENT** button shows when **Content TV**, **Content Phone** or **Content Full** is selected, and they're imported as that one.
+- Pick several files at once from the `content` folder; they're added in file-name order, each named after its file.
+- They're timed like any other card, not toggles: a video for all of its length, a picture for the usual 15 seconds.
+- Files that aren't in the `content` folder, and ones already saved the same way, are skipped.
+
 ### Control panel
-- **Simple mode:** the **Pro / Simple** switch in the top bar (it reads **Pro** while off, **Simple** while on) swaps the tabs for one page in a theme's look (Classic, Sports, News, Tech & Gaming, Comedy, True Crime, Business, Lifestyle, Holiday): type a name and take it, and the theme's own overlays, stingers and sounds are one tap each. See [Simple mode](#simple-mode-themes).
+- **Simple mode:** the **Pro / Simple** switch in the top bar (it reads **Pro** while off, **Simple** while on) swaps the tabs for one page in a theme's look (Classic, Sports, News, Tech & Gaming, Comedy, True Crime, Business, Lifestyle, Holiday): pick one of the theme's looks, type a name and take it, and the theme's own overlays, stingers and sounds are one tap each. See [Simple mode](#simple-mode-themes).
 - **Shows:** the chip on the left of the top bar names the show that's open (like **001 · Morning Show**), with an amber dot when something has changed since it was saved. Tap it to save the show, everything the panel is set to, as a numbered file in the `shows` folder, or to open another. See [Saving shows](#saving-shows).
+- **Layout:** the wrench left of the **Pro / Simple** switch (Pro only) lets each show hide the tabs, sections and buttons it doesn't need, for a slimmer dock. The layout is saved with the show. See [Editing the layout](#editing-the-layout).
 - **Five tabs, as icons** (hover for the name): Animated L3s (a lower third), Fullscreen Overlays (sparkles), [Scene Builder](#scene-builder) (stacked bars), Podcast Rundown (a list) and [Sound Pad](#sound-pad) (a speaker). Animated L3s and Fullscreen Overlays each have their own saved list.
 - **Sections that open and close:** the lower third options (Background, Font Style, Font Color, Location, Animation) and the overlay groups (Fullscreen L3s, Overlays, Stingers, Content) are big bars you tap to open or close. They all start closed, and opening one closes the others on that tab. On the Animated L3s tab, **▾ Expand all** (above the sections) opens them all at once; **▴ Collapse all** closes them, and closing any one ends it. Each bar has a chevron and shows what's picked inside. Lower thirds start on Blue, Default, White, Bottom Left and Slide Left; after that the panel remembers what's picked on each tab (and which tab was open).
 - **Saved graphics:** large, touch-friendly cards, full width (or two per row with the switch on the left of the heading; the panel remembers). The list starts closed: tap the heading, or the chevron under it, to open or close it (each tab separately). Tap a card to take, ✕ to delete, ＋ to add it to the Podcast Rundown. A colored edge shows the background or overlay type. The trash can on the right of the heading deletes everything saved on that tab (it asks first). The spyglass next to the layout switch opens a search box that filters the list by name, title, file or style (Escape closes it).
@@ -137,6 +147,7 @@ Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import bu
     - **Close** (optional): the final section, after the last block. It takes anything, numbered **CL1-L3**, **CL1-SCENE**...
   - **Unsorted:** graphics added with **＋ RUNDOWN** (see below) wait at the bottom under **Unsorted**, labeled with just their type, until you drag them into a block (or move them with ✎). They aren't part of the show: they're hidden while Set Show is on, and turning it on tells you how many are left.
   - **Cues:** producer notes, placeholders for things that aren't graphics, the scene to take, and scripts. Tap **Note**, **Clip**, **SOT**, **PIC**, **Scene**, **Script** or **Break** (while Set Show is off), type the note, an optional description or the script (or load the script from a .txt file), and pick its block. Cues show as thin, greyed-out rows, numbered like graphics (**A1-CLIP**, **A2-CLIP**, **A1-SOT**, **A1-SCENE**, **B1-SCRIPT**...; notes have no number). Drag, edit and remove them like cards. Scripts show on the [projector](#the-projector-anchor-view); notes are for the crew and don't.
+  - **Clip, SOT and PIC with content:** a Clip, SOT or PIC can play a picture or video from the `content` folder. In its window, pick the file under **Plays** (the list is the `content` folder, as for Content TV…), then **TV**, **Phone** or **Full screen** (like Content TV…, Content Phone… and Content Full…). A video fills in its whole length as the **Duration**, which you can change; a picture stays up for the Duration (15 seconds to start). It shows with a blue **PLAY** marker, the file and its time (**PLAY interview.mp4 · 1:32**; red with a **!** if the file isn't in the folder any more). While **Set Show** is on, tap the marker (it has a ⚡) to play it on the Content browser source, the same as a Content card: it becomes the current item, the row gets the green outline and the **OFF** button with its countdown, and it goes in the log under the cue's name. Its time counts in the graphics' totals. A **SOT**'s video plays with its sound; a **Clip**'s plays **muted**, in case it has background noise, and its marker says so (**PLAY broll.mp4 · 0:20 · muted**). Leave **Plays** on **Nothing** and it's a placeholder, the same as before; ✎ can add or take away the file any time while Set Show is off.
   - **Break:** a break you fire from the rundown. Pick its **break scene** (the OBS scene to go to for the break; it starts on the first of your [break scenes](#show-timing), if you've ticked any), give it a length (like 2:00) and, if you like, a name (*Break 1*). A Break can't be saved without a scene. It shows with an orange **BREAK** marker, its length and its scene (**BREAK 2:00 · Break Slate**). While **Set Show** is on, tap the marker (it has a ⚡) to fire it:
     - OBS switches to its break scene, the same as firing a TAKE (with OBS's current transition; it goes in the log). Going there doesn't start a second break, even if it's one of your break scenes. This needs server.py running in OBS; without it the break still starts, and the message box says the scene couldn't be taken. (A Break added before breaks had a scene says **no scene**: ✎ to pick one.)
     - It says so on the projector, big: **In break** and its countdown, and here in an orange strip with **End** to finish it early. It ends by itself when its time is up.
@@ -151,10 +162,11 @@ Turn plain `.txt` files into a list of L3 graphics, ready to take. The Import bu
 - **Buttons, two by two:** **TAKE** and **TOGGLE ON** on top, **SAVE** and **＋ RUNDOWN** below. **＋ RUNDOWN** puts what you've set up straight into the Podcast Rundown under **Unsorted**, without saving it first. It only works while Set Show is off; if it's on, it offers to turn it off (or cancel).
 - **TOGGLE ON / TOGGLE OFF:** puts the graphic up with no time limit. The button turns yellow and pulses and reads **TOGGLE OFF** until you press it again, press Clear All, or take something else on the same tab. Stingers play once, so it's greyed out for them.
 - **Message box:** floats at the bottom of the panel on every tab and shows what you just took and how long it will stay up, for example **Taken: Fire** *for 12s*. Then it counts down (*11s left*, *10s left*...) while the graphic is on screen, and says **Off screen: Fire** when it's gone. Any newer message (taking something else, Clear All, OFF, TOGGLE) takes its place. It lights up for each new message (and stays lit while it counts down), dims after 3 seconds, and goes back to a small, faint **Ready** after 15 seconds with nothing new. The panel leaves room at the bottom so it never covers the last card.
+- **Content clock:** while Content TV, Phone or Full is up, a blue bar sits just above CLEAR ALL, on every tab and in Simple mode: which one, its name, its time left and a thin line of how far through it is (**0:42** *left of 1:30*). Toggled on, it counts how long it's been up instead. Lower thirds and overlays taken over the content don't touch it (the message box moves up and counts down those). **OFF** on the bar takes the content down. A Clip from the rundown says **muted**.
 - **Clear All:** takes everything off screen right away, with its normal out animation. It floats at the very bottom of the panel, under the message box, on every tab and in Simple mode, so it's always one tap away without scrolling.
 - **Greenscreen:** on the overlays that support [Greenscreen Depth](#-greenscreen-depth), a **Greenscreen** switch sits left of Duration. Each effect remembers its own.
 - **Light mode** (the switch under the connection status): shows a moon in dark mode and a sun in light mode. Dark is the default, and the browser remembers your choice.
-- **Connection help:** the wrench in the top bar opens a window with the live connection status and a list of things to check when it isn't **OPEN**.
+- **Connection help:** the wrench on the left of the connection bar (the very top) opens a window with the live connection status and a list of things to check when it isn't **OPEN**.
 - **Tiny logo:** tap the logo on the right of the connection bar to reload the panel (during a show it asks first; nothing on screen changes, and the rundown and log are kept).
 
 ---
@@ -169,7 +181,7 @@ Control panel  ──►  Server (port 8080)  ──►  Display page in OBS
 - **Control panel:** `fx_wizard.html`, opened in any browser. An OBS dock is recommended (see [Open the Control Panel](#️-open-the-control-panel)).
 - **Display:** the same file with `#display` on the end, added to OBS as a Browser Source.
 - **Underlay** (optional, for Greenscreen): the same file with `#underlay` on the end, added to OBS *below* your keyed camera.
-- **Content** (for Content and Content Full): the same file with `#content` on the end, added to OBS below the display. It shows only the pictures and videos from the `content` folder, so they stay up while graphics come and go on the display.
+- **Content** (for Content TV, Content Phone and Content Full): the same file with `#content` on the end, added to OBS below the display. It shows only the pictures and videos from the `content` folder, so they stay up while graphics come and go on the display.
 - **Projector** (optional): the same file with `#projector` on the end, opened in a browser on a screen the anchor and guests can see.
 - **Server:** passes each message from the control panel to the display. It can run inside OBS (Python) or on its own (Node.js).
 
@@ -289,7 +301,7 @@ Every OBS setup is a little different, but this one works well, especially with 
 In OBS, a scene can be added to another scene like any other source. Make these scenes that hold nothing but FX Wizard:
 
 1. **FX Display:** one Browser Source with `fx_wizard.html#display`, full screen (1920 x 1080).
-2. **FX Content** (for Content and Content Full): one Browser Source with `fx_wizard.html#content`, full screen.
+2. **FX Content** (for Content TV, Content Phone and Content Full): one Browser Source with `fx_wizard.html#content`, full screen.
 3. **FX Underlay** (only needed with a greenscreen): one Browser Source with `fx_wizard.html#underlay`, full screen.
 
 Then, in each of your show scenes:
@@ -309,7 +321,7 @@ Background
 ```
 
 ### Content beside the cameras
-Content stays up on its own layer while lower thirds and overlays come and go, so it can share a scene with the cameras. In a scene where it should sit to the side (say the host on the left and the picture on the right), select **FX Content** in that scene and drag its corners, or right-click it and use **Transform > Edit Transform**, to make it the box you want. Each show scene keeps its own size and spot for it, so one scene can have it full screen and another a box on the right, and the same picture stays up when you switch between them. **Content Full** fills whatever box you give it, so it's the one to use there; **Content** (the TV) is made to fill the screen.
+Content stays up on its own layer while lower thirds and overlays come and go, so it can share a scene with the cameras. In a scene where it should sit to the side (say the host on the left and the picture on the right), select **FX Content** in that scene and drag its corners, or right-click it and use **Transform > Edit Transform**, to make it the box you want. Each show scene keeps its own size and spot for it, so one scene can have it full screen and another a box on the right, and the same picture stays up when you switch between them. **Content Full** fills whatever box you give it, so it's the one to use there; **Content TV** is made to fill the screen.
 
 ### Why nested scenes
 - **One copy of each page, shared by every scene.** OBS runs a separate browser for every Browser Source, even in scenes that aren't on screen, and the animated effects take real work to draw. Nesting means one page each, so they're always in step: a graphic that's up stays up when you change scenes.
@@ -341,15 +353,18 @@ Open `fx_wizard.html` in a browser (without `#display`). Check that the top bar 
 1. Open **Fullscreen L3s**, **Overlays**, **Stingers** or **Content** and pick one (opening one closes the others).
 2. For L3 PNG, L3 Gif and Custom, type a **Name** and an optional **Title**. For L3 Info, type the paragraph in **Text**.
    - **Custom:** same as the Custom background: tap **Custom…** and pick the image from the `custom` folder.
-   - **Like & Subscribe:** under **Socials**, tap an icon (YouTube, Facebook, Twitter, Instagram, LinkedIn, Web) to open a box for that account and type it in. Tap the icon again to leave it out. All of them are optional, and the panel remembers what you typed. Give it at least 4 seconds so the clicks finish.
+   - **Like & Subscribe:** under **Socials**, tap an icon (YouTube, Facebook, Twitter, Instagram, LinkedIn, GitHub, Web) to open a box for that account and type it in. Tap the icon again to leave it out. All of them are optional, and the panel remembers what you typed. Give it at least 4 seconds so the clicks finish.
    - **Hot Take:** type your own text in **Text (optional)**, or leave it blank for **HOT TAKE**.
    - **Coffee:** type the word for the foam in **Text (optional)** (*Dad*, *Grandma*, your show's name; up to 14 characters, longer words get smaller to fit the heart), or leave it blank for **Mom**.
    - **Breaking News:** type the scrolling text in **Ticker text**, or leave it empty for **Breaking News | Breaking News | ...**. **TOGGLE ON** keeps it up until you turn it off.
    - **Location:** type the place (like *City Hall*).
+   - **Retro VHS:** under **Date and time on the tape (optional)**, set a date, a time, or both for the camcorder stamp in the corner (say, a date in 1994). The clock starts there and runs on while it's up. Leave them empty for today's date and the time now, as before; ✕ empties both. Saved and rundown cards keep theirs (✎ changes it on a rundown card).
    - **Sports** (a stinger): pick **Football**, **Basketball**, **Baseball** or **Soccer** under **Sport**.
-   - **Content** and **Content Full** (in their own section, **Content**): put pictures (PNG, JPG, GIF or WebP) and videos (MP4 or WebM) in the `content` folder next to `assets`, then tap **Content…** (on a TV) or **Content Full…** (full screen). A window shows everything in the folder with a preview (videos are marked ▶, with their length): tap the one to show. The two share the pick. The panel remembers it, and each saved Content overlay (named after its file) keeps its own.
+   - **Content TV**, **Content Phone** and **Content Full** (in their own section, **Content**): put pictures (PNG, JPG, GIF or WebP) and videos (MP4 or WebM) in the `content` folder next to `assets`, then tap **Content TV…** (on a TV), **Content Phone…** (on a phone, for tall 9:16 ones) or **Content Full…** (full screen). A window shows everything in the folder with a preview (videos are marked ▶, with their length): tap the one to show. The three share the pick. The panel remembers it, and each saved Content overlay (named after its file) keeps its own.
      - **Its own layer:** Content shows on the `#content` browser source (see [Add the Display to OBS](#-add-the-display-to-obs)), so taking a lower third, an overlay or a stinger leaves it up, and taking Content leaves those up. Taking another Content replaces the one that's up. **TOGGLE ON** keeps it up until you turn it off: with Content picked, the TOGGLE button is Content's own (pick an overlay and it's the overlay's), so Content can stay toggled on while you take and toggle overlays. **CLEAR ALL** takes Content down too.
      - **Duration:** 15 seconds for a picture. For a video it fills in with the video's length, plus the moment the TV (or the dissolve) takes to come up, so the whole video plays (a 45-second video on the TV gets 47), and the panel says so under the buttons: `content/clip.mp4 · video 0:45, plays to the end`. You can still change it: shorter cuts the video off, longer holds its last frame. A panel that can't open the file itself (on another computer) keeps 15, so set it by hand there. **Choose a file…** picks it by hand (for an older server that can't list the folder); pick it from the `content` folder, because that's where the display looks. For a video's sound, turn on **Control audio via OBS** on the FX Content browser source (`#content`).
+     - **Many at once:** **IMPORT CONTENT** makes a saved card for each file you pick. See [Importing content](#importing-content).
+     - **Its time on screen:** the blue content clock above CLEAR ALL shows its time left on every tab, whatever you take over it.
 3. Check the **Duration**: it fills in with the overlay's usual time when you pick it. Stingers show their fixed length, locked.
 4. Press **TAKE**, **TOGGLE ON**, **SAVE**, or **＋ RUNDOWN**.
 
@@ -362,6 +377,12 @@ Open `fx_wizard.html` in a browser (without `#display`). Check that the top bar 
    ```
 2. On the Fullscreen Overlays tab, pick **L3 PNG**, **KAMC** or **L3 Info**, then press **IMPORT L3s (.txt)** and choose one or more files.
 3. The names appear under **Saved Overlays**, each labeled with its file name.
+
+### Importing content
+1. Put the pictures (PNG, JPG, GIF or WebP) and videos (MP4 or WebM) in the `content` folder next to `assets`.
+2. On the Fullscreen Overlays tab, open **Content** and pick **Content TV**, **Content Phone** or **Content Full**, then press **IMPORT CONTENT** and choose files in the `content` folder (Ctrl+A picks them all).
+3. Each one appears under **Saved Overlays**, named after its file, on the TV, the phone or full screen (whichever was picked). A video's time is all of it; a picture's is 15 seconds. They're timed like any other card, not toggles.
+4. Files from anywhere else are skipped (the display can only show what's in the `content` folder), and so are ones already saved the same way. The message box says how many were imported and skipped.
 
 ### Scene Builder
 The third tab (the stacked bars) chains up to **8 saved graphics** into one **complex scene** (a **cScene**) that plays them one after another: each goes up once the one before has had its time and its exit animation. Any saved graphic can go in: animated L3s, and anything saved on the Fullscreen Overlays tab (Fullscreen L3s, overlays, stingers and Content).
@@ -386,29 +407,31 @@ The fifth tab (the speaker) is six big, colorful pads: **Victory**, **Sad Trombo
 ### Simple mode (themes)
 For anyone who'd rather not build a look of their own. Flip the switch in the top bar from **Pro** to **Simple**, and the tabs give way to one page:
 
-1. **Pick a theme.** Each one has its own lower third look and its own overlays, stingers and sounds:
+1. **Pick a theme.** Each one has a few lower third looks (the first is its own) and its own overlays, stingers and sounds. Between them, the themes use every background, font, animation, overlay, stinger and sound in FX Wizard, plus the L3 PNG and L3 Gif Fullscreen L3s and Location. KAMC is one show's own, so it's never in Simple.
 
-   | Theme | Lower third | Overlays | Stingers | Sounds |
+   | Theme | Looks | Overlays | Stingers | Sounds |
    |---|---|---|---|---|
-   | Classic | Blue, Default, Slide Left | Confetti, Color Wave, Like & Subscribe | Standard, Color Bars | Victory, Swish, Comedy |
-   | Sports | Sports, Modern, Slam | Confetti, Hot Take, Fire | Sports, Fire | Victory, Swish, Sad Trombone |
-   | News | Politics, Classic, Slide Left | Breaking News, Like & Subscribe | Standard, Color Bars | Mystery, Swish, Censor Beep |
-   | Tech & Gaming | Code, Modern, Glitch | Retro VHS, Comic | 8-Bit, Static | Victory, Swish, Comedy |
-   | Comedy | Clouds, Fun, Bounce | Comic, Disco Ball, Confetti | Curtains, Cat, Spring | Comedy, Sad Trombone, Censor Beep, Victory |
-   | True Crime | Black, Classic, red text, Fade In | Rain, Arrested, Retro VHS | Storm, Ghost, Static | Mystery, Censor Beep, Swish |
-   | Business | Finance, Classic, gold text, Fade In | Breaking News, Color Wave, Like & Subscribe | Standard, Fireworks | Victory, Swish, Mystery |
-   | Lifestyle | Café, Script, Fade In | V-Day, Confetti, Like & Subscribe | Coffee, Curtains, Hearts | Victory, Comedy, Swish |
-   | Holiday | Holiday, Script, Fade In | Snow, Confetti | Xmas, Fireworks | Victory, Comedy |
+   | Classic | **Blue** (Default, Slide Left), **Green** (Default, Slide Up), **L3 PNG**, **L3 Gif** | Confetti, Color Wave, Disco Ball, Like & Subscribe | Standard, Color Bars, Fireworks | Victory, Swish, Comedy, Sad Trombone |
+   | Sports | **Sports** (Modern, Slam), **Red** (Modern, Bounce) | Confetti, Hot Take, Fire, Location | Sports, Fire, Fireworks | Victory, Swish, Sad Trombone, Censor Beep |
+   | News | **Politics** (Classic, Slide Left), **Blue** (Classic, Slide Right), **L3 PNG** | Breaking News, Location, Rain, Like & Subscribe | Standard, Color Bars, Medical, Storm | Mystery, Swish, Censor Beep |
+   | Tech & Gaming | **Code** (Modern, Glitch), **Tech** (Modern, Glitch), **Space** (Accent, sky text, Spin) | Retro VHS, Comic, Color Wave, Confetti | 8-Bit, Static, Color Bars | Victory, Swish, Sad Trombone, Comedy |
+   | Comedy | **Clouds** (Fun, Bounce), **Fantasy** (Fun, Spin) | Comic, Disco Ball, Confetti, Underwater | Curtains, Cat, Spring | Comedy, Sad Trombone, Censor Beep, Victory |
+   | True Crime | **Black** (Classic, red text, Fade In), **Red** (Classic, Slide Down) | Rain, Arrested, Retro VHS | Storm, Ghost, Static | Mystery, Censor Beep, Swish |
+   | Business | **Finance** (Classic, gold text, Fade In), **Black** (Modern, gold text, Slide Up), **L3 PNG** | Breaking News, Color Wave, Confetti, Like & Subscribe | Standard, Fireworks, Color Bars | Victory, Swish, Mystery |
+   | Lifestyle | **Café** (Script, Fade In), **Fantasy** (Script, Slide Down) | V-Day, Fall, Underwater, Like & Subscribe | Coffee, Curtains, Hearts, Spring | Victory, Comedy, Swish |
+   | Holiday | **Holiday** (Script, Fade In), **Green** (Script, gold text, Bounce) | Snow, Fall, St. Patrick's, V-Day, Confetti, Color Wave | Xmas, Fireworks, Hearts, Spring | Victory, Comedy, Swish |
 
-2. **Lower third:** type a **Name** and an optional **Title**, pick **Left**, **Middle** or **Right** (along the bottom), pick **Short · 6s** or **Long · 12s** (how long a TAKE keeps it up, saved ones too), then **TAKE**, **TOGGLE ON** (up until you turn it off) or **SAVE**. Saved L3s are big tiles under the buttons, two per row: tap one to take it, the small ✕ in its corner to delete it.
+2. **Lower third:** pick one of the theme's **looks** (the row of buttons at the top of the card), type a **Name** and an optional **Title**, pick **Left**, **Middle** or **Right** (along the bottom; L3 PNG and L3 Gif have their own place, so it's hidden for them), pick **Short · 6s** or **Long · 12s** (how long a TAKE keeps it up, saved ones too), then **TAKE**, **TOGGLE ON** (up until you turn it off) or **SAVE**. Saved L3s are big tiles under the buttons, two per row: tap one to take it, the small ✕ in its corner to delete it.
    - Simple has **its own saved list**: only the L3s saved here show, up to **20 (10 rows)**; SAVE says so when it's full, so delete one first. L3s saved on the Animated L3s tab don't show here or count toward the 20.
-   - Every L3 taken here, the saved ones too, wears the theme picked **now**. Save your guests once, and changing the theme restyles them all.
-   - The ones saved here also show with the saved L3s on the Animated L3s tab (deleting one in either place deletes it from both).
-3. **Overlays and Stingers:** one tap each, with their usual time. Breaking News, Hot Take and Coffee use their own words (**HOT TAKE**, **Mom**); Like & Subscribe uses the socials typed on the Fullscreen Overlays tab; Sports uses the sport picked there.
+   - Every L3 taken here, the saved ones too, wears the theme and look picked **now**. Save your guests once, and changing the theme or look restyles them all.
+   - Each theme remembers the look last picked in it.
+   - The ones saved here also show with the saved L3s on the Animated L3s tab, in the theme's own look (deleting one in either place deletes it from both).
+   - **TOGGLE OFF** takes down whichever lower third is toggled on, even after changing the look.
+3. **Overlays and Stingers:** one tap each, with their usual time. Breaking News, Hot Take and Coffee use their own words (**HOT TAKE**, **Mom**); Like & Subscribe uses the socials typed on the Fullscreen Overlays tab; Sports uses the sport picked there. **Location** (📍 Name) shows the place typed in **Name**, so type it there first (like *City Hall*).
 4. **Sounds:** the theme's pads from the Sound Pad (keys **1** and up hit them too), at the Sound Pad's volume.
 5. **CLEAR ALL** (floating at the bottom) takes everything off screen.
 
-Picking a theme also sets the Animated L3s tab to its look, so turning Simple off carries on from there. The panel remembers Simple mode and the theme, and a [saved show](#saving-shows) keeps them too. To add or change a theme, see [Add or change a Simple mode theme](#add-or-change-a-simple-mode-theme).
+Picking a theme (or one of its animated looks) also sets the Animated L3s tab to that look, so turning Simple off carries on from there. The panel remembers Simple mode, the theme and each theme's look, and a [saved show](#saving-shows) keeps them too. To add or change a theme, see [Add or change a Simple mode theme](#add-or-change-a-simple-mode-theme).
 
 ### Saving shows
 Running a dozen shows? Save each one as a **show**: everything the panel is set to, in one file. Open it again later, or on another computer, and the panel looks the same.
@@ -421,13 +444,24 @@ Running a dozen shows? Save each one as a **show**: everything the panel is set 
 
 The show stays open until another one is opened: reloading the panel or restarting the computer keeps it.
 
-**What a show keeps:** the saved L3s, overlays and complex scenes; the rundown with its blocks, cues, show times, block lengths and break scenes; the Scene Builder's slots; Simple mode and its theme; what's picked on each tab; light or dark mode; the timer (its mode and length, and whether its box is open); the projector (prompter) on or off; the rundown's Simple or Advanced; the socials; Greenscreen switches; the custom image and the content picked; the Sound Pad volume; and the saved list's layout.
+**What a show keeps:** the saved L3s, overlays and complex scenes; the rundown with its blocks, cues, show times, block lengths and break scenes; the Scene Builder's slots; Simple mode and its theme; what's picked on each tab; light or dark mode; the timer (its mode and length, and whether its box is open); the projector (prompter) on or off; the rundown's Simple or Advanced; the socials; Greenscreen switches; the custom image and the content picked; the Sound Pad volume; the saved list's layout; and the panel's [layout](#editing-the-layout) (what's hidden).
 
 **What it leaves alone:** the **AKTA settings** (keys, encoders, and AKTA on or off) stay with each computer and are never in a show file. What's happening in a show right now starts fresh: Set Show is off, nothing is marked as played, and the log starts over (if there's a log of what ran, it reminds you to **Generate Log** first). A show can't be opened while Set Show is on.
 
 Good to know:
 - Custom images and Content files aren't inside the show file. When moving a show to another computer, copy the `custom` and `content` folders too.
 - The server does the saving (the current `server.py` or `server.js`; after updating, reload or restart it). With an older server, **Save** downloads the file instead: move it into the `shows` folder.
+
+### Editing the layout
+Not every show needs every tab, overlay and stinger. Each show can hide what it doesn't use, for a slimmer dock:
+
+1. In **Pro**, tap the **wrench** left of the **Pro / Simple** switch. An amber **Editing the layout** bar appears at the top (it stays there while you scroll).
+2. Tap anything with a dashed amber outline to hide it: a background, font or animation on the Animated L3s tab, an overlay or stinger, a sound pad, or a cue button (Note, Clip, SOT...). Tap it again to bring it back. To hide a whole **tab** or **section** (like Stingers or Content), tap the eye on it; you can still open them while editing, to hide just some of what's inside.
+3. Hidden things show faded and crossed out while you edit, so you can bring them back. TAKE and the saved list are off while editing, so a tap can't send anything by mistake (CLEAR ALL still works).
+4. Tap **Done**. Everything hidden is gone, and the tabs that are left share the bar. If something picked is now hidden (the tab that was open, or the overlay picked), the first one still showing is picked instead, so TAKE never sends something you can't see.
+5. The layout is saved to the show that's open (**Done** saves the show, like **Save**). With no show open, it's kept on this computer until you save one.
+
+**Restore all** (in the editing bar) brings back every tab, section and button. Opening another show brings its layout (a show saved before layouts, or with nothing hidden, shows everything). The layout only changes Pro: Simple mode has its own page, and turning Simple on ends editing. A hidden sound pad's number key does nothing either.
 
 ### Running a show
 1. Open **Podcast Rundown** and tap the block you're filling under **Add to** (A to start).
@@ -554,7 +588,7 @@ It updates by itself as the director works, as long as **Projector** is on in th
 | An overlay's usual duration | `fx_wizard.html`, script section 2 | `dur` on that overlay in `OVERLAYS` (in seconds) |
 | Arrested look or timing | `fx_wizard.html`, script section 6 | `arrested` in the canvas effects (`POLICE_RED`, `POLICE_BLUE`, `DROP` and `LAND`) |
 | Hot Take look | `fx_wizard.html`, script section 6 | `hottake` in the canvas effects; the default text is `caption` in `OVERLAYS` |
-| Cue types (Note, Clip, SOT, PIC, Script) | `fx_wizard.html`, script section 15 | `CUES` |
+| Cue types (Note, Clip, SOT, PIC, Script) | `fx_wizard.html`, script section 15 | `CUES` (`CONTENT_CUES` lists the ones that can play a file from the `content` folder; `cueMuted` says which play muted) |
 | Message presets | `fx_wizard.html`, in the Podcast Rundown part of the page | The four buttons inside `msg-presets` (copy one to add another) |
 | Projector look | `css/styles.css`, section 9 | The `.pj-...` rules |
 | Podcast Rundown blocks to start with | `fx_wizard.html`, script section 15 | `DEFAULT_BLOCKS` |
@@ -637,12 +671,13 @@ Tips:
 The themes are in `THEMES`, in the script's **Simple mode** section (section 24). Each one is a few lines:
 ```js
 holiday:  { label: 'Holiday',  icon: '🎄', c1: '#dc2626', c2: '#166534',
-            l3: { bgStyle: 'holiday', fontStyle: 'font-script', fontColor: '', animationStyle: 'anim-fade' },
-            overlays: ['snow', 'confetti'], stingers: ['xmas', 'fireworks'], sounds: ['victory', 'comedy'] },
+            looks: [{ name: 'Holiday', bgStyle: 'holiday', fontStyle: 'font-script', fontColor: '', animationStyle: 'anim-fade' },
+                    { name: 'Green', bgStyle: 'green', fontStyle: 'font-script', fontColor: '#FFC72C', animationStyle: 'anim-bounce' }],
+            overlays: ['snow', 'fall', 'stpatricks', 'vday', 'confetti', 'colorwave'], stingers: ['xmas', 'fireworks', 'hearts', 'spring'], sounds: ['victory', 'comedy', 'swish'] },
 ```
 - `label` and `icon` are on its button; `c1` and `c2` are its colors.
-- `l3` is the lower third's look: the **value** of a background, font, font color and animation option on the Animated L3s tab (`fontColor: ''` is white).
-- `overlays` and `stingers` are keys from `OVERLAYS` (section 2); `sounds` are keys from `SOUNDS`.
+- `looks` are its lower thirds, each with a `name` for its button. An animated one is the **value** of a background, font, font color and animation option on the Animated L3s tab (`fontColor: ''` is white). A Fullscreen L3 is `{ name: 'L3 PNG', overlay: 'l3Large' }` (or `'l3Gif'`). The first look is the theme's own, so make it an animated one. Keep KAMC out: it's one show's own.
+- `overlays` and `stingers` are keys from `OVERLAYS` (section 2); `sounds` are keys from `SOUNDS`. `locpin` (Location) shows the place typed in Name.
 - Copy a theme, give it a new key (like `weather`), and change what you like. Keep each key the same once shows are saved with it.
 
 ### Replace the Fullscreen L3 images
@@ -754,7 +789,7 @@ Still open: `custom/water.gif` is 49 MB. GIFs are decoded by the CPU frame by fr
 | `css/tailwind.css` | The panel's layout classes, built by `npm run build:css` from `css/tailwind.src.css` and `tailwind.config.js` (don't edit it by hand) |
 | `assets/` | Background videos, the L3 images and GIF, and logos. `assets/sounds/` holds the Sound Pad sounds |
 | `custom/` | Your own images for the **Custom…** background and the **Custom** Fullscreen L3 (pick one with **Custom…**). Not shared in Git |
-| `content/` | Your pictures and videos for **Content** and **Content Full**, shown on `#content` (pick one with **Content…**). Not shared in Git |
+| `content/` | Your pictures and videos for **Content TV**, **Content Phone** and **Content Full**, shown on `#content` (pick one with **Content TV…**, or **IMPORT CONTENT** for many). Not shared in Git |
 | `rundowns/` | Saved Podcast Rundowns, one `.json` file each. Not shared in Git |
 | `logs/` | Show logs from **Generate Log**, one `.csv` file each. Not shared in Git |
 | `shows/` | Saved shows, one `.json` file each, named by number and title (`001 - Morning Show.json`). Not shared in Git |
