@@ -99,7 +99,7 @@ Each overlay has its own built-in animation, so there's nothing extra to pick.
 | **8-Bit** | Chunky pixel blocks in rainbow bands stair-step across the screen like an old game console's screen wipe until it's covered, a pixel-art star hops in the middle with twinkles, then the blocks wipe away the same way (about 2.6 seconds) | Blocks step in | Blocks step out |
 | **Cat** | Two paws grab the bottom edge of the screen, then a giant orange tabby's face rises up so big it fills the screen. It looks around, blinks and twitches its whiskers, then ducks back down and the paws let go (about 2.8 seconds) | Rises up | Ducks down |
 | **Curtains** | Red velvet theater curtains sweep in from both sides under a scalloped valance with gold trim and meet in the middle, a warm spotlight glows on them, then they're pulled back to gold tie-backs at the sides like a stage reveal and slide away (about 3 seconds) | Close in | Pulled back |
-| **Coffee** | A cup of coffee on its saucer, seen from above, slides in steaming and turning; the camera zooms into the foam while latte art draws itself, a heart around **Mom** (or your own words, typed in **Text (optional)**, up to 14 characters), until the foam fills the screen; then it zooms on through and fades away (about 3.4 seconds) | Slides in | Zooms through |
+| **Coffee** | A cup of coffee on its saucer, seen from above, slides in steaming and turning; the camera zooms into the foam while latte art draws itself, a heart, with your own words inside if you type them in **Text (optional)** (blank by default, up to 14 characters), until the foam fills the screen; then it zooms on through and fades away (about 3.4 seconds) | Slides in | Zooms through |
 | **Medical** | Blue and white: blue panels sweep in from both sides as a white heartbeat line races across; at the middle a big white medical cross pulses as the heartbeat passes under it, then the panels sweep back out (about 2.4 seconds) | Sweeps in | Sweeps out |
 
 | **Content** | | | |
@@ -355,7 +355,7 @@ Open `fx_wizard.html` in a browser (without `#display`). Check that the top bar 
    - **Custom:** same as the Custom background: tap **Custom…** and pick the image from the `custom` folder.
    - **Like & Subscribe:** under **Socials**, tap an icon (YouTube, Facebook, Twitter, Instagram, LinkedIn, GitHub, Web) to open a box for that account and type it in. Tap the icon again to leave it out. All of them are optional, and the panel remembers what you typed. Give it at least 4 seconds so the clicks finish.
    - **Hot Take:** type your own text in **Text (optional)**, or leave it blank for **HOT TAKE**.
-   - **Coffee:** type the word for the foam in **Text (optional)** (*Dad*, *Grandma*, your show's name; up to 14 characters, longer words get smaller to fit the heart), or leave it blank for **Mom**.
+   - **Coffee:** type the word for the foam in **Text (optional)** (*Dad*, *Grandma*, your show's name; up to 14 characters, longer words get smaller to fit the heart), or leave it blank for just the heart.
    - **Breaking News:** type the scrolling text in **Ticker text**, or leave it empty for **Breaking News | Breaking News | ...**. **TOGGLE ON** keeps it up until you turn it off.
    - **Location:** type the place (like *City Hall*).
    - **Retro VHS:** under **Date and time on the tape (optional)**, set a date, a time, or both for the camcorder stamp in the corner (say, a date in 1994). The clock starts there and runs on while it's up. Leave them empty for today's date and the time now, as before; ✕ empties both. Saved and rundown cards keep theirs (✎ changes it on a rundown card).
@@ -428,7 +428,7 @@ For anyone who'd rather not build a look of their own. Flip the switch in the to
    - Each theme remembers the look last picked in it.
    - The ones saved here also show with the saved L3s on the Animated L3s tab, in the theme's own look (deleting one in either place deletes it from both).
    - **TOGGLE OFF** takes down whichever lower third is toggled on, even after changing the look.
-3. **Overlays and Stingers:** one tap each, with their usual time. Breaking News, Hot Take and Coffee use their own words (**HOT TAKE**, **Mom**); Like & Subscribe uses the socials typed on the Fullscreen Overlays tab; Sports uses the sport picked there. **Location** (📍 Name) shows the place typed in **Name**, so type it there first (like *City Hall*).
+3. **Overlays and Stingers:** one tap each, with their usual time. Breaking News and Hot Take use their own words (**HOT TAKE**); Coffee shows just the heart; Like & Subscribe uses the socials typed on the Fullscreen Overlays tab; Sports uses the sport picked there. **Location** (📍 Name) shows the place typed in **Name**, so type it there first (like *City Hall*).
 4. **Sounds:** the theme's pads from the Sound Pad (keys **1** and up hit them too), at the Sound Pad's volume.
 5. **CLEAR ALL** (floating at the bottom) takes everything off screen.
 

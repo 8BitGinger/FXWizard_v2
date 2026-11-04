@@ -288,7 +288,7 @@
                             <input type="radio" id="ov-curtains" name="overlayStyle" value="curtains" class="hidden peer/o37">
                             <label for="ov-curtains" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o37:bg-primary">Curtains</label>
 
-                            <!-- Coffee: a cup slides in, then the camera zooms into the foam: latte art of a heart around "Mom" (or your own text) -->
+                            <!-- Coffee: a cup slides in, then the camera zooms into the foam: latte art of a heart (with your own text inside, if typed) -->
                             <input type="radio" id="ov-coffee" name="overlayStyle" value="coffee" class="hidden peer/o38">
                             <label for="ov-coffee" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o38:bg-primary">Coffee</label>
                         </div>
@@ -1323,7 +1323,7 @@
         //   ticker:  true = one text box, scrolled along the Breaking News bar
         //   sport:   true = shows the Sport picker (Football, Basketball, Baseball, Soccer)
         //   social:  true = shows the Socials picker (YouTube, Facebook, Twitter, Instagram, LinkedIn, GitHub, Web)
-        //   caption: one optional line of text, with this as the default (Hot Take, Coffee)
+        //   caption: one optional line of text, with this as the default (Hot Take; '' = blank by default, Coffee)
         //   max:     the most characters that text can have (default 40)
         //   place:   one line of text, the place (Location)
         //   stamp:   true = shows the tape's date and time picker (Retro VHS; both optional, sent as tapeDate / tapeTime)
@@ -1386,17 +1386,17 @@
             pixel:     { label: '8-Bit',   text: false, effect: 'pixel',    animIn: '', animOut: '', length: 2.6 },
             cat:       { label: 'Cat',     text: false, effect: 'cat',      animIn: '', animOut: '', length: 2.8 },
             curtains:  { label: 'Curtains', text: false, effect: 'curtains', animIn: '', animOut: '', length: 3 },
-            coffee:    { label: 'Coffee',  text: false, caption: 'Mom', max: 14, effect: 'coffee', animIn: '', animOut: '', length: 3.4 },
+            coffee:    { label: 'Coffee',  text: false, caption: '', max: 14, effect: 'coffee', animIn: '', animOut: '', length: 3.4 },
         };
 
         // Overlays with one text box instead of Name and Title (L3 Info, Breaking News, Hot Take, Location):
         // what the box is called, what it shows when empty, and whether it's one short line
-        const oneBoxOf = (cfg) => !!(cfg && (cfg.paragraph || cfg.ticker || cfg.caption || cfg.place));
-        const oneBoxLabel = (cfg) => (cfg?.ticker ? 'Ticker text (optional):' : cfg?.caption ? 'Text (optional):' : cfg?.place ? 'Location:' : 'Text:');
-        const oneBoxShort = (cfg) => !!(cfg?.caption || cfg?.place);
+        const oneBoxOf = (cfg) => !!(cfg && (cfg.paragraph || cfg.ticker || cfg.caption != null || cfg.place));
+        const oneBoxLabel = (cfg) => (cfg?.ticker ? 'Ticker text (optional):' : cfg?.caption != null ? 'Text (optional):' : cfg?.place ? 'Location:' : 'Text:');
+        const oneBoxShort = (cfg) => !!(cfg?.caption != null || cfg?.place);
         // Breaking News with no ticker text typed says this
         const BREAKING_DEFAULT = 'Breaking News  |  Breaking News  |  Breaking News  |';
-        const oneBoxPlaceholder = (cfg) => cfg?.caption || (cfg?.ticker ? BREAKING_DEFAULT : cfg?.place ? 'Where you are, like City Hall' : 'Type the information to show');
+        const oneBoxPlaceholder = (cfg) => cfg?.caption || (cfg?.caption === '' ? 'Optional, like Mom' : cfg?.ticker ? BREAKING_DEFAULT : cfg?.place ? 'Where you are, like City Hall' : 'Type the information to show');
 
         // Lower third positions on screen
         const LOCATION_MAP = {
@@ -4951,8 +4951,8 @@
             };
 
             // ---------- Coffee stinger: a cup of coffee on its saucer, seen from above, slides in spinning a little and
-            // steaming; then the camera zooms into the foam, where latte art draws itself: a heart around "Mom" in the milk
-            // (or whatever's typed in its Text box; long words get smaller to stay inside the heart).
+            // steaming; then the camera zooms into the foam, where latte art draws itself: a heart in the milk
+            // (with whatever's typed in its Text box inside it, blank by default; long words get smaller to stay inside the heart).
             // The foam fills the screen (the cut happens behind it), then it zooms on through and fades away. ----------
             const coffee = {
                 detail: 0.75, // a full-screen fill (see "detail" above)
@@ -5024,7 +5024,7 @@
                     ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
                     ctx.fillStyle = 'rgba(255, 244, 225, 0.35)';
                     for (const b of this.bubbles) { ctx.beginPath(); ctx.arc(b.x * R, b.y * R, b.r * R, 0, Math.PI * 2); ctx.fill(); }
-                    // The latte art, upright on the screen whatever way the cup turned: a heart drawn around "Mom"
+                    // The latte art, upright on the screen whatever way the cup turned: a heart, with the typed words inside (if any)
                     ctx.rotate(-lerp(1.1, -0.35, slide));
                     const foam = '#fdf5e6';
                     const draw = clamp01((p - 0.2) / 0.3), word = clamp01((p - 0.32) / 0.2);
@@ -5051,7 +5051,7 @@
                         ctx.stroke();
                         ctx.setLineDash([]);
                     }
-                    if (word > 0) {
+                    if (word > 0 && this.text) {
                         ctx.save();
                         ctx.globalAlpha = fade * word;
                         let size = R * 0.3 * (0.85 + 0.15 * EASE.outBack(word));
@@ -7585,7 +7585,7 @@
                 }
             } else if (item.mode === 'cl3') {
                 item.label = $('edit-name').value.trim() || item.label;
-            } else if (cfg?.caption || cfg?.ticker) {
+            } else if (cfg?.caption != null || cfg?.ticker) {
                 item.label = $('edit-para').value.trim(); // blank uses the default text
             } else if (cfg?.social) {
                 item.socials = Object.fromEntries(Object.keys(SOCIALS)
