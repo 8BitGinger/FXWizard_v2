@@ -46,10 +46,10 @@ def save():
 EFFECT_CASES = [
     ["confetti", 4, {}], ["colorwave", 4, {}], ["leaves", 4, {}], ["snow", 4, {}], ["fire", 4, {}], ["underwater", 4, {}],
     ["arrested", 4, {}], ["hottake", 4, {}], ["stpatricks", 4, {}], ["vhs", 4, {}], ["vday", 4, {}], ["rain", 4, {}],
-    ["comic", 4, {}], ["disco", 4, {}],
+    ["comic", 4, {}], ["disco", 4, {}], ["emoji", 4, {"emoji": "lol"}], ["emoji", 4, {"emoji": "angry"}],
     ["sports", 2.6, {"sport": "football"}], ["sports", 2.6, {"sport": "basketball"}], ["sports", 2.6, {"sport": "baseball"}],
-    ["sports", 2.6, {"sport": "soccer"}], ["spring", 3, {}], ["storm", 2.8, {}], ["tvstatic", 1.8, {}], ["fireworks", 3, {}],
-    ["medical", 2.4, {}], ["hearts", 2.6, {}], ["firestinger", 2.4, {}], ["pixel", 2.6, {}], ["cat", 2.8, {}],
+    ["sports", 2.6, {"sport": "soccer"}], ["spring", 3, {}], ["storm", 2.8, {}], ["tvstatic", 1.8, {}], ["fireworks", 4, {}],
+    ["medical", 2.4, {}], ["lubbock", 3, {}], ["tech", 2.6, {}], ["xmasfx", 1.8, {"xmas": "trees"}], ["xmasfx", 1.8, {"xmas": "ornaments"}], ["firestinger", 2.4, {}], ["pixel", 2.6, {}], ["cat", 2.8, {}],
     ["curtains", 3, {}], ["coffee", 3.4, {}], ["coffee", 3.4, {"label": "Happy Birthday"}],
     ["fire", 4, {"layer": "front"}], ["fire", 4, {"layer": "back"}], ["snow", 4, {"layer": "back"}],
 ]
@@ -135,7 +135,8 @@ def display():
     cases = [("L3 blue / slide", l3("blue"), 3), ("L3 code (25 MB video)", l3("code"), 3), ("L3 cafe / glitch", l3("cafe", "anim-glitch"), 3),
              ("L3 custom image", {**l3("custom"), "customBg": "ryan3.jpg"}, 3)]
     for ov in ["stinger", "ghost", "colorbars", "xmas", "l3Large", "l3Gif", "breaking", "social", "locpin",
-               "fire", "hottake", "disco", "comic", "firestinger", "cat", "curtains", "coffee", "storm", "sportsfx"]:
+               "fire", "hottake", "disco", "comic", "fireworks", "emoji", "firestinger", "cat", "curtains", "coffee", "storm", "sportsfx",
+               "techfx", "lubbock"]:
         cases.append((ov, {"mode": "overlay", "overlay": ov, "label": "Test", "title": "", "duration": 3, "sport": "basketball"}, 3.2))
     for name, data, secs in cases:
         r = pg.js(f"rtTake({json.dumps(data)}, {secs})", timeout=60)
@@ -354,7 +355,7 @@ def gpu():
         pg.js(DISPLAY_JS); time.sleep(1.5)
         renderer = pg.js("(() => { const g = document.createElement('canvas').getContext('webgl'); const e = g && g.getExtension('WEBGL_debug_renderer_info'); return e ? g.getParameter(e.UNMASKED_RENDERER_WEBGL) : 'none'; })()")
         rows = []
-        for ov in ["hottake", "underwater", "vhs", "storm", "sportsfx", "spring", "hearts", "fire", "curtains", "coffee", "stinger", "ghost"]:
+        for ov in ["hottake", "underwater", "vhs", "storm", "sportsfx", "spring", "lubbock", "techfx", "fire", "curtains", "coffee", "stinger", "ghost"]:
             r = pg.js(f"rtTake({json.dumps({'mode': 'overlay', 'overlay': ov, 'label': '', 'title': '', 'duration': 3, 'sport': 'baseball'})}, 3)", timeout=60)
             rows.append({"name": ov, "fps": round(1000 / r["avg"], 1), "janks": r["janks"], "longest": r["longest"]})
         out["gpu" if on else "software"] = {"renderer": renderer, "rows": rows}

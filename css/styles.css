@@ -562,6 +562,7 @@ body {
 .block-chip.active { background: #6D28D9; border-color: #a78bfa; color: #fff; }
 .block-chip.block-add { border-style: dashed; font-size: 18px; line-height: 1; opacity: 0.85; }
 .block-chip.block-all { padding: 0 10px; letter-spacing: 0.04em; }
+.block-chip.block-unsorted { padding: 0 9px; font-size: 12px; letter-spacing: 0.02em; } /* Unsorted, before the letters */
 /* Set Show on: empty blocks are greyed out */
 .block-chip:disabled { opacity: 0.3; border-style: dashed; cursor: not-allowed; transform: none; }
 .show-block { margin-bottom: 6px; }
@@ -1206,6 +1207,22 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
 .break-strip button .icon { width: 12px; height: 12px; }
 /* The tally: the TAKE that's on program in OBS now */
 .take-pill.on-program { box-shadow: 0 0 0 2px #22c55e, 0 0 10px rgba(34, 197, 94, 0.6); }
+/* Content with OBS scenes (a CD, or a Clip, SOT or PIC that plays a file): TAKE (yellow, the scene OBS goes to
+   first) and THEN (grey, where it goes when the content is over). On a CD card they get a line under the name;
+   on a cue they sit either side of PLAY, wrapping onto a second line in a narrow dock. */
+.then-pill { background: #d4d4d8; color: #18181b; }
+.then-pill b { background: #27272a; color: #e4e4e7; border-color: #a1a1aa; }
+.take-line.cd-line { flex-wrap: wrap; gap: 4px; }
+.take-fire .take-pill + .take-pill { margin-left: 4px; }
+.cd-scenes { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; margin-top: 4px; }
+/* Saved list: which block ＋ adds to, and the letters to change it (the same as "Add to" on the rundown) */
+.saved-add { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 0 6px 6px; font-size: 12px; }
+.saved-add > span { margin-right: 2px; opacity: 0.75; }
+.saved-add .block-chip { min-width: 28px; height: 26px; padding: 0 6px; border-radius: 7px; font-size: 12px; }
+/* Content's OBS scenes in the edit dialog: TAKE and THEN, each with its list */
+.cd-scene-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.cd-scene-tag { flex: none; width: 50px; padding: 3px 0; border-radius: 5px; background: #facc15; color: #1c1917; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-align: center; }
+.cd-scene-tag.then { background: #d4d4d8; }
 
 /* Building the rundown (Set Show off): a little smaller and thinner, so more fits while you arrange it.
    The drag handles stay full height for touch. Once Set Show is on, it's all back to full size. */
@@ -1216,6 +1233,9 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
 #show-section:not(.show-running) .show-card .card-btn .icon { width: 12px; height: 12px; }
 #show-section:not(.show-running) .show-card.show-unlocked .show-time { right: 32px; }
 #show-section:not(.show-running) .show-time, #show-section:not(.show-running) .show-code { font-size: 11px; }
+/* A CD card with OBS scenes: taller, for its TAKE / THEN line */
+#show-section .show-card.has-scenes .card-take { height: auto; min-height: 64px; padding-top: 6px; padding-bottom: 6px; }
+#show-section:not(.show-running) .show-card.has-scenes .card-take { min-height: 52px; padding-top: 4px; padding-bottom: 4px; }
 #show-section:not(.show-running) .show-cue { min-height: 28px; padding-top: 2px; padding-bottom: 2px; font-size: 11.5px; }
 #show-section:not(.show-running) .show-cue.cue-scene, #show-section:not(.show-running) .show-cue.cue-break { padding-top: 4px; padding-bottom: 5px; }
 #show-section:not(.show-running) .show-cue.cue-content { padding-top: 4px; padding-bottom: 5px; }
@@ -1623,6 +1643,7 @@ html.light .take-pill { box-shadow: 0 0 0 1px #ca8a04; }
 html.light .take-fire .take-pill { box-shadow: 0 0 0 1px #ca8a04, 0 2px 0 #a16207; }
 html.light .take-fire:active .take-pill { box-shadow: 0 0 0 1px #ca8a04; }
 html.light .take-pill.on-program { box-shadow: 0 0 0 2px #16a34a, 0 0 10px rgba(22, 163, 74, 0.5); }
+html.light .take-pill.then-pill { box-shadow: 0 0 0 1px #71717a; }
 html.light .scene-kinds { border-color: #9ca3af; }
 html.light .scene-reload { background: rgba(0, 0, 0, 0.08); color: #4b5563; }
 /* Show timing */
@@ -2812,6 +2833,7 @@ html.light .tm-error { color: #b91c1c; }
 #overlay-box.xmas #xmas {
   display: block;
 }
+#overlay-box.xmas.xmas-canvas #xmas { display: none; } /* Trees and Ornaments are drawn on the canvas instead */
 
 /* The band that moves across the screen, leaning forward. The right side leads. */
 .xmas-track {
@@ -3030,6 +3052,29 @@ html.light .tm-error { color: #b91c1c; }
   94%  { transform: translateY(0) scale(1.004, 0.99); animation-timing-function: ease-out; }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
+/* Flash In (lower thirds): flickers in, flashing through colors, then settles (each step holds until the next) */
+@keyframes flashIn {
+  0%   { opacity: 0;    filter: brightness(2.4) saturate(0); }
+  7%   { opacity: 1;    filter: brightness(1.9) hue-rotate(0deg) saturate(1.8); }
+  14%  { opacity: 0.1; }
+  21%  { opacity: 1;    filter: brightness(1.5) hue-rotate(110deg) saturate(2.2); }
+  28%  { opacity: 0.25; }
+  35%  { opacity: 1;    filter: brightness(1.6) hue-rotate(230deg) saturate(2.2); }
+  42%  { opacity: 0.4; }
+  49%  { opacity: 1;    filter: brightness(1.4) hue-rotate(320deg) saturate(2); }
+  56%  { opacity: 0.6; }
+  63%  { opacity: 1;    filter: brightness(1.3) hue-rotate(160deg) saturate(1.6); animation-timing-function: ease-out; }
+  100% { opacity: 1;    filter: none; }
+}
+/* Enlarge (lower thirds): fades in, swells at the bottom (the top edge stays put), then at the top (the bottom edge
+   stays put), then settles */
+@keyframes enlargeIn {
+  0%   { opacity: 0; transform: none; animation-timing-function: ease-out; }
+  20%  { opacity: 1; transform: none; animation-timing-function: ease-in-out; }
+  45%  { transform: translateY(12%) scale(1.1, 1.24); animation-timing-function: ease-in-out; }
+  72%  { transform: translateY(-12%) scale(1.1, 1.24); animation-timing-function: ease-in-out; }
+  100% { opacity: 1; transform: none; }
+}
 /* Slam (lower thirds): comes down hard from big and blurry, hits with a flash, and shakes
    for a moment */
 @keyframes slamIn {
@@ -3078,6 +3123,28 @@ html.light .tm-error { color: #b91c1c; }
 .anim-slam {
   animation: slamIn 0.7s forwards;
 }
+.anim-flash {
+  animation: flashIn 1.6s steps(1, end) forwards;
+}
+.anim-enlarge {
+  animation: enlargeIn 1.8s forwards;
+}
+.anim-8bit {
+  animation: bitsShow 1.1s steps(1, end) forwards;
+}
+/* 8-Bit's blocks (made in fx_wizard.html, over the box): each pops in or flies to its place in four chunky steps,
+   then blinks out. --c is its color, --l and --d its lit and shaded edges (a bevel, like the 8-Bit stinger's). */
+.l3-bits { position: fixed; pointer-events: none; }
+.l3-bit {
+  position: absolute;
+  background: var(--c);
+  box-shadow: inset var(--b) var(--b) 0 var(--l), inset calc(var(--b) * -1) calc(var(--b) * -1) 0 var(--d);
+  animation: l3BitIn 0.22s steps(4, end) var(--at) both, l3BitOut 0.04s steps(1, end) var(--gone) both;
+}
+@keyframes l3BitIn  { from { transform: translate(var(--dx), var(--dy)) scale(0); } to { transform: none; } }
+@keyframes l3BitOut { from { opacity: 1; } to { opacity: 0; } }
+/* The lower third itself comes up under the blocks as they meet */
+@keyframes bitsShow { 0%, 61% { opacity: 0; } 62%, 100% { opacity: 1; } }
 
 /* ---------- Out animations ---------- */
 .anim-hide {
@@ -3248,6 +3315,33 @@ html.projector, html.projector body { background: #0b0b10; color: #f4f4f5; overf
 .pj-take span { min-width: 0; padding: 0 0.45em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pj-take-note { margin-left: 0.5em; color: #d4d4d8; font-weight: 400; }
 .pj-now .pj-take-note { display: block; margin: 0.15em 0 0; font-size: 0.72em; }
+.pj-cd-take { font-size: 0.8em; } /* content's TAKE, after its name */
+/* Content on screen: what it is and its time left, big, in blue (red for the last 10 seconds), with a line
+   along the bottom for how far through it is */
+.pj-content {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2vw;
+  padding: 1vh 2vw 1.6vh;
+  background: #0c1e2e;
+  border-bottom: 2px solid #0369a1;
+  color: #e0f2fe;
+  overflow: hidden;
+}
+.pj-cd-icon { flex: none; display: grid; color: #38bdf8; }
+.pj-cd-icon .icon { width: 5vh; height: 5vh; }
+.pj-cd-what { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.15; }
+.pj-cd-what b { color: #7dd3fc; font-size: 2.4vh; letter-spacing: 0.1em; text-transform: uppercase; }
+.pj-cd-what span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 4.4vh; font-weight: 700; }
+.pj-cd-time { flex: none; display: flex; align-items: baseline; gap: 0.8vw; }
+.pj-cd-time b { color: #38bdf8; font-size: 8vh; line-height: 1; font-variant-numeric: tabular-nums; }
+.pj-cd-time small { color: #7dd3fc; font-size: 2.6vh; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.pj-cd-bar { position: absolute; left: 0; bottom: 0; width: 0; height: 0.6vh; background: #38bdf8; transition: width 0.25s linear; }
+.pj-content.ending { background: #3b0d0d; border-bottom-color: #f87171; }
+.pj-content.ending .pj-cd-time b, .pj-content.ending .pj-cd-time small { color: #f87171; }
+.pj-content.ending .pj-cd-bar { background: #f87171; }
 /* A scene to take now: Now lights up, so whoever's on next sees it's their turn */
 .pj-now-wrap.take .pj-take { animation: pjTake 1.6s ease-in-out infinite; }
 @keyframes pjTake {
@@ -3284,6 +3378,9 @@ html.projector, html.projector body { background: #0b0b10; color: #f4f4f5; overf
   .pj-status { flex-wrap: wrap; gap: 0.4vh 2.5vw; padding: 1vh 4vw; font-size: 3.8vh; }
   .pj-timer { font-size: 7vh; }
   .pj-countdown { font-size: 3vh; }
+  .pj-content { padding: 0.8vh 4vw 1.4vh; }
+  .pj-cd-what span { font-size: 3.6vh; }
+  .pj-cd-time b { font-size: 7vh; }
   .pj-main { flex-direction: column; }
   .pj-side { display: contents; }
   .pj-label { margin-top: 0; font-size: 2.2vh; }
