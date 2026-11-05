@@ -2725,7 +2725,8 @@ html.light .tm-error { color: #b91c1c; }
   flex: 1;
   overflow: hidden;
 }
-/* The text scrolls from the right edge to off the left; the page sets --from, --to and --dur */
+/* The text scrolls from the right edge to off the left: the page moves it a whole number of pixels each frame
+   (startTicker). It's kept on a layer of its own, so moving it never redraws the text. */
 #breaking-text {
   position: absolute;
   top: 50%;
@@ -2736,11 +2737,8 @@ html.light .tm-error { color: #b91c1c; }
   font-weight: 600;
   letter-spacing: 0.02em;
   text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.5);
-  animation: bnScroll var(--dur, 20s) linear infinite;
-}
-@keyframes bnScroll {
-  from { transform: translate(var(--from, 100vw), -50%); }
-  to   { transform: translate(var(--to, -100%), -50%); }
+  transform: translate3d(100vw, -50%, 0);
+  will-change: transform;
 }
 @keyframes bnPulse {
   0%, 100% { opacity: 1; }

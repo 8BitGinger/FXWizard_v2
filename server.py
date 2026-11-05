@@ -680,8 +680,10 @@ def register_hotkeys(settings):
 #
 # The control panel can start the next break when OBS goes to one of its break scenes. This script
 # runs inside OBS, so it hears about it and tells every connected panel:
-#   {"mode": "obsScene", "scene": "<name>"}   OBS went to that scene (its transition has started)
 #   {"mode": "obsTransitionEnd"}             the transition has finished
+#   {"mode": "obsScene", "scene": "<name>"}   OBS is on that scene now
+# OBS sends both when a transition is over, the end of the transition first and the scene right after it
+# (a switch with no transition sends only the scene).
 # The panel's obsScenes request gets the scene names, for picking the break scenes and Scene cues;
 # obsSources gets the source names, for Scene cues that name a source; obsProgram gets the scene on
 # program now; and obsTake {scene} puts a scene on program (a TAKE fired from the rundown).

@@ -908,16 +908,17 @@
                          over (its time is up, or OFF). Without server.py in OBS there's no list, so they're typed. -->
                     <div id="edit-cdscene-wrap" class="hidden">
                         <div class="scene-pick-head">
-                            <span class="text-sm">OBS scenes (optional):</span>
+                            <span id="edit-cdscene-head" class="text-sm">OBS scenes (optional):</span>
                             <span class="flex-1"></span>
                             <button type="button" class="scene-reload" onclick="askCdScenes()" title="Ask OBS again"><span data-icon="reset"></span></button>
                         </div>
+                        <!-- A stinger uses the TAKE row alone: OBS goes there while the stinger covers the screen -->
                         <div class="cd-scene-row">
-                            <label for="edit-cd-take" class="cd-scene-tag" title="OBS goes to this scene first, then the content starts">TAKE</label>
+                            <label for="edit-cd-take" id="edit-cd-take-tag" class="cd-scene-tag" title="OBS goes to this scene first, then the content starts">TAKE</label>
                             <select id="edit-cd-take" class="w-full p-1 rounded border-2 border-white text-sm" onchange="pickCdScene('take', this.value)"></select>
                             <input type="text" id="edit-cd-take-text" maxlength="80" placeholder="Scene to take first (optional)" class="hidden w-full p-1 rounded border-2 border-white bg-transparent text-sm" oninput="pickCdScene('take', this.value)">
                         </div>
-                        <div class="cd-scene-row">
+                        <div id="edit-cd-after-row" class="cd-scene-row">
                             <label for="edit-cd-after" class="cd-scene-tag then" title="When it's over, OBS goes to this scene">THEN</label>
                             <select id="edit-cd-after" class="w-full p-1 rounded border-2 border-white text-sm" onchange="pickCdScene('after', this.value)"></select>
                             <input type="text" id="edit-cd-after-text" maxlength="80" placeholder="Scene when it's over (optional)" class="hidden w-full p-1 rounded border-2 border-white bg-transparent text-sm" oninput="pickCdScene('after', this.value)">
@@ -1411,6 +1412,9 @@
         //   effect:  canvas animation to run (see section 6)
         //   animIn / animOut: fixed animations ('' = none). Hides the Animation picker.
         //   length:  fixed run time in seconds. Hides the Duration field.
+        //   cover:   stingers: when it covers all of the screen, [from, to] as fractions of its length, measured
+        //            frame by frame (Sports and Xmas: one for each choice). A rundown stinger with an OBS scene
+        //            switches OBS while it's covered (see coverScene). Change it if a stinger's timing changes.
         // The keys are code names saved graphics use, so don't rename them
         // ("l3Large" is L3 PNG, "l3LargeAlt" is L3 Info).
         const OVERLAYS = {
@@ -1447,28 +1451,31 @@
             // The same picture or video, full screen (no TV), dissolving in and out
             contentFull: { label: 'Content Full', text: false, dur: 15, content: true, lead: 0.6, effect: null, animIn: 'anim-fade', animOut: 'anim-hide' },
             // Stingers: CSS stinger lengths are read from styles.css, so the speed is only set there
-            stinger:   { label: 'Standard', text: false, effect: null, animIn: '', animOut: '',
+            stinger:   { label: 'Standard', text: false, effect: null, animIn: '', animOut: '', cover: [0.34, 0.66],
                          get length() { return cssSeconds('stinger', '--stinger-time', 2); } },
-            ghost:     { label: 'Ghost',  text: false, effect: null, animIn: '', animOut: '',
+            ghost:     { label: 'Ghost',  text: false, effect: null, animIn: '', animOut: '', cover: [0.28, 0.77],
                          get length() { return cssSeconds('ghost', '--ghost-time', 2.4); } },
-            colorbars: { label: 'Color Bars',   text: false, effect: null, animIn: '', animOut: '',
+            // Covered once the last piece has slid in, until the fade starts (72%, in styles.css)
+            colorbars: { label: 'Color Bars',   text: false, effect: null, animIn: '', animOut: '', cover: [0.52, 0.72],
                          get length() { return cssSeconds('colorbars', '--bars-time', 2.6); } },
             // Xmas: the Wrapper (the candy-cane band, in styles.css), Trees or Ornaments (on the canvas, xmasfx)
             xmas:      { label: 'Xmas',  text: false, xmas: true, effect: null, animIn: '', animOut: '',
+                         cover: { wrapper: [0.36, 0.66], trees: [0.24, 0.76], ornaments: [0.24, 0.76] },
                          get length() { return cssSeconds('xmas', '--xmas-time', 1.8); } },
             // Drawn on the canvas, so their lengths are set here
-            storm:     { label: 'Storm',  text: false, effect: 'storm',    animIn: '', animOut: '', length: 2.8 },
-            tvstatic:  { label: 'Static', text: false, effect: 'tvstatic', animIn: '', animOut: '', length: 1.8 },
-            sportsfx:  { label: 'Sports', text: false, sport: true, effect: 'sports', animIn: '', animOut: '', length: 2.6 },
-            spring:    { label: 'Spring', text: false, effect: 'spring',   animIn: '', animOut: '', length: 3 },
-            techfx:    { label: 'Tech',    text: false, effect: 'tech',     animIn: '', animOut: '', length: 2.6 },
-            medical:   { label: 'Medical', text: false, effect: 'medical',  animIn: '', animOut: '', length: 2.4 },
-            lubbock:   { label: 'Lubbock', text: false, effect: 'lubbock',  animIn: '', animOut: '', length: 3 },
-            firestinger: { label: 'Fire',  text: false, effect: 'firestinger', animIn: '', animOut: '', length: 2.4 },
-            pixel:     { label: '8-Bit',   text: false, effect: 'pixel',    animIn: '', animOut: '', length: 2.6 },
-            cat:       { label: 'Cat',     text: false, effect: 'cat',      animIn: '', animOut: '', length: 2.8 },
-            curtains:  { label: 'Curtains', text: false, effect: 'curtains', animIn: '', animOut: '', length: 3 },
-            coffee:    { label: 'Coffee',  text: false, caption: '', max: 14, effect: 'coffee', animIn: '', animOut: '', length: 3.4 },
+            storm:     { label: 'Storm',  text: false, effect: 'storm',    animIn: '', animOut: '', length: 2.8, cover: [0.24, 0.76] },
+            tvstatic:  { label: 'Static', text: false, effect: 'tvstatic', animIn: '', animOut: '', length: 1.8, cover: [0.13, 0.78] },
+            sportsfx:  { label: 'Sports', text: false, sport: true, effect: 'sports', animIn: '', animOut: '', length: 2.6,
+                         cover: { football: [0.24, 0.76], basketball: [0.33, 0.67], baseball: [0.15, 0.85], soccer: [0.42, 0.57] } },
+            spring:    { label: 'Spring', text: false, effect: 'spring',   animIn: '', animOut: '', length: 3, cover: [0.39, 0.6] },
+            techfx:    { label: 'Tech',    text: false, effect: 'tech',     animIn: '', animOut: '', length: 2.6, cover: [0.37, 0.63] },
+            medical:   { label: 'Medical', text: false, effect: 'medical',  animIn: '', animOut: '', length: 2.4, cover: [0.19, 0.79] },
+            lubbock:   { label: 'Lubbock', text: false, effect: 'lubbock',  animIn: '', animOut: '', length: 3, cover: [0.23, 0.85] },
+            firestinger: { label: 'Fire',  text: false, effect: 'firestinger', animIn: '', animOut: '', length: 2.4, cover: [0.25, 0.74] },
+            pixel:     { label: '8-Bit',   text: false, effect: 'pixel',    animIn: '', animOut: '', length: 2.6, cover: [0.4, 0.6] },
+            cat:       { label: 'Cat',     text: false, effect: 'cat',      animIn: '', animOut: '', length: 2.8, cover: [0.17, 0.76] },
+            curtains:  { label: 'Curtains', text: false, effect: 'curtains', animIn: '', animOut: '', length: 3, cover: [0.19, 0.53] },
+            coffee:    { label: 'Coffee',  text: false, caption: '', max: 14, effect: 'coffee', animIn: '', animOut: '', length: 3.4, cover: [0.39, 0.79] },
         };
 
         // The Hearts stinger was replaced by Lubbock: graphics saved as Hearts play Lubbock
@@ -6718,23 +6725,45 @@
             if (!hold) overlayTimeout = setTimeout(hideOverlay, duration * 1000);
         };
 
-        // Scrolls the Breaking News text across its bar at a steady speed, however long it is
+        // Scrolls the Breaking News text across its bar at a steady speed, however long it is, from the right edge
+        // to off the left, over and over. Each frame moves it the same whole number of pixels: about TICKER_SPEED a
+        // second, rounded to whole pixels a frame at the frame rate it's getting (180 a second at 30 or 60 fps).
+        // It used to be a CSS animation, which places the text by each frame's timestamp: OBS's browser source
+        // hands those out a little unevenly, so the text stepped 2, 3, 3, 2... pixels and looked choppy. A frame
+        // that comes late moves it on for the frames it missed, so it keeps its pace. The font loading partway
+        // in only measures it again (it used to restart the scroll). It stops once Breaking News is gone.
         const TICKER_SPEED = 170; // pixels per second at 1080p
+        let tickerRaf = null;
         const startTicker = (text) => {
-            const el = $('breaking-text');
+            const el = $('breaking-text'), box = $('overlay-box');
             el.textContent = text;
-            const run = () => {
-                const box = el.parentElement.clientWidth;
-                const w = el.scrollWidth;
-                el.style.setProperty('--from', `${box}px`);
-                el.style.setProperty('--to', `${-w}px`);
-                el.style.setProperty('--dur', `${(box + w) / (TICKER_SPEED * window.innerHeight / 1080)}s`);
-                el.style.animation = 'none';
-                void el.offsetWidth; // restarts the scroll
-                el.style.animation = '';
+            cancelAnimationFrame(tickerRaf);
+            let from = 0, to = 0, x = null, last = null;
+            const gaps = []; // the last few frame intervals (ms), for the frame rate
+            const measure = () => {
+                from = el.parentElement.clientWidth;
+                to = -el.scrollWidth;
+                if (x === null) x = from;
             };
-            run();
-            document.fonts.load('600 40px Oswald').then(run); // measure again once the font has loaded
+            const place = () => { el.style.transform = `translate3d(${x}px, -50%, 0)`; };
+            measure();
+            place();
+            document.fonts.load('600 40px Oswald').then(measure);
+            const frame = (now) => {
+                if (!box.classList.contains('breaking') || box.style.visibility === 'hidden') { tickerRaf = null; return; } // another overlay, or gone
+                const gap = last === null ? 0 : now - last;
+                last = now;
+                if (gap > 0 && gap < 250) { gaps.push(gap); if (gaps.length > 30) gaps.shift(); }
+                // The frame rate: the middle of the last few intervals (60 fps until there are 5: at 30 fps each
+                // frame then counts as two, so it keeps its pace all the same)
+                const interval = gaps.length >= 5 ? [...gaps].sort((a, b) => a - b)[(gaps.length - 1) >> 1] : 1000 / 60;
+                const step = Math.max(1, Math.round(TICKER_SPEED * (window.innerHeight / 1080) * interval / 1000));
+                x -= step * (gap ? Math.min(30, Math.max(1, Math.round(gap / interval))) : 1);
+                if (x <= to) x = from; // off the left: in again from the right
+                place();
+                tickerRaf = requestAnimationFrame(frame);
+            };
+            tickerRaf = requestAnimationFrame(frame);
         };
 
         const hideOverlay = () => {
@@ -7769,12 +7798,24 @@
         // and taking other content over it, don't take the afterScene.
         const contentScenes = (d) => ({ ...(d.takeScene && { takeScene: d.takeScene }), ...(d.afterScene && { afterScene: d.afterScene }) });
         const playsContent = (d) => (d.cue ? CONTENT_CUES.includes(d.cue) && !!d.content : layerOf(d) === 'content');
+        // A stinger in the rundown can have an OBS scene too, also optional: coverScene, taken while the stinger
+        // covers the whole screen, so it clears to show the new scene (see coverTake).
+        // When a stinger covers the screen: [from, to] in seconds from its start, or null if it isn't a stinger
+        const coverOf = (d) => {
+            const cfg = d && !d.cue && isOverlayItem(d) ? OVERLAYS[d.overlay] : null;
+            if (!cfg?.cover) return null;
+            const c = Array.isArray(cfg.cover) ? cfg.cover : cfg.sport ? cfg.cover[SPORTS[d.sport] ? d.sport : 'football'] : cfg.cover[xmasCanvas(d) ? d.xmas : 'wrapper'];
+            return c ? [c[0] * cfg.length, c[1] * cfg.length] : null;
+        };
+        const stingerScene = (d) => (d.coverScene && coverOf(d) ? d.coverScene : '');
         // Its TAKE (the scene first, yellow) and THEN (the scene after, grey) markers, or null. fires: ⚡ on the TAKE.
+        // A stinger's TAKE is its coverScene.
         const sceneMarkers = (d, fires) => {
             let take = null;
-            if (d.takeScene) {
-                take = cueMarker('TAKE', d.takeScene, 'take-pill', `OBS goes to ${d.takeScene} first, then the content starts`);
-                take.dataset.obsName = d.takeScene; // the tally
+            const first = d.takeScene || stingerScene(d);
+            if (first) {
+                take = cueMarker('TAKE', first, 'take-pill', d.takeScene ? `OBS goes to ${first} first, then the content starts` : `OBS goes to ${first} while the stinger covers the screen`);
+                take.dataset.obsName = first; // the tally
                 if (fires) take.insertAdjacentHTML('beforeend', `<i class="take-go">${icon('zap')}</i>`);
             }
             const then = d.afterScene ? cueMarker('THEN', d.afterScene, 'take-pill then-pill', `When it's over, OBS goes to ${d.afterScene}`) : null;
@@ -7899,6 +7940,7 @@
             }
             liveByLayer[layer] = null;
             if (layer === 'content') liveAfter = null;
+            if (layer === 'overlay') cancelCoverSwap(); // a stinger that's gone (or replaced) can't hide a scene change
             if (!Object.values(liveByLayer).some(Boolean)) { clearInterval(liveTicker); liveTicker = null; }
             updateLiveMarks();
         };
@@ -7926,6 +7968,7 @@
                 return;
             }
             if (layerOf(data) === 'content' && data.takeScene) { takeSceneThenPlay(data); return; } // OBS goes there first
+            if (stingerScene(data) && (takeInFlight || sceneArrival)) { flash('A TAKE is going out', true, 'try again in a moment'); return; }
             playFromRundown(data);
         };
         // Puts a rundown card's graphic up: OFF on its card with the time left, in the log, and the current item
@@ -7949,17 +7992,46 @@
             localStorage.setItem(LAST_PLAYED_KEY, data.sid);
             logEvent('take', data, loadShow(), { layer });
             setCurrent(data.sid); // what's taken becomes the current item
+            if (stingerScene(data)) coverTake(data); // OBS switches while it covers the screen
             return true;
         };
 
+        // ---------- A stinger with an OBS scene (coverScene) ----------
+        // Once the stinger has gone out, its TAKE waits for it to cover the screen (its cover, in OVERLAYS), then
+        // OBS goes to the scene with its current transition: a Cut is cleanest, though a short Fade (300 ms) fits
+        // under most of them. It goes a little after the cover starts, as the display can start the stinger a
+        // frame or two after it's sent. Another overlay over it, OFF or Clear All before then calls it off. While
+        // it waits, other TAKEs wait too (one switch at a time). If OBS can't take it, the stinger plays anyway.
+        const COVER_LEAD = 0.1; // seconds into the cover (at most a third of it)
+        let coverSwap = null;   // the stinger's TAKE, waiting: { sid, timer }
+        const cancelCoverSwap = () => {
+            if (!coverSwap) return;
+            clearTimeout(coverSwap.timer);
+            coverSwap = null;
+            takeInFlight = false;
+        };
+        const coverTake = (data) => {
+            const [from, to] = coverOf(data), scene = data.coverScene, name = itemLabel(data);
+            takeInFlight = true;
+            coverSwap = { sid: data.sid, timer: setTimeout(async () => {
+                coverSwap = null;
+                const reply = await serverRequest({ mode: 'obsTake', scene }, 'obsTakeResult', 6000);
+                takeInFlight = false;
+                logEvent('fire', data, loadShow(), { scene, ok: !!reply?.ok, error: reply?.ok ? '' : reply?.error || 'no answer from the server' });
+                if (reply?.ok) { setObsProgram(scene); flash(`TAKE ${scene}`, false, `under ${name}`); }
+                else flash(`Couldn't take ${scene}`, true, `${reply?.error || 'a TAKE needs server.py, running in OBS'}: ${name} played without it`);
+            }, (from + Math.min(COVER_LEAD, (to - from) / 3)) * 1000) };
+        };
+
         // ---------- Content with OBS scenes (see contentScenes) ----------
-        // Its TAKE: OBS goes to the takeScene with its current transition, and the content starts once the
-        // transition has ended (server.py says when), or straight away if OBS was already there. If the scene
-        // can't be taken (no server.py, or OBS doesn't have it), the content plays anyway, on the scene that's up.
-        // Clear All while it waits calls it off.
-        const SCENE_SETTLE_MAX = 4000; // the content starts after this long (ms) even if the end of the transition never comes
-        const SCENE_CHANGE_GRACE = 300; // OBS's word that it's going there can come just after the reply
-        let sceneArrival = null; // the TAKE waiting for OBS: { scene, changed, ended, cancelled, wake }
+        // Its TAKE: OBS goes to the takeScene with its current transition, and the content starts once OBS says
+        // it's there, or straight away if OBS was already there. OBS says so when the transition is over: the
+        // end of the transition, then the scene's name (obsScene), one right after the other. (The content used
+        // to wait for an end of the transition after the name, which never came, so it started 4 seconds late.)
+        // If the scene can't be taken (no server.py, or OBS doesn't have it), the content plays anyway, on the
+        // scene that's up. Clear All while it waits calls it off.
+        const SCENE_SETTLE_MAX = 4000; // the content starts after this long (ms) even if OBS never says it's there
+        let sceneArrival = null; // the TAKE waiting for OBS: { scene, arrived, cancelled, wake }
         const wakeArrival = () => { const w = sceneArrival?.wake; if (w) { sceneArrival.wake = null; w(); } };
         const napArrival = (ms) => new Promise(resolve => { sceneArrival.wake = resolve; setTimeout(resolve, Math.max(0, ms)); });
         const takeSceneThenPlay = async (data) => {
@@ -7968,14 +8040,13 @@
             takeInFlight = true;
             setCurrent(data.sid);
             flash(`TAKE ${scene}`, false, `${itemLabel(data)} starts once OBS is there`);
-            sceneArrival = { scene, changed: false, ended: false, cancelled: false, wake: null };
+            sceneArrival = { scene, arrived: false, cancelled: false, wake: null };
             const reply = await serverRequest({ mode: 'obsTake', scene }, 'obsTakeResult', 6000);
             logEvent('fire', data, loadShow(), { scene, ok: !!reply?.ok, error: reply?.ok ? '' : reply?.error || 'no answer from the server' });
             if (reply?.ok) {
                 setObsProgram(scene);
-                if (!there && !sceneArrival.changed && !sceneArrival.cancelled) await napArrival(SCENE_CHANGE_GRACE);
-                // OBS is on its way there: wait for the transition to end
-                while (sceneArrival.changed && !sceneArrival.ended && !sceneArrival.cancelled && Date.now() - started < SCENE_SETTLE_MAX) {
+                // OBS is on its way there (with a Cut, it may have said it's there already)
+                while (!there && !sceneArrival.arrived && !sceneArrival.cancelled && Date.now() - started < SCENE_SETTLE_MAX) {
                     await napArrival(SCENE_SETTLE_MAX - (Date.now() - started));
                 }
             }
@@ -8374,8 +8445,9 @@
             time.textContent = holdsOn(data) ? 'TOGGLE' : formatTime(graphicSeconds(data));
             time.title = holdsOn(data) ? 'Stays up until OFF' : 'Time on screen';
             card.append(star, time);
-            // A CD with OBS scenes: TAKE (tapping the card takes it first, then plays) and THEN, on a line of their own
-            const { take: takePill, then: thenPill } = layerOf(data) === 'content' ? sceneMarkers(data, locked) : {};
+            // A CD with OBS scenes: TAKE (tapping the card takes it first, then plays) and THEN, on a line of their own.
+            // A stinger with one: its TAKE (OBS goes there while it covers the screen).
+            const { take: takePill, then: thenPill } = layerOf(data) === 'content' || stingerScene(data) ? sceneMarkers(data, locked) : {};
             const markers = [takePill, thenPill].filter(Boolean);
             if (markers.length) {
                 const line = document.createElement('span');
@@ -8384,6 +8456,7 @@
                 take.append(line);
                 card.classList.add('has-scenes');
                 if (data.takeScene) take.title = `${locked ? 'Tap to take' : 'Takes'} ${data.takeScene} in OBS, then ${itemLabel(data)} plays${data.afterScene ? `, then ${data.afterScene}` : ''}`;
+                else if (stingerScene(data)) take.title = `${locked ? 'Tap to play' : 'Plays'} ${itemLabel(data)}; OBS goes to ${data.coverScene} while it covers the screen`;
             }
             if (!locked) {
                 // Drag handle on the left
@@ -8843,10 +8916,17 @@
 
         // ---------- Content's OBS scenes (a CD, or a Clip, SOT or PIC with a file): TAKE first, THEN after ----------
         // Picked from OBS's scenes (the same list as Scene cues), or typed without one. None for either is fine.
+        // A stinger uses the TAKE row alone, for its coverScene (stinger: true).
         let cdScenes = { take: '', after: '' };
+        let cdScenesStinger = false;
         const pickCdScene = (which, name) => { cdScenes[which] = name.trim(); };
-        const openCdScenes = (item) => {
-            cdScenes = { take: item?.takeScene || '', after: item?.afterScene || '' };
+        const openCdScenes = (item, stinger = false) => {
+            cdScenesStinger = stinger;
+            cdScenes = stinger ? { take: item?.coverScene || '', after: '' } : { take: item?.takeScene || '', after: item?.afterScene || '' };
+            $('edit-cdscene-head').textContent = stinger ? 'OBS scene (optional):' : 'OBS scenes (optional):';
+            $('edit-cd-after-row').classList.toggle('hidden', stinger);
+            $('edit-cd-take-tag').title = stinger ? 'OBS goes to this scene while the stinger covers the screen' : 'OBS goes to this scene first, then the content starts';
+            $('edit-cd-take-text').placeholder = stinger ? 'Scene to go to under the stinger (optional)' : 'Scene to take first (optional)';
             renderCdScenes();
             askCdScenes();
         };
@@ -8860,13 +8940,14 @@
             $('edit-cdscene-note').textContent = names === null
                 ? `${reply?.error || 'No answer from the server: the list of scenes needs server.py, running in OBS.'} Type the names instead.`
                 : !names.length ? 'OBS doesn\'t have any scenes yet.'
+                : cdScenesStinger ? 'TAKE: OBS goes there while the stinger covers the screen, so it clears to show the new scene. A Cut transition in OBS is cleanest.'
                 : 'TAKE: OBS goes there first, and the content starts once it\'s there. THEN: OBS goes there when it\'s over (its time is up, or OFF).';
             renderCdScenes();
         };
         // Each list, with the pick selected. A pick OBS doesn't have now stays in the list, marked.
         const renderCdScenes = () => {
             const names = obsNames.scene;
-            [['take', 'edit-cd-take', 'None: it plays on the scene that\'s up'], ['after', 'edit-cd-after', 'None: OBS stays where it is']].forEach(([which, id, none]) => {
+            [['take', 'edit-cd-take', cdScenesStinger ? 'None: OBS stays where it is' : 'None: it plays on the scene that\'s up'], ['after', 'edit-cd-after', 'None: OBS stays where it is']].forEach(([which, id, none]) => {
                 const sel = $(id), typed = $(`${id}-text`), want = cdScenes[which];
                 sel.classList.toggle('hidden', names === null);
                 typed.classList.toggle('hidden', names !== null);
@@ -8885,6 +8966,11 @@
             if (!playsContent(item)) return;
             if (cdScenes.take) item.takeScene = cdScenes.take;
             if (cdScenes.after) item.afterScene = cdScenes.after;
+        };
+        // A stinger's pick (its coverScene), or none
+        const applyCoverScene = (item) => {
+            delete item.coverScene;
+            if (cdScenes.take && coverOf(item)) item.coverScene = cdScenes.take;
         };
 
         // forBreak: a Break cue's break scene (scenes only, no Sources)
@@ -8962,8 +9048,10 @@
                 const socials = item.socials || (item.label ? { youtube: item.label } : {});
                 Object.keys(SOCIALS).forEach(k => socialsWrap.append(socialRow(k, socials[k], `edit-social-${k}`).row));
             }
-            showEditFields({ name: hasText && !oneBox, para: !!oneBox, duration: cfg?.length === undefined && !holdsOn(item), gs: !!cfg?.depth, vhs: !!cfg?.stamp, clear: !!cfg?.backdrop, cdScenes: !!cfg?.content });
+            const stinger = !!coverOf(item);
+            showEditFields({ name: hasText && !oneBox, para: !!oneBox, duration: cfg?.length === undefined && !holdsOn(item), gs: !!cfg?.depth, vhs: !!cfg?.stamp, clear: !!cfg?.backdrop, cdScenes: !!cfg?.content || stinger });
             if (cfg?.content) openCdScenes(item); // a CD: the OBS scenes before and after it
+            else if (stinger) openCdScenes(item, true); // a stinger: the OBS scene it covers the change to
             $('edit-clear').checked = !!item.clear;
             $('edit-vhs-date').value = item.tapeDate || '';
             $('edit-vhs-time').value = item.tapeTime || '';
@@ -9056,6 +9144,7 @@
                 item.title = $('edit-title').value.trim();
             }
             if (!item.cue && item.mode !== 'cl3' && cfg?.length === undefined) item.duration = Number($('edit-duration').value) || item.duration || 5;
+            if (coverOf(item)) applyCoverScene(item); // a stinger: its OBS scene, or none
             if (cfg?.depth) {
                 if ($('edit-gs').checked) item.gs = true;
                 else delete item.gs;
@@ -10129,6 +10218,7 @@
                     ...(d.cue === 'scene' && { obsName: d.obsName || '', note: d.text || '' }),
                     ...(d.cue === 'break' && { secs: d.secs || 0, note: d.text || '', obsName: d.obsName || '' }),
                     ...(playsContent(d) && contentScenes(d)),
+                    ...(stingerScene(d) && { coverScene: d.coverScene }),
                 })),
                 content: projectorContent(list), // content on screen, and its time left
                 blocks: [
@@ -10566,7 +10656,7 @@
         // transition to end holds it back, to line the cue up with a stinger.
         const obsSceneChanged = (scene) => {
             setObsProgram(scene); // the TAKE tally
-            if (sceneArrival && scene === sceneArrival.scene) { sceneArrival.changed = true; wakeArrival(); } // a CD's TAKE is on its way
+            if (sceneArrival && scene === sceneArrival.scene) { sceneArrival.arrived = true; wakeArrival(); } // a CD's TAKE got there: its content starts
             // A Break cue just took this scene: that break is already on
             if (breakSceneTaken?.scene === scene && Date.now() < breakSceneTaken.until) { breakSceneTaken = null; return; }
             if (!showLocked() || !advancedMode() || typeof scene !== 'string' || !loadBreakScenes().includes(scene)) return; // no show running, or Simple
@@ -10580,7 +10670,6 @@
             updateTiming();
         };
         const obsTransitionEnded = () => {
-            if (sceneArrival?.changed) { sceneArrival.ended = true; wakeArrival(); } // a CD's TAKE got there: its content starts
             if (pendingBreak?.wait) startBreak(pendingBreak.block);
         };
 
@@ -11008,12 +11097,13 @@
             return row;
         };
         // An item's name; a scene shows the yellow TAKE marker, then its note. Content with OBS scenes shows its
-        // name, then the TAKE marker (the scene it goes to first) and where OBS goes after it.
+        // name, then the TAKE marker (the scene it goes to first) and where OBS goes after it. A stinger with an
+        // OBS scene shows its name, then the TAKE marker (the scene OBS goes to under it).
         const pjName = (el, it) => {
-            if (it.takeScene || it.afterScene) {
+            if (it.takeScene || it.afterScene || it.coverScene) {
                 el.textContent = it.label;
-                if (it.takeScene) {
-                    const take = cueMarker('TAKE', it.takeScene, 'pj-take pj-cd-take', `OBS goes to ${it.takeScene} first`);
+                if (it.takeScene || it.coverScene) {
+                    const take = cueMarker('TAKE', it.takeScene || it.coverScene, 'pj-take pj-cd-take', it.takeScene ? `OBS goes to ${it.takeScene} first` : `OBS goes to ${it.coverScene} under the stinger`);
                     el.append(' ', take);
                 }
                 if (it.afterScene) {
