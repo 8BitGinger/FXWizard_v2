@@ -4580,11 +4580,11 @@
                 },
             };
 
-            // ---------- 8-Bit stinger: chunky pixel blocks stair-step in from the left in bands of blue and violet, like an old console's
+            // ---------- 8-Bit stinger: chunky pixel blocks stair-step in from the left in bands of blue and orange, like an old console's
             // screen wipe, until they cover the screen; a pixel-art star bounces in the middle; then the blocks wipe away the
             // same way. Blocks grow and shrink a few sizes at a time, not smoothly, and the canvas is drawn at half size and
             // scaled up without smoothing (pixelated), for the 8-bit look. ----------
-            const PIXEL_COLORS = ['#0078f8', '#6844fc', '#1838a8']; // blue, violet and deep blue, repeating (the yellow star stands out)
+            const PIXEL_COLORS = ['#0078f8', '#f87800', '#1838a8']; // blue, orange and deep blue, repeating (the star's dark outline keeps it clear)
             // The star, one character per pixel: o = outline, y = yellow, w = shine, e = eyes
             const PIXEL_STAR = [
                 '.....oo.....',
