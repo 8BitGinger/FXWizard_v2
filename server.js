@@ -157,6 +157,9 @@ function answerRequest(request) {
     if (request.mode === 'obsTake') {
         return { mode: 'obsTakeResult', ok: false, scene: '', error: "server.js runs outside OBS, so it can't switch scenes. Firing a TAKE needs server.py, run in OBS." };
     }
+    if (request.mode === 'obsHotkey') {
+        return { mode: 'obsHotkeyResult', ok: false, key: '', error: "server.js runs outside OBS, so it can't press keys in OBS. A rundown item's hotkey needs server.py, run in OBS." };
+    }
     if (request.mode === 'obsProgram') {
         return { mode: 'obsProgramScene', ok: false, scene: null };
     }

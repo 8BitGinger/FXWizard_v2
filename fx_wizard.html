@@ -511,8 +511,8 @@
                     <details id="animation-section" class="fx-section" data-key="l3-anim">
                         <summary><span>Animation</span><span class="fx-value"></span></summary>
                         <div id="animation-selector" class="grid grid-cols-3 gap-1 text-[12px]">
-                            <!-- In rows of three. Glitch also glitches out; the others fade out. Flash In flickers in through
-                                 colors; Enlarge grows at the bottom, then the top, then settles; 8-Bit builds out of blocks. -->
+                            <!-- In rows of three. Glitch also glitches out, and Jelly splats flat; the others fade out. Flash In
+                                 flickers in through colors; Jelly splats in and wobbles; 8-Bit builds out of blocks. -->
                             <input type="radio" id="anim-slideLeft" name="animationStyle" value="anim-slideLeft" checked class="hidden peer/a3">
                             <label for="anim-slideLeft" class="p-1 hover:bg-violet-400 flex justify-center items-center border rounded text-center cursor-pointer peer-checked/a3:bg-primary">Slide Left</label>
                             <input type="radio" id="anim-slideUp" name="animationStyle" value="anim-slideUp" class="hidden peer/a1">
@@ -533,8 +533,8 @@
                             <label for="anim-bounce" class="p-1 hover:bg-violet-400 flex justify-center items-center border rounded text-center cursor-pointer peer-checked/a8:bg-primary">Bounce</label>
                             <input type="radio" id="anim-flash" name="animationStyle" value="anim-flash" class="hidden peer/a10">
                             <label for="anim-flash" class="p-1 hover:bg-violet-400 flex justify-center items-center border rounded text-center cursor-pointer peer-checked/a10:bg-primary">Flash In</label>
-                            <input type="radio" id="anim-enlarge" name="animationStyle" value="anim-enlarge" class="hidden peer/a11">
-                            <label for="anim-enlarge" class="p-1 hover:bg-violet-400 flex justify-center items-center border rounded text-center cursor-pointer peer-checked/a11:bg-primary">Enlarge</label>
+                            <input type="radio" id="anim-jelly" name="animationStyle" value="anim-jelly" class="hidden peer/a11">
+                            <label for="anim-jelly" class="p-1 hover:bg-violet-400 flex justify-center items-center border rounded text-center cursor-pointer peer-checked/a11:bg-primary">Jelly</label>
                             <input type="radio" id="anim-8bit" name="animationStyle" value="anim-8bit" class="hidden peer/a12">
                             <label for="anim-8bit" class="p-1 hover:bg-violet-400 flex justify-center items-center border rounded text-center cursor-pointer peer-checked/a12:bg-primary">8-Bit</label>
                         </div>
@@ -579,6 +579,10 @@
                 <span class="cc-icon" data-icon="monitor"></span>
                 <span class="cc-text"><b id="cc-kind"></b><span id="cc-name"></span></span>
                 <span class="cc-time"><b id="cc-left"></b><small id="cc-of"></small></span>
+                <!-- ⏸ holds it where it is (the video, and its time left, here and on the projector); ▶ carries on.
+                     🔇 mutes the video (or turns its sound back on); a rundown item keeps it. -->
+                <button type="button" id="cc-pause" class="cc-tool" onclick="toggleContentPause()" title="Pause"><span data-icon="pause"></span></button>
+                <button type="button" id="cc-mute" class="cc-tool" onclick="toggleContentMute()" title="Mute"></button>
                 <button type="button" onclick="takeOff('content')" title="Take the content off screen now"><span data-icon="stop"></span> OFF</button>
                 <i id="cc-bar" class="cc-bar"></i>
             </div>
@@ -786,6 +790,14 @@
                     <label for="builder-name" class="block text-sm font-medium">Name:</label>
                     <input type="text" id="builder-name" maxlength="50" placeholder="Name this scene" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm">
                 </div>
+                <!-- ✎ put a saved cScene back in the slots: SAVE reads UPDATE (it changes that one), or Save as new
+                     keeps that one as it was and saves these as another; Cancel empties the slots, changing nothing -->
+                <div id="builder-editing" class="builder-editing hidden">
+                    <span data-icon="pencil"></span>
+                    <span class="builder-editing-text">Editing <b id="builder-editing-name"></b></span>
+                    <button type="button" onclick="saveCl3(true)" title="Keep the one you're editing as it was, and save the slots as a new cScene">Save as new</button>
+                    <button type="button" onclick="clearBuilder()" title="Stop editing: empty the slots (the saved one stays as it was)">Cancel</button>
+                </div>
                 <div id="builder-slots" class="builder-slots"></div>
                 <div class="builder-btns">
                     <button type="button" class="b-play" onclick="playSeq(builderCl3())" title="Play the slots now, one after another"><span data-icon="play"></span> PLAY</button>
@@ -800,7 +812,7 @@
                     <button type="button" onclick="stopSeq(true)" title="Stop, and take it down"><span data-icon="stop"></span></button>
                 </div>
                 <div id="builder-saved-wrap" class="hidden">
-                    <h3 class="builder-heading">Saved complex scenes</h3>
+                    <h3 class="builder-heading">Saved complex scenes <small id="builder-saved-count"></small></h3>
                     <div id="builder-saved" class="grid grid-cols-1 gap-2 p-1 pt-0"></div>
                 </div>
                 <h3 class="builder-heading">Saved graphics <small>tap one to put it in the picked slot</small></h3>
@@ -955,6 +967,26 @@
                     <div class="grid grid-cols-2 gap-2 mt-1">
                         <!-- Cancel just closes; Save (also Enter in a text box) saves -->
                         <button type="button" value="cancel" class="py-2 rounded bg-gray-500 font-bold" onclick="this.closest('dialog').close('cancel')">Cancel</button>
+                        <button value="save" class="py-2 rounded bg-indigo-600 text-white font-bold">Save</button>
+                    </div>
+                </form>
+            </dialog>
+
+            <!-- H on a rundown item: a key combination for OBS. When the item fires during the show, server.py presses
+                 those keys in OBS, so whatever OBS has on them (Settings > Hotkeys) happens with it. -->
+            <dialog id="hotkey-dialog">
+                <form method="dialog" class="flex flex-col gap-2">
+                    <h3 class="font-bold">Hotkey for OBS</h3>
+                    <p id="hk-item" class="hk-item"></p>
+                    <div id="hk-capture" class="hk-capture" tabindex="0" role="textbox" aria-label="Press the keys for OBS"></div>
+                    <p id="hk-note" class="text-xs opacity-75"></p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" id="hk-test" class="rundown-btn" onclick="testHotkey()" title="Press these keys in OBS now, to check what they do"><span data-icon="zap"></span> Test in OBS</button>
+                        <button type="button" id="hk-remove" class="rundown-btn" onclick="pickHotkey(null)" title="No hotkey for this item"><span data-icon="x"></span> None</button>
+                    </div>
+                    <p class="text-xs opacity-75">When it fires during the show (taken, a TAKE, a Break or a PLAY; a script or placeholder when you tap it), FX Wizard presses these keys in OBS too. Give them to something in OBS under Settings &gt; Hotkeys. Needs server.py, running in OBS.</p>
+                    <div class="grid grid-cols-2 gap-2 mt-1">
+                        <button type="button" class="py-2 rounded bg-gray-500 font-bold" onclick="this.closest('dialog').close('cancel')">Cancel</button>
                         <button value="save" class="py-2 rounded bg-indigo-600 text-white font-bold">Save</button>
                     </div>
                 </form>
@@ -1640,6 +1672,8 @@
             x:      '<path d="M6 6l12 12M18 6L6 18"/>',
             stop:   '<rect x="6" y="6" width="12" height="12" rx="2" class="icon-fill"/>',
             sound:  '<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 9a4 4 0 0 1 0 6M19 6.5a7.5 7.5 0 0 1 0 11"/>',
+            muted:  '<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/>',
+            keyboard: '<rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h.01M9.5 10h.01M13 10h.01M16.5 10h.01M7 14h10"/>',
             pencil: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',
             prev:   '<path d="M15 5l-7 7 7 7"/>',
             l3:     '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M6 13h9M6 16h6"/>',
@@ -1665,9 +1699,13 @@
            ========================================================= */
         const ANIMS = ['anim-slideUp', 'anim-slideDown', 'anim-slideLeft', 'anim-slideRight', 'anim-fade', 'anim-spinIn', 'anim-hide', 'anim-slideOutLeft',
                        'anim-riseUp', 'anim-dropDown', 'anim-glitch', 'anim-glitchOut', 'anim-bounce', 'anim-slam', 'anim-tvOff',
-                       'anim-flash', 'anim-enlarge', 'anim-8bit'];
+                       'anim-flash', 'anim-jelly', 'anim-jellyOut', 'anim-8bit'];
         // Lower third animations with their own way out (the others fade out)
-        const L3_OUT = { 'anim-glitch': 'anim-glitchOut' };
+        const L3_OUT = { 'anim-glitch': 'anim-glitchOut', 'anim-jelly': 'anim-jellyOut' };
+        // Animations that were replaced: graphics saved with the old one play the new one.
+        // (Enlarge, which only stretched the box a little and read as broken, became Jelly.)
+        const ANIM_RENAMED = { 'anim-enlarge': 'anim-jelly' };
+        const l3Anim = (name) => ANIM_RENAMED[name] || name;
         const clearAnimationClasses = (el) => el.classList.remove(...ANIMS);
 
         // Plays an in animation ('' = just appear)
@@ -1800,9 +1838,10 @@
 
             // Show it, then hide it when the duration is up
             box.style.visibility = 'visible';
-            l3Out = L3_OUT[data.animationStyle] || 'anim-hide';
-            playIn(box, data.animationStyle || 'anim-slideUp');
-            if (data.animationStyle === 'anim-8bit') showL3Bits(box, data.bgStyle);
+            const anim = l3Anim(data.animationStyle);
+            l3Out = L3_OUT[anim] || 'anim-hide';
+            playIn(box, anim || 'anim-slideUp');
+            if (anim === 'anim-8bit') showL3Bits(box, data.bgStyle);
             // Toggled graphics (hold) stay up until hidden
             if (!data.hold) l3Timeout = setTimeout(hideLowerThird, (Number(data.duration) || 5) * 1000);
         };
@@ -6809,13 +6848,47 @@
             // Show it, then hide it when the duration is up (toggled: stays up until hidden)
             box.style.visibility = 'visible';
             playIn(box, cfg.animIn);
+            contentPausedLeft = null;
+            contentEnds = data.hold ? Infinity : Date.now() + duration * 1000;
             if (!data.hold) contentTimeout = setTimeout(hideContent, duration * 1000);
+        };
+
+        // ⏸ PAUSE (from the panel's content clock): the video stops where it is and the time it has left stops
+        // with it, so it stays up; ▶ carries on from there. A picture just stays up, with its time held.
+        let contentEnds = 0;           // when the content up now goes off (Infinity: toggled on)
+        let contentPausedLeft = null;  // while it's paused: the ms it had left (Infinity: toggled on)
+        const pauseContent = (on) => {
+            const box = $('content-box'), video = $('content-video');
+            if (box.style.visibility !== 'visible' || box.style.opacity === '0') return; // nothing up (or on its way out)
+            if (on && contentPausedLeft === null) {
+                contentPausedLeft = contentEnds === Infinity ? Infinity : Math.max(0, contentEnds - Date.now());
+                clearTimeout(contentTimeout);
+                clearTimeout(contentPlay); // still coming up: it doesn't start until ▶
+                video.pause();
+            } else if (!on && contentPausedLeft !== null) {
+                const left = contentPausedLeft;
+                contentPausedLeft = null;
+                contentEnds = left === Infinity ? Infinity : Date.now() + left;
+                if (left !== Infinity) contentTimeout = setTimeout(hideContent, left);
+                // A video that has played to its end holds its last frame (play() would start it over)
+                if (!video.hidden && video.hasAttribute('src') && !video.ended) video.play().catch(() => { video.muted = true; video.play().catch(() => {}); });
+            }
+        };
+        // 🔇 (the content clock, or the toggle on a rundown item): the video up now, muted or with its sound
+        const muteContent = (muted) => {
+            const video = $('content-video');
+            video.muted = !!muted;
+            // A browser that won't play sound by itself pauses it: back to muted, so the picture keeps going
+            if (!muted && video.paused && contentPausedLeft === null && !video.ended && video.hasAttribute('src') && video.currentTime > 0) {
+                video.play().catch(() => { video.muted = true; video.play().catch(() => {}); });
+            }
         };
 
         const hideContent = () => {
             const box = $('content-box');
             clearTimeout(contentTimeout);
             clearTimeout(contentCleanup);
+            contentPausedLeft = null;
             const out = OVERLAYS[currentContent]?.animOut ?? 'anim-hide';
             playOut(box, out);
             contentCleanup = setTimeout(() => {
@@ -6931,6 +7004,8 @@
         // and sounds are for #display. (A Content video's sound comes from this source.)
         const contentMessage = (data) => {
             if (data.mode === 'clear' || (data.mode === 'hide' && data.layer === 'content')) hideContent();
+            else if (data.mode === 'contentPause') pauseContent(!!data.paused);
+            else if (data.mode === 'contentMute') muteContent(!!data.muted);
             else if (data.mode === 'overlay' && OVERLAYS[data.overlay]?.content) showContent(data);
         };
 
@@ -7075,15 +7150,17 @@
         // bar of its own above CLEAR ALL, on every tab: Content TV, Phone or Full, its name, and its time left (for
         // one toggled on, how long it's been up). Lower thirds and overlays taken over it leave it be. Everything
         // sent goes through sendPayload, which starts it for Content and stops it for Clear All or Content's OFF.
-        let contentClock = null; // { kind, name, muted, start, ends (Infinity when toggled), secs }
+        // { kind, name, video (a video, so it can be muted), muted, sid (its rundown item, if it's from the rundown),
+        //   start, ends (Infinity when toggled), secs, pausedAt (while ⏸ holds it: when it was paused) }
+        let contentClock = null;
         let contentClockTimer = null;
         const contentSent = (p) => {
             if (p.mode === 'clear' || (p.mode === 'hide' && p.layer === 'content')) stopContentClock();
             else if (p.mode === 'overlay' && OVERLAYS[p.overlay]?.content) {
-                const secs = Number(p.duration) || 5, now = Date.now();
+                const secs = Number(p.duration) || 5, now = Date.now(), video = VIDEO_FILE.test(p.content || '');
                 contentClock = {
-                    kind: OVERLAYS[p.overlay].label, name: p.label || p.content || '', muted: !!p.muted && VIDEO_FILE.test(p.content || ''),
-                    start: now, ends: p.hold ? Infinity : now + secs * 1000, secs,
+                    kind: OVERLAYS[p.overlay].label, name: p.label || p.content || '', video, muted: !!p.muted && video, sid: p.sid || null,
+                    start: now, ends: p.hold ? Infinity : now + secs * 1000, secs, pausedAt: null,
                 };
                 clearInterval(contentClockTimer);
                 contentClockTimer = setInterval(tickContentClock, 250);
@@ -7091,6 +7168,56 @@
                 broadcastProjector(); // the projector counts it down too
             }
         };
+        // The time on the content clock: frozen while it's paused
+        const contentNow = (now = Date.now()) => contentClock?.pausedAt || now;
+
+        // ⏸ / ▶ on the content clock: the content up now (from anywhere) holds where it is, and so does everything
+        // counting it down: the clock, the projector's bar, its rundown card's OFF (and when it goes off, and its
+        // THEN), and a cScene's next graphic, if it's playing one. ▶ carries on from there.
+        const setContentPaused = (on) => {
+            const c = contentClock;
+            if (!c) { flash('No content on screen', true); return; }
+            if (!!c.pausedAt === on) return;
+            if (!sendPayload({ mode: 'contentPause', paused: on })) return;
+            const now = Date.now(), fromRundown = !!liveByLayer.content && liveEnds.content !== Infinity, inSeq = seq?.layer === 'content';
+            if (on) {
+                c.pausedAt = now;
+                if (fromRundown) clearTimeout(liveTimers.content);
+                if (inSeq) { clearTimeout(seq.timer); seq.timer = null; }
+                flash(`Paused: ${c.name || c.kind}`, false, c.ends === Infinity ? 'toggled on: ▶ carries on' : `${clock(Math.ceil((c.ends - now) / 1000))} left · ▶ carries on`);
+            } else {
+                const held = now - c.pausedAt;
+                c.pausedAt = null;
+                c.start += held;
+                if (c.ends !== Infinity) c.ends += held;
+                if (fromRundown) { liveEnds.content += held; armLiveTimer('content', liveByLayer.content, liveEnds.content - now); }
+                if (inSeq && seq.due) { seq.due += held; liveEnds.seq += held; const i = seq.i; seq.timer = setTimeout(() => seqStep(i + 1), Math.max(0, seq.due - now)); }
+                flash(`Playing: ${c.name || c.kind}`, false, c.ends === Infinity ? 'toggled on' : `${clock(Math.ceil((c.ends - now) / 1000))} left`);
+            }
+            logEvent(on ? 'pause' : 'resume', null, undefined, { text: c.name || c.kind });
+            tickContentClock();
+            updateLiveMarks();
+            broadcastProjector();
+        };
+        const toggleContentPause = () => setContentPaused(!contentClock?.pausedAt);
+
+        // 🔇 on the content clock: the video up now, muted or with its sound back. Content from the rundown keeps it
+        // (its item's own mute toggle shows the same).
+        const setContentMuted = (muted) => {
+            const c = contentClock;
+            if (!c) { flash('No content on screen', true); return; }
+            if (!c.video) { flash('A picture has no sound', true); return; }
+            if (!sendPayload({ mode: 'contentMute', muted })) return;
+            c.muted = muted;
+            if (c.sid) {
+                const list = loadShow(), d = list.find(x => x.sid === c.sid);
+                if (d && playsMuted(d) !== muted) { d.muted = muted; saveShow(list); }
+            }
+            flash(muted ? `Muted: ${c.name || c.kind}` : `Sound on: ${c.name || c.kind}`);
+            tickContentClock();
+            broadcastProjector();
+        };
+        const toggleContentMute = () => setContentMuted(!contentClock?.muted);
         const stopContentClock = () => {
             const was = !!contentClock;
             clearInterval(contentClockTimer);
@@ -7100,15 +7227,23 @@
             if (was) broadcastProjector();
         };
         const tickContentClock = () => {
-            const c = contentClock, now = Date.now();
+            const c = contentClock, now = contentNow();
             if (!c) return;
             if (now >= c.ends) { stopContentClock(); return; } // its time is up: the display has taken it down
-            const held = c.ends === Infinity, up = (now - c.start) / 1000;
-            $('cc-kind').textContent = c.kind;
+            const held = c.ends === Infinity, up = (now - c.start) / 1000, paused = !!c.pausedAt;
+            $('cc-kind').textContent = paused ? `${c.kind} · paused` : c.kind;
             $('cc-name').textContent = `${c.name}${c.muted ? ' · muted' : ''}`;
             $('cc-left').textContent = held ? clock(Math.floor(up)) : clock(Math.ceil((c.ends - now) / 1000));
             $('cc-of').textContent = held ? 'up · toggled' : `left of ${clock(Math.ceil(c.secs))}`;
             $('cc-bar').style.width = held ? '0' : `${Math.min(100, (up / c.secs) * 100)}%`;
+            $('content-clock').classList.toggle('paused', paused);
+            const pause = $('cc-pause'), mute = $('cc-mute');
+            if (pause.dataset.on !== String(paused)) { pause.dataset.on = String(paused); pause.innerHTML = icon(paused ? 'play' : 'pause'); }
+            pause.title = paused ? 'Carry on (it\'s paused)' : `Pause: ${c.video ? 'the video stops where it is' : 'it stays up'}, and so does its time`;
+            mute.classList.toggle('hidden', !c.video); // a picture has no sound
+            mute.classList.toggle('on', c.muted);
+            if (mute.dataset.on !== String(c.muted)) { mute.dataset.on = String(c.muted); mute.innerHTML = icon(c.muted ? 'muted' : 'sound'); }
+            mute.title = c.muted ? 'Muted: tap for its sound' : 'Mute it';
             $('content-clock').classList.remove('hidden');
             $('controller-view').classList.add('content-on');
         };
@@ -7782,13 +7917,15 @@
         const cueContentStyle = (d) => (OVERLAYS[d.contentStyle]?.content ? d.contentStyle : 'content');
         const CONTENT_WHERE = { content: 'on the TV', contentPhone: 'on the phone', contentFull: 'full screen' };
         const cueSeconds = (d) => Number(d.duration) || OVERLAYS[cueContentStyle(d)].dur;
-        const cueMuted = (d) => d.cue === 'clip' && VIDEO_FILE.test(d.content || '');
+        // Whether a video plays muted: with its sound unless its 🔇 toggle in the rundown is on (muted: true or false).
+        // A Clip's starts on (in case it has background noise); a SOT's, and Content's (a CD), start off.
+        const playsMuted = (d) => VIDEO_FILE.test(d.content || '') && (typeof d.muted === 'boolean' ? d.muted : d.cue === 'clip');
         // The Content graphic it takes. It keeps the cue's sid (so its row shows it's on screen), and its cue and
         // text (so the log names it the way the rundown does), and its OBS scenes (see contentScenes).
         const cueGraphic = (d) => ({
             mode: 'overlay', overlay: cueContentStyle(d), content: d.content,
             label: d.text || d.content.replace(/\.[^.]+$/, ''), title: '', duration: cueSeconds(d),
-            cue: d.cue, ...(d.text && { text: d.text }), ...(cueMuted(d) && { muted: true }),
+            cue: d.cue, ...(d.text && { text: d.text }), ...(playsMuted(d) && { muted: true }),
             ...(d.clear && OVERLAYS[cueContentStyle(d)].backdrop && { clear: true }), sid: d.sid, block: d.block,
             ...contentScenes(d),
         });
@@ -7915,7 +8052,13 @@
                     off.remove();
                     off = null;
                 }
-                if (off) off.lastChild.textContent = liveEnds[layer] === Infinity ? 'OFF' : `OFF ${formatTime(Math.max(0, Math.ceil((liveEnds[layer] - now) / 1000)))}`;
+                // Content held with ⏸ (or a cScene showing it): its time left stays put until ▶
+                const held = (layer === 'content' || (layer === 'seq' && seq?.layer === 'content')) && contentClock?.pausedAt;
+                if (off) {
+                    off.lastChild.textContent = liveEnds[layer] === Infinity ? 'OFF' : `OFF ${formatTime(Math.max(0, Math.ceil((liveEnds[layer] - (held || now)) / 1000)))}`;
+                    off.classList.toggle('paused', !!held);
+                    off.title = held ? 'Paused (▶ on the content clock carries on). Tap to take it off screen now' : 'Take it off screen now';
+                }
                 // A cScene playing: ⏭ NEXT skips to the next graphic in it
                 let next = c.querySelector('.show-next');
                 if (layer === 'seq' && !next) {
@@ -7965,11 +8108,31 @@
                 localStorage.setItem(LAST_PLAYED_KEY, data.sid);
                 logEvent('take', data, loadShow(), { layer: 'seq' });
                 setCurrent(data.sid);
+                sendItemHotkey(data.sid);
                 return;
             }
-            if (layerOf(data) === 'content' && data.takeScene) { takeSceneThenPlay(data); return; } // OBS goes there first
-            if (stingerScene(data) && (takeInFlight || sceneArrival)) { flash('A TAKE is going out', true, 'try again in a moment'); return; }
-            playFromRundown(data);
+            if (layerOf(data) === 'content' && data.takeScene) { // OBS goes there first
+                if (takeInFlight || sceneArrival) { flash('A TAKE is going out', true, 'try again in a moment'); return; }
+                takeSceneThenPlay(data);
+                sendItemHotkey(data.sid);
+                return;
+            }
+            // A stinger with an OBS scene waits only for another kind of TAKE. Another stinger's switch that hasn't gone
+            // out yet is called off by this one (it takes that one's place on screen, so that one never covers it);
+            // one going out right now goes first, and this one's switch follows it (see coverTake).
+            if (stingerScene(data) && (sceneArrival || (takeInFlight && !coverSwap && !coverSending))) { flash('A TAKE is going out', true, 'try again in a moment'); return; }
+            if (playFromRundown(data)) sendItemHotkey(data.sid);
+        };
+        // When a rundown card's time is up, it's off screen (content with an afterScene sends OBS there).
+        // Pausing content holds it, and ▶ arms it again for the time that was left.
+        const armLiveTimer = (layer, sid, ms) => {
+            clearTimeout(liveTimers[layer]);
+            liveTimers[layer] = setTimeout(() => {
+                if (liveByLayer[layer] !== sid) return; // something else took its place
+                const after = layer === 'content' && liveAfter?.sid === sid ? liveAfter : null;
+                clearLive(layer);
+                if (after) takeAfterScene(after);
+            }, Math.max(0, ms));
         };
         // Puts a rundown card's graphic up: OFF on its card with the time left, in the log, and the current item
         const playFromRundown = (data) => {
@@ -7981,11 +8144,7 @@
             if (holdsOn(data)) liveEnds[layer] = Infinity; // up until OFF (or TOGGLE OFF)
             else {
                 liveEnds[layer] = Date.now() + secs * 1000;
-                liveTimers[layer] = setTimeout(() => { // its time is up: content with an afterScene sends OBS there
-                    const after = layer === 'content' && liveAfter?.sid === data.sid ? liveAfter : null;
-                    clearLive(layer);
-                    if (after) takeAfterScene(after);
-                }, secs * 1000);
+                armLiveTimer(layer, data.sid, secs * 1000);
             }
             if (!liveTicker) liveTicker = setInterval(updateLiveMarks, 250);
             lastTakenSid = data.sid;
@@ -8002,25 +8161,36 @@
         // under most of them. It goes a little after the cover starts, as the display can start the stinger a
         // frame or two after it's sent. Another overlay over it, OFF or Clear All before then calls it off. While
         // it waits, other TAKEs wait too (one switch at a time). If OBS can't take it, the stinger plays anyway.
+        // Stingers can follow one another (a different one for each kind of scene): a stinger taken while the last one's
+        // switch is still waiting calls that one off (it's been replaced on screen), and one taken while the last one's
+        // switch is going out lets it finish first.
         const COVER_LEAD = 0.1; // seconds into the cover (at most a third of it)
         let coverSwap = null;   // the stinger's TAKE, waiting: { sid, timer }
+        let coverSending = false; // a stinger's TAKE has gone out to OBS, and OBS hasn't answered yet
         const cancelCoverSwap = () => {
             if (!coverSwap) return;
             clearTimeout(coverSwap.timer);
             coverSwap = null;
-            takeInFlight = false;
+            takeInFlight = coverSending; // the one before it may still be going out
         };
         const coverTake = (data) => {
             const [from, to] = coverOf(data), scene = data.coverScene, name = itemLabel(data);
             takeInFlight = true;
-            coverSwap = { sid: data.sid, timer: setTimeout(async () => {
+            const swap = { sid: data.sid, timer: null };
+            coverSwap = swap;
+            swap.timer = setTimeout(async () => {
+                // The stinger before it is still switching OBS: this one goes as soon as that's done
+                for (const until = Date.now() + 6500; coverSending && Date.now() < until;) await new Promise(r => setTimeout(r, 40));
+                if (coverSwap !== swap) return; // called off while it waited
                 coverSwap = null;
+                coverSending = true;
                 const reply = await serverRequest({ mode: 'obsTake', scene }, 'obsTakeResult', 6000);
-                takeInFlight = false;
+                coverSending = false;
+                takeInFlight = !!coverSwap; // another stinger's TAKE may be waiting its turn
                 logEvent('fire', data, loadShow(), { scene, ok: !!reply?.ok, error: reply?.ok ? '' : reply?.error || 'no answer from the server' });
                 if (reply?.ok) { setObsProgram(scene); flash(`TAKE ${scene}`, false, `under ${name}`); }
                 else flash(`Couldn't take ${scene}`, true, `${reply?.error || 'a TAKE needs server.py, running in OBS'}: ${name} played without it`);
-            }, (from + Math.min(COVER_LEAD, (to - from) / 3)) * 1000) };
+            }, (from + Math.min(COVER_LEAD, (to - from) / 3)) * 1000);
         };
 
         // ---------- Content with OBS scenes (see contentScenes) ----------
@@ -8247,9 +8417,9 @@
                 row.classList.add('cue-content');
                 const line = document.createElement('span');
                 line.className = 'take-line';
-                const secs = cueSeconds(data), where = `${CONTENT_WHERE[cueContentStyle(data)]}${data.clear ? ', clear behind' : ''}${cueMuted(data) ? ', muted' : ''}`;
+                const secs = cueSeconds(data), where = `${CONTENT_WHERE[cueContentStyle(data)]}${data.clear ? ', clear behind' : ''}${playsMuted(data) ? ', muted' : ''}`;
                 const gone = !!contentFolderFiles && !contentFolderFiles.some(f => f.toLowerCase() === data.content.toLowerCase());
-                const pill = cueMarker(gone ? 'PLAY !' : 'PLAY', `${data.content} · ${formatTime(secs)}${cueMuted(data) ? ' · muted' : ''}`, `take-pill play-pill${gone ? ' play-missing' : ''}`,
+                const pill = cueMarker(gone ? 'PLAY !' : 'PLAY', `${data.content} · ${formatTime(secs)}${playsMuted(data) ? ' · muted' : ''}`, `take-pill play-pill${gone ? ' play-missing' : ''}`,
                     gone ? `${data.content} isn't in the ${CONTENT_FOLDER} folder` : `Plays ${data.content} ${where}, for ${formatTime(secs)}`);
                 // Its OBS scenes: TAKE before PLAY (one tap does both), THEN after it
                 const { take, then } = sceneMarkers(data, false); // the ⚡ goes on PLAY
@@ -8272,12 +8442,20 @@
             text.className = 'cue-text';
             text.textContent = data.cue === 'script' ? scriptTitle(data) : data.text || (data.cue === 'note' || data.cue === 'scene' ? '' : cue.label);
             row.append(text);
-            // During the show: tap a cue (not a note) to make it the current item
+            // During the show: tap a cue (not a note) to make it the current item. One with nothing of its own to fire
+            // (a script, a placeholder) presses its hotkey in OBS as it does.
             if (locked && data.cue !== 'note') {
+                const pressesKeys = validHotkey(data.hotkey) && !cueFiresItself(data);
                 row.classList.add('show-tappable');
-                row.title = 'Make this the current item';
-                row.onclick = () => setCurrent(data.sid);
+                row.title = pressesKeys ? `Make this the current item, and press ${hotkeyText(data.hotkey)} in OBS` : 'Make this the current item';
+                row.onclick = () => { setCurrent(data.sid); if (pressesKeys) sendItemHotkey(data.sid); };
             }
+            // A video it plays: 🔊 / 🔇, after its PLAY marker
+            if (hasSound(data)) row.querySelector('.take-line')?.append(muteToggle(data, 'cue-mute'));
+            // Its hotkey's keys: on its TAKE / BREAK / PLAY line if it has one (the first line is full of buttons while
+            // building the rundown), otherwise before its text
+            const keys = data.cue !== 'note' && hotkeyChip(data);
+            if (keys) { const line = row.querySelector('.take-line'); if (line) line.append(keys); else text.before(keys); }
             if (!locked) {
                 const handle = document.createElement('div');
                 handle.className = 'show-handle';
@@ -8307,6 +8485,7 @@
                     dup.onclick = () => duplicateShowItem(data.sid);
                     row.append(dup);
                 }
+                if (data.cue !== 'note') row.append(hotkeyButton(data, 'cue-btn')); // H: a hotkey for OBS (notes never fire)
                 row.append(edit, del);
             }
             return row;
@@ -8326,14 +8505,178 @@
             setObsProgram(reply?.ok ? reply.scene : null);
         };
         const fireTake = async (d) => {
-            if (!showLocked() || takeInFlight) return;
+            if (!showLocked()) return;
+            if (takeInFlight) { flash('A TAKE is going out', true, 'try again in a moment'); return; }
             takeInFlight = true;
             setCurrent(d.sid);
+            sendItemHotkey(d.sid);
             const reply = await serverRequest({ mode: 'obsTake', scene: d.obsName }, 'obsTakeResult', 6000);
             takeInFlight = false;
             logEvent('fire', d, loadShow(), { scene: d.obsName, ok: !!reply?.ok, error: reply?.ok ? '' : reply?.error || 'no answer from the server' });
             if (reply?.ok) { setObsProgram(d.obsName); flash(`TAKE ${d.obsName}`, false, 'OBS switched'); }
             else flash(`Couldn't take ${d.obsName}`, true, reply?.error || 'firing a TAKE needs server.py, running in OBS');
+        };
+
+        // ---------- Hotkeys for OBS (H on a rundown item) ----------
+        // While Set Show is off, H on an item gives it a key combination, like Ctrl+Shift+F5. When the item fires during
+        // the show, server.py presses those keys in OBS as well, so whatever OBS has on them (Settings > Hotkeys: a
+        // scene, a source shown or hidden, a filter, a mute, a replay, a Move transition...) happens with it. It fires
+        // when a graphic or cScene is taken, a TAKE or a Break fires, or a Clip, SOT or PIC's PLAY is tapped; a cue that
+        // doesn't fire anything (a script, a placeholder, a TAKE that names a source) when it's tapped to make it the
+        // current item (◀ ▶ don't). The keys go to OBS, not to this panel: pressing them here does nothing.
+        // Kept on the item: hotkey: { key: OBS's name for it (OBS_KEY_F5), name: what it says on the key (F5),
+        // ctrl, shift, alt, win (true when held) }. Rundown and show files keep it.
+        // The keys OBS has names for, by the browser's name for them (KeyboardEvent.code). Letters, digits, F1–F24 and
+        // the number pad are worked out below. (=, ' and ` are left out: their names in OBS depend on the keyboard.)
+        const HOTKEY_KEYS = {
+            Space: ['OBS_KEY_SPACE', 'Space'], Enter: ['OBS_KEY_RETURN', 'Enter'], NumpadEnter: ['OBS_KEY_RETURN', 'Enter'],
+            Tab: ['OBS_KEY_TAB', 'Tab'], Backspace: ['OBS_KEY_BACKSPACE', 'Backspace'], Escape: ['OBS_KEY_ESCAPE', 'Esc'],
+            Insert: ['OBS_KEY_INSERT', 'Insert'], Delete: ['OBS_KEY_DELETE', 'Delete'], Home: ['OBS_KEY_HOME', 'Home'], End: ['OBS_KEY_END', 'End'],
+            PageUp: ['OBS_KEY_PAGEUP', 'Page Up'], PageDown: ['OBS_KEY_PAGEDOWN', 'Page Down'],
+            ArrowLeft: ['OBS_KEY_LEFT', 'Left'], ArrowRight: ['OBS_KEY_RIGHT', 'Right'], ArrowUp: ['OBS_KEY_UP', 'Up'], ArrowDown: ['OBS_KEY_DOWN', 'Down'],
+            Pause: ['OBS_KEY_PAUSE', 'Pause'], ScrollLock: ['OBS_KEY_SCROLLLOCK', 'Scroll Lock'],
+            Minus: ['OBS_KEY_MINUS', '-'], Comma: ['OBS_KEY_COMMA', ','], Period: ['OBS_KEY_PERIOD', '.'], Slash: ['OBS_KEY_SLASH', '/'],
+            Semicolon: ['OBS_KEY_SEMICOLON', ';'], BracketLeft: ['OBS_KEY_BRACKETLEFT', '['], BracketRight: ['OBS_KEY_BRACKETRIGHT', ']'], Backslash: ['OBS_KEY_BACKSLASH', '\\'],
+            NumpadAdd: ['OBS_KEY_NUMPLUS', 'Num +'], NumpadSubtract: ['OBS_KEY_NUMMINUS', 'Num -'], NumpadMultiply: ['OBS_KEY_NUMASTERISK', 'Num *'],
+            NumpadDivide: ['OBS_KEY_NUMSLASH', 'Num /'], NumpadDecimal: ['OBS_KEY_NUMPERIOD', 'Num .'],
+        };
+        const hotkeyKeyOf = (code) => {
+            let m;
+            if ((m = /^Key([A-Z])$/.exec(code)) || (m = /^Digit([0-9])$/.exec(code))) return [`OBS_KEY_${m[1]}`, m[1]];
+            if ((m = /^F([1-9]|1[0-9]|2[0-4])$/.exec(code))) return [`OBS_KEY_F${m[1]}`, `F${m[1]}`];
+            if ((m = /^Numpad([0-9])$/.exec(code))) return [`OBS_KEY_NUM${m[1]}`, `Num ${m[1]}`];
+            return HOTKEY_KEYS[code] || null;
+        };
+        const validHotkey = (h) => !!h && typeof h === 'object' && typeof h.key === 'string' && /^OBS_KEY_[A-Z0-9_]+$/.test(h.key);
+        // "Ctrl+Shift+F5"
+        const hotkeyText = (h) => (validHotkey(h) ? [h.ctrl && 'Ctrl', h.alt && 'Alt', h.shift && 'Shift', h.win && 'Win', h.name || h.key.replace('OBS_KEY_', '')].filter(Boolean).join('+') : '');
+        // The keys pressed in OBS, and how it went: the message box says if it didn't work, and the log has it either way
+        const pressHotkey = async (h) => serverRequest({ mode: 'obsHotkey', key: h.key, shift: !!h.shift, control: !!h.ctrl, alt: !!h.alt, command: !!h.win }, 'obsHotkeyResult', 3000);
+        const sendItemHotkey = async (sid) => {
+            const list = loadShow(), d = list.find(x => x.sid === sid);
+            if (!d || !validHotkey(d.hotkey)) return;
+            const text = hotkeyText(d.hotkey);
+            // Its keys light up on the item (after the rundown has been drawn again, if firing it does that)
+            setTimeout(() => document.querySelectorAll(`.show-card[data-sid="${sid}"] .hk-chip`).forEach(c => { c.classList.remove('sent'); void c.offsetWidth; c.classList.add('sent'); }), 0);
+            const reply = await pressHotkey(d.hotkey);
+            logEvent('hotkey', d, loadShow(), { keys: text, ok: !!reply?.ok, error: reply?.ok ? '' : reply?.error || 'no answer from the server' });
+            if (!reply?.ok) flash(`Couldn't press ${text} in OBS`, true, reply?.error || 'sending hotkeys to OBS needs server.py, running in OBS');
+        };
+        // A cue with nothing of its own to fire: its hotkey goes when it's tapped to make it the current item
+        const cueFiresItself = (d) => (d.cue === 'scene' && d.obsKind !== 'source' && !!d.obsName) || d.cue === 'break' || (CONTENT_CUES.includes(d.cue) && !!d.content);
+
+        // The H window: the keys are pressed in its box (held modifiers show as they're held), and Save keeps them
+        let hotkeyEdit = null; // { sid, hotkey: the keys picked (null: none), held: the modifiers held now, note }
+        const openHotkeyDialog = (sid) => {
+            const d = loadShow().find(x => x.sid === sid);
+            if (!d) return;
+            hotkeyEdit = { sid, hotkey: validHotkey(d.hotkey) ? { ...d.hotkey } : null, held: null, note: '' };
+            const code = itemCode(d);
+            $('hk-item').textContent = `${code ? `${code} · ` : ''}${itemLabel(d)}`;
+            $('hotkey-dialog').returnValue = '';
+            $('hotkey-dialog').showModal();
+            renderHotkeyDialog();
+            $('hk-capture').focus();
+        };
+        const renderHotkeyDialog = () => {
+            if (!hotkeyEdit) return;
+            const { hotkey, held } = hotkeyEdit, box = $('hk-capture'), focused = document.activeElement === box;
+            box.textContent = held ? `${held}+…` : hotkey ? hotkeyText(hotkey) : focused ? 'Press the keys now' : 'Tap here, then press the keys';
+            box.classList.toggle('set', !!hotkey && !held);
+            $('hk-test').disabled = $('hk-remove').disabled = !hotkey;
+            const plain = hotkey && !hotkey.ctrl && !hotkey.alt && !hotkey.shift && !hotkey.win;
+            $('hk-note').textContent = hotkeyEdit.note
+                || (plain ? 'With no Ctrl, Alt or Shift, OBS also does it whenever that key is pressed (typing included). F13 to F24, or Ctrl+Shift with a key, are safest.'
+                : hotkey ? 'Give the same keys to something in OBS (Settings > Hotkeys). Test in OBS presses them now.'
+                : 'Like Ctrl+Shift+F5. F13 to F24 work well with a Stream Deck.');
+        };
+        const pickHotkey = (h) => {
+            if (!hotkeyEdit) return;
+            hotkeyEdit.hotkey = h;
+            hotkeyEdit.note = '';
+            renderHotkeyDialog();
+        };
+        const heldModifiers = (e) => [e.ctrlKey && 'Ctrl', e.altKey && 'Alt', e.shiftKey && 'Shift', e.metaKey && 'Win'].filter(Boolean).join('+');
+        const hotkeyKeydown = (e) => {
+            if (!hotkeyEdit) return;
+            if (['Control', 'Alt', 'Shift', 'Meta', 'OS', 'AltGraph'].includes(e.key)) { // a modifier on its own: wait for the key
+                e.preventDefault();
+                hotkeyEdit.held = heldModifiers(e) || null;
+                renderHotkeyDialog();
+                return;
+            }
+            const mods = e.ctrlKey || e.altKey || e.shiftKey || e.metaKey;
+            if (!mods && (e.key === 'Tab' || e.key === 'Escape')) return; // on to the buttons, or close the window, as usual
+            e.preventDefault();
+            e.stopPropagation();
+            hotkeyEdit.held = null;
+            const k = hotkeyKeyOf(e.code);
+            if (!k) { hotkeyEdit.note = `${e.key === ' ' ? 'That key' : `"${e.key}"`} can't be sent to OBS: try another (F-keys work best).`; renderHotkeyDialog(); return; }
+            pickHotkey({ key: k[0], name: k[1], ...(e.ctrlKey && { ctrl: true }), ...(e.shiftKey && { shift: true }), ...(e.altKey && { alt: true }), ...(e.metaKey && { win: true }) });
+        };
+        const hotkeyKeyup = (e) => {
+            if (!hotkeyEdit?.held) return;
+            hotkeyEdit.held = heldModifiers(e) || null; // let go of the modifiers without a key: back to what was picked
+            renderHotkeyDialog();
+        };
+        const testHotkey = async () => {
+            const h = hotkeyEdit?.hotkey;
+            if (!h) return;
+            const reply = await pressHotkey(h);
+            if (reply?.ok) flash(`Pressed ${hotkeyText(h)} in OBS`, false, 'whatever OBS has on those keys happened');
+            else flash(`Couldn't press ${hotkeyText(h)} in OBS`, true, reply?.error || 'sending hotkeys to OBS needs server.py, running in OBS');
+        };
+        const saveHotkey = () => {
+            if (!hotkeyEdit) return;
+            const { sid, hotkey } = hotkeyEdit, list = loadShow(), d = list.find(x => x.sid === sid);
+            hotkeyEdit = null;
+            if (!d) return;
+            if (hotkey) d.hotkey = hotkey; else delete d.hotkey;
+            saveShow(list);
+            flash(hotkey ? `Hotkey: ${hotkeyText(hotkey)}` : 'No hotkey', false, `${itemLabel(d)}${hotkey ? ': pressed in OBS when it fires' : ''}`);
+        };
+        // H on an item while Set Show is off (amber once it has one), and its keys on the item (both views)
+        const hotkeyButton = (data, cls) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `hk-btn${validHotkey(data.hotkey) ? ' on' : ''}${cls ? ` ${cls}` : ''}`;
+            btn.textContent = 'H';
+            btn.title = validHotkey(data.hotkey) ? `Hotkey for OBS: ${hotkeyText(data.hotkey)} (tap to change)` : 'Hotkey for OBS: keys pressed in OBS when this fires';
+            btn.onclick = (e) => { e.stopPropagation(); openHotkeyDialog(data.sid); };
+            return btn;
+        };
+        const hotkeyChip = (data) => {
+            if (!validHotkey(data.hotkey)) return null;
+            const chip = document.createElement('span');
+            chip.className = 'hk-chip';
+            chip.title = `Presses ${hotkeyText(data.hotkey)} in OBS when it fires`;
+            chip.innerHTML = icon('keyboard');
+            chip.append(hotkeyText(data.hotkey));
+            return chip;
+        };
+
+        // ---------- The mute toggle (🔊 / 🔇) on a rundown item that plays a video ----------
+        // A CD, or a Clip, SOT or PIC with a video: whether it plays with its sound (see playsMuted). Tapping it while
+        // the item is on screen mutes it (or turns its sound on) right away, too. Works with Set Show on or off.
+        const hasSound = (d) => playsContent(d) && VIDEO_FILE.test(d.content || '');
+        const muteToggle = (data, cls) => {
+            const btn = document.createElement('button'), muted = playsMuted(data);
+            btn.type = 'button';
+            btn.className = `mute-toggle${muted ? ' on' : ''}${cls ? ` ${cls}` : ''}`;
+            btn.innerHTML = icon(muted ? 'muted' : 'sound');
+            btn.title = muted ? 'Plays muted: tap for its sound' : 'Plays with its sound: tap to mute it';
+            btn.setAttribute('aria-pressed', String(muted));
+            btn.onclick = (e) => { e.stopPropagation(); toggleItemMute(data.sid); };
+            return btn;
+        };
+        const toggleItemMute = (sid) => {
+            const list = loadShow(), d = list.find(x => x.sid === sid);
+            if (!d || !hasSound(d)) return;
+            const muted = !playsMuted(d), live = liveByLayer.content === sid && contentClock?.sid === sid;
+            d.muted = muted;
+            saveShow(list);
+            if (live && sendPayload({ mode: 'contentMute', muted })) { contentClock.muted = muted; tickContentClock(); broadcastProjector(); } // on screen now: right away
+            flash(muted ? `Muted: ${itemLabel(d)}` : `Sound on: ${itemLabel(d)}`, false, live ? 'on screen now' : 'when it plays');
         };
 
         // ---------- Break cues ----------
@@ -8380,6 +8723,7 @@
                     setCurrent(d.sid);
                     startBreak(d.block);
                     takeBreakScene(d);
+                    sendItemHotkey(d.sid);
                     renderShow();
                     return;
                 }
@@ -8391,6 +8735,7 @@
             logEvent('break', null, undefined, { block: d.block, label: b.label, planned: b.secs });
             if (b.akta) aktaCue('break', b.secs, d.block);
             takeBreakScene(d);
+            sendItemHotkey(d.sid);
             flash(`${b.label}: ${clock(b.secs)}`, false, `${d.obsName ? `on ${d.obsName} · ` : ''}${b.akta ? 'AKTA break sent' : 'in break'}`);
             renderShow();
         };
@@ -8458,6 +8803,14 @@
                 if (data.takeScene) take.title = `${locked ? 'Tap to take' : 'Takes'} ${data.takeScene} in OBS, then ${itemLabel(data)} plays${data.afterScene ? `, then ${data.afterScene}` : ''}`;
                 else if (stingerScene(data)) take.title = `${locked ? 'Tap to play' : 'Plays'} ${itemLabel(data)}; OBS goes to ${data.coverScene} while it covers the screen`;
             }
+            // Its hotkey for OBS (H), on the line under the name
+            const keys = hotkeyChip(data);
+            if (keys) take.querySelector('.card-sub')?.prepend(keys);
+            // A video: 🔊 / 🔇 (top right during the show; next to ✎ while building it)
+            if (hasSound(data)) {
+                card.classList.add('has-mute');
+                card.append(muteToggle(data, 'card-mute'));
+            }
             if (!locked) {
                 // Drag handle on the left
                 const handle = document.createElement('div');
@@ -8472,6 +8825,7 @@
                         saveShow(loadShow().filter(x => x.sid !== data.sid));
                     }),
                     cardButton('pencil', 'Edit for this rundown', 'bottom-1 right-1', 'bg-sky-600 text-white hover:bg-sky-500', () => editShowItem(data.sid)),
+                    hotkeyButton(data, 'card-hk'), // H, left of ✕
                 );
             }
             return card;
@@ -8860,9 +9214,9 @@
         // ---------- Clip, SOT and PIC cues: the content they play ----------
         // A list of the content folder's files (from the server), or a box to type the name in without one.
         // Picking a video fills in the Duration with all of it, the same as Content TV… on the Fullscreen Overlays tab.
-        let cueContent = { file: '', style: 'content', cue: 'clip' }; // the dialog's pick, and the cue's type (a Clip plays muted)
+        let cueContent = { file: '', style: 'content', cue: 'clip', muted: undefined }; // the dialog's pick, the cue's type and its mute toggle (see playsMuted)
         const openCueContent = async (item, cue = item?.cue) => {
-            cueContent = { file: item?.content || '', style: cueContentStyle(item || {}), cue };
+            cueContent = { file: item?.content || '', style: cueContentStyle(item || {}), cue, muted: item?.muted };
             $('edit-clear').checked = !!item?.clear;
             $('edit-duration').value = item?.content ? cueSeconds(item) : OVERLAYS.content.dur;
             renderCueContent();
@@ -8891,7 +9245,7 @@
             $('edit-duration-wrap').classList.toggle('hidden', !want);
             $('edit-cdscene-wrap').classList.toggle('hidden', !want); // its OBS scenes, once it plays something
             const length = contentLengths[want];
-            const sound = !VIDEO_FILE.test(want) ? '' : cueMuted({ cue: cueContent.cue, content: want }) ? ' A Clip plays muted.' : ' It plays with its sound.';
+            const sound = !VIDEO_FILE.test(want) ? '' : playsMuted({ cue: cueContent.cue, content: want, muted: cueContent.muted }) ? ' It plays muted (🔇 on it in the rundown turns its sound on).' : ' It plays with its sound (🔊 on it in the rundown mutes it).';
             $('edit-content-note').textContent = !want
                 ? (files === null ? 'The server can\'t list the content folder. Type the file\'s name to play it from the rundown, or leave it empty for a placeholder.'
                     : files.length ? 'Pick a picture or video to play from the rundown while Set Show is on, or leave it as a placeholder.'
@@ -9328,9 +9682,12 @@
            (or just tap saved graphics and they fill the slots in order). Save it as a cScene: it's kept with
            the saved graphics, listed here, and can go in the rundown (CS), where it plays for its total time,
            with ⏭ NEXT on its card to skip ahead while it plays. (Kept as mode 'cl3': see cl3Steps.)
+           Up to 8 cScenes are kept. SAVE empties the slots for the next one. ✎ on a saved one puts it back in the
+           slots to change it: SAVE reads UPDATE, and Save as new keeps that one as it was and saves another.
            ========================================================= */
         const BUILDER_KEY = 'fx_builder'; // the slots being built: { name, steps: [8 graphics or null], editing: the saved cScene being changed }
         const SLOTS = 8;
+        const MAX_CSCENES = 8; // how many cScenes can be saved
         let builderTarget = null; // the slot the next saved graphic goes in (to start with, the first empty one)
         let builderQuery = '';  // the search over the saved graphics
         const loadBuilder = () => {
@@ -9376,23 +9733,34 @@
             const name = b.name.trim() || steps.map(stepName).slice(0, 2).join(' + ') || 'cScene';
             return { mode: 'cl3', label: name, steps };
         };
-        // 💾 Saves the slots as a cScene (changing the one loaded with ✎, if it's still saved)
-        const saveCl3 = () => {
+        const savedCl3s = (all = loadButtonsFromStorage()) => all.filter(d => d.mode === 'cl3');
+        // The saved cScene the slots are changing (put there with ✎), or null
+        const builderEditing = (b = loadBuilder(), all = loadButtonsFromStorage()) => (b.editing && all.find(x => x.id === b.editing && x.mode === 'cl3')) || null;
+        // 💾 Saves the slots as a cScene: UPDATE changes the one loaded with ✎ (if it's still saved); otherwise, or with
+        // asNew (Save as new), it's another one, up to MAX_CSCENES. Then the slots are emptied for the next one.
+        const saveCl3 = (asNew = false) => {
             const b = loadBuilder(), item = builderCl3();
             if (!item.steps.length) { flash('Put at least one graphic in the slots', true); return; }
-            const all = loadButtonsFromStorage(), i = b.editing ? all.findIndex(x => x.id === b.editing) : -1;
-            item.id = i >= 0 ? all[i].id : Date.now();
+            const all = loadButtonsFromStorage(), editing = asNew ? null : builderEditing(b, all);
+            if (!editing && savedCl3s(all).length >= MAX_CSCENES) {
+                flash(`${MAX_CSCENES} complex scenes are saved already`, true, 'delete one (✕) to save another, or ✎ one to change it');
+                return;
+            }
+            const i = editing ? all.indexOf(editing) : -1;
+            item.id = editing ? editing.id : Date.now();
             if (i >= 0) all[i] = item; else all.unshift(item);
-            localStorage.setItem(BUILDER_KEY, JSON.stringify({ ...b, name: item.label, editing: item.id }));
-            saveButtonsToStorage(all);
-            flash(i >= 0 ? 'cScene updated' : 'cScene saved', false, item.label);
+            builderTarget = 0;
+            localStorage.setItem(BUILDER_KEY, JSON.stringify({ name: '', steps: [], editing: null })); // empty for the next one
+            saveButtonsToStorage(all); // draws the tab again
+            const n = savedCl3s(all).length;
+            flash(`${editing ? 'cScene updated' : 'cScene saved'}: ${item.label}`, false, `${n} of ${MAX_CSCENES} saved · the slots are empty for the next one`);
         };
         // ✎ on a saved cScene: its graphics go back in the slots, to change it
         const editCl3 = (d) => {
             const steps = cl3Steps(d);
             builderTarget = Math.min(steps.length, SLOTS - 1);
             saveBuilder({ name: d.label || '', steps: Array.from({ length: SLOTS }, (_, i) => steps[i] || null), editing: d.id });
-            flash(`Editing: ${d.label}`, false, 'UPDATE keeps the changes');
+            flash(`Editing: ${d.label}`, false, 'UPDATE keeps the changes; Save as new makes another');
         };
         const clearBuilder = () => {
             builderTarget = 0;
@@ -9466,12 +9834,21 @@
             });
             const steps = b.steps.filter(Boolean);
             $('builder-total').textContent = steps.length ? `${steps.length} of ${SLOTS} · ${clock(cl3Seconds({ steps }))}` : '';
-            $('builder-save').innerHTML = `${icon('save')} ${b.editing && loadButtonsFromStorage().some(x => x.id === b.editing) ? 'UPDATE' : 'SAVE'}`;
+            const all = loadButtonsFromStorage(), editing = builderEditing(b, all), cl3s = savedCl3s(all);
+            const full = !editing && cl3s.length >= MAX_CSCENES;
+            $('builder-save').innerHTML = `${icon('save')} ${editing ? 'UPDATE' : 'SAVE'}`;
+            $('builder-save').title = editing ? `Save the changes to ${editing.label}` : full
+                ? `${MAX_CSCENES} complex scenes are saved already: delete one to save another`
+                : `Keep it as a complex scene (${cl3s.length} of ${MAX_CSCENES} saved)`;
+            $('builder-save').classList.toggle('opacity-40', full);
+            // Changing a saved one: say which, with Save as new and Cancel
+            $('builder-editing').classList.toggle('hidden', !editing);
+            if (editing) $('builder-editing-name').textContent = editing.label || 'cScene';
             // The saved cScenes: tap to play, ✎ to change, ＋ for the rundown, ✕ to delete
             const saved = $('builder-saved');
             saved.innerHTML = '';
-            const cl3s = loadButtonsFromStorage().filter(d => d.mode === 'cl3');
             $('builder-saved-wrap').classList.toggle('hidden', !cl3s.length);
+            $('builder-saved-count').textContent = `${cl3s.length} of ${MAX_CSCENES}`;
             cl3s.forEach(d => {
                 const { card, take } = makeCard(d);
                 take.onclick = () => playSeq(d);
@@ -9486,6 +9863,7 @@
                     cardButton('pencil', 'Put it in the slots, to change it', 'bottom-1 right-9', 'bg-sky-600 text-white hover:bg-sky-500', () => editCl3(d)),
                 );
                 card.classList.add('cl3-card');
+                card.classList.toggle('cl3-editing', !!editing && editing.id === d.id); // the one in the slots now
                 saved.append(card);
             });
             // The saved graphics to pick from
@@ -9540,6 +9918,7 @@
             seq.i = i;
             seq.layer = layerOf(st);
             const secs = graphicSeconds(st);
+            seq.due = Date.now() + (secs + SEQ_GAP) * 1000; // when the next one goes up (Content paused with ⏸ holds it)
             seq.timer = setTimeout(() => seqStep(i + 1), (secs + SEQ_GAP) * 1000);
             if (seq.sid) liveEnds.seq = Date.now() + seqLeft(i) * 1000;
             flash(`${seq.d.label || 'cScene'} ${i + 1}/${seq.steps.length}: ${stepName(st)}`, false, `for ${formatTime(secs)}`);
@@ -9555,6 +9934,7 @@
             sendPayload({ mode: 'hide', layer: seq.layer });
             const next = seq.i + 1;
             if (next >= seq.steps.length) { stopSeq(false); flash('cScene done'); return; }
+            seq.due = null; // on its way to the next one: a pause now has nothing to hold
             seq.timer = setTimeout(() => seqStep(next), SEQ_GAP * 1000);
             if (seq.sid) liveEnds.seq = Date.now() + (SEQ_GAP + seqLeft(next)) * 1000;
             updateLiveMarks();
@@ -10193,7 +10573,8 @@
             const c = contentClock;
             if (!c) return null;
             const d = liveByLayer.content && list.find(x => x.sid === liveByLayer.content);
-            return { kind: c.kind, name: c.name, muted: c.muted, code: d ? itemCode(d, list) : '', start: c.start, ends: c.ends === Infinity ? null : c.ends, secs: c.secs };
+            return { kind: c.kind, name: c.name, muted: c.muted, code: d ? itemCode(d, list) : '', start: c.start, ends: c.ends === Infinity ? null : c.ends, secs: c.secs,
+                pausedAt: c.pausedAt || null }; // paused with ⏸: its time stays where it was then
         };
         const broadcastProjector = () => {
             clearTimeout(projectorTimer);
@@ -10274,6 +10655,10 @@
                     rows.push({ start: e.t, end: e.t, type: 'AKTA', code: '', item: e.text, block: e.block || '', message: true });
                 } else if (e.kind === 'fire') {
                     rows.push({ start: e.t, end: e.t, type: 'TAKE', code: e.code, item: `${e.scene}${e.ok ? '' : ` (failed: ${e.error})`}`, block: e.block, message: true });
+                } else if (e.kind === 'hotkey') { // an item's keys, pressed in OBS as it fired
+                    rows.push({ start: e.t, end: e.t, type: 'HOTKEY', code: e.code, item: `${e.keys} (${e.label})${e.ok ? '' : ` (failed: ${e.error})`}`, block: e.block, message: true });
+                } else if (e.kind === 'pause' || e.kind === 'resume') { // Content held with ⏸, and carried on with ▶
+                    rows.push({ start: e.t, end: e.t, type: e.kind === 'pause' ? 'PAUSE' : 'RESUME', code: '', item: e.text, block: '', message: true });
                 } else if (e.kind === 'start') {
                     rows.push({ start: e.t, end: e.t, type: 'SHOW', code: '', item: 'Show started', block: '', message: true });
                 }
@@ -11271,9 +11656,10 @@
             tickProjectorContent(now);
         };
         // The content bar: what's on the content layer and its time left (on the panel's clock), as on its OFF
-        // button in the panel; toggled on, how long it's been up. Gone once its time is up.
-        const tickProjectorContent = (now) => {
-            const c = PJ.state?.content, held = c?.ends === null;
+        // button in the panel; toggled on, how long it's been up. Paused (⏸ in the panel), its time stays put and it
+        // says PAUSED, in amber. Gone once its time is up.
+        const tickProjectorContent = (time) => {
+            const c = PJ.state?.content, held = c?.ends === null, paused = !!c?.pausedAt, now = paused ? c.pausedAt : time;
             const on = !!c && (held || now < c.ends);
             $('pj-content').classList.toggle('hidden', !on);
             if (!on) return;
@@ -11281,9 +11667,10 @@
             $('pj-cd-kind').textContent = [c.code, c.kind].filter(Boolean).join(' · ');
             $('pj-cd-name').textContent = `${c.name}${c.muted ? ' · muted' : ''}`;
             $('pj-cd-left').textContent = held ? clock(Math.floor(up)) : clock(Math.ceil(left));
-            $('pj-cd-of').textContent = held ? 'up' : 'left';
+            $('pj-cd-of').textContent = paused ? 'paused' : held ? 'up' : 'left';
             $('pj-cd-bar').style.width = held ? '0' : `${Math.min(100, (up / c.secs) * 100)}%`;
-            $('pj-content').classList.toggle('ending', !held && left <= 10);
+            $('pj-content').classList.toggle('ending', !held && !paused && left <= 10);
+            $('pj-content').classList.toggle('paused', paused);
         };
 
         /* =========================================================
@@ -11427,7 +11814,7 @@
         const loadPicks = () => {
             const picks = readJson(PICKS_KEY, {});
             if (!picks || typeof picks !== 'object') return;
-            PICK_GROUPS.forEach(name => { if (typeof picks[name] === 'string') pickOption(name, picks[name]); });
+            PICK_GROUPS.forEach(name => { if (typeof picks[name] === 'string') pickOption(name, name === 'animationStyle' ? l3Anim(picks[name]) : picks[name]); });
             if (Number(picks.l3Duration) > 0) l3Duration = Number(picks.l3Duration);
         };
 
@@ -11679,7 +12066,7 @@
                         overlays: ['confetti', 'colorwave', 'disco', 'fireworks', 'social'], stingers: ['stinger', 'colorbars', 'curtains'], sounds: ['victory', 'swish', 'comedy', 'trombone'] },
             sports:   { label: 'Sports',   icon: '🏆', c1: '#f97316', c2: '#9a3412',
                         looks: [{ name: 'Sports', bgStyle: 'sports', fontStyle: 'font-modern', fontColor: '', animationStyle: 'anim-slam' },
-                                { name: 'Red', bgStyle: 'red', fontStyle: 'font-modern', fontColor: '', animationStyle: 'anim-enlarge' }],
+                                { name: 'Red', bgStyle: 'red', fontStyle: 'font-modern', fontColor: '', animationStyle: 'anim-slideRight' }],
                         overlays: ['confetti', 'fireworks', 'hottake', 'fire', 'locpin'], stingers: ['sportsfx', 'firestinger', 'stinger'], sounds: ['victory', 'swish', 'trombone', 'censor'] },
             news:     { label: 'News',     icon: '📰', c1: '#e11d48', c2: '#4c0519',
                         looks: [{ name: 'Politics', bgStyle: 'politics', fontStyle: 'font-classic', fontColor: '', animationStyle: 'anim-slideLeft' },
@@ -11693,7 +12080,8 @@
                         overlays: ['vhs', 'comic', 'emoji', 'colorwave'], stingers: ['techfx', 'pixel', 'tvstatic', 'colorbars'], sounds: ['victory', 'swish', 'trombone', 'comedy'] },
             comedy:   { label: 'Comedy',   icon: '😂', c1: '#ec4899', c2: '#7c3aed',
                         looks: [{ name: 'Clouds', bgStyle: 'clouds', fontStyle: 'font-fun', fontColor: '', animationStyle: 'anim-bounce' },
-                                { name: 'Fantasy', bgStyle: 'fantasy', fontStyle: 'font-fun', fontColor: '', animationStyle: 'anim-flash' }],
+                                { name: 'Fantasy', bgStyle: 'fantasy', fontStyle: 'font-fun', fontColor: '', animationStyle: 'anim-flash' },
+                                { name: 'Green', bgStyle: 'green', fontStyle: 'font-fun', fontColor: '', animationStyle: 'anim-jelly' }],
                         overlays: ['emoji', 'comic', 'disco', 'confetti', 'underwater'], stingers: ['curtains', 'cat', 'spring'], sounds: ['comedy', 'trombone', 'censor', 'victory'] },
             truecrime: { label: 'True Crime', icon: '🔍', c1: '#52525b', c2: '#18181b',
                         looks: [{ name: 'Black', bgStyle: 'black', fontStyle: 'font-classic', fontColor: '#E53935', animationStyle: 'anim-fade' },
@@ -12217,6 +12605,13 @@
                 // Saves the moment Save is pressed (not when the dialog's close event arrives later)
                 $('edit-dialog').querySelector('form').addEventListener('submit', (e) => {
                     if (finishEdit(e.submitter?.value || 'save') === false) e.preventDefault(); // something's missing: stays open to fix it
+                });
+                // H: a rundown item's hotkey for OBS. The box takes the keys pressed in it; Save keeps them.
+                $('hk-capture').addEventListener('keydown', hotkeyKeydown);
+                $('hk-capture').addEventListener('keyup', hotkeyKeyup);
+                $('hk-capture').addEventListener('blur', () => renderHotkeyDialog());
+                $('hotkey-dialog').querySelector('form').addEventListener('submit', (e) => {
+                    if ((e.submitter?.value || 'save') === 'save') saveHotkey();
                 });
                 // Show timing: its dialogs, a Show Timer schedule, the AKTA switch, and the clock (always running)
                 $('timing-dialog').querySelector('form').addEventListener('submit', (e) => {

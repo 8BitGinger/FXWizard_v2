@@ -538,8 +538,9 @@ async def socket_handler(websocket):
                 task.add_done_callback(akta_tasks.discard)
                 continue
 
-            # A TAKE fired from the rundown: OBS switches scene on a worker thread, answered only to that panel
-            if isinstance(request, dict) and request.get("mode") == "obsTake":
+            # A TAKE fired from the rundown: OBS switches scene on a worker thread, answered only to that panel.
+            # A rundown item's hotkey (obsHotkey) is pressed in OBS the same way.
+            if isinstance(request, dict) and request.get("mode") in ("obsTake", "obsHotkey"):
                 task = asyncio.get_running_loop().create_task(reply_take(websocket, request))
                 take_tasks.add(task)
                 task.add_done_callback(take_tasks.discard)
@@ -761,11 +762,88 @@ def take_scene(name):
     print(f"FXWizard: TAKE {name}")
     return {"mode": "obsTakeResult", "ok": True, "scene": name}
 
-take_tasks = set()  # keeps the takes that are in flight from being cleaned up before they finish
+# ---------------------------------------------------------------------------------------------
+# Hotkeys from the rundown
+#
+# A rundown item can have a key combination (H on it in the control panel). When it fires during the show, the
+# panel sends {"mode": "obsHotkey", "key": "OBS_KEY_F5", "shift": true, "control": true, "alt": false,
+# "command": false}, and OBS gets those keys as if they'd been pressed on the keyboard, so whatever has them in
+# Settings > Hotkeys happens. It's what obs-websocket's TriggerHotkeyByKeySequence does. The answer, to that
+# panel only: {"mode": "obsHotkeyResult", "ok": true | false, "key": "...", "error": "..."}.
+# ---------------------------------------------------------------------------------------------
+HOTKEY_MODIFIERS = (  # the request's field, obspython's name for the flag, and its value (obs-interaction.h)
+    ("shift", "INTERACT_SHIFT_KEY", 1 << 1),
+    ("control", "INTERACT_CONTROL_KEY", 1 << 2),
+    ("alt", "INTERACT_ALT_KEY", 1 << 3),
+    ("command", "INTERACT_COMMAND_KEY", 1 << 7),  # the Windows key
+)
+
+class KeyCombination(ctypes.Structure):
+    """libobs's obs_key_combination_t: the modifiers held, and the key."""
+    _fields_ = [("modifiers", ctypes.c_uint32), ("key", ctypes.c_int)]
+
+_hotkey_api = None
+
+def hotkey_api():
+    """(key from name, inject event) through ctypes, or None. Like the TAKE's, the call lets go of Python's lock while
+    OBS handles the keys, so a hotkey that runs a script (this one's own, say) can't get stuck waiting for it."""
+    global _hotkey_api
+    if _hotkey_api is None:
+        try:
+            libobs = ctypes.CDLL("obs") if os.name == "nt" else ctypes.CDLL(None)
+            key_from_name, inject = libobs.obs_key_from_name, libobs.obs_hotkey_inject_event
+            key_from_name.argtypes, key_from_name.restype = [ctypes.c_char_p], ctypes.c_int
+            inject.argtypes, inject.restype = [KeyCombination, ctypes.c_bool], None
+            _hotkey_api = (key_from_name, inject)
+        except (OSError, AttributeError):
+            _hotkey_api = False
+    return _hotkey_api or None
+
+def press_hotkey(request):
+    """obsHotkey: presses the keys in OBS (let go, pressed, let go, the way obs-websocket does it)."""
+    key = request.get("key")
+    def failed(error):
+        return {"mode": "obsHotkeyResult", "ok": False, "key": key if isinstance(key, str) else "", "error": error}
+    if not isinstance(key, str) or not re.fullmatch(r"OBS_KEY_[A-Z0-9_]{1,24}", key):
+        return failed("No key to press")
+    if obs_busy:
+        return failed("OBS is busy (starting up, or changing scene collection)")
+    modifiers = 0
+    for field, name, value in HOTKEY_MODIFIERS:
+        if request.get(field) is True:
+            modifiers |= getattr(obs, name, value)
+    try:
+        api = hotkey_api()
+        if api:
+            key_from_name, inject = api
+            code = key_from_name(key.encode("ascii"))
+            if not code:  # OBS_KEY_NONE
+                return failed(f"OBS doesn't know the key {key[8:]}")
+            combo = KeyCombination(modifiers, code)
+            for pressed in (False, True, False):
+                inject(combo, pressed)
+        else:
+            code = obs.obs_key_from_name(key)
+            if not code:
+                return failed(f"OBS doesn't know the key {key[8:]}")
+            combo = obs.obs_key_combination()
+            combo.modifiers = modifiers
+            combo.key = code
+            for pressed in (False, True, False):
+                obs.obs_hotkey_inject_event(combo, pressed)
+    except Exception as e:
+        return failed(f"Couldn't press the keys in OBS ({e.__class__.__name__})")
+    print(f"FXWizard: HOTKEY {key[8:]} (modifiers {modifiers})")
+    return {"mode": "obsHotkeyResult", "ok": True, "key": key}
+
+take_tasks = set()  # keeps the takes (and hotkeys) that are in flight from being cleaned up before they finish
 
 async def reply_take(websocket, request):
-    """Fires one TAKE on a worker thread and tells the panel that asked how it went."""
-    reply = await asyncio.get_running_loop().run_in_executor(None, take_scene, request.get("scene"))
+    """Fires one TAKE (or presses one rundown item's hotkey) on a worker thread and tells the panel that asked how it went."""
+    if request.get("mode") == "obsHotkey":
+        reply = await asyncio.get_running_loop().run_in_executor(None, press_hotkey, request)
+    else:
+        reply = await asyncio.get_running_loop().run_in_executor(None, take_scene, request.get("scene"))
     try:
         await websocket.send(json.dumps(reply))
     except Exception:
@@ -818,7 +896,8 @@ def on_frontend_event(event):
 def script_description():
     return ("FXWizard WebSocket Server. It also adds three hotkeys to OBS (see Settings, Hotkeys): FX Wizard: Start Break, "
             "Reset Break and Toggle AKTA control, tells the control panel when OBS changes scene (for break scenes and "
-            "the TAKE tally), switches scenes for TAKEs fired from the rundown, and opens the projector in Chrome.")
+            "the TAKE tally), switches scenes for TAKEs fired from the rundown, presses the hotkeys given to rundown "
+            "items (H) as they fire, and opens the projector in Chrome.")
 
 def script_load(settings):
     global server_loop, server_thread, obs_busy
