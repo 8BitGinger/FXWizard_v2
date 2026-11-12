@@ -353,6 +353,7 @@ Content stays up on its own layer while lower thirds and overlays come and go, s
 - Keep **Enable Browser Source Hardware Acceleration** on (OBS **Settings → Advanced → Sources**; it's on unless someone turned it off). In the [tests](#-tests), every effect ran at 55 to 60 frames a second with it, even on a basic Intel graphics chip. Without it, the effects now average under 16 ms a frame (60 fps) after the 2026-10-22 fixes, but a few still have short busier moments.
 - For the [Sound Pad](#sound-pad): turn on **Control audio via OBS** on the FX Display source (not on FX Underlay), so its sounds show in the Audio Mixer and go out on the stream and recording.
 - For a Content video's sound: turn on **Control audio via OBS** on the FX Content source too. It shows in the Audio Mixer as its own channel, so you can set its level apart from the Sound Pad.
+- **Content videos:** match them to the OBS canvas, for example 1920 x 1080 at 30 fps, as H.264 MP4. A 4K, 60 fps or HEVC clip straight off a phone is several times the work to decode for a picture that's scaled down anyway, and it's the first thing to check if one video stutters and others don't. A solid-state drive for the FX Wizard folder helps big files start sooner.
 
 ---
 
@@ -752,6 +753,7 @@ Results are printed and saved to `tests/results/perf_results.json`. If Chrome is
 | `display` | The display in real time: how soon each background video shows its first frame, and dropped frames while each L3, overlay and stinger plays | First frame under 100 ms |
 | `gpu` | The heaviest effects in real time, drawn on the CPU and then on the graphics chip | 55 fps or more with the graphics chip |
 | `panel` | Opening the panel with 0, 100 and 500 saved graphics (and up to 300 rundown items), drawing the lists and switching tabs | Lists drawn and tabs switched in under 250 ms |
+| `dock` | The dock's own load while Content is up (idle, Content taken from the Overlays tab, and a Content card live in the rundown): how often it's laid out again, its main-thread time, and the CPU time of Chrome's GPU process, which in OBS also plays the Content video | Under 5 layouts a second, and nothing moving at full frame rate but the OFF button's stepped ring |
 | `leak` | 156 takes in a row (every overlay and every background, three times), checking memory and page elements after each round | Memory levels off; no elements left behind |
 | `offline` | The panel, display, underlay and content pages with every web address blocked | Only graphics on the display, underlay and content pages; the panel keeps its layout and fonts; no web requests |
 | `servers` | `server.js` and `server.py`: the time to pass a lower third from the panel to the display (400 in a row, 150 large ones, a burst of 200), and what happens when one connected window stops reading | Under 5 ms; the display keeps getting messages |
@@ -781,6 +783,13 @@ The first full run found the problems listed under **Fixed** below; each fix was
 - **Big videos:** `code.webm` 25.8 → 4.7 MB, `finance.webm` 6.4 → 2.8 MB, `space.webm` 6.0 → 3.6 MB (VP9, same size and length; the originals are in `assets/originals`).
 
 Still open: `custom/water.gif` is 49 MB. GIFs are decoded by the CPU frame by frame, so crop it to the band the L3 box shows, or keep custom GIFs under 10 MB.
+
+**Fixed (2026-11-11): Content videos lagging and freezing.** Measured in Chrome on the studio computer (Xeon Silver 4108, Quadro P2000); not yet confirmed in OBS.
+- **The dock was the load, not the display.** In OBS the dock and every Browser Source share one GPU process, and that process also decodes and draws the Content video. While Content was up, the content clock's progress line eased to a new width four times a second, so it was always moving, and the whole dock was laid out and painted again 58 times a second (0 when idle). With a rundown card on screen, its **OFF** button's pulse (an animated shadow) painted on every frame as well. Work for the dock in the GPU process, in ms of CPU per second: Content taken from the Overlays tab 301 → 50; a Content card live in the rundown 774 → 136 (idle is about 10). The dock's own work: 96 → 11 and 172 → 25.
+- **What changed:** the progress lines (panel and projector) are scaled instead of resized, with no easing; the OFF pulse is a ring on its own layer that moves 10 times a second; and the clocks only write to the page when their text has changed.
+- **Videos are loaded before they're taken.** The Content source used to open the file as the TV was already rising. Now the panel tells it which video is next (the next one in the rundown from the current item, one whose TAKE scene OBS is going to, or the one just picked on the Overlays tab), and it's opened with its first frame decoded, unseen, so it starts on time.
+- **The Content picker's previews:** every video in the window was a player of its own and stayed loaded after the window closed. They now load only as they scroll into view and are let go of when it closes.
+- **New `dock` test section** (`python tests/perf.py dock`) so this can't creep back in. On the old code it fails (58 layouts a second; GPU process 275 and 851 ms/s); on the new code it passes (1 to 1.4 layouts a second; GPU process 42 and 129 ms/s, idle 11).
 
 ### Earlier checks
 

@@ -3,7 +3,7 @@
     python tests/perf.py                 every section
     python tests/perf.py canvas panel    just those
 
-Sections: assets canvas display gpu panel leak offline servers. Needs Google Chrome (or set FXW_CHROME to its path),
+Sections: assets canvas display gpu panel dock leak offline servers. Needs Google Chrome (or set FXW_CHROME to its path),
 Node.js (for server.js), and Python 3 with websockets (pip install websockets). OBS can stay open: the servers are
 tested on ports 8092 and 8093, not 8080. Results go to tests/results/perf_results.json (merged with what's there).
 Each section makes a throwaway copy of the panel (_perf_*.html) next to fx_wizard.html and deletes it after."""
@@ -193,6 +193,77 @@ def panel():
             pg.close(); os.remove(p)
         out[tag] = r
     results["panel"] = out
+
+
+# ---------------------------------------------------------------- C2. the dock's own load while Content is up
+# In OBS the dock and every Browser Source share one GPU process, which also decodes and draws the Content video. Anything
+# in the dock that moves on every frame (a progress line easing to its width, an animated shadow) is work in that process
+# for as long as Content is up. This counts the dock's layouts and the CPU time of Chrome's GPU process, idle and with
+# Content up (taken from the Overlays tab, and from a rundown card with its OFF button).
+DOCK_PORT = 9334
+
+
+def _cpu_by_process():
+    """CPU seconds so far, by Chrome process type (browser, renderer, GPU...)."""
+    import websockets, urllib.request
+    async def ask():
+        u = json.load(urllib.request.urlopen(f"http://127.0.0.1:{DOCK_PORT}/json/version"))["webSocketDebuggerUrl"]
+        async with websockets.connect(u, max_size=2 ** 24) as ws:
+            await ws.send(json.dumps({"id": 1, "method": "SystemInfo.getProcessInfo"}))
+            while True:
+                m = json.loads(await ws.recv())
+                if m.get("id") == 1:
+                    return m["result"]["processInfo"]
+    out = {}
+    for p in asyncio.run(ask()):
+        key = "gpu" if p["type"].lower() == "gpu" else p["type"]
+        out[key] = out.get(key, 0) + p["cpuTime"]
+    return out
+
+
+def dock():
+    items = rundown(60)
+    items.insert(1, {"id": 1, "mode": "overlay", "overlay": "contentFull", "content": "clip.mp4", "label": "clip.mp4", "title": "",
+                     "duration": 120, "block": "A", "sid": "cd1"})
+    p = test_page("dock", seed={"fx_show": items, "fx_blocks": ["A", "B", "C", "D", "E"], "fx_show_locked": "1"})
+    pg = Page(url(p), size=(500, 1000), port=DOCK_PORT, gpu=True, extra=("--enable-gpu-rasterization", "--ignore-gpu-blocklist"))
+    try:
+        pg.send("Performance.enable")
+        time.sleep(2)
+        pg.js("ws = { readyState: WebSocket.OPEN, send() {} }; 0")  # a stand-in server, so takes go through
+        metrics = lambda: {m["name"]: m["value"] for m in pg.send("Performance.getMetrics")["metrics"]}
+        out = {}
+
+        def sample(label, secs=8):
+            a, ca = metrics(), _cpu_by_process()
+            time.sleep(secs)
+            b, cb = metrics(), _cpu_by_process()
+            out[label] = {
+                "layoutsPerSec": round((b["LayoutCount"] - a["LayoutCount"]) / secs, 1),
+                "mainMsPerSec": round((b["TaskDuration"] - a["TaskDuration"]) / secs * 1000, 1),
+                "gpuProcessMsPerSec": round((cb.get("gpu", 0) - ca.get("gpu", 0)) / secs * 1000, 1),
+                "running": pg.js("document.getAnimations().filter(a => a.playState === 'running').map(a => a.animationName || ('transition ' + a.transitionProperty))"),
+            }
+            print(f"{label:34}", out[label])
+
+        sample("idle")
+        pg.js("contentSent({ mode: 'overlay', overlay: 'content', content: 'clip.mp4', duration: 120 }); 0")
+        sample("content up (Overlays tab)")
+        pg.js(PANEL_JS)
+        pg.js("stopContentClock(); pickTab('show'); 0")
+        time.sleep(1)
+        pg.js("takeFromRundown(loadShow().find(x => x.sid === 'cd1')); 0")
+        time.sleep(0.5)
+        sample("content card live (rundown)")
+        # Passes when the dock isn't laid out again on every frame, and nothing in it eases or pulses at full frame rate
+        # except the OFF button's stepped ring
+        busy = [k for k, v in out.items() if v["layoutsPerSec"] > 5 or any(r not in ("offAirPulse",) for r in v["running"])]
+        out["ok"] = not busy
+        print("dock ok" if not busy else f"dock BUSY: {busy}")
+    finally:
+        pg.close()
+        os.remove(p)
+    results["dock"] = out
 
 
 # ---------------------------------------------------------------- D. memory over many takes
@@ -409,7 +480,7 @@ def assets():
 
 
 if __name__ == "__main__":
-    for sec in sys.argv[1:] or ["assets", "canvas", "display", "gpu", "panel", "leak", "offline", "servers"]:
+    for sec in sys.argv[1:] or ["assets", "canvas", "display", "gpu", "panel", "dock", "leak", "offline", "servers"]:
         t0 = time.time()
         globals()[sec]()
         results.setdefault("_ran", {})[sec] = time.strftime("%Y-%m-%d %H:%M")

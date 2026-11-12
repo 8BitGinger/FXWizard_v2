@@ -1599,6 +1599,16 @@
            ========================================================= */
         const $ = (id) => document.getElementById(id);
 
+        // For what the clocks write several times a second: the page is only touched when the value has changed.
+        // (Writing the same text again still makes the browser lay out and paint that part of the dock again.)
+        const setText = (el, text) => { if (el.textContent !== text) el.textContent = text; };
+        // A progress line (.cc-bar, .pj-cd-bar), 0 to 1: scaled, which the graphics chip does without a new layout,
+        // and in steps (200 across the dock is a pixel or two each), so a long video isn't a new frame every tick
+        const setBar = (el, part, steps = 200) => {
+            const scale = `scaleX(${Math.round(Math.min(1, Math.max(0, part || 0)) * steps) / steps})`;
+            if (el.style.transform !== scale) el.style.transform = scale;
+        };
+
         // Value of the selected option in a group of buttons
         const checked = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value;
 
@@ -6836,6 +6846,7 @@
             box.classList.add(data.overlay);
             box.classList.toggle('clear-back', !!data.clear && !!cfg.backdrop); // Clear: the stream isn't dimmed behind it
             currentContent = data.overlay;
+            contentPrepped = null; // (the panel asks again for the one after this)
             setContent(data.content, cfg.lead, !!data.muted);
             // The phone's status bar shows the time now (like 9:41), kept up to date while it's up
             clearInterval(phoneClock);
@@ -6886,6 +6897,7 @@
 
         const hideContent = () => {
             const box = $('content-box');
+            if (box.style.visibility !== 'visible') return; // nothing up (a Clear All for the display): a video that's ready stays ready
             clearTimeout(contentTimeout);
             clearTimeout(contentCleanup);
             contentPausedLeft = null;
@@ -6895,9 +6907,26 @@
                 box.style.visibility = 'hidden';
                 setContent(null); // a video stops once the TV has gone
                 clearInterval(phoneClock);
+                if (contentPrepped) prepContent(contentPrepped); // the next video, asked for while this one was up
             }, out === 'anim-hide' ? 600 : 900);
         };
         let phoneClock = null; // updates the phone's time while it's up
+
+        // Getting a video ready before it's taken (contentPrep, from the panel: the rundown's next video, or one whose
+        // TAKE scene OBS is on its way to). It's loaded into the hidden player, so the file is open, its start is read
+        // off the disk and its first frame is decoded; taking it then starts it straight away instead of loading it
+        // while the TV is already coming up. While something is up it waits until that has gone. Nothing shows.
+        let contentPrepped = null; // the file to get ready once what's up has gone
+        const prepContent = (file) => {
+            if (!file || !VIDEO_FILE.test(file)) return;
+            const video = $('content-video');
+            if ($('content-box').style.visibility === 'visible') { contentPrepped = file; return; }
+            contentPrepped = null;
+            const src = contentPath(file);
+            if (video.getAttribute('src') === src && !video.error) return; // ready already
+            video.onerror = null; // (a file that's gone says No signal when it's taken)
+            video.src = src;
+        };
 
         // Content: the file on the TV's screen, or full screen (null = none). A video waits on its first frame until
         // the picture is fully up (lead seconds), then plays from the start, once, with its sound (turn on "Control
@@ -6931,7 +6960,7 @@
             const src = contentPath(file);
             if (video.getAttribute('src') !== src || video.error) video.src = src; // (again after an error, to say No signal again)
             video.pause();
-            video.currentTime = 0;
+            if (video.currentTime !== 0) video.currentTime = 0; // (one that's ready at its start isn't sent looking for it again)
             video.muted = muted;
             contentPlay = setTimeout(() => video.play().catch(err => {
                 if (err.name !== 'NotAllowedError' || video.muted) return; // stopped before it started (something else was taken)
@@ -7006,6 +7035,7 @@
             if (data.mode === 'clear' || (data.mode === 'hide' && data.layer === 'content')) hideContent();
             else if (data.mode === 'contentPause') pauseContent(!!data.paused);
             else if (data.mode === 'contentMute') muteContent(!!data.muted);
+            else if (data.mode === 'contentPrep') prepContent(data.content);
             else if (data.mode === 'overlay' && OVERLAYS[data.overlay]?.content) showContent(data);
         };
 
@@ -7070,6 +7100,12 @@
             flash('Not connected', true);
             return false;
         };
+        // Asks the Content source to get a video ready before it's taken (see prepContent): the file open and its first
+        // frame decoded, so it starts straight away when it's taken. Quiet: it's only a head start, so nothing is said
+        // if the panel isn't connected, and a display from before this just ignores it.
+        const sendContentPrep = (file) => {
+            if (file && VIDEO_FILE.test(file) && ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ mode: 'contentPrep', content: file }));
+        };
 
 
         /* =========================================================
@@ -7119,7 +7155,7 @@
                     return;
                 }
                 const s = Math.ceil(left), detail = el.querySelector('.toast-detail');
-                if (detail) detail.textContent = `${s >= Math.ceil(secs) ? `for ${formatTime(secs)}` : `${formatTime(s)} left`}${extra}`;
+                if (detail) setText(detail, `${s >= Math.ceil(secs) ? `for ${formatTime(secs)}` : `${formatTime(s)} left`}${extra}`);
             };
             takeCountdown = setInterval(tick, 250);
             tick();
@@ -7231,19 +7267,26 @@
             if (!c) return;
             if (now >= c.ends) { stopContentClock(); return; } // its time is up: the display has taken it down
             const held = c.ends === Infinity, up = (now - c.start) / 1000, paused = !!c.pausedAt;
-            $('cc-kind').textContent = paused ? `${c.kind} · paused` : c.kind;
-            $('cc-name').textContent = `${c.name}${c.muted ? ' · muted' : ''}`;
-            $('cc-left').textContent = held ? clock(Math.floor(up)) : clock(Math.ceil((c.ends - now) / 1000));
-            $('cc-of').textContent = held ? 'up · toggled' : `left of ${clock(Math.ceil(c.secs))}`;
-            $('cc-bar').style.width = held ? '0' : `${Math.min(100, (up / c.secs) * 100)}%`;
+            // (setText and setBar only touch the page when something has changed: this runs 4 times a second)
+            setText($('cc-kind'), paused ? `${c.kind} · paused` : c.kind);
+            setText($('cc-name'), `${c.name}${c.muted ? ' · muted' : ''}`);
+            setText($('cc-left'), held ? clock(Math.floor(up)) : clock(Math.ceil((c.ends - now) / 1000)));
+            setText($('cc-of'), held ? 'up · toggled' : `left of ${clock(Math.ceil(c.secs))}`);
+            setBar($('cc-bar'), held ? 0 : up / c.secs);
             $('content-clock').classList.toggle('paused', paused);
             const pause = $('cc-pause'), mute = $('cc-mute');
-            if (pause.dataset.on !== String(paused)) { pause.dataset.on = String(paused); pause.innerHTML = icon(paused ? 'play' : 'pause'); }
-            pause.title = paused ? 'Carry on (it\'s paused)' : `Pause: ${c.video ? 'the video stops where it is' : 'it stays up'}, and so does its time`;
+            if (pause.dataset.on !== `${paused} ${c.video}`) {
+                pause.dataset.on = `${paused} ${c.video}`;
+                pause.innerHTML = icon(paused ? 'play' : 'pause');
+                pause.title = paused ? 'Carry on (it\'s paused)' : `Pause: ${c.video ? 'the video stops where it is' : 'it stays up'}, and so does its time`;
+            }
             mute.classList.toggle('hidden', !c.video); // a picture has no sound
             mute.classList.toggle('on', c.muted);
-            if (mute.dataset.on !== String(c.muted)) { mute.dataset.on = String(c.muted); mute.innerHTML = icon(c.muted ? 'muted' : 'sound'); }
-            mute.title = c.muted ? 'Muted: tap for its sound' : 'Mute it';
+            if (mute.dataset.on !== String(c.muted)) {
+                mute.dataset.on = String(c.muted);
+                mute.innerHTML = icon(c.muted ? 'muted' : 'sound');
+                mute.title = c.muted ? 'Muted: tap for its sound' : 'Mute it';
+            }
             $('content-clock').classList.remove('hidden');
             $('controller-view').classList.add('content-on');
         };
@@ -8055,9 +8098,11 @@
                 // Content held with ⏸ (or a cScene showing it): its time left stays put until ▶
                 const held = (layer === 'content' || (layer === 'seq' && seq?.layer === 'content')) && contentClock?.pausedAt;
                 if (off) {
-                    off.lastChild.textContent = liveEnds[layer] === Infinity ? 'OFF' : `OFF ${formatTime(Math.max(0, Math.ceil((liveEnds[layer] - (held || now)) / 1000)))}`;
-                    off.classList.toggle('paused', !!held);
-                    off.title = held ? 'Paused (▶ on the content clock carries on). Tap to take it off screen now' : 'Take it off screen now';
+                    setText(off.lastChild, liveEnds[layer] === Infinity ? 'OFF' : `OFF ${formatTime(Math.max(0, Math.ceil((liveEnds[layer] - (held || now)) / 1000)))}`);
+                    if (off.classList.contains('paused') !== !!held) {
+                        off.classList.toggle('paused', !!held);
+                        off.title = held ? 'Paused (▶ on the content clock carries on). Tap to take it off screen now' : 'Take it off screen now';
+                    }
                 }
                 // A cScene playing: ⏭ NEXT skips to the next graphic in it
                 let next = c.querySelector('.show-next');
@@ -8070,7 +8115,7 @@
                     next.innerHTML = `${icon('next')}<span>NEXT</span>`;
                     c.append(next);
                 } else if (layer !== 'seq' && next) next.remove();
-                if (next && seq) next.lastChild.textContent = `NEXT ${seq.i + 2 <= seq.steps.length ? `${seq.i + 2}/${seq.steps.length}` : ''}`.trim();
+                if (next && seq) setText(next.lastChild, `NEXT ${seq.i + 2 <= seq.steps.length ? `${seq.i + 2}/${seq.steps.length}` : ''}`.trim());
             });
         };
         // A graphic left the screen on this layer (time up, taken off, replaced, or cleared)
@@ -10109,6 +10154,7 @@
             localStorage.setItem(CONTENT_KEY, name);
             showContentName();
             readContentLength(name);
+            sendContentPrep(name); // picked to be taken: the Content source gets it ready
         };
         // Asks the server what's in the content folder: for the window, and the red ! on cards whose file is gone
         const askContentList = async () => {
@@ -10133,9 +10179,24 @@
             askContentList();
         };
         // The window's list: a preview (a video's first moments) and the name of each file; the one in use is marked
+        // Every video preview is a player of its own, and in OBS they decode in the same GPU process as the Content
+        // video that's on air. So a preview only loads once it's scrolled into view, and they're all let go of when
+        // the window closes (they used to stay loaded behind it).
+        let contentPreviews = null; // watches for previews coming into view
+        const clearContentList = () => {
+            contentPreviews?.disconnect();
+            contentPreviews = null;
+            $('content-list').querySelectorAll('video').forEach(v => { v.onerror = null; v.removeAttribute('src'); v.load(); });
+            $('content-list').innerHTML = '';
+        };
         const renderContentList = () => {
             const box = $('content-list');
-            box.innerHTML = '';
+            clearContentList();
+            contentPreviews = new IntersectionObserver((entries, watcher) => entries.forEach(e => {
+                if (!e.isIntersecting) return;
+                watcher.unobserve(e.target);
+                e.target.src = e.target.dataset.src;
+            }), { root: box, rootMargin: '150px' });
             (contentFolderFiles || []).forEach(name => {
                 const video = VIDEO_FILE.test(name);
                 const btn = document.createElement('button');
@@ -10153,7 +10214,8 @@
                         contentLengths[name] = preview.duration;
                         label.textContent = `▶ ${name} · ${clock(Math.ceil(preview.duration))}`;
                     };
-                    preview.src = `${contentPath(name)}#t=0.5`;
+                    preview.dataset.src = `${contentPath(name)}#t=0.5`;
+                    contentPreviews.observe(preview);
                 } else {
                     preview.alt = '';
                     preview.loading = 'lazy';
@@ -10384,6 +10446,9 @@
             }
             updateLiveMarks();
             broadcastProjector();
+            // The next video from here on (this item's, if it isn't the one playing): the Content source gets it ready
+            const flow = showFlow(list), at = flow.findIndex(x => x.sid === sid);
+            sendContentPrep(flow.slice(Math.max(0, at)).find(x => playsContent(x) && VIDEO_FILE.test(x.content || '') && liveByLayer.content !== x.sid)?.content);
         };
         // ◀ ▶: move the current item without taking anything
         const stepCurrent = (dir) => {
@@ -11664,11 +11729,11 @@
             $('pj-content').classList.toggle('hidden', !on);
             if (!on) return;
             const left = held ? 0 : (c.ends - now) / 1000, up = Math.max(0, (now - c.start) / 1000);
-            $('pj-cd-kind').textContent = [c.code, c.kind].filter(Boolean).join(' · ');
-            $('pj-cd-name').textContent = `${c.name}${c.muted ? ' · muted' : ''}`;
-            $('pj-cd-left').textContent = held ? clock(Math.floor(up)) : clock(Math.ceil(left));
-            $('pj-cd-of').textContent = paused ? 'paused' : held ? 'up' : 'left';
-            $('pj-cd-bar').style.width = held ? '0' : `${Math.min(100, (up / c.secs) * 100)}%`;
+            setText($('pj-cd-kind'), [c.code, c.kind].filter(Boolean).join(' · '));
+            setText($('pj-cd-name'), `${c.name}${c.muted ? ' · muted' : ''}`);
+            setText($('pj-cd-left'), held ? clock(Math.floor(up)) : clock(Math.ceil(left)));
+            setText($('pj-cd-of'), paused ? 'paused' : held ? 'up' : 'left');
+            setBar($('pj-cd-bar'), held ? 0 : up / c.secs, 1000); // (a whole screen wide)
             $('pj-content').classList.toggle('ending', !held && !paused && left <= 10);
             $('pj-content').classList.toggle('paused', paused);
         };
@@ -12546,6 +12611,7 @@
                 $('ov-content').addEventListener('click', pickContent);
                 $('ov-contentPhone').addEventListener('click', pickContent);
                 $('ov-contentFull').addEventListener('click', pickContent);
+                $('content-dialog').addEventListener('close', clearContentList); // lets go of its video previews
                 $('content-file').addEventListener('change', (e) => {
                     if (e.target.files.length) useContentFile(e.target.files[0].name);
                     e.target.value = '';
