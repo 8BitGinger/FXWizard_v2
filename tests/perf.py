@@ -51,7 +51,7 @@ EFFECT_CASES = [
     ["sports", 2.6, {"sport": "soccer"}], ["spring", 3, {}], ["storm", 2.8, {}], ["tvstatic", 1.8, {}], ["fireworks", 4, {}],
     ["medical", 2.4, {}], ["lubbock", 3, {}], ["tech", 2.6, {}], ["xmasfx", 1.8, {"xmas": "trees"}], ["xmasfx", 1.8, {"xmas": "ornaments"}], ["firestinger", 2.4, {}], ["pixel", 2.6, {}], ["cat", 2.8, {}],
     ["curtains", 3, {}], ["coffee", 3.4, {}], ["coffee", 3.4, {"label": "Happy Birthday"}],
-    ["sunshine", 2.8, {}], ["cloudsfx", 2.8, {}], ["america", 3, {}], ["customstinger", 3, {}],
+    ["sunshine", 2.8, {}], ["cloudsfx", 2.8, {}], ["america", 3, {}], ["customstinger", 3, {}], ["castle", 3, {}], ["dragons", 3, {}], ["oldwest", 3, {}],
     ["fire", 4, {"layer": "front"}], ["fire", 4, {"layer": "back"}], ["snow", 4, {"layer": "back"}],
 ]
 BENCH = """<script>
@@ -137,10 +137,11 @@ def display():
              ("L3 custom image", {**l3("custom"), "customBg": "ryan3.jpg"}, 3)]
     for ov in ["stinger", "ghost", "colorbars", "xmas", "l3Large", "l3Gif", "breaking", "social", "locpin",
                "fire", "hottake", "disco", "comic", "fireworks", "emoji", "firestinger", "cat", "curtains", "coffee", "storm", "sportsfx",
-               "techfx", "lubbock", "america", "customStinger"]:
+               "techfx", "lubbock", "america", "customStinger", "fantasyfx", "oldwest"]:
         cases.append((ov, {"mode": "overlay", "overlay": ov, "label": "Test", "title": "", "duration": 3, "sport": "basketball"}, 3.2))
     for weather in ("sunshine", "clouds"):  # the Weather stinger's other two (plain "storm" above is its Storm)
         cases.append((f"weather: {weather}", {"mode": "overlay", "overlay": "storm", "weather": weather, "label": "", "title": "", "duration": 3}, 3.2))
+    cases.append(("fantasy: dragons", {"mode": "overlay", "overlay": "fantasyfx", "fantasy": "dragons", "label": "", "title": "", "duration": 3}, 3.2))  # (plain "fantasyfx" above is its Castle)
     for name, data, secs in cases:
         r = pg.js(f"rtTake({json.dumps(data)}, {secs})", timeout=60)
         r["name"] = name
@@ -245,7 +246,8 @@ def dock():
                 "layoutsPerSec": round((b["LayoutCount"] - a["LayoutCount"]) / secs, 1),
                 "mainMsPerSec": round((b["TaskDuration"] - a["TaskDuration"]) / secs * 1000, 1),
                 "gpuProcessMsPerSec": round((cb.get("gpu", 0) - ca.get("gpu", 0)) / secs * 1000, 1),
-                "running": pg.js("document.getAnimations().filter(a => a.playState === 'running').map(a => a.animationName || ('transition ' + a.transitionProperty))"),
+                # (what's moving at full frame rate: an animation that goes in steps, a few a second, doesn't count)
+                "running": pg.js("document.getAnimations().filter(a => a.playState === 'running' && !String(a.effect.getKeyframes()[0]?.easing).startsWith('steps')).map(a => a.animationName || ('transition ' + a.transitionProperty))"),
             }
             print(f"{label:34}", out[label])
 
@@ -258,9 +260,13 @@ def dock():
         pg.js("takeFromRundown(loadShow().find(x => x.sid === 'cd1')); 0")
         time.sleep(0.5)
         sample("content card live (rundown)")
+        # A graphic toggled on: the TOGGLE OFF button pulses for as long as it's up
+        pg.js("clearAll(); pickTab('overlay'); (() => { const r = document.querySelector('input[name=overlayStyle][value=breaking]'); r.checked = true; r.dispatchEvent(new Event('change', { bubbles: true })); })(); toggleButton(); 0")
+        time.sleep(4)
+        sample("graphic toggled on")
         # Passes when the dock isn't laid out again on every frame, and nothing in it eases or pulses at full frame rate
-        # except the OFF button's stepped ring
-        busy = [k for k, v in out.items() if v["layoutsPerSec"] > 5 or any(r not in ("offAirPulse",) for r in v["running"])]
+        # (the OFF button's ring and TOGGLE OFF's pulse go in steps)
+        busy = [k for k, v in out.items() if v["layoutsPerSec"] > 5 or v["running"]]
         out["ok"] = not busy
         print("dock ok" if not busy else f"dock BUSY: {busy}")
     finally:
@@ -448,6 +454,73 @@ async def folder_test(port):
             "type": good.get("type"), "othersRefused": all(refused), "ok": "_perf_snd.mp3" in custom and "_perf_viz.mp3" in listed and bool(whole) and all(refused)}
 
 
+# A stand-in news site for the RSS checks (Breaking News from a feed), so they need no internet: an RSS feed with the
+# things real ones do (a CDATA title, entities escaped once and twice, a tag inside a title, the same story twice, a
+# title over two lines), an Atom feed, a page that isn't a feed, and nothing at all (404).
+FEED_PORT = 8094
+FEED_PAGES = {
+    "/rss.xml": ("application/rss+xml; charset=utf-8", """<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Test &amp; News</title>
+<item><title><![CDATA[Mayor's office: "No changes" to budget]]></title><link>x</link></item>
+<item><title>Storms &amp; hail move in; O&amp;#8217;Brien says stay home</title></item>
+<item><title>Team wins <b>big</b> at home</title></item>
+<item><title><![CDATA[Mayor's office: "No changes" to budget]]></title></item>
+<item><title>  Road work
+   starts Monday  </title></item>
+<item><description>No title on this one</description></item>
+</channel></rss>"""),
+    "/atom.xml": ("application/atom+xml", """<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"><title>Atom Test</title>
+<entry><title type="html">First &lt;i&gt;entry&lt;/i&gt;</title></entry><entry><title>Café reopens</title></entry></feed>"""),
+    "/page.html": ("text/html", "<html><head><title>Just a page</title></head><body>No feed here</body></html>"),
+}
+FEED_WANT = {"/rss.xml": ("Test & News", ['Mayor\'s office: "No changes" to budget', "Storms & hail move in; O\u2019Brien says stay home", "Team wins big at home", "Road work starts Monday"]),
+             "/atom.xml": ("Atom Test", ["First entry", "Caf\u00e9 reopens"])}
+
+
+def feed_site():
+    import http.server
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            page = FEED_PAGES.get(self.path)
+            self.send_response(200 if page else 404)
+            self.send_header("Content-Type", page[0] if page else "text/plain")
+            self.end_headers()
+            self.wfile.write((page[1] if page else "gone").encode("utf-8"))
+        def log_message(self, *a):
+            pass
+    site = http.server.ThreadingHTTPServer(("127.0.0.1", FEED_PORT), Handler)
+    threading.Thread(target=site.serve_forever, daemon=True).start()
+    return site
+
+
+async def feed_test(port):
+    """rssFeed: a feed's headlines come back as plain text, in order, each once; what isn't a feed, isn't there, or isn't a
+    web address is refused with a reason; and the answer goes only to the window that asked."""
+    import websockets
+    ws = await websockets.connect(f"ws://127.0.0.1:{port}", max_size=2 ** 24)
+    other = await websockets.connect(f"ws://127.0.0.1:{port}", max_size=2 ** 24)
+    base = f"http://127.0.0.1:{FEED_PORT}"
+    async def ask(url):
+        await ws.send(json.dumps({"mode": "rssFeed", "url": url}))
+        while True:
+            m = json.loads(await asyncio.wait_for(ws.recv(), 15))
+            if m.get("mode") == "rssData":
+                return m
+    got = {path: await ask(base + path) for path in FEED_WANT}
+    right = all(got[path].get("ok") and got[path].get("feed") == feed and got[path].get("titles") == titles for path, (feed, titles) in FEED_WANT.items())
+    refused = {}
+    for url in (base + "/page.html", base + "/missing", "http://127.0.0.1:9/feed", "file:///c:/windows/win.ini", "ftp://127.0.0.1/x.xml", "feed", "", None, 7):
+        r = await ask(url)
+        refused[str(url)] = not r.get("ok") and not r.get("titles") and bool(r.get("error"))
+    t0 = time.perf_counter(); await ask(base + "/rss.xml"); again = (time.perf_counter() - t0) * 1000  # kept for a minute: answered without asking the site
+    try:
+        stray = json.loads(await asyncio.wait_for(other.recv(), 0.5)).get("mode")  # nothing should reach the other window
+    except asyncio.TimeoutError:
+        stray = None
+    await ws.close(); await other.close()
+    return {"headlinesRight": right, "othersRefused": all(refused.values()), "onlyToTheOneThatAsked": stray is None, "againMs": round(again, 1),
+            "ok": right and all(refused.values()) and stray is None, **({} if right else {"got": got}), **({} if all(refused.values()) else {"refused": refused})}
+
+
 def servers():
     out = {}
     # Stand-in files for the folder checks (the folders' own files aren't in Git); taken away again at the end
@@ -456,9 +529,11 @@ def servers():
             (os.path.join(REPO, "assets", "tinyLogo.png"), os.path.join(REPO, "content", "_perf_pic.png"))]
     for src, dst in temp:
         shutil.copy(src, dst)
+    site = feed_site()
     try:
         _servers(out)
     finally:
+        site.shutdown()
         for _, dst in temp:
             os.remove(dst)
     for k, v in out.items():
@@ -476,6 +551,7 @@ def _servers(out):
     try:
         out["server.js"] = asyncio.run(relay_test(8092))
         out["server.js folders"] = asyncio.run(folder_test(8092))
+        out["server.js rss"] = asyncio.run(feed_test(8092))
         out["server.js big"] = asyncio.run(relay_test(8092, 150, big=True))
         out["server.js slow client"] = asyncio.run(slow_client_test(8092))
     finally:
@@ -506,6 +582,7 @@ def _servers(out):
     with contextlib.redirect_stdout(io.StringIO()):  # it prints every broadcast
         out["server.py"] = asyncio.run(relay_test(8093))
         out["server.py folders"] = asyncio.run(folder_test(8093))
+        out["server.py rss"] = asyncio.run(feed_test(8093))
         out["server.py big"] = asyncio.run(relay_test(8093, 150, big=True))
         out["server.py slow client"] = asyncio.run(slow_client_test(8093))
     loop.call_soon_threadsafe(lambda: mod.server_stop.set_result(None))
@@ -520,9 +597,9 @@ def gpu():
         pg.js(DISPLAY_JS); time.sleep(1.5)
         renderer = pg.js("(() => { const g = document.createElement('canvas').getContext('webgl'); const e = g && g.getExtension('WEBGL_debug_renderer_info'); return e ? g.getParameter(e.UNMASKED_RENDERER_WEBGL) : 'none'; })()")
         rows = []
-        for ov in ["hottake", "underwater", "vhs", "storm", "storm:sunshine", "storm:clouds", "america", "customStinger", "sportsfx", "spring", "lubbock", "techfx", "fire", "curtains", "coffee", "stinger", "ghost"]:
-            key, _, weather = ov.partition(":")  # "storm:sunshine" is the Weather stinger's Sunshine
-            r = pg.js(f"rtTake({json.dumps({'mode': 'overlay', 'overlay': key, 'label': '', 'title': '', 'duration': 3, 'sport': 'baseball', **({'weather': weather} if weather else {})})}, 3)", timeout=60)
+        for ov in ["hottake", "underwater", "vhs", "storm", "storm:sunshine", "storm:clouds", "america", "customStinger", "fantasyfx", "fantasyfx:dragons", "oldwest", "sportsfx", "spring", "lubbock", "techfx", "fire", "curtains", "coffee", "stinger", "ghost"]:
+            key, _, weather = ov.partition(":")  # "storm:sunshine" is the Weather stinger's Sunshine, "fantasyfx:dragons" Fantasy's Dragons
+            r = pg.js(f"rtTake({json.dumps({'mode': 'overlay', 'overlay': key, 'label': '', 'title': '', 'duration': 3, 'sport': 'baseball', **({'weather': weather, 'fantasy': weather} if weather else {})})}, 3)", timeout=60)
             rows.append({"name": ov, "fps": round(1000 / r["avg"], 1), "janks": r["janks"], "longest": r["longest"]})
         out["gpu" if on else "software"] = {"renderer": renderer, "rows": rows}
         print("GPU" if on else "SOFTWARE", renderer)

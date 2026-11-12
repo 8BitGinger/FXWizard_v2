@@ -128,6 +128,18 @@
                         </div>
                     </div>
                     <div id="paragraph-field" class="w-full hidden">
+                        <!-- Breaking News only: its ticker from an RSS feed's headlines instead of typed text. Ticked, the
+                             text box gives way to the feed's address (NewsNation, Nexstar's news network, to start). -->
+                        <div id="rss-row" class="hidden">
+                            <label class="rss-check" title="Scroll a news feed's latest headlines instead of text you type"><input type="checkbox" id="rss-on"> <span data-icon="rss"></span> Use an RSS feed</label>
+                        </div>
+                        <div id="rss-field" class="hidden">
+                            <label for="rss-input" class="block text-md font-medium ">RSS feed:</label>
+                            <input type="url" id="rss-input" placeholder="https://www.newsnationnow.com/feed/" maxlength="300" spellcheck="false" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm text-violet-300 focus:text-white focus:bg-gray-700">
+                            <!-- One tap puts a feed's address in the box (filled in by the script: RSS_FEEDS) -->
+                            <div id="rss-feeds" class="rss-feeds"></div>
+                            <p id="rss-note" class="text-[12px] opacity-75"></p>
+                        </div>
                         <label id="paragraph-label" for="paragraph-input" class="block text-md font-medium ">Text:</label>
                         <textarea id="paragraph-input" rows="4" maxlength="400" placeholder="Type the information to show" class="w-full p-1 rounded border-2 border-white bg-transparent text-sm text-violet-300 focus:text-white focus:bg-gray-700 resize-y"></textarea>
                     </div>
@@ -303,6 +315,14 @@
                             <input type="radio" id="ov-coffee" name="overlayStyle" value="coffee" class="hidden peer/o38">
                             <label for="ov-coffee" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o38:bg-primary">Coffee</label>
 
+                            <!-- Fantasy: a Castle under a twilight sky, or Dragons in a wall of fire (picked under Fantasy below) -->
+                            <input type="radio" id="ov-fantasyfx" name="overlayStyle" value="fantasyfx" class="hidden peer/o47">
+                            <label for="ov-fantasyfx" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o47:bg-primary">Fantasy</label>
+
+                            <!-- Old West: plank doors slam shut, a sheriff's star spins in, a tumbleweed rolls by, the doors open -->
+                            <input type="radio" id="ov-oldwest" name="overlayStyle" value="oldwest" class="hidden peer/o48">
+                            <label for="ov-oldwest" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o48:bg-primary">Old West</label>
+
                             <!-- America: an American flag sweeps in, waving, fills the screen, then sweeps off -->
                             <input type="radio" id="ov-america" name="overlayStyle" value="america" class="hidden peer/o44">
                             <label for="ov-america" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o44:bg-primary">America</label>
@@ -362,6 +382,17 @@
                             <label for="weather-sunshine" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/w2:bg-primary">☀️ Sunshine</label>
                             <input type="radio" id="weather-clouds" name="weatherStyle" value="clouds" class="hidden peer/w3">
                             <label for="weather-clouds" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/w3:bg-primary">☁️ Clouds</label>
+                        </div>
+                    </div>
+
+                    <!-- Which Fantasy (only shown for the Fantasy stinger) -->
+                    <div id="fantasy-field" class="hidden">
+                        <p class="block text-sm font-medium mb-1 text-center">Fantasy:</p>
+                        <div class="grid grid-cols-2 gap-1 text-[12px]">
+                            <input type="radio" id="fantasy-castle" name="fantasyStyle" value="castle" checked class="hidden peer/f1">
+                            <label for="fantasy-castle" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/f1:bg-primary">🏰 Castle</label>
+                            <input type="radio" id="fantasy-dragons" name="fantasyStyle" value="dragons" class="hidden peer/f2">
+                            <label for="fantasy-dragons" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/f2:bg-primary">🐉 Dragons</label>
                         </div>
                     </div>
 
@@ -1471,6 +1502,7 @@
         //   emoji:   true = shows the Emoji picker (LOL, Ugh, Angry, Sad)
         //   xmas:    true = shows the Xmas picker (Wrapper, Trees, Ornaments)
         //   weather: true = shows the Weather picker (Storm, Sunshine, Clouds)
+        //   fantasy: true = shows the Fantasy picker (Castle, Dragons)
         //   logo:    true = uses its own picture from the "custom" folder (the Custom stinger), sent as logo
         //   audio:   true = Content that plays a sound file from the "content" folder (the Visualizer)
         //   social:  true = shows the Socials picker (YouTube, Facebook, Twitter, Instagram, LinkedIn, GitHub, Web)
@@ -1554,6 +1586,10 @@
             curtains:  { label: 'Curtains', text: false, effect: 'curtains', animIn: '', animOut: '', length: 3, cover: [0.19, 0.53] },
             coffee:    { label: 'Coffee',  text: false, caption: '', max: 14, effect: 'coffee', animIn: '', animOut: '', length: 3.4, cover: [0.39, 0.79] },
             america:   { label: 'America', text: false, effect: 'america',  animIn: '', animOut: '', length: 3, cover: [0.29, 0.7] },
+            // Fantasy: a Castle under a twilight sky, or Dragons in a wall of fire (picked under Fantasy)
+            fantasyfx: { label: 'Fantasy', text: false, fantasy: true, effect: 'castle', animIn: '', animOut: '', length: 3,
+                         cover: { castle: [0.28, 0.72], dragons: [0.22, 0.77] } },
+            oldwest:   { label: 'Old West', text: false, effect: 'oldwest', animIn: '', animOut: '', length: 3, cover: [0.31, 0.72] },
             // A background swoops in and the picture picked from the "custom" folder (logo) fades in and out over it
             customStinger: { label: 'Custom', text: false, logo: true, effect: 'customstinger', animIn: '', animOut: '', length: 3, cover: [0.25, 0.73] },
         };
@@ -1568,6 +1604,16 @@
         const oneBoxShort = (cfg) => !!(cfg?.caption != null || cfg?.place);
         // Breaking News with no ticker text typed says this
         const BREAKING_DEFAULT = 'Breaking News  |  Breaking News  |  Breaking News  |';
+        // Breaking News from an RSS feed: the feed it starts on, and others offered in the box (any feed's address can be
+        // typed). The server reads the feed (a page opened from a file isn't allowed to), so it needs the internet there.
+        const RSS_DEFAULT = 'https://www.newsnationnow.com/feed/';
+        const RSS_FEEDS = [ // [address, the name on its button, what it is]
+            ['https://www.everythinglubbock.com/feed/', 'Everything Lubbock', 'EverythingLubbock.com (KAMC, KLBK): Lubbock news'],
+            ['https://www.newsnationnow.com/feed/', 'NewsNation', 'NewsNation (Nexstar): national news'],
+            ['https://thehill.com/feed/', 'The Hill', 'The Hill (Nexstar): politics'],
+        ];
+        const rssAddress = (text) => (/^https?:\/\/[^\s/]+\.[^\s]+$/i.test(String(text || '').trim()) ? String(text).trim() : '');
+        const rssHost = (address) => { try { return new URL(address).hostname.replace(/^www\./, ''); } catch { return address; } };
         const oneBoxPlaceholder = (cfg) => cfg?.caption || (cfg?.caption === '' ? 'Optional, like Mom' : cfg?.ticker ? BREAKING_DEFAULT : cfg?.place ? 'Where you are, like City Hall' : 'Type the information to show');
 
         // Lower third positions on screen
@@ -1623,6 +1669,9 @@
         const WEATHER = { storm: 'Storm', sunshine: 'Sunshine', clouds: 'Clouds' };
         const WEATHER_FX = { storm: 'storm', sunshine: 'sunshine', clouds: 'cloudsfx' };
         const weatherOf = (data) => (WEATHER[data?.weather] ? data.weather : 'storm');
+        // Fantasy stinger choices (each is the name of its canvas effect too)
+        const FANTASY = { castle: 'Castle', dragons: 'Dragons' };
+        const fantasyOf = (data) => (FANTASY[data?.fantasy] ? data.fantasy : 'castle');
         // Emoji overlay choices (the word on its tag is this, in capitals)
         const EMOJIS = { lol: 'LOL', ugh: 'Ugh', angry: 'Angry', sad: 'Sad' };
 
@@ -1654,6 +1703,7 @@
             comic: 'border-yellow-400', disco: 'border-fuchsia-400', pixel: 'border-lime-400', cat: 'border-orange-400',
             curtains: 'border-red-600', coffee: 'border-amber-600', content: 'border-sky-300', contentPhone: 'border-sky-400', contentFull: 'border-sky-500',
             contentViz: 'border-fuchsia-400', america: 'border-red-500', customStinger: 'border-fuchsia-300',
+            fantasyfx: 'border-purple-400', oldwest: 'border-amber-600',
         };
         // Lower third backgrounds that share a name with an overlay (the Medical stinger) have their edge color here
         const L3_ACCENTS = { medical: 'border-sky-300' };
@@ -1694,7 +1744,9 @@
         // Imported L3s go up as a toggle: they stay up until they're turned off (TOGGLE OFF, or OFF on a
         // rundown card), instead of for a set time. (Older imports, saved with 5 minutes, work the same.)
         // One put in a cScene gets toggle: false and a time, like any other.
-        const holdsOn = (data) => isOverlayItem(data) && !!(data.toggle ?? data.source);
+        // So does a graphic saved (or added to the rundown) while it's toggled on: toggle: true, lower thirds too.
+        // Stingers play once, so they never do.
+        const holdsOn = (data) => (isOverlayItem(data) ? !!(data.toggle ?? data.source) && OVERLAYS[data.overlay || 'l3Large']?.length === undefined : data.toggle === true);
         // A cScene (complex scene, from the Scene Builder): up to 8 saved graphics (lower thirds, overlays,
         // stingers, content) played one after another. Each goes up once the one before has had its time and
         // its exit animation (SEQ_GAP). It's kept as mode 'cl3' (it started out as a cL3, of lower thirds only),
@@ -1729,6 +1781,7 @@
             save:   '<path d="M5 3h11l3 3v15H5z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/>',
             folder: '<path d="M3 6a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>',
             file:   '<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',
+            rss:    '<path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.6"/>',
             note:   '<path d="M5 3h14v12l-6 6H5z"/><path d="M13 21v-6h6M8 8h8M8 12h5"/>',
             clip:   '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/>',
             sot:    '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/>',
@@ -2732,52 +2785,45 @@
             };
 
             // ---------- America stinger: an American flag sweeps in from the left, waving, until it fills the screen,
-            // flies for a moment, then sweeps off to the right. The flag is drawn once (taller than the screen, so its
-            // waves never show an edge) and copied each frame in upright strips, each a little higher or lower than
-            // the last. Its light and shade (lit on the rises, shaded in the dips) is one more picture, a wave wide,
-            // slid along over the strips. Everything is copied pixel for pixel, on whole pixels, and the slanted edges
-            // are cut out afterward: stretched copies, a tint per strip and a slanted clip took 40 ms a frame without
-            // the graphics chip. ----------
+            // flies for a moment, then sweeps off to the right. It's taller than the screen, so its waves never show
+            // an edge, and in its true shape, so its far end is off the right of the screen.
+            // The flag is drawn as shapes, every frame: its red stripes and blue field as bands whose top and bottom
+            // edges follow the wave, and its 50 stars each riding the wave where it is. So the stripes are smooth
+            // curves with clean edges. (It used to be a picture of the flag copied in upright strips, each a little
+            // higher or lower than the last: 64 strips looked blocky, and enough strips to look smooth took 38 ms a
+            // frame without the graphics chip.) Its light and shade (lit on the rises, shaded in the dips) is a
+            // picture, a wave wide, slid along over it, and the slanted edges are cut out afterward. ----------
             const america = {
-                detail: 0.75, // a full-screen flag (see "detail" above)
+                // (Full resolution: the shapes cost little, and the browser has no stretching to do after)
                 init(durationSec) {
                     this.T = durationSec;
-                    const fw = canvas.width, fh = Math.round(canvas.height * 1.16);
-                    if (this.flag && this.flag.width === fw && this.flag.height === fh) return;
-                    const c = this.flag = Object.assign(document.createElement('canvas'), { width: fw, height: fh });
-                    const x = c.getContext('2d');
-                    const stripe = fh / 13, flagW = fh * 1.9; // its true shape: the far end is off the right of the screen
-                    for (let i = 0; i < 13; i++) {
-                        x.fillStyle = i % 2 ? '#ffffff' : '#b22234';
-                        x.fillRect(0, Math.floor(i * stripe), fw, Math.ceil(stripe) + 1);
-                    }
-                    const cw = flagW * 0.4, ch = stripe * 7;
-                    x.fillStyle = '#3c3b6e';
-                    x.fillRect(0, 0, cw, ch);
-                    // 50 stars: nine rows, six and five in turn
-                    x.fillStyle = '#ffffff';
-                    const r = fh * 0.0308;
+                    const key = `${canvas.width}x${canvas.height}`;
+                    if (this.key === key) return;
+                    this.key = key;
+                    // The flag, in screen units: 13 stripes; the blue field is 7 stripes deep and 0.4 of the flag's length
+                    // (4% taller than the screen above and below: a little more than its biggest wave)
+                    const tall = 1.08 * H, stripe = this.stripe = tall / 13;
+                    this.top = -0.04 * H;
+                    this.fieldW = tall * 1.9 * 0.4;
+                    // One star, and where the 50 go: nine rows, six and five in turn
+                    const r = tall * 0.0308;
+                    this.star = Array.from({ length: 10 }, (_, i) => {
+                        const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.382 : r;
+                        return [Math.cos(a) * rr, Math.sin(a) * rr];
+                    });
+                    this.stars = [];
                     for (let row = 0; row < 9; row++) {
-                        for (let col = 0; col < 11; col++) {
-                            if ((row + col) % 2) continue;
-                            const sx = cw * (col + 1) / 12, sy = ch * (row + 1) / 10;
-                            x.beginPath();
-                            for (let i = 0; i < 10; i++) {
-                                const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.382 : r;
-                                x.lineTo(sx + Math.cos(a) * rr, sy + Math.sin(a) * rr);
-                            }
-                            x.closePath();
-                            x.fill();
-                        }
+                        for (let col = 0; col < 11; col++) if (!((row + col) % 2)) this.stars.push([this.fieldW * (col + 1) / 12, stripe * 7 * (row + 1) / 10]);
                     }
                     // The light and shade of one wave, a column at a time: white on the rises, dark in the dips
-                    this.wave = 2 * Math.PI * (H / 1080) * (canvas.width / W) / 0.0052; // a wave's length, in canvas pixels
-                    const shade = this.shade = Object.assign(document.createElement('canvas'), { width: Math.max(8, Math.round(this.wave)), height: canvas.height });
-                    const sx2 = shade.getContext('2d');
-                    for (let col = 0; col < shade.width; col++) {
-                        const slope = Math.cos(col / shade.width * 2 * Math.PI);
-                        sx2.fillStyle = slope > 0 ? `rgba(255, 255, 255, ${(slope * 0.1).toFixed(3)})` : `rgba(0, 0, 20, ${(-slope * 0.24).toFixed(3)})`;
-                        sx2.fillRect(col, 0, 1, shade.height);
+                    this.k = 0.0052 * 1080 / H; // the wave: how fast it turns across the screen
+                    const lam = Math.max(8, Math.round(2 * Math.PI / this.k * (canvas.width / W))); // a wave's length, in canvas pixels
+                    const shade = this.shade = Object.assign(document.createElement('canvas'), { width: lam, height: canvas.height });
+                    const x = shade.getContext('2d');
+                    for (let col = 0; col < lam; col++) {
+                        const slope = Math.cos(col / lam * 2 * Math.PI);
+                        x.fillStyle = slope > 0 ? `rgba(255, 255, 255, ${(slope * 0.1).toFixed(3)})` : `rgba(0, 0, 20, ${(-slope * 0.24).toFixed(3)})`;
+                        x.fillRect(col, 0, 1, shade.height);
                     }
                 },
                 frame(dt, t) {
@@ -2787,17 +2833,42 @@
                     const tail = -skew + EASE.in3(clamp01((p - 0.7) / 0.3)) * span;   // the edge it leaves behind
                     ctx.clearRect(0, 0, W, H);
                     if (head <= tail || tail >= W + skew) return;
-                    const cw = canvas.width, chh = canvas.height, lam = this.shade.width, turn = t * 5.2; // how far along its wave it is
-                    ctx.save();
-                    ctx.setTransform(1, 0, 0, 1, 0, 0); // in the canvas's own pixels from here
-                    const sw = Math.ceil(cw / 64), top = -Math.round(chh * 0.08);
-                    const from = Math.max(0, Math.floor((tail - skew) * px / sw)), to = Math.min(Math.ceil(cw / sw) - 1, Math.floor((head + skew) * px / sw));
-                    for (let i = from; i <= to; i++) {
-                        const x = i * sw, ph = x / lam * 2 * Math.PI - turn;
-                        const dy = Math.round((10 + 26 * (x / cw)) * s * px * Math.sin(ph));
-                        ctx.drawImage(this.flag, x, 0, sw, this.flag.height, x, top + dy, sw, this.flag.height);
+                    const turn = t * 5.2; // how far along its wave it is
+                    // How far the flag is lifted or dropped at each point across the screen (more toward its free end)
+                    const n = 80, step = W / n, lift = (x) => (10 + 26 * (x / W)) * s * Math.sin(x * this.k - turn);
+                    if (!this.dy) this.dy = new Float32Array(n + 1);
+                    for (let i = 0; i <= n; i++) this.dy[i] = lift(i * step);
+                    // A band of the flag from y0 to y1 (before the wave), as far across as x1: its edges follow the wave
+                    const band = (y0, y1, x1) => {
+                        const last = Math.min(n, Math.floor(x1 / step));
+                        ctx.moveTo(0, this.top + y0 + this.dy[0]);
+                        for (let i = 1; i <= last; i++) ctx.lineTo(i * step, this.top + y0 + this.dy[i]);
+                        if (x1 < W) { const d = lift(x1); ctx.lineTo(x1, this.top + y0 + d); ctx.lineTo(x1, this.top + y1 + d); }
+                        for (let i = last; i >= 0; i--) ctx.lineTo(i * step, this.top + y1 + this.dy[i]);
+                        ctx.closePath();
+                    };
+                    ctx.fillStyle = '#ffffff'; // the white stripes: everything, under the rest
+                    ctx.fillRect(0, 0, W, H);
+                    ctx.fillStyle = '#b22234';
+                    ctx.beginPath();
+                    for (let i = 0; i < 13; i += 2) band(i * this.stripe - (i ? 0 : 20 * s), (i + 1) * this.stripe + (i === 12 ? 20 * s : 0), W);
+                    ctx.fill();
+                    ctx.fillStyle = '#3c3b6e';
+                    ctx.beginPath();
+                    band(-20 * s, this.stripe * 7, this.fieldW);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    for (const [sx, sy] of this.stars) {
+                        const y = this.top + sy + lift(sx);
+                        this.star.forEach(([ox, oy], i) => (i ? ctx.lineTo(sx + ox, y + oy) : ctx.moveTo(sx + ox, y + oy)));
+                        ctx.closePath();
                     }
-                    // Its light and shade, moving along with the wave
+                    ctx.fill();
+                    // Its light and shade, moving along with the wave (copied pixel for pixel, in the canvas's own pixels)
+                    const cw = canvas.width, chh = canvas.height, lam = this.shade.width;
+                    ctx.save();
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
                     for (let x = Math.round(((turn / (2 * Math.PI)) % 1) * lam) - lam; x < cw; x += lam) ctx.drawImage(this.shade, x, 0);
                     // Its slanted edges: what's ahead of its leading edge, and behind the one it leaves, is cut away
                     ctx.globalCompositeOperation = 'destination-out';
@@ -2816,6 +2887,406 @@
                     ctx.moveTo(head + skew, 0); ctx.lineTo(head - skew, H);
                     ctx.moveTo(tail + skew, 0); ctx.lineTo(tail - skew, H);
                     ctx.stroke();
+                },
+            };
+
+            // A scene's slanted edges, shared by the stingers that sweep across: what's ahead of its leading edge (head)
+            // and behind the edge it leaves (tail) is cut away after it's drawn whole, then both get a bright rim.
+            // (Cutting it out costs far less than drawing through a slanted mask.)
+            const sweepEdges = (head, tail, skew, rim) => {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.moveTo(head + skew, -2); ctx.lineTo(W + 4, -2); ctx.lineTo(W + 4, H + 2); ctx.lineTo(head - skew, H + 2); ctx.closePath();
+                ctx.moveTo(tail + skew, -2); ctx.lineTo(-4, -2); ctx.lineTo(-4, H + 2); ctx.lineTo(tail - skew, H + 2); ctx.closePath();
+                ctx.fill();
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.lineWidth = 12 * (H / 1080);
+                ctx.strokeStyle = rim;
+                ctx.beginPath();
+                ctx.moveTo(head + skew, 0); ctx.lineTo(head - skew, H);
+                ctx.moveTo(tail + skew, 0); ctx.lineTo(tail - skew, H);
+                ctx.stroke();
+            };
+
+            // ---------- Fantasy stinger, Castle: a twilight sky (stars, a big moon) sweeps in from the left with a golden
+            // edge, and a castle rises along the bottom: walls with battlements, towers with pointed roofs and lit
+            // windows, pennants flying from the tallest. Stars twinkle; then it all sweeps off to the right.
+            // The sky and the castle are each painted once and copied; only the pennants and twinkles are drawn each frame. ----------
+            const castle = {
+                init(durationSec) {
+                    this.T = durationSec;
+                    const key = `${canvas.width}x${canvas.height}`;
+                    if (this.key === key) return;
+                    this.key = key;
+                    const s = H / 1080, px = canvas.width / W;
+                    this.twinkles = Array.from({ length: 14 }, () => ({ x: rand(0.03, 0.97) * W, y: rand(0.04, 0.5) * H, r: rand(2.5, 5) * s, ph: rand(0, 6.28), v: rand(3, 7) }));
+                    // The castle, in a picture of its own (as wide as the screen, 0.8 of its height), standing on its bottom edge
+                    const tall = this.tall = 0.8 * H;
+                    const c = this.keep = Object.assign(document.createElement('canvas'), { width: canvas.width, height: Math.ceil(tall * px) });
+                    const x = c.getContext('2d');
+                    x.scale(px, px);
+                    const DARK = '#150b2c', FAR = '#231341', LIT = '#ffd36b';
+                    const ground = tall - 120 * s; // where the walls stand
+                    this.flags = [];
+                    const battlements = (x0, x1, y, col) => {
+                        x.fillStyle = col;
+                        for (let bx = x0; bx < x1 - 10 * s; bx += 56 * s) x.fillRect(bx, y - 26 * s, 30 * s, 28 * s);
+                    };
+                    const windowAt = (wx, wy, w = 16, h = 34) => {
+                        x.fillStyle = LIT;
+                        x.beginPath();
+                        x.moveTo(wx - w / 2 * s, wy + h * s); x.lineTo(wx - w / 2 * s, wy + w / 2 * s);
+                        x.arc(wx, wy + w / 2 * s, w / 2 * s, Math.PI, 0);
+                        x.lineTo(wx + w / 2 * s, wy + h * s);
+                        x.closePath(); x.fill();
+                    };
+                    // A tower: how wide, how tall above the ground; a pointed roof (and a pennant) or battlements
+                    const tower = (cx, w, h, roof, col = DARK, flag = false) => {
+                        const top = ground - h * s, half = w / 2 * s;
+                        x.fillStyle = col;
+                        x.fillRect(cx - half, top, half * 2, h * s + 130 * s);
+                        if (roof) {
+                            x.fillRect(cx - half - 10 * s, top - 6 * s, half * 2 + 20 * s, 16 * s); // its lip
+                            x.beginPath(); x.moveTo(cx - half - 14 * s, top - 4 * s); x.lineTo(cx, top - roof * s); x.lineTo(cx + half + 14 * s, top - 4 * s); x.closePath(); x.fill();
+                            if (flag) this.flags.push([cx, top - roof * s]);
+                        } else battlements(cx - half - 6 * s, cx + half + 12 * s, top, col);
+                        for (let wy = top + 46 * s, i = 0; wy < ground - 70 * s && i < 4; wy += 120 * s, i++) windowAt(cx + (i % 2 ? 0.18 : -0.18) * w * s * (w > 120 ? 1 : 0), wy);
+                    };
+                    // The hill it stands on
+                    x.fillStyle = DARK;
+                    x.beginPath(); x.moveTo(0, tall); x.lineTo(0, tall - 70 * s); x.quadraticCurveTo(W * 0.5, tall - 210 * s, W, tall - 70 * s); x.lineTo(W, tall); x.closePath(); x.fill();
+                    // Far towers and the curtain wall behind, a shade lighter
+                    tower(W * 0.31, 96, 420, 130, FAR); tower(W * 0.69, 96, 420, 130, FAR);
+                    x.fillStyle = FAR; x.fillRect(W * 0.24, ground - 250 * s, W * 0.52, 380 * s);
+                    battlements(W * 0.24, W * 0.76, ground - 250 * s, FAR);
+                    // The keep and its towers, the tallest in the middle
+                    tower(W * 0.5, 300, 400, 0);
+                    tower(W * 0.415, 90, 560, 170, DARK, true); tower(W * 0.585, 90, 560, 170, DARK, true);
+                    tower(W * 0.5, 120, 650, 220, DARK, true);
+                    // The front wall, its corner towers, and the gate
+                    x.fillStyle = DARK; x.fillRect(W * 0.17, ground - 170 * s, W * 0.66, 300 * s);
+                    battlements(W * 0.17, W * 0.83, ground - 170 * s, DARK);
+                    tower(W * 0.17, 130, 330, 0); tower(W * 0.83, 130, 330, 0);
+                    const gw = 70 * s, gy = ground - 20 * s;
+                    x.fillStyle = '#f2a13c';
+                    x.beginPath(); x.moveTo(W / 2 - gw, tall); x.lineTo(W / 2 - gw, gy - 60 * s); x.arc(W / 2, gy - 60 * s, gw, Math.PI, 0); x.lineTo(W / 2 + gw, tall); x.closePath(); x.fill();
+                    x.strokeStyle = DARK; x.lineWidth = 7 * s; // its portcullis
+                    x.beginPath();
+                    for (let i = -2; i <= 2; i++) { x.moveTo(W / 2 + i * 26 * s, gy - 140 * s); x.lineTo(W / 2 + i * 26 * s, tall); }
+                    for (let i = 0; i < 4; i++) { x.moveTo(W / 2 - gw, gy - 96 * s + i * 44 * s); x.lineTo(W / 2 + gw, gy - 96 * s + i * 44 * s); }
+                    x.stroke();
+                    for (let i = 0; i < 9; i++) if (i !== 4) windowAt(W * (0.22 + i * 0.07), ground - 110 * s, 14, 30); // along the wall
+                },
+                frame(dt, t) {
+                    const s = H / 1080, p = clamp01(t / this.T), px = canvas.width / W;
+                    const skew = 0.07 * W, span = W + 2 * skew;
+                    const head = -skew + EASE.out3(clamp01(p / 0.3)) * span, tail = -skew + EASE.in3(clamp01((p - 0.72) / 0.28)) * span;
+                    ctx.clearRect(0, 0, W, H);
+                    if (head <= tail || tail >= W + skew) return;
+                    // The sky: deep violet down to a glowing horizon, with stars and the moon (painted once)
+                    stampLayer('castle-sky', (x) => {
+                        const g = x.createLinearGradient(0, 0, 0, H);
+                        g.addColorStop(0, '#120a33'); g.addColorStop(0.42, '#3a1467'); g.addColorStop(0.74, '#96307b'); g.addColorStop(1, '#f39a52');
+                        x.fillStyle = g; x.fillRect(0, 0, W, H);
+                        x.fillStyle = '#ffffff';
+                        for (let i = 0; i < 150; i++) { x.globalAlpha = rand(0.25, 0.9); x.beginPath(); x.arc(rand(0, W), rand(0, H * 0.62), rand(0.8, 2.2) * s, 0, 6.3); x.fill(); }
+                        x.globalAlpha = 1;
+                        const mx = W * 0.8, my = H * 0.2, mr = 92 * s;
+                        const glow = x.createRadialGradient(mx, my, mr * 0.6, mx, my, mr * 3.2);
+                        glow.addColorStop(0, 'rgba(255, 240, 200, 0.45)'); glow.addColorStop(1, 'rgba(255, 240, 200, 0)');
+                        x.fillStyle = glow; x.fillRect(mx - mr * 3.3, my - mr * 3.3, mr * 6.6, mr * 6.6);
+                        x.fillStyle = '#fdf3d2'; x.beginPath(); x.arc(mx, my, mr, 0, 6.3); x.fill();
+                        x.fillStyle = 'rgba(190, 170, 150, 0.35)'; // its seas
+                        for (const [dx, dy, r] of [[-0.3, -0.2, 0.22], [0.25, 0.1, 0.3], [-0.1, 0.4, 0.16], [0.4, -0.4, 0.12]]) { x.beginPath(); x.arc(mx + dx * mr, my + dy * mr, r * mr, 0, 6.3); x.fill(); }
+                    });
+                    // Stars that twinkle
+                    ctx.fillStyle = '#ffffff';
+                    for (const tw of this.twinkles) {
+                        const a = 0.5 + 0.5 * Math.sin(t * tw.v + tw.ph);
+                        ctx.globalAlpha = a;
+                        ctx.fillRect(tw.x - tw.r * 2.4, tw.y - tw.r * 0.3, tw.r * 4.8, tw.r * 0.6);
+                        ctx.fillRect(tw.x - tw.r * 0.3, tw.y - tw.r * 2.4, tw.r * 0.6, tw.r * 4.8);
+                    }
+                    ctx.globalAlpha = 1;
+                    // The castle rises along the bottom (copied pixel for pixel)
+                    const up = EASE.out3(clamp01((p - 0.12) / 0.3)), lift = (1 - up) * this.tall;
+                    ctx.save();
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.drawImage(this.keep, 0, canvas.height - this.keep.height + Math.round(lift * px));
+                    ctx.restore();
+                    // Pennants on the tallest towers, flying to the right
+                    const base = H - this.tall + lift;
+                    for (const [fx, fy] of this.flags) {
+                        const y = base + fy;
+                        ctx.strokeStyle = '#150b2c'; ctx.lineWidth = 4 * s;
+                        ctx.beginPath(); ctx.moveTo(fx, y + 2 * s); ctx.lineTo(fx, y - 64 * s); ctx.stroke();
+                        ctx.fillStyle = '#e23b4e';
+                        ctx.beginPath();
+                        ctx.moveTo(fx, y - 64 * s);
+                        for (let i = 1; i <= 6; i++) ctx.lineTo(fx + i * 13 * s, y - 64 * s + i * 2.6 * s + Math.sin(t * 9 - i * 0.9 + fx) * i * 1.6 * s);
+                        for (let i = 6; i >= 1; i--) ctx.lineTo(fx + i * 13 * s, y - 34 * s - i * 2.4 * s + Math.sin(t * 9 - i * 0.9 + fx) * i * 1.6 * s);
+                        ctx.lineTo(fx, y - 34 * s);
+                        ctx.closePath(); ctx.fill();
+                    }
+                    sweepEdges(head, tail, skew, 'rgba(255, 214, 120, 0.95)');
+                },
+            };
+
+            // ---------- Fantasy stinger, Dragons: a dragon flies in from the left breathing a wall of fire that sweeps
+            // across behind its ragged, licking edge until the screen is all flame. Two more dragons fly through it,
+            // wings beating, with sparks rising; then the fire burns off to the right behind another ragged edge.
+            // The fire is painted once; the dragons are shapes (a body, and wings whose tips beat up and down). ----------
+            const dragons = {
+                init(durationSec) {
+                    this.T = durationSec;
+                    this.seed = rand(0, 10);
+                    this.sparks = Array.from({ length: 46 }, () => ({ x: rand(0, 1), y: rand(0, 1), v: rand(0.25, 0.7), r: rand(2, 5), ph: rand(0, 6.28) }));
+                },
+                // One dragon, facing right, about 430 across at size 1: its far wing, its body, its near wing. beat: -1 (wings down) to 1 (up)
+                dragon(x, y, size, beat) {
+                    const s = H / 1080;
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.scale(size * s, size * s);
+                    const wing = (rx, ry, f, col) => {
+                        const up = 60 + 150 * f; // how high its tip is above the root (below it, when f is negative enough)
+                        ctx.fillStyle = col;
+                        ctx.beginPath();
+                        ctx.moveTo(rx + 34, ry);
+                        ctx.quadraticCurveTo(rx + 70, ry - up * 0.75, rx + 26, ry - up * 1.05);  // the arm, out to the wrist
+                        ctx.lineTo(rx - 60, ry - up * 1.2);                                          // the tip
+                        ctx.quadraticCurveTo(rx - 62, ry - up * 0.85, rx - 96, ry - up * 0.74);    // the membrane's scallops, back to the body
+                        ctx.quadraticCurveTo(rx - 88, ry - up * 0.45, rx - 122, ry - up * 0.3);
+                        ctx.quadraticCurveTo(rx - 96, ry - up * 0.12, rx - 104, ry + 6);
+                        ctx.closePath();
+                        ctx.fill();
+                    };
+                    wing(-6, -22, beat * 0.9 - 0.1, '#3a0f12');
+                    ctx.fillStyle = '#14070a';
+                    ctx.beginPath();
+                    ctx.moveTo(-205, 10);                                 // the tail's tip
+                    ctx.quadraticCurveTo(-120, -20, -50, -24);            // along the back
+                    ctx.quadraticCurveTo(22, -32, 72, -56);               // up the neck
+                    ctx.quadraticCurveTo(102, -84, 136, -76);             // the head
+                    ctx.lineTo(128, -104); ctx.lineTo(152, -82);          // a horn
+                    ctx.lineTo(206, -62);                                 // the snout
+                    ctx.lineTo(176, -56); ctx.lineTo(198, -44);           // its open jaw
+                    ctx.lineTo(150, -46);
+                    ctx.quadraticCurveTo(118, -44, 96, -26);              // under the neck
+                    ctx.quadraticCurveTo(50, 20, -30, 12);                // the belly
+                    ctx.quadraticCurveTo(-120, 8, -205, 10);              // under the tail
+                    ctx.closePath();
+                    ctx.moveTo(-205, 10); ctx.lineTo(-238, -10); ctx.lineTo(-228, 24); ctx.closePath(); // the tail's spade
+                    ctx.moveTo(14, 10); ctx.lineTo(30, 42); ctx.lineTo(40, 8); ctx.closePath();          // legs, tucked
+                    ctx.moveTo(-46, 12); ctx.lineTo(-30, 38); ctx.lineTo(-18, 10); ctx.closePath();
+                    ctx.fill();
+                    wing(10, -24, beat, '#14070a');
+                    ctx.restore();
+                },
+                // A ragged, licking edge down the screen at x: the points of its tongues of flame
+                edge(x, t, side) {
+                    const s = H / 1080, pts = [];
+                    for (let i = 0; i <= 18; i++) pts.push([x + side * ((i % 2 ? 95 : -5) + 34 * Math.sin(t * 10 + i * 1.9 + this.seed)) * s, (i / 18) * (H + 4) - 2]);
+                    return pts;
+                },
+                frame(dt, t) {
+                    const s = H / 1080, p = clamp01(t / this.T);
+                    const reach = 0.1 * W, span = W + 2 * reach;
+                    const head = -reach + EASE.out3(clamp01(p / 0.34)) * span, tail = -reach + EASE.in3(clamp01((p - 0.7) / 0.3)) * span;
+                    ctx.clearRect(0, 0, W, H);
+                    if (head <= tail || tail >= W + reach) return;
+                    // The fire: dark and smoky at the top, white-hot at the bottom (painted once)
+                    stampLayer('dragon-fire', (x) => {
+                        const g = x.createLinearGradient(0, 0, 0, H);
+                        g.addColorStop(0, '#2b0705'); g.addColorStop(0.3, '#8d1608'); g.addColorStop(0.62, '#e8500f'); g.addColorStop(0.88, '#ffb42e'); g.addColorStop(1, '#ffe07a');
+                        x.fillStyle = g; x.fillRect(0, 0, W, H);
+                        for (let i = 0; i < 26; i++) { // billows: darker up top, brighter below
+                            const bx = rand(0, W), by = rand(0, H), r = rand(160, 380) * s, hot = by > H * 0.5;
+                            const b = x.createRadialGradient(bx, by, 0, bx, by, r);
+                            b.addColorStop(0, hot ? 'rgba(255, 210, 90, 0.28)' : 'rgba(30, 6, 4, 0.3)'); b.addColorStop(1, hot ? 'rgba(255, 210, 90, 0)' : 'rgba(30, 6, 4, 0)');
+                            x.fillStyle = b; x.fillRect(bx - r, by - r, r * 2, r * 2);
+                        }
+                    });
+                    // Sparks, rising
+                    ctx.fillStyle = '#fff3b0';
+                    for (const sp of this.sparks) {
+                        const y = (1 - ((sp.y + t * sp.v) % 1)) * H, x = sp.x * W + Math.sin(t * 3 + sp.ph) * 24 * s;
+                        ctx.globalAlpha = 0.35 + 0.65 * Math.abs(Math.sin(t * 9 + sp.ph));
+                        ctx.fillRect(x, y, sp.r * s, sp.r * s);
+                    }
+                    ctx.globalAlpha = 1;
+                    // The dragons: the one breathing the fire just behind its edge, and two more through the flames
+                    const beat = (ph) => Math.sin(t * 9 + ph);
+                    this.dragon(head - 300 * s, H * 0.36 + Math.sin(t * 3) * 14 * s, 1.25, beat(0));
+                    this.dragon(lerp(-0.25 * W, 1.3 * W, clamp01((p - 0.28) / 0.5)), H * 0.7 + Math.sin(t * 3 + 2) * 12 * s, 0.8, beat(1.6));
+                    this.dragon(lerp(-0.2 * W, 1.25 * W, clamp01((p - 0.36) / 0.44)), H * 0.16 + Math.sin(t * 3 + 4) * 10 * s, 0.5, beat(3.1));
+                    // Its ragged edges: what's ahead of the fire, and where it has burned off, is cut away; then they glow
+                    const front = this.edge(head, t, 1), back = this.edge(tail, t + 3, 1);
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.fillStyle = '#000';
+                    ctx.beginPath();
+                    front.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+                    ctx.lineTo(W + 300 * s, H + 2); ctx.lineTo(W + 300 * s, -2); ctx.closePath();
+                    back.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+                    ctx.lineTo(-300 * s, H + 2); ctx.lineTo(-300 * s, -2); ctx.closePath();
+                    ctx.fill();
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.lineJoin = 'round';
+                    ctx.lineWidth = 12 * s;
+                    ctx.strokeStyle = 'rgba(255, 236, 150, 0.95)';
+                    ctx.beginPath();
+                    front.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+                    back.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+                    ctx.stroke();
+                },
+            };
+
+            // ---------- Old West stinger: two big plank doors (iron straps, cross beams, nail heads) slide in from the
+            // sides and slam shut with a bounce and a puff of dust. A gold sheriff's star spins in on them and catches
+            // the light while a tumbleweed rolls along the bottom; then the star goes and the doors slide open.
+            // Each door is painted once and slid, pixel for pixel; the star is a shape; the tumbleweed a small picture, turned. ----------
+            const oldwest = {
+                init(durationSec) {
+                    this.T = durationSec;
+                    const key = `${canvas.width}x${canvas.height}`;
+                    if (this.key === key) return;
+                    this.key = key;
+                    const s = H / 1080, px = canvas.width / W;
+                    const dw = Math.ceil(canvas.width / 2), dh = canvas.height;
+                    // A door: planks with their grain and knots, two cross beams and iron straps from its hinge side (outer)
+                    const door = (dir) => { // dir 1: the left door (hinges on its left); -1: the right
+                        const c = Object.assign(document.createElement('canvas'), { width: dw, height: dh });
+                        const x = c.getContext('2d');
+                        const w = dw / px;
+                        x.scale(px, px);
+                        const planks = 6, pw = w / planks;
+                        for (let i = 0; i < planks; i++) {
+                            const shade = ['#7b4a22', '#6c401b', '#84532a', '#74461f', '#63391a', '#7f4f26'][(i + (dir > 0 ? 0 : 3)) % 6];
+                            x.fillStyle = shade; x.fillRect(i * pw, 0, pw + 1, H);
+                            x.strokeStyle = 'rgba(40, 20, 6, 0.28)'; x.lineWidth = 2 * s; // its grain
+                            for (let g = 0; g < 9; g++) {
+                                const gx = i * pw + rand(8, pw - 8) * 1;
+                                x.beginPath(); x.moveTo(gx, 0);
+                                for (let y = 0; y <= H; y += H / 6) x.lineTo(gx + rand(-7, 7) * s, y);
+                                x.stroke();
+                            }
+                            for (let k = 0; k < 2; k++) { // a knot or two
+                                const kx = i * pw + rand(0.25, 0.75) * pw, ky = rand(0.08, 0.92) * H;
+                                x.fillStyle = 'rgba(45, 22, 8, 0.6)'; x.beginPath(); x.ellipse(kx, ky, 11 * s, 17 * s, 0, 0, 6.3); x.fill();
+                                x.strokeStyle = 'rgba(45, 22, 8, 0.35)'; x.beginPath(); x.ellipse(kx, ky, 20 * s, 30 * s, 0, 0, 6.3); x.stroke();
+                            }
+                            x.fillStyle = 'rgba(20, 9, 2, 0.75)'; x.fillRect(i * pw - 2 * s, 0, 4 * s, H); // the gap between planks
+                        }
+                        const nail = (nx, ny) => { x.fillStyle = '#1a1917'; x.beginPath(); x.arc(nx, ny, 9 * s, 0, 6.3); x.fill(); x.fillStyle = 'rgba(255, 255, 255, 0.25)'; x.beginPath(); x.arc(nx - 2.5 * s, ny - 2.5 * s, 3 * s, 0, 6.3); x.fill(); };
+                        for (const by of [0.2 * H, 0.78 * H]) { // cross beams, and the iron straps over them
+                            x.fillStyle = '#56300f'; x.fillRect(0, by - 46 * s, w, 92 * s);
+                            x.fillStyle = 'rgba(0, 0, 0, 0.28)'; x.fillRect(0, by + 38 * s, w, 16 * s);
+                            x.fillStyle = 'rgba(255, 220, 170, 0.12)'; x.fillRect(0, by - 46 * s, w, 8 * s);
+                            const x0 = dir > 0 ? 0 : w * 0.38;
+                            x.fillStyle = '#2a2826'; x.fillRect(x0, by - 20 * s, w * 0.62, 40 * s);
+                            x.beginPath(); // its pointed end
+                            const tip = dir > 0 ? w * 0.62 : w * 0.38;
+                            x.moveTo(tip, by - 20 * s); x.lineTo(tip + dir * 46 * s, by); x.lineTo(tip, by + 20 * s); x.closePath(); x.fill();
+                            for (let n = 0; n < 5; n++) nail(x0 + (n + 0.5) * w * 0.62 / 5, by);
+                        }
+                        for (let i = 0; i < planks; i++) for (const ny of [0.05 * H, 0.5 * H, 0.95 * H]) nail((i + 0.5) * pw, ny);
+                        // Darker toward where the doors meet, and at the top and bottom
+                        const g = x.createLinearGradient(dir > 0 ? w : 0, 0, dir > 0 ? w - 90 * s : 90 * s, 0);
+                        g.addColorStop(0, 'rgba(0, 0, 0, 0.55)'); g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                        x.fillStyle = g; x.fillRect(0, 0, w, H);
+                        const v = x.createLinearGradient(0, 0, 0, H);
+                        v.addColorStop(0, 'rgba(0, 0, 0, 0.35)'); v.addColorStop(0.2, 'rgba(0, 0, 0, 0)'); v.addColorStop(0.8, 'rgba(0, 0, 0, 0)'); v.addColorStop(1, 'rgba(0, 0, 0, 0.4)');
+                        x.fillStyle = v; x.fillRect(0, 0, w, H);
+                        return c;
+                    };
+                    this.left = door(1);
+                    this.right = door(-1);
+                    // The tumbleweed: a ball of dry, tangled twigs
+                    const tw = this.weed = Object.assign(document.createElement('canvas'), { width: 220, height: 220 });
+                    const x = tw.getContext('2d');
+                    x.translate(110, 110);
+                    x.lineCap = 'round';
+                    for (let i = 0; i < 90; i++) {
+                        const a = rand(0, 6.28), r = rand(40, 100), b = a + rand(0.6, 2.4);
+                        x.strokeStyle = ['#c9a35c', '#a8803f', '#e0c080', '#8a6a34'][i % 4];
+                        x.lineWidth = rand(1.5, 4);
+                        x.beginPath(); x.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+                        x.quadraticCurveTo(rand(-45, 45), rand(-45, 45), Math.cos(b) * rand(55, 102), Math.sin(b) * rand(55, 102));
+                        x.stroke();
+                    }
+                    this.dust = glowSprite('#d9b98a', 0, 128);
+                },
+                frame(dt, t) {
+                    const s = H / 1080, p = clamp01(t / this.T), px = canvas.width / W;
+                    const k = EASE.outBounce(clamp01(p / 0.3)) * (1 - EASE.in3(clamp01((p - 0.72) / 0.28))); // 0 open, 1 shut
+                    ctx.clearRect(0, 0, W, H);
+                    if (k <= 0) return;
+                    const dw = this.left.width, shut = Math.round((1 - k) * dw);
+                    ctx.save();
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.drawImage(this.left, -shut, 0);
+                    ctx.drawImage(this.right, canvas.width - dw + shut, 0);
+                    ctx.restore();
+                    // Dust where they slam
+                    const d = clamp01((p - 0.1) / 0.3);
+                    if (d > 0 && d < 1) {
+                        ctx.globalAlpha = (1 - d) * 0.7;
+                        for (let i = 0; i < 7; i++) {
+                            const r = (60 + 240 * d) * s * (0.7 + (i % 3) * 0.25), y = H * (0.08 + i * 0.14);
+                            ctx.drawImage(this.dust, W / 2 - r + (i % 2 ? 1 : -1) * 60 * d * s, y - r, r * 2, r * 2);
+                        }
+                        ctx.globalAlpha = 1;
+                    }
+                    // The sheriff's star: spins in, catches the light, shrinks away
+                    const a = Math.min(EASE.outBack(clamp01((p - 0.3) / 0.14)), 1 - EASE.in3(clamp01((p - 0.6) / 0.1)));
+                    if (a > 0.01) {
+                        const R = 250 * s * a, turn = (1 - clamp01((p - 0.3) / 0.2)) * -1.4;
+                        ctx.save();
+                        ctx.translate(W / 2, H * 0.5);
+                        ctx.rotate(turn);
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)'; // its shadow on the wood
+                        ctx.beginPath(); ctx.arc(10 * s, 16 * s, R * 0.9, 0, 6.3); ctx.fill();
+                        const star = (r, inner) => {
+                            ctx.beginPath();
+                            for (let i = 0; i < 10; i++) { const an = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * inner : r; ctx.lineTo(Math.cos(an) * rr, Math.sin(an) * rr); }
+                            ctx.closePath();
+                        };
+                        ctx.fillStyle = '#8a6412'; star(R, 0.5); ctx.fill();
+                        ctx.fillStyle = '#e2b233'; star(R * 0.93, 0.5); ctx.fill();
+                        ctx.fillStyle = '#f6d568'; // the lit half of each point
+                        ctx.beginPath();
+                        for (let i = 0; i < 5; i++) { const an = -Math.PI / 2 + i * Math.PI * 2 / 5, a2 = an - Math.PI / 5; ctx.moveTo(0, 0); ctx.lineTo(Math.cos(an) * R * 0.93, Math.sin(an) * R * 0.93); ctx.lineTo(Math.cos(a2) * R * 0.465, Math.sin(a2) * R * 0.465); ctx.closePath(); }
+                        ctx.fill();
+                        for (let i = 0; i < 5; i++) { // a ball on each point
+                            const an = -Math.PI / 2 + i * Math.PI * 2 / 5;
+                            ctx.fillStyle = '#8a6412'; ctx.beginPath(); ctx.arc(Math.cos(an) * R, Math.sin(an) * R, R * 0.085, 0, 6.3); ctx.fill();
+                            ctx.fillStyle = '#f0c648'; ctx.beginPath(); ctx.arc(Math.cos(an) * R, Math.sin(an) * R, R * 0.062, 0, 6.3); ctx.fill();
+                        }
+                        ctx.strokeStyle = '#8a6412'; ctx.lineWidth = R * 0.03; // the ring engraved in its middle
+                        ctx.beginPath(); ctx.arc(0, 0, R * 0.3, 0, 6.3); ctx.stroke();
+                        ctx.restore();
+                        // A glint, travelling across it
+                        const gl = clamp01((p - 0.42) / 0.16);
+                        if (gl > 0 && gl < 1) {
+                            const gx = W / 2 + lerp(-0.6, 0.6, gl) * R, gy = H * 0.5 - lerp(0.5, -0.1, gl) * R, gr = R * 0.5 * Math.sin(gl * Math.PI);
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                            ctx.beginPath();
+                            ctx.moveTo(gx - gr, gy); ctx.quadraticCurveTo(gx, gy, gx, gy - gr); ctx.quadraticCurveTo(gx, gy, gx + gr, gy);
+                            ctx.quadraticCurveTo(gx, gy, gx, gy + gr); ctx.quadraticCurveTo(gx, gy, gx - gr, gy);
+                            ctx.fill();
+                        }
+                    }
+                    // The tumbleweed, rolling and hopping along the bottom while the doors are shut
+                    const roll = clamp01((p - 0.27) / 0.47);
+                    if (roll > 0 && roll < 1 && k > 0.98) {
+                        const r = 100 * s, x = lerp(-r, W + r, roll), y = H - r - Math.abs(Math.sin(roll * 14)) * 70 * s;
+                        ctx.save();
+                        ctx.translate(x, y);
+                        ctx.rotate(roll * 22);
+                        ctx.drawImage(this.weed, -r, -r, r * 2, r * 2);
+                        ctx.restore();
+                    }
                 },
             };
 
@@ -7004,7 +7475,7 @@
 
             const EFFECTS = { confetti, colorwave, leaves, snow, fire, underwater, arrested, hottake, sports, spring, storm, tvstatic,
                 fireworks, medical, stpatricks, vhs, vday, rain, firestinger, pixel, cat, curtains, coffee, comic, disco, tech, lubbock, emoji, xmasfx,
-                sunshine, cloudsfx, america, customstinger };
+                sunshine, cloudsfx, america, customstinger, castle, dragons, oldwest };
 
             // Runs every frame while an effect is playing
             const loop = () => {
@@ -7081,7 +7552,10 @@
             currentOverlay = data.overlay;
 
             // Breaking News: the ticker text scrolls right to left, over and over (with none typed, "Breaking News | ...")
-            if (cfg.ticker) startTicker(data.label || BREAKING_DEFAULT);
+            // From an RSS feed (rss: its address), its latest headlines instead.
+            stopTickerFeed();
+            if (cfg.ticker && data.rss) startTickerFeed(data.rss, data.label || BREAKING_DEFAULT);
+            else if (cfg.ticker) startTicker(data.label || BREAKING_DEFAULT);
 
             // Location: the place next to the pin
             if (cfg.place) $('locpin-text').textContent = data.label || '';
@@ -7118,7 +7592,7 @@
 
             // Canvas effect (Color Wave, Confetti, Fall, Snow, Fire, Underwater, and the Weather, Static, Sports and Spring stingers...).
             // Xmas's Trees and Ornaments are drawn on it too, in place of the Wrapper's band.
-            const effect = xmasCanvas(data) ? 'xmasfx' : cfg.weather ? WEATHER_FX[weatherOf(data)] : cfg.effect;
+            const effect = xmasCanvas(data) ? 'xmasfx' : cfg.weather ? WEATHER_FX[weatherOf(data)] : cfg.fantasy ? fantasyOf(data) : cfg.effect;
             box.classList.toggle('xmas-canvas', effect === 'xmasfx');
             if (effect) FX.start(effect, hold ? Infinity : duration, { ...data, layer });
             else FX.stop();
@@ -7138,21 +7612,52 @@
         // in only measures it again (it used to restart the scroll). It stops once Breaking News is gone.
         const TICKER_SPEED = 170; // pixels per second at 1080p
         let tickerRaf = null;
-        const startTicker = (text) => {
+        let tickerNext = null; // { text, parts }: new text waiting for the old to finish its pass (a feed's fresh headlines)
+        // parts: the text in pieces (a feed's headlines), each on a small layer of its own, and only the ones on screen
+        // are shown. As one piece, a feed's 20 headlines were a strip of text about 40,000 pixels wide for the graphics
+        // chip to keep ready; typed text is one piece, as it always was.
+        let tickerText = ''; // what's scrolling (as it was given)
+        const startTicker = (text, parts = null) => {
             const el = $('breaking-text'), box = $('overlay-box');
-            el.textContent = text;
             cancelAnimationFrame(tickerRaf);
-            let from = 0, to = 0, x = null, last = null;
+            tickerNext = null;
+            let items = [], from = 0, to = 0, x = null, last = null;
             const gaps = []; // the last few frame intervals (ms), for the frame rate
+            const fill = (t, pieces) => {
+                tickerText = t;
+                el.textContent = '';
+                items = (pieces && pieces.length ? pieces : [t]).map(piece => {
+                    const span = document.createElement('span');
+                    span.textContent = String(piece).replace(/\s+/g, ' '); // (as one line, the way it always showed)
+                    el.append(span);
+                    return { span, at: 0, wide: 0, on: true };
+                });
+            };
+            // How wide each piece is, and where it starts in the line (all shown for a moment, to be measured)
             const measure = () => {
                 from = el.parentElement.clientWidth;
-                to = -el.scrollWidth;
+                let at = 0;
+                for (const it of items) {
+                    it.span.style.display = '';
+                    it.on = true;
+                    it.wide = Math.ceil(it.span.getBoundingClientRect().width);
+                    it.at = at;
+                    at += it.wide;
+                }
+                to = -at;
                 if (x === null) x = from;
             };
-            const place = () => { el.style.transform = `translate3d(${x}px, -50%, 0)`; };
+            const place = () => {
+                for (const it of items) {
+                    const left = x + it.at, on = left < from && left + it.wide > 0;
+                    if (on) it.span.style.transform = `translate3d(${left}px, -50%, 0)`;
+                    if (on !== it.on) { it.on = on; it.span.style.display = on ? '' : 'none'; }
+                }
+            };
+            fill(text, parts);
             measure();
             place();
-            document.fonts.load('600 40px Oswald').then(measure);
+            document.fonts.load('600 40px Oswald').then(() => { measure(); place(); });
             const frame = (now) => {
                 if (!box.classList.contains('breaking') || box.style.visibility === 'hidden') { tickerRaf = null; return; } // another overlay, or gone
                 const gap = last === null ? 0 : now - last;
@@ -7163,15 +7668,45 @@
                 const interval = gaps.length >= 5 ? [...gaps].sort((a, b) => a - b)[(gaps.length - 1) >> 1] : 1000 / 60;
                 const step = Math.max(1, Math.round(TICKER_SPEED * (window.innerHeight / 1080) * interval / 1000));
                 x -= step * (gap ? Math.min(30, Math.max(1, Math.round(gap / interval))) : 1);
-                if (x <= to) x = from; // off the left: in again from the right
+                if (x <= to) { // off the left: in again from the right, with the newer text if there is some
+                    if (tickerNext !== null) { fill(tickerNext.text, tickerNext.parts); tickerNext = null; measure(); }
+                    x = from;
+                }
                 place();
                 tickerRaf = requestAnimationFrame(frame);
             };
             tickerRaf = requestAnimationFrame(frame);
         };
 
+        // Breaking News from an RSS feed. The display asks the server for the feed's headlines (the server reads it: a
+        // page opened from a file isn't allowed to), and scrolls them one after another: "Headline  |  Headline  |".
+        // Nothing scrolls until they arrive (a moment); if they can't be had (no internet, an older server, a wrong
+        // address), it scrolls the usual text instead. While it stays up it asks again every few minutes, and newer
+        // headlines take over when the ones on screen finish their pass, so the text never jumps.
+        const TICKER_FEED_EVERY = 5 * 60 * 1000;
+        const TICKER_FEED_MOST = 20; // headlines in one pass
+        let tickerFeedTimer = null, tickerFeedToken = 0;
+        const stopTickerFeed = () => { clearInterval(tickerFeedTimer); tickerFeedTimer = null; tickerFeedToken++; };
+        const startTickerFeed = (url, fallback) => {
+            stopTickerFeed();
+            const token = tickerFeedToken;
+            let shown = false;
+            startTicker('');
+            const load = async () => {
+                const reply = await serverRequest({ mode: 'rssFeed', url }, 'rssData', 9000);
+                if (token !== tickerFeedToken) return; // taken down, or something else taken, while it was read
+                const titles = (reply?.ok && Array.isArray(reply.titles) ? reply.titles : []).filter(t => typeof t === 'string' && t.trim()).slice(0, TICKER_FEED_MOST);
+                const parts = titles.map(t => `${t.trim()} | `), text = parts.join('') || null; // "Headline | Headline | "
+                if (!shown) { shown = true; if (text) startTicker(text, parts); else startTicker(fallback); }
+                else if (text && text !== tickerText) tickerNext = { text, parts };
+            };
+            load();
+            tickerFeedTimer = setInterval(load, TICKER_FEED_EVERY);
+        };
+
         const hideOverlay = () => {
             const box = $('overlay-box');
+            stopTickerFeed();
             if (overlayTimeout) clearTimeout(overlayTimeout);
             if (overlayCleanup) clearTimeout(overlayCleanup);
             const out = OVERLAYS[currentOverlay]?.animOut ?? 'anim-hide';
@@ -7551,6 +8086,7 @@
         const showDisplay = (data) => {
             // #content shows Content and nothing else; the other pages leave Content to it
             if (isContentPage) { contentMessage(data); return; }
+            if (replyWaiters[data.mode]) { replyWaiters[data.mode](data); return; } // the server's answer to this page (a feed's headlines)
             // Sounds play on #display only (the underlay is another browser source; it would play them twice)
             if (data.mode === 'sound' || data.mode === 'soundStop' || data.mode === 'soundVolume') { if (!isUnderlay) soundMessage(data); return; }
             if (data.mode === 'clear') { hideLowerThird(); hideOverlay(); if (!isUnderlay) stopAllSounds(); return; }
@@ -7860,6 +8396,13 @@
             $('emoji-field').classList.toggle('hidden', !cfg?.emoji);
             $('xmas-field').classList.toggle('hidden', !cfg?.xmas);
             $('weather-field').classList.toggle('hidden', !cfg?.weather);
+            $('fantasy-field').classList.toggle('hidden', !cfg?.fantasy);
+            // Breaking News: the RSS checkbox, and with it ticked the feed's address in place of the text box
+            const rss = !!cfg?.ticker && rssState().on;
+            $('rss-row').classList.toggle('hidden', !cfg?.ticker);
+            $('rss-field').classList.toggle('hidden', !rss);
+            $('paragraph-label').classList.toggle('hidden', rss);
+            $('paragraph-input').classList.toggle('hidden', rss);
             renderContentName(); // (the Visualizer has its own pick)
             $('vhs-field').classList.toggle('hidden', !cfg?.stamp);
             $('backdrop-field').classList.toggle('hidden', !cfg?.backdrop);
@@ -7882,6 +8425,53 @@
             if (builder || sound) $('text-fields').classList.add('hidden');
             updateToggleButton();
             updateSummaries();
+        };
+
+        // ---------- Breaking News from an RSS feed ----------
+        // Ticked, the ticker scrolls the feed's latest headlines, read fresh when it's taken and every few minutes while
+        // it's up. The tick and the address are remembered. Leaving the address box (or ticking it) asks the server to
+        // read the feed, to say under the box how many headlines it has, or why it couldn't.
+        const RSS_KEY = 'fx_rss'; // { on, url }
+        const rssState = () => {
+            const st = readJson(RSS_KEY, {});
+            return { on: !!st?.on, url: typeof st?.url === 'string' && st.url ? st.url : RSS_DEFAULT };
+        };
+        const saveRss = (changes) => { try { localStorage.setItem(RSS_KEY, JSON.stringify({ ...rssState(), ...changes })); } catch { /* storage blocked */ } };
+        const checkRss = async () => {
+            const note = $('rss-note'), url = rssAddress($('rss-input').value);
+            if (!url) { note.textContent = 'Type the feed\'s address, starting with https://'; return; }
+            note.textContent = 'Reading the feed…';
+            const reply = await serverRequest({ mode: 'rssFeed', url }, 'rssData', 9000);
+            if (rssAddress($('rss-input').value) !== url) return; // changed while it was read
+            const titles = reply?.ok && Array.isArray(reply.titles) ? reply.titles : [];
+            note.textContent = !reply ? 'The server didn\'t answer (not connected, or a server from before RSS: reload server.py in OBS, or restart server.js). Until it does, the ticker says Breaking News.'
+                : titles.length ? `${reply.feed ? `${reply.feed}: ` : ''}${titles.length} headline${titles.length > 1 ? 's' : ''}, like "${titles[0].slice(0, 70)}${titles[0].length > 70 ? '…' : ''}"`
+                : `Couldn't read it (${reply.error || 'no headlines in it'}). Until it can, the ticker says Breaking News.`;
+        };
+        const initRss = () => {
+            const st = rssState();
+            $('rss-on').checked = st.on;
+            $('rss-input').value = st.url;
+            // A button for each feed on offer, under the box: tapping one puts its address there (lit while it's the one in use)
+            const lit = () => $('rss-feeds').querySelectorAll('button').forEach(btn => btn.classList.toggle('on', btn.dataset.url === rssAddress($('rss-input').value)));
+            RSS_FEEDS.forEach(([url, name, what]) => {
+                const btn = Object.assign(document.createElement('button'), { type: 'button', textContent: name, title: `${what}\n${url}` });
+                btn.dataset.url = url;
+                btn.onclick = () => { $('rss-input').value = url; saveRss({ url }); lit(); checkRss(); };
+                $('rss-feeds').append(btn);
+            });
+            $('rss-input').addEventListener('input', lit);
+            lit();
+            $('rss-on').addEventListener('change', (e) => {
+                saveRss({ on: e.target.checked });
+                updateSections();
+                if (e.target.checked) checkRss();
+            });
+            $('rss-input').addEventListener('change', (e) => {
+                const url = rssAddress(e.target.value);
+                if (url) saveRss({ url });
+                checkRss();
+            });
         };
 
         // ---------- Like, Follow & Subscribe socials ----------
@@ -8004,6 +8594,8 @@
                     out.textContent = logoFile ? `Custom: ${logoFile}` : 'Custom (no picture picked)';
                 } else if (OVERLAYS[input.value]?.weather && input.name === 'overlayStyle') {
                     out.textContent = `Weather: ${WEATHER[checked('weatherStyle')] || WEATHER.storm}`;
+                } else if (OVERLAYS[input.value]?.fantasy && input.name === 'overlayStyle') {
+                    out.textContent = `Fantasy: ${FANTASY[checked('fantasyStyle')] || FANTASY.castle}`;
                 } else {
                     out.textContent = d.dataset.show === 'value' ? input.value : label.textContent.trim();
                 }
@@ -8098,18 +8690,23 @@
                 if ((cfg.text || cfg.place) && !text) { flash(cfg.place ? 'Enter the location' : oneBox ? 'Enter some text' : 'Enter a name', true); return null; }
                 if (cfg.custom && !customFile) { flash(`Put a PNG, JPG or GIF in the "${CUSTOM_FOLDER}" folder, then tap Custom…`, true); return null; }
                 const file = cfg.content ? contentPickOf(cfg) : '';
+                // Breaking News from an RSS feed: its address goes, in place of the text
+                const rss = cfg.ticker && $('rss-on').checked ? rssAddress($('rss-input').value) : '';
+                if (cfg.ticker && $('rss-on').checked && !rss) { flash('Type the RSS feed\'s address, starting with https://', true); return null; }
                 if (cfg.content && !file) { flash(`Put a ${cfg.audio ? 'sound file (MP3, WAV, OGG, M4A)' : 'picture or video'} in the "${CONTENT_FOLDER}" folder, then tap ${cfg.label}…`, true); return null; }
                 if (cfg.logo && !logoFile) { flash(`Put a PNG in the "${CUSTOM_FOLDER}" folder, then tap Custom… under Stingers`, true); return null; }
                 return {
                     mode: 'overlay',
                     overlay,
                     // Content is named after its file (like "interview"), so its cards and rundown rows tell them apart
-                    label: oneBox || cfg.text ? text : cfg.content ? file.replace(/\.[^.]+$/, '') : '',
+                    label: rss ? '' : oneBox || cfg.text ? text : cfg.content ? file.replace(/\.[^.]+$/, '') : '',
+                    ...(rss && { rss }),
                     title: cfg.text && !oneBox ? title : '',
                     ...(cfg.custom && { customBg: customFile }),
                     ...(cfg.content && { content: file }),
                     ...(cfg.logo && { logo: logoFile }),
                     ...(cfg.weather && { weather: checked('weatherStyle') || 'storm' }),
+                    ...(cfg.fantasy && { fantasy: checked('fantasyStyle') || 'castle' }),
                     ...(cfg.sport && { sport: checked('sportStyle') }),
                     ...(cfg.emoji && { emoji: checked('emojiStyle') || 'lol' }),
                     ...(cfg.xmas && { xmas: checked('xmasStyle') || 'wrapper' }),
@@ -8148,13 +8745,16 @@
         };
 
         // 💾 SAVE
+        // Saved while TOGGLE is on (the button reads TOGGLE OFF), it's saved as a toggle: its card puts it up until it's
+        // turned off, the way it is now, instead of for the Duration.
+        const asToggled = (p) => (toggled[currentLayer()] && OVERLAYS[p.overlay]?.length === undefined ? { ...p, toggle: true } : p);
         const saveButton = () => {
             const p = buildPayload();
             if (!p) return;
-            const b = loadButtonsFromStorage();
-            b.unshift({ id: Date.now(), ...p });
+            const b = loadButtonsFromStorage(), d = asToggled(p);
+            b.unshift({ id: Date.now(), ...d });
             saveButtonsToStorage(b);
-            flash('Saved');
+            flash(d.toggle ? 'Saved as a toggle' : 'Saved', false, d.toggle ? 'its card keeps it up until it\'s turned off' : '');
         };
 
         // ＋ RUNDOWN: adds what's set up now straight to the Podcast Rundown, under Unsorted.
@@ -8166,7 +8766,7 @@
                 if (!confirm('The show is set. Turn off Set Show and add this under Unsorted?')) return;
                 localStorage.setItem(SHOW_LOCK_KEY, '0');
             }
-            addToShow(p, UNSORTED);
+            addToShow(asToggled(p), UNSORTED);
         };
 
         // ✖ CLEAR ALL
@@ -8273,8 +8873,8 @@
             const cl3 = data.mode === 'cl3';
             const sub = cl3 ? `Complex scene | ${cl3Steps(data).length} in a row`
                 : isOverlay
-                ? (data.source && holdsOn(data) ? `${data.source} | toggle` : data.source || `${kind} | ${OVERLAYS[ovKey]?.label || ovKey}${data.customBg ? `: ${data.customBg}` : ''}${data.content ? `: ${data.content}${data.clear ? ' (clear)' : ''}` : ''}${data.sport ? `: ${SPORTS[data.sport] || data.sport}` : ''}${data.emoji ? `: ${EMOJIS[data.emoji] || data.emoji}` : ''}${data.xmas ? `: ${XMAS_STYLES[data.xmas] || data.xmas}` : ''}${OVERLAYS[ovKey]?.weather ? `: ${WEATHER[weatherOf(data)]}` : ''}${data.logo ? `: ${data.logo}` : ''}${data.tapeDate || data.tapeTime ? `: ${tapeLabel(data)}` : ''}`)
-                : `${data.bgStyle === 'custom' ? `custom: ${data.customBg}` : l3Bg(data.bgStyle)} | ${data.fontStyle?.replace('font-', '')}`;
+                ? (data.source && holdsOn(data) ? `${data.source} | toggle` : data.source || `${kind}${holdsOn(data) ? ' | TOGGLE' : ''} | ${OVERLAYS[ovKey]?.label || ovKey}${data.customBg ? `: ${data.customBg}` : ''}${data.content ? `: ${data.content}${data.clear ? ' (clear)' : ''}` : ''}${data.sport ? `: ${SPORTS[data.sport] || data.sport}` : ''}${data.emoji ? `: ${EMOJIS[data.emoji] || data.emoji}` : ''}${data.xmas ? `: ${XMAS_STYLES[data.xmas] || data.xmas}` : ''}${OVERLAYS[ovKey]?.weather ? `: ${WEATHER[weatherOf(data)]}` : ''}${OVERLAYS[ovKey]?.fantasy ? `: ${FANTASY[fantasyOf(data)]}` : ''}${data.logo ? `: ${data.logo}` : ''}${data.rss ? `: RSS ${rssHost(data.rss)}` : ''}${data.tapeDate || data.tapeTime ? `: ${tapeLabel(data)}` : ''}`)
+                : `${holdsOn(data) ? 'toggle | ' : ''}${data.bgStyle === 'custom' ? `custom: ${data.customBg}` : l3Bg(data.bgStyle)} | ${data.fontStyle?.replace('font-', '')}`;
 
             const card = document.createElement('div');
             card.className = `saved-card relative rounded-lg overflow-hidden border-l-4 ${cl3 ? 'border-amber-400' : (isOverlay ? ACCENTS[ovKey] : L3_ACCENTS[l3Bg(data.bgStyle)] || ACCENTS[l3Bg(data.bgStyle)]) || 'border-gray-400'} bg-gradient-to-br ${cl3 ? 'from-[#3a2f14] to-zinc-800' : isOverlay ? 'from-[#26253a] to-zinc-800' : 'from-zinc-700 to-zinc-800'} shadow-md`;
@@ -8362,7 +8962,7 @@
             renderButtons(loadButtonsFromStorage());
             if (open) $('saved-search').focus();
         };
-        const savedSearchText = (d) => [d.label, d.title, d.source, d.customBg, d.logo, d.content, d.bgStyle, OVERLAYS[d.overlay]?.label, OVERLAYS[d.overlay]?.weather && WEATHER[weatherOf(d)],
+        const savedSearchText = (d) => [d.label, d.title, d.source, d.customBg, d.logo, d.content, d.bgStyle, OVERLAYS[d.overlay]?.label, OVERLAYS[d.overlay]?.weather && WEATHER[weatherOf(d)], OVERLAYS[d.overlay]?.fantasy && FANTASY[fantasyOf(d)],
             ...Object.values(d.socials || {})].filter(Boolean).join(' ').toLowerCase();
 
         const toggleSavedOpen = () => {
@@ -8541,7 +9141,7 @@
         const coverOf = (d) => {
             const cfg = d && !d.cue && isOverlayItem(d) ? OVERLAYS[d.overlay] : null;
             if (!cfg?.cover) return null;
-            const c = Array.isArray(cfg.cover) ? cfg.cover : cfg.sport ? cfg.cover[SPORTS[d.sport] ? d.sport : 'football'] : cfg.weather ? cfg.cover[weatherOf(d)] : cfg.cover[xmasCanvas(d) ? d.xmas : 'wrapper'];
+            const c = Array.isArray(cfg.cover) ? cfg.cover : cfg.sport ? cfg.cover[SPORTS[d.sport] ? d.sport : 'football'] : cfg.weather ? cfg.cover[weatherOf(d)] : cfg.fantasy ? cfg.cover[fantasyOf(d)] : cfg.cover[xmasCanvas(d) ? d.xmas : 'wrapper'];
             return c ? [c[0] * cfg.length, c[1] * cfg.length] : null;
         };
         const stingerScene = (d) => (d.coverScene && coverOf(d) ? d.coverScene : '');
@@ -10089,6 +10689,7 @@
                 item.label = $('edit-name').value.trim() || item.label;
             } else if (cfg?.caption != null || cfg?.ticker) {
                 item.label = $('edit-para').value.trim(); // blank uses the default text
+                if (item.label) delete item.rss; // Breaking News from a feed: text typed here takes its place
             } else if (cfg?.social) {
                 item.socials = Object.fromEntries(Object.keys(SOCIALS)
                     .map(k => [k, $(`edit-social-${k}`).value.trim()]).filter(([, v]) => v));
@@ -12584,7 +13185,7 @@
            was left, and a saved show brings them back too.
            ========================================================= */
         const PICKS_KEY = 'fx_picks';
-        const PICK_GROUPS = ['mode', 'bgStyle', 'fontStyle', 'fontColor', 'location', 'animationStyle', 'overlayStyle', 'sportStyle', 'emojiStyle', 'xmasStyle', 'weatherStyle', 'contentBack'];
+        const PICK_GROUPS = ['mode', 'bgStyle', 'fontStyle', 'fontColor', 'location', 'animationStyle', 'overlayStyle', 'sportStyle', 'emojiStyle', 'xmasStyle', 'weatherStyle', 'fantasyStyle', 'contentBack'];
         const savePicks = () => {
             const picks = Object.fromEntries(PICK_GROUPS.map(name => [name, checked(name) ?? null]));
             try { localStorage.setItem(PICKS_KEY, JSON.stringify({ ...picks, l3Duration })); } catch { /* storage blocked */ }
@@ -13004,6 +13605,8 @@
                 ...(cfg.emoji && { emoji: checked('emojiStyle') || 'lol' }),
                 ...(cfg.xmas && { xmas: checked('xmasStyle') || 'wrapper' }),
                 ...(cfg.weather && { weather: checked('weatherStyle') || 'storm' }),
+                ...(cfg.fantasy && { fantasy: checked('fantasyStyle') || 'castle' }),
+                ...(cfg.ticker && rssState().on && rssAddress(rssState().url) && { rss: rssAddress(rssState().url) }), // Breaking News, from the feed set on its tab
                 ...(cfg.logo && logoFile && { logo: logoFile }),
                 ...(cfg.social && { socials: currentSocials() }),
                 ...(cfg.depth && loadGsEffects().includes(key) && { gs: true }),
@@ -13330,7 +13933,7 @@
                 $('bg-custom').addEventListener('click', pickCustom);
                 $('ov-l3Custom').addEventListener('click', pickCustom);
                 $('ov-customStinger').addEventListener('click', () => pickCustom('logo')); // the Custom stinger's picture
-                document.querySelectorAll('input[name="weatherStyle"]').forEach(r => r.addEventListener('change', updateSummaries));
+                document.querySelectorAll('input[name="weatherStyle"], input[name="fantasyStyle"]').forEach(r => r.addEventListener('change', updateSummaries));
                 $('custom-file').addEventListener('change', (e) => {
                     if (e.target.files.length) useCustomFile(e.target.files[0].name);
                     e.target.value = '';
@@ -13347,6 +13950,7 @@
                 });
                 // Like & Subscribe socials
                 renderSocialField();
+                initRss(); // Breaking News from an RSS feed
                 // Sound Pad
                 renderSoundPads();
                 document.addEventListener('keydown', soundKeys);

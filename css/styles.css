@@ -1452,6 +1452,19 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
    The Content window is the same, for the content folder's pictures and videos. */
 .custom-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-height: 50vh; overflow-y: auto; }
 .custom-list:empty { display: none; }
+/* Breaking News: Use an RSS feed */
+.rss-check { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.rss-check input { width: 18px; height: 18px; accent-color: #6d28d9; }
+.rss-check .icon { width: 16px; height: 16px; color: #fb923c; }
+.rss-feeds { display: flex; flex-wrap: wrap; gap: 4px; margin: 5px 0 3px; }
+.rss-feeds button { flex: 1 1 auto; padding: 4px 8px; border: 1px solid rgba(255, 255, 255, 0.85); border-radius: 6px; font-size: 12px; font-weight: 600; }
+.rss-feeds button:hover { background: #a78bfa; }
+.rss-feeds button.on { background: #6d28d9; border-color: #6d28d9; color: #fff; }
+html.light .rss-feeds button { border-color: #6b7280; }
+/* TOGGLE OFF's pulse (Tailwind's animate-pulse), in 4 steps a second, not 60: a button that fades smoothly for as long as
+   something is toggled on kept the dock drawing 60 frames a second, in the GPU process that draws the display in OBS
+   (175 ms of it a second, against 11 with nothing moving), and what was on screen moved less smoothly for it. */
+#toggle-btn.animate-pulse, #simple-toggle-btn.animate-pulse { animation-timing-function: steps(4, end); }
 /* A sound file's picture in the pick windows */
 .audio-tile { display: grid; place-items: center; width: 100%; aspect-ratio: 16 / 9; border-radius: 4px; background: linear-gradient(135deg, #4c1d95, #0e7490); color: #fff; font-size: 34px; }
 .custom-pick {
@@ -2897,11 +2910,13 @@ html.light .tm-error { color: #b91c1c; }
 }
 /* The text scrolls from the right edge to off the left: the page moves it a whole number of pixels each frame
    (startTicker). It's kept on a layer of its own, so moving it never redraws the text. */
-#breaking-text {
+#breaking-text { position: absolute; inset: 0; }
+/* Its pieces (one for typed text, one a headline for a feed), each on a layer of its own; the ones off screen are hidden */
+#breaking-text > span {
   position: absolute;
   top: 50%;
   left: 0;
-  white-space: nowrap;
+  white-space: pre;
   color: #fff;
   font-size: 4.4vh;
   font-weight: 600;

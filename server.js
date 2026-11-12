@@ -125,6 +125,82 @@ function loadShowFile(request) {
     }
 }
 
+// ---------- Breaking News from an RSS feed ----------
+// The display asks for a feed's headlines (rssFeed, with its address) and the server reads it: a page opened from a file
+// isn't allowed to read another site. Only http and https addresses, at most RSS_MAX_BYTES of the feed, and only its
+// headlines go back (as plain text). A feed's answer is kept for a minute, so several windows asking don't each fetch it.
+const RSS_MAX_BYTES = 2 * 1024 * 1024;
+const RSS_MOST = 30;
+const RSS_KEEP = 60 * 1000;
+const rssKept = new Map(); // address -> { when, reply }
+const RSS_ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', rsquo: '\u2019', lsquo: '\u2018', rdquo: '\u201d', ldquo: '\u201c', ndash: '\u2013', mdash: '\u2014', hellip: '\u2026' };
+// &amp; and the like turned back into characters
+function rssUnescape(text) {
+    return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+\d*);/gi, (all, name) => {
+        if (name[0] === '#') {
+            const code = name[1].toLowerCase() === 'x' ? parseInt(name.slice(2), 16) : parseInt(name.slice(1), 10);
+            return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : all;
+        }
+        return Object.prototype.hasOwnProperty.call(RSS_ENTITIES, name.toLowerCase()) ? RSS_ENTITIES[name.toLowerCase()] : all;
+    });
+}
+// A title as plain text: out of its CDATA wrapper, entities turned back (twice: some feeds escape twice), tags dropped
+// (before and after: some feeds escape their tags, as &lt;i&gt;)
+function rssText(raw) {
+    const cdata = raw.match(/^\s*<!\[CDATA\[([\s\S]*?)\]\]>\s*$/);
+    const tags = /<\/?[A-Za-z][^>]*>/g;
+    const text = (cdata ? cdata[1] : raw).replace(tags, '');
+    return rssUnescape(rssUnescape(text)).replace(tags, '').replace(/\s+/g, ' ').trim().slice(0, 300);
+}
+// The feed's own name and its items' headlines, in order, from RSS or Atom (read loosely, so a cut-off or untidy feed still works)
+function rssTitles(xml) {
+    const items = [...xml.matchAll(/<(item|entry)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi)];
+    const head = items.length ? xml.slice(0, items[0].index) : xml;
+    const title = (part) => { const m = part.match(/<title\b[^>]*>([\s\S]*?)<\/title\s*>/i); return m ? rssText(m[1]) : ''; };
+    const titles = [];
+    for (const item of items) {
+        const text = title(item[2]);
+        if (text && !titles.includes(text)) titles.push(text);
+        if (titles.length >= RSS_MOST) break;
+    }
+    return { feed: title(head), titles };
+}
+async function rssFeed(request) {
+    let url = request.url;
+    const reply = { mode: 'rssData', url, ok: false, titles: [] };
+    if (typeof url !== 'string' || url.length > 500 || !/^https?:\/\/[^\s/]+\.[^\s]+$/i.test(url.trim())) return { ...reply, error: 'Not a web address' };
+    url = url.trim();
+    const kept = rssKept.get(url);
+    if (kept && Date.now() - kept.when < RSS_KEEP) return kept.reply;
+    let answer;
+    try {
+        if (typeof fetch !== 'function') throw Object.assign(new Error('needs Node.js 18 or newer'), { name: 'needs Node.js 18 or newer' });
+        const response = await fetch(url, { signal: AbortSignal.timeout(7000), redirect: 'follow',
+            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; FXWizard RSS ticker)', Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*' } });
+        if (!response.ok) answer = { ...reply, error: `The site answered ${response.status}` };
+        else {
+            // No more than RSS_MAX_BYTES of it (some feeds go back years)
+            const parts = [];
+            let size = 0;
+            for await (const part of response.body) {
+                parts.push(part);
+                size += part.length;
+                if (size >= RSS_MAX_BYTES) break;
+            }
+            const charset = ((response.headers.get('content-type') || '').match(/charset=([\w-]+)/i) || [])[1] || 'utf-8';
+            let xml;
+            try { xml = new TextDecoder(charset).decode(Buffer.concat(parts).subarray(0, RSS_MAX_BYTES)); } catch (err) { xml = Buffer.concat(parts).toString('utf8'); }
+            const { feed, titles } = rssTitles(xml);
+            answer = { ...reply, url, ok: titles.length > 0, feed, titles, ...(titles.length ? {} : { error: 'No headlines found: is it an RSS feed?' }) };
+        }
+    } catch (err) { // no internet, a wrong name, too slow
+        answer = { ...reply, error: `Couldn't reach it (${(err && (err.cause && err.cause.code)) || (err && err.name) || 'error'})` };
+    }
+    if (rssKept.size > 50) rssKept.clear();
+    rssKept.set(url, { when: Date.now(), reply: answer });
+    return answer;
+}
+
 // Requests from the control panel that the server answers itself (only to that panel).
 // Returns the reply, or null for everything else (graphics, which get passed on).
 function answerRequest(request) {
@@ -494,6 +570,13 @@ wss.on('connection', function connection(ws) {
         }
 
         console.log(`Received message: ${messageText}`);
+
+        // Breaking News from an RSS feed: the display (or the panel, checking an address) asks for its headlines.
+        // Read without holding anything up, and answered only to the window that asked.
+        if (request && request.mode === 'rssFeed') {
+            rssFeed(request).then(reply => { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(reply)); }).catch(() => {});
+            return;
+        }
 
         // The control panel asking for the custom images or a rundown file: answer only it
         const reply = answerRequest(request);

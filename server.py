@@ -4,6 +4,7 @@ import base64
 import ctypes
 import hashlib
 import hmac
+import html
 import json
 import math
 import os
@@ -572,6 +573,13 @@ async def socket_handler(websocket):
                 task.add_done_callback(take_tasks.discard)
                 continue
 
+            # Breaking News from an RSS feed: the display (or the panel, checking an address) asks for its headlines
+            if isinstance(request, dict) and request.get("mode") == "rssFeed":
+                task = asyncio.get_running_loop().create_task(reply_rss(websocket, request))
+                take_tasks.add(task)
+                task.add_done_callback(take_tasks.discard)
+                continue
+
             # The control panel asking for the custom images or a rundown file: answer only it
             reply = answer_request(message)
             if reply is not None:
@@ -863,6 +871,84 @@ def press_hotkey(request):
     return {"mode": "obsHotkeyResult", "ok": True, "key": key}
 
 take_tasks = set()  # keeps the takes (and hotkeys) that are in flight from being cleaned up before they finish
+
+# ---------- Breaking News from an RSS feed ----------
+# The display asks for a feed's headlines (rssFeed, with its address) and the server reads it: a page opened from a file
+# isn't allowed to read another site. Only http and https addresses, at most RSS_MAX_BYTES of the feed, and only its
+# headlines go back (as plain text). A feed's answer is kept for a minute, so several windows asking don't each fetch it.
+RSS_MAX_BYTES = 2 * 1024 * 1024
+RSS_MOST = 30
+RSS_KEEP = 60
+rss_kept = {}  # address -> (when, reply)
+RSS_ITEM = re.compile(r"<(item|entry)\b[^>]*>(.*?)</\1\s*>", re.S | re.I)
+RSS_TITLE = re.compile(r"<title\b[^>]*>(.*?)</title\s*>", re.S | re.I)
+
+def rss_text(raw):
+    """A title as plain text: out of its CDATA wrapper, &amp; and the like turned back into characters, tags dropped
+    (before and after: some feeds escape their tags, as &lt;i&gt;)."""
+    cdata = re.match(r"\s*<!\[CDATA\[(.*?)\]\]>\s*$", raw, re.S)
+    tags = re.compile(r"</?[A-Za-z][^>]*>")
+    text = tags.sub("", cdata.group(1) if cdata else raw)
+    text = tags.sub("", html.unescape(html.unescape(text)))  # (twice: some feeds escape twice)
+    return re.sub(r"\s+", " ", text).strip()[:300]
+
+def rss_titles(xml):
+    """(the feed's own name, its items' headlines in order) from RSS or Atom, read loosely so a cut-off or untidy feed still works."""
+    items = [m.group(2) for m in RSS_ITEM.finditer(xml)]
+    head = xml[:RSS_ITEM.search(xml).start()] if items else xml
+    feed = RSS_TITLE.search(head)
+    titles = []
+    for item in items:
+        title = RSS_TITLE.search(item)
+        text = rss_text(title.group(1)) if title else ""
+        if text and text not in titles:
+            titles.append(text)
+        if len(titles) >= RSS_MOST:
+            break
+    return (rss_text(feed.group(1)) if feed else ""), titles
+
+def rss_feed(request):
+    """Reads a feed and answers with its headlines. Runs on a worker thread (see reply_rss): the web can be slow."""
+    url = request.get("url")
+    reply = {"mode": "rssData", "url": url, "ok": False, "titles": []}
+    if not isinstance(url, str) or not re.match(r"https?://[^\s/]+\.[^\s]+$", url.strip(), re.I) or len(url) > 500:
+        return {**reply, "error": "Not a web address"}
+    url = url.strip()
+    kept = rss_kept.get(url)
+    if kept and time.time() - kept[0] < RSS_KEEP:
+        return kept[1]
+    try:
+        ask = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; FXWizard RSS ticker)", "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml, */*"})
+        with urllib.request.urlopen(ask, timeout=7) as response:
+            raw = response.read(RSS_MAX_BYTES)
+            charset = response.headers.get_content_charset() or "utf-8"
+            if (response.headers.get("Content-Encoding") or "").lower() == "gzip":
+                import zlib
+                raw = zlib.decompressobj(31).decompress(raw)  # (as much of it as arrived)
+        try:
+            xml = raw.decode(charset, errors="replace")
+        except LookupError:
+            xml = raw.decode("utf-8", errors="replace")
+        feed, titles = rss_titles(xml)
+        reply = {**reply, "url": url, "ok": bool(titles), "feed": feed, "titles": titles}
+        if not titles:
+            reply["error"] = "No headlines found: is it an RSS feed?"
+    except urllib.error.HTTPError as e:
+        reply = {**reply, "error": f"The site answered {e.code}"}
+    except Exception as e:  # no internet, a wrong name, too slow
+        reply = {**reply, "error": f"Couldn't reach it ({e.__class__.__name__})"}
+    if len(rss_kept) > 50:
+        rss_kept.clear()
+    rss_kept[url] = (time.time(), reply)
+    return reply
+
+async def reply_rss(websocket, request):
+    """Reads the feed on a worker thread, so a slow site never holds up the graphics, and answers only the window that asked."""
+    reply = await asyncio.get_running_loop().run_in_executor(None, rss_feed, request)
+    try:
+        await websocket.send(json.dumps(reply))
+    except Exception:
+        pass  # the window went away while the feed was read
 
 async def reply_take(websocket, request):
     """Fires one TAKE (or presses one rundown item's hotkey) on a worker thread and tells the panel that asked how it went."""
