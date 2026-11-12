@@ -3,7 +3,7 @@
     python tests/perf.py                 every section
     python tests/perf.py canvas panel    just those
 
-Sections: assets canvas display gpu panel dock leak offline servers. Needs Google Chrome (or set FXW_CHROME to its path),
+Sections: assets canvas display gpu panel dock content leak offline servers. Needs Google Chrome (or set FXW_CHROME to its path),
 Node.js (for server.js), and Python 3 with websockets (pip install websockets). OBS can stay open: the servers are
 tested on ports 8092 and 8093, not 8080. Results go to tests/results/perf_results.json (merged with what's there).
 Each section makes a throwaway copy of the panel (_perf_*.html) next to fx_wizard.html and deletes it after."""
@@ -51,6 +51,7 @@ EFFECT_CASES = [
     ["sports", 2.6, {"sport": "soccer"}], ["spring", 3, {}], ["storm", 2.8, {}], ["tvstatic", 1.8, {}], ["fireworks", 4, {}],
     ["medical", 2.4, {}], ["lubbock", 3, {}], ["tech", 2.6, {}], ["xmasfx", 1.8, {"xmas": "trees"}], ["xmasfx", 1.8, {"xmas": "ornaments"}], ["firestinger", 2.4, {}], ["pixel", 2.6, {}], ["cat", 2.8, {}],
     ["curtains", 3, {}], ["coffee", 3.4, {}], ["coffee", 3.4, {"label": "Happy Birthday"}],
+    ["sunshine", 2.8, {}], ["cloudsfx", 2.8, {}], ["america", 3, {}], ["customstinger", 3, {}],
     ["fire", 4, {"layer": "front"}], ["fire", 4, {"layer": "back"}], ["snow", 4, {"layer": "back"}],
 ]
 BENCH = """<script>
@@ -132,12 +133,14 @@ def display():
         out["video"].append(r); print("video", r)
     l3 = lambda bg, anim="anim-slideLeft": {"mode": "l3", "label": "Jenny Parker", "title": "Host", "location": "Bottom Left", "bgStyle": bg,
                                              "fontStyle": "font-default", "fontColor": "", "animationStyle": anim, "duration": 3}
-    cases = [("L3 blue / slide", l3("blue"), 3), ("L3 code (25 MB video)", l3("code"), 3), ("L3 cafe / glitch", l3("cafe", "anim-glitch"), 3),
+    cases = [("L3 blue / slide", l3("blue"), 3), ("L3 medical", l3("medical"), 3), ("L3 saved as code (plays medical)", l3("code"), 3), ("L3 cafe / glitch", l3("cafe", "anim-glitch"), 3),
              ("L3 custom image", {**l3("custom"), "customBg": "ryan3.jpg"}, 3)]
     for ov in ["stinger", "ghost", "colorbars", "xmas", "l3Large", "l3Gif", "breaking", "social", "locpin",
                "fire", "hottake", "disco", "comic", "fireworks", "emoji", "firestinger", "cat", "curtains", "coffee", "storm", "sportsfx",
-               "techfx", "lubbock"]:
+               "techfx", "lubbock", "america", "customStinger"]:
         cases.append((ov, {"mode": "overlay", "overlay": ov, "label": "Test", "title": "", "duration": 3, "sport": "basketball"}, 3.2))
+    for weather in ("sunshine", "clouds"):  # the Weather stinger's other two (plain "storm" above is its Storm)
+        cases.append((f"weather: {weather}", {"mode": "overlay", "overlay": "storm", "weather": weather, "label": "", "title": "", "duration": 3}, 3.2))
     for name, data, secs in cases:
         r = pg.js(f"rtTake({json.dumps(data)}, {secs})", timeout=60)
         r["name"] = name
@@ -266,6 +269,60 @@ def dock():
     results["dock"] = out
 
 
+# ---------------------------------------------------------------- C3. the Visualizer on the Content page
+# In real time, with the graphics chip: the Background Music file plays through it, once from its own copy of the sound
+# (what the server hands over, here handed over by the test) so its bars move to what's in it, and once with no server,
+# where the sound still plays and the bars move by themselves. Its frame rate, and that the bars really do follow the sound.
+VIZ_JS = r"""
+window.vizRun = async (secs) => {
+  const d = [], sums = []; let last = performance.now(), run = true; const longs = [];
+  const po = new PerformanceObserver(l => l.getEntries().forEach(e => longs.push(e.duration))); po.observe({ entryTypes: ['longtask'] });
+  const f = (t) => { d.push(t - last); last = t; if (run) requestAnimationFrame(f); };
+  requestAnimationFrame(f);
+  showDisplay({ mode: 'overlay', overlay: 'contentViz', content: '_perf_viz.mp3', label: 'Test', duration: secs });
+  await new Promise(r => setTimeout(r, 1500));
+  const heard = VIZ.heard, blob = !!VIZ.audio && VIZ.audio.src.startsWith('blob:');
+  for (let i = 0; i < 20; i++) { sums.push(+VIZ.levels.reduce((a, b) => a + b, 0).toFixed(2)); await new Promise(r => setTimeout(r, 100)); }
+  const playing = !!VIZ.audio && !VIZ.audio.paused && VIZ.audio.currentTime > 1;
+  await new Promise(r => setTimeout(r, Math.max(0, secs * 1000 - 3900)));
+  run = false; po.disconnect();
+  showDisplay({ mode: 'clear' }); await new Promise(r => setTimeout(r, 900));
+  const s = d.slice(2).sort((a, b) => a - b);
+  return { heard, blob, playing, moves: new Set(sums).size, peak: Math.max(...sums), fps: +(1000 / (s.reduce((a, b) => a + b, 0) / s.length)).toFixed(1), janks: s.filter(x => x > 25).length,
+           longTasks: longs.length, longest: Math.round(Math.max(0, ...longs)), leftOn: VIZ.on || !!VIZ.audio || !!VIZ.raf };
+};
+"""
+
+
+def content():
+    import base64
+    clip = os.path.join(REPO, "content", "_perf_viz.mp3")  # (the content folder's own files aren't in Git)
+    shutil.copy(os.path.join(REPO, "assets", "sounds", "background.mp3"), clip)
+    p = test_page("viz")
+    pg = Page(url(p, "#content"), gpu=True, extra=("--enable-gpu-rasterization", "--ignore-gpu-blocklist"))
+    out = {}
+    try:
+        time.sleep(1.5)
+        pg.js(VIZ_JS)
+        out["no server"] = pg.js("vizRun(6)", timeout=60)
+        # A stand-in server: it answers contentData with the file, as server.py and server.js do
+        pg.js("window.__b64 = %s; ws = { readyState: WebSocket.OPEN, send(m) { const q = JSON.parse(m); if (q.mode === 'contentData') setTimeout(() => showDisplay({ mode: 'contentData', file: q.file, ok: true, type: 'audio/mpeg', data: window.__b64 }), 20); } }; 0"
+              % json.dumps(base64.b64encode(open(clip, "rb").read()).decode()))
+        out["with the server"] = pg.js("vizRun(6)", timeout=60)
+        for k, r in out.items():
+            print(f"{k:16}", r)
+        a, b = out["no server"], out["with the server"]
+        out["ok"] = (a["playing"] and not a["heard"] and a["moves"] > 5 and not a["leftOn"]
+                     and b["playing"] and b["heard"] and b["blob"] and b["moves"] > 5 and b["peak"] > 1 and not b["leftOn"]
+                     and min(a["fps"], b["fps"]) >= 55)
+        print("content ok" if out["ok"] else "content FAILED")
+    finally:
+        pg.close()
+        os.remove(p)
+        os.remove(clip)
+    results["content"] = out
+
+
 # ---------------------------------------------------------------- D. memory over many takes
 def leak():
     p = test_page("leak")
@@ -370,8 +427,46 @@ async def slow_client_test(port):
     return {"sent": len(lat), "median": statistics.median(lat), "max": max(lat), "stalled": lat[-1] >= 5000}
 
 
+async def folder_test(port):
+    """The folders: sound files are listed (custom, for the Sound Pad's Custom pad; content, for the Visualizer), and
+    contentData hands over a sound from the content folder, whole, and nothing else (not a picture, not a file from outside)."""
+    import websockets, base64
+    ws = await websockets.connect(f"ws://127.0.0.1:{port}", max_size=2 ** 26)
+    async def ask(msg, reply):
+        await ws.send(json.dumps(msg))
+        while True:
+            m = json.loads(await asyncio.wait_for(ws.recv(), 10))
+            if m.get("mode") == reply:
+                return m
+    custom = (await ask({"mode": "customList"}, "customFiles"))["files"]
+    listed = (await ask({"mode": "contentList"}, "contentFiles"))["files"]
+    good = await ask({"mode": "contentData", "file": "_perf_viz.mp3"}, "contentData")
+    whole = good.get("ok") and base64.b64decode(good["data"]) == open(os.path.join(REPO, "content", "_perf_viz.mp3"), "rb").read()
+    refused = [not (await ask({"mode": "contentData", "file": f}, "contentData")).get("ok") for f in ("_perf_pic.png", "../server.py", "..\\server.py", "nothing.mp3", "", None, 5)]
+    await ws.close()
+    return {"customListsSounds": "_perf_snd.mp3" in custom, "contentListsSounds": "_perf_viz.mp3" in listed, "soundHandedOverWhole": bool(whole),
+            "type": good.get("type"), "othersRefused": all(refused), "ok": "_perf_snd.mp3" in custom and "_perf_viz.mp3" in listed and bool(whole) and all(refused)}
+
+
 def servers():
     out = {}
+    # Stand-in files for the folder checks (the folders' own files aren't in Git); taken away again at the end
+    temp = [(os.path.join(REPO, "assets", "sounds", "swish.mp3"), os.path.join(REPO, "content", "_perf_viz.mp3")),
+            (os.path.join(REPO, "assets", "sounds", "swish.mp3"), os.path.join(REPO, "custom", "_perf_snd.mp3")),
+            (os.path.join(REPO, "assets", "tinyLogo.png"), os.path.join(REPO, "content", "_perf_pic.png"))]
+    for src, dst in temp:
+        shutil.copy(src, dst)
+    try:
+        _servers(out)
+    finally:
+        for _, dst in temp:
+            os.remove(dst)
+    for k, v in out.items():
+        print(k, {a: round(b, 2) if isinstance(b, float) else b for a, b in v.items()})
+    results["servers"] = out
+
+
+def _servers(out):
     # server.js, a copy on port 8092 (OBS holds 8080)
     js = open(os.path.join(REPO, "server.js"), encoding="utf-8").read().replace("port: 8080", "port: 8092")
     jsp = os.path.join(REPO, "_perf_server.js")
@@ -380,6 +475,7 @@ def servers():
     time.sleep(1.2)
     try:
         out["server.js"] = asyncio.run(relay_test(8092))
+        out["server.js folders"] = asyncio.run(folder_test(8092))
         out["server.js big"] = asyncio.run(relay_test(8092, 150, big=True))
         out["server.js slow client"] = asyncio.run(slow_client_test(8092))
     finally:
@@ -409,12 +505,10 @@ def servers():
     import io, contextlib
     with contextlib.redirect_stdout(io.StringIO()):  # it prints every broadcast
         out["server.py"] = asyncio.run(relay_test(8093))
+        out["server.py folders"] = asyncio.run(folder_test(8093))
         out["server.py big"] = asyncio.run(relay_test(8093, 150, big=True))
         out["server.py slow client"] = asyncio.run(slow_client_test(8093))
     loop.call_soon_threadsafe(lambda: mod.server_stop.set_result(None))
-    for k, v in out.items():
-        print(k, {a: round(b, 2) if isinstance(b, float) else b for a, b in v.items()})
-    results["servers"] = out
 
 
 # ---------------------------------------------------------------- G. the same heavy effects with GPU drawing (as OBS does by default)
@@ -426,8 +520,9 @@ def gpu():
         pg.js(DISPLAY_JS); time.sleep(1.5)
         renderer = pg.js("(() => { const g = document.createElement('canvas').getContext('webgl'); const e = g && g.getExtension('WEBGL_debug_renderer_info'); return e ? g.getParameter(e.UNMASKED_RENDERER_WEBGL) : 'none'; })()")
         rows = []
-        for ov in ["hottake", "underwater", "vhs", "storm", "sportsfx", "spring", "lubbock", "techfx", "fire", "curtains", "coffee", "stinger", "ghost"]:
-            r = pg.js(f"rtTake({json.dumps({'mode': 'overlay', 'overlay': ov, 'label': '', 'title': '', 'duration': 3, 'sport': 'baseball'})}, 3)", timeout=60)
+        for ov in ["hottake", "underwater", "vhs", "storm", "storm:sunshine", "storm:clouds", "america", "customStinger", "sportsfx", "spring", "lubbock", "techfx", "fire", "curtains", "coffee", "stinger", "ghost"]:
+            key, _, weather = ov.partition(":")  # "storm:sunshine" is the Weather stinger's Sunshine
+            r = pg.js(f"rtTake({json.dumps({'mode': 'overlay', 'overlay': key, 'label': '', 'title': '', 'duration': 3, 'sport': 'baseball', **({'weather': weather} if weather else {})})}, 3)", timeout=60)
             rows.append({"name": ov, "fps": round(1000 / r["avg"], 1), "janks": r["janks"], "longest": r["longest"]})
         out["gpu" if on else "software"] = {"renderer": renderer, "rows": rows}
         print("GPU" if on else "SOFTWARE", renderer)
@@ -480,7 +575,7 @@ def assets():
 
 
 if __name__ == "__main__":
-    for sec in sys.argv[1:] or ["assets", "canvas", "display", "gpu", "panel", "dock", "leak", "offline", "servers"]:
+    for sec in sys.argv[1:] or ["assets", "canvas", "display", "gpu", "panel", "dock", "content", "leak", "offline", "servers"]:
         t0 = time.time()
         globals()[sec]()
         results.setdefault("_ran", {})[sec] = time.strftime("%Y-%m-%d %H:%M")

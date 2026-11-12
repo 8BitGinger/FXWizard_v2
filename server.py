@@ -37,21 +37,45 @@ RUNDOWN_DIR = os.path.join(BASE_DIR, "rundowns")
 LOG_DIR = os.path.join(BASE_DIR, "logs")
 SHOW_DIR = os.path.join(BASE_DIR, "shows")
 IMAGE_TYPES = (".png", ".jpg", ".jpeg", ".gif")
-CONTENT_TYPES = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".mp4", ".webm")
+# Sound files: in the custom folder for the Sound Pad's Background Music and Custom pads, in the content folder for the Visualizer
+AUDIO_TYPES = {".mp3": "audio/mpeg", ".wav": "audio/wav", ".ogg": "audio/ogg", ".m4a": "audio/mp4", ".aac": "audio/aac", ".flac": "audio/flac"}
+CUSTOM_TYPES = IMAGE_TYPES + tuple(AUDIO_TYPES)
+CONTENT_TYPES = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".mp4", ".webm") + tuple(AUDIO_TYPES)
+CONTENT_DATA_MAX = 64 * 1024 * 1024  # the biggest sound file handed to the Visualizer (bigger ones still play, without moving the bars)
 
 def custom_images():
-    """Image files in the custom folder, sorted by name."""
+    """Image and sound files in the custom folder, sorted by name."""
     try:
-        return sorted((f for f in os.listdir(CUSTOM_DIR) if f.lower().endswith(IMAGE_TYPES)), key=str.lower)
+        return sorted((f for f in os.listdir(CUSTOM_DIR) if f.lower().endswith(CUSTOM_TYPES)), key=str.lower)
     except OSError:
         return []
 
 def content_files():
-    """Pictures and videos in the content folder, sorted by name."""
+    """Pictures, videos and sound files in the content folder, sorted by name."""
     try:
         return sorted((f for f in os.listdir(CONTENT_DIR) if f.lower().endswith(CONTENT_TYPES)), key=str.lower)
     except OSError:
         return []
+
+def content_data(request):
+    """A sound file from the content folder, for the Visualizer (base64). The Content page plays it from these bytes:
+    a page opened from a file isn't allowed to listen to a sound it plays straight from another file, so its bars
+    couldn't move to it. Only sound files that are in the content folder, by name."""
+    name = request.get("file")
+    reply = {"mode": "contentData", "file": name, "ok": False}
+    found = next((f for f in content_files() if f == name), None) if isinstance(name, str) else None
+    kind = AUDIO_TYPES.get(os.path.splitext(found)[1].lower()) if found else None
+    if not kind:
+        return {**reply, "error": "Not a sound file in the content folder"}
+    path = os.path.join(CONTENT_DIR, found)
+    try:
+        if os.path.getsize(path) > CONTENT_DATA_MAX:
+            return {**reply, "error": "Too big"}
+        with open(path, "rb") as f:
+            data = base64.b64encode(f.read()).decode("ascii")
+    except OSError as e:
+        return {**reply, "error": str(e)}
+    return {**reply, "ok": True, "type": kind, "data": data}
 
 def rundown_name(name):
     """A safe file name for a rundown (letters, numbers, spaces, _ - .), or None."""
@@ -176,6 +200,8 @@ def answer_request(message):
         return {"mode": "customFiles", "files": custom_images()}
     if mode == "contentList":
         return {"mode": "contentFiles", "files": content_files()}
+    if mode == "contentData":
+        return content_data(request)
     if mode == "rundownList":
         return {"mode": "rundownFiles", "files": rundown_files()}
     if mode == "showList":

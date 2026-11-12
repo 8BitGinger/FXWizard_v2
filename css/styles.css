@@ -321,6 +321,15 @@ body {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+/* Background Music and Custom: a line under the name (Custom's file), and the folder in Custom's corner that picks it */
+.pad-file { max-width: 92%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10.5px; font-weight: 600; opacity: 0.9; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); }
+.pad-file.gone { color: #fecaca; }
+.pad-pick { position: absolute; right: 5px; bottom: 6px; z-index: 1; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: rgba(0, 0, 0, 0.32); }
+.pad-pick:hover { background: rgba(0, 0, 0, 0.55); }
+.pad-pick .icon { width: 13px; height: 13px; }
+/* Background Music while it plays: lit, and still (anything in the dock that keeps moving is work for the same
+   GPU process that plays a Content video in OBS, and this stays on for a whole show) */
+.pad.on { box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), inset 0 -6px 0 rgba(0, 0, 0, 0.25), 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 18px var(--c1); filter: brightness(1.12); }
 .pad-key { left: 7px; }
 .pad-time { right: 7px; }
 .pad-time:empty { display: none; }
@@ -1443,6 +1452,8 @@ button.block-time.unset { border-style: dashed; opacity: 0.75; }
    The Content window is the same, for the content folder's pictures and videos. */
 .custom-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-height: 50vh; overflow-y: auto; }
 .custom-list:empty { display: none; }
+/* A sound file's picture in the pick windows */
+.audio-tile { display: grid; place-items: center; width: 100%; aspect-ratio: 16 / 9; border-radius: 4px; background: linear-gradient(135deg, #4c1d95, #0e7490); color: #fff; font-size: 34px; }
 .custom-pick {
   display: flex;
   flex-direction: column;
@@ -2787,6 +2798,37 @@ html.light .tm-error { color: #b91c1c; }
 @keyframes phoneDrop {
   from { opacity: 1; transform: none; }
   to   { opacity: 0; transform: translateY(18vh) rotate(4deg) scale(0.9); }
+}
+
+/* Visualizer (contentViz): bars and a waveform that move to a sound file, drawn on #viz-canvas by the page (see
+   startViz), over a deep violet backdrop that never changes, so it's here and costs nothing to keep up. It dissolves
+   in and out with the box (anim-fade, anim-hide). Behind it: Clear leaves the backdrop out, so only the bars and
+   the name show over the stream. */
+#content-viz {
+  position: absolute;
+  inset: 0;
+  display: none;
+  background: radial-gradient(ellipse at 50% 50%, #2b1560 0%, #150b33 55%, #07040f 100%);
+}
+#content-box.contentViz #content-viz { display: block; }
+#content-box.contentViz.clear-back #content-viz { background: none; }
+#viz-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+#viz-title {
+  position: absolute;
+  left: 8vw;
+  right: 8vw;
+  bottom: 9vh;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.88);
+  font-family: 'Oswald', sans-serif;
+  font-size: 3.4vh;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow: 0 0.3vh 1vh rgba(0, 0, 0, 0.7);
 }
 
 /* ---------- Breaking News: LIVE in the top-right corner, red ticker bar along the bottom ---------- */

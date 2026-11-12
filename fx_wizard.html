@@ -106,12 +106,13 @@
                     <label for="mode-l3" title="Animated L3s" aria-label="Animated L3s" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m1:bg-primary"><span data-icon="l3"></span></label>
                     <input type="radio" id="mode-overlay" name="mode" value="overlay" class="hidden peer/m2">
                     <label for="mode-overlay" title="Fullscreen Overlays" aria-label="Fullscreen Overlays" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m2:bg-primary"><span data-icon="sparkles"></span></label>
+                    <!-- Sound Pad third, then the Scene Builder, and the Podcast Rundown last -->
+                    <input type="radio" id="mode-sound" name="mode" value="sound" class="hidden peer/m5">
+                    <label for="mode-sound" title="Sound Pad" aria-label="Sound Pad" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m5:bg-primary"><span data-icon="sound"></span></label>
                     <input type="radio" id="mode-builder" name="mode" value="builder" class="hidden peer/m4">
                     <label for="mode-builder" title="Scene Builder" aria-label="Scene Builder" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m4:bg-primary"><span data-icon="stack"></span></label>
                     <input type="radio" id="mode-show" name="mode" value="show" class="hidden peer/m3">
                     <label for="mode-show" title="Podcast Rundown" aria-label="Podcast Rundown" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m3:bg-primary"><span data-icon="list"></span></label>
-                    <input type="radio" id="mode-sound" name="mode" value="sound" class="hidden peer/m5">
-                    <label for="mode-sound" title="Sound Pad" aria-label="Sound Pad" class="border rounded cursor-pointer hover:bg-violet-400 peer-checked/m5:bg-primary"><span data-icon="sound"></span></label>
                 </div>
 
                 <!-- Text: Name and Title, or one paragraph for L3 Info -->
@@ -257,8 +258,9 @@
                             <input type="radio" id="ov-tvstatic" name="overlayStyle" value="tvstatic" class="hidden peer/o14">
                             <label for="ov-tvstatic" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o14:bg-primary">Static</label>
 
+                            <!-- Weather (it was Storm): Storm, Sunshine or Clouds, picked under Weather below -->
                             <input type="radio" id="ov-storm" name="overlayStyle" value="storm" class="hidden peer/o12">
-                            <label for="ov-storm" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o12:bg-primary">Storm</label>
+                            <label for="ov-storm" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o12:bg-primary">Weather</label>
 
                             <!-- Fire: flames roar up from the bottom and fill the screen, then burn away -->
                             <input type="radio" id="ov-firestinger" name="overlayStyle" value="firestinger" class="hidden peer/o32">
@@ -300,6 +302,16 @@
                             <!-- Coffee: a cup slides in, then the camera zooms into the foam: latte art of a heart (with your own text inside, if typed) -->
                             <input type="radio" id="ov-coffee" name="overlayStyle" value="coffee" class="hidden peer/o38">
                             <label for="ov-coffee" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o38:bg-primary">Coffee</label>
+
+                            <!-- America: an American flag sweeps in, waving, fills the screen, then sweeps off -->
+                            <input type="radio" id="ov-america" name="overlayStyle" value="america" class="hidden peer/o44">
+                            <label for="ov-america" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o44:bg-primary">America</label>
+
+                            <!-- Custom: a background swoops in and a picture from the "custom" folder fades in and out over it.
+                                 Tapping it opens the window to pick the picture (its own pick, apart from the other Custom…s) -->
+                            <input type="radio" id="ov-customStinger" name="overlayStyle" value="customStinger" data-logo="1" class="hidden peer/o45">
+                            <label for="ov-customStinger" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o45:bg-primary">Custom…</label>
+                            <p id="logo-name" class="col-span-2 text-[12px] text-center opacity-75"></p>
                         </div>
                     </details>
 
@@ -316,7 +328,11 @@
                             <input type="radio" id="ov-contentPhone" name="overlayStyle" value="contentPhone" data-content="1" class="hidden peer/o41">
                             <label for="ov-contentPhone" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o41:bg-primary">Content Phone…</label>
                             <input type="radio" id="ov-contentFull" name="overlayStyle" value="contentFull" data-content="1" class="hidden peer/o40">
-                            <label for="ov-contentFull" class="col-span-2 p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o40:bg-primary">Content Full…</label>
+                            <label for="ov-contentFull" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o40:bg-primary">Content Full…</label>
+                            <!-- Visualizer: a sound file from the "content" folder plays, and bars and a waveform move to it
+                                 (its own pick: tapping it opens the window on the folder's sound files) -->
+                            <input type="radio" id="ov-contentViz" name="overlayStyle" value="contentViz" data-content="1" class="hidden peer/o46">
+                            <label for="ov-contentViz" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/o46:bg-primary">Visualizer…</label>
                             <p id="content-name" class="col-span-2 text-[12px] text-center opacity-75"></p>
                         </div>
                     </details>
@@ -333,6 +349,19 @@
                             <label for="sport-baseball" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/s3:bg-primary">⚾ Baseball</label>
                             <input type="radio" id="sport-soccer" name="sportStyle" value="soccer" class="hidden peer/s4">
                             <label for="sport-soccer" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/s4:bg-primary">⚽ Soccer</label>
+                        </div>
+                    </div>
+
+                    <!-- Which weather (only shown for the Weather stinger) -->
+                    <div id="weather-field" class="hidden">
+                        <p class="block text-sm font-medium mb-1 text-center">Weather:</p>
+                        <div class="grid grid-cols-3 gap-1 text-[12px]">
+                            <input type="radio" id="weather-storm" name="weatherStyle" value="storm" checked class="hidden peer/w1">
+                            <label for="weather-storm" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/w1:bg-primary">⛈️ Storm</label>
+                            <input type="radio" id="weather-sunshine" name="weatherStyle" value="sunshine" class="hidden peer/w2">
+                            <label for="weather-sunshine" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/w2:bg-primary">☀️ Sunshine</label>
+                            <input type="radio" id="weather-clouds" name="weatherStyle" value="clouds" class="hidden peer/w3">
+                            <label for="weather-clouds" class="p-1 border rounded text-center cursor-pointer hover:bg-violet-400 peer-checked/w3:bg-primary">☁️ Clouds</label>
                         </div>
                     </div>
 
@@ -425,10 +454,11 @@
                             <label for="bg-clouds" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b6:bg-sky-600">Clouds</label>
 
                             <input type="radio" id="bg-fantasy" name="bgStyle" value="fantasy" class="hidden peer/b12">
-                            <label for="bg-fantasy" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b12:bg-indigo-600">Fantasy</label>
+                            <label for="bg-fantasy" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b12:bg-lime-700">Fantasy</label>
 
-                            <input type="radio" id="bg-code" name="bgStyle" value="code" class="hidden peer/b13">
-                            <label for="bg-code" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b13:bg-lime-700">Code</label>
+                            <!-- Medical took Code's place (graphics saved with Code play Medical) -->
+                            <input type="radio" id="bg-medical" name="bgStyle" value="medical" class="hidden peer/b13">
+                            <label for="bg-medical" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b13:bg-sky-300 peer-checked/b13:text-black">Medical</label>
 
                             <input type="radio" id="bg-tech" name="bgStyle" value="tech" class="hidden peer/b7">
                             <label for="bg-tech" class="p-1 border rounded text-center cursor-pointer text-md hover:scale-105 peer-checked/b7:bg-teal-500">Tech</label>
@@ -762,7 +792,8 @@
 
             <!-- ===== SOUND PAD TAB =====
                  Six pads, each plays one sound from assets/sounds on the display (so it goes out through OBS).
-                 Keys 1-6 hit them too while this tab is open. Filled in by the script (SOUNDS). -->
+                 Keys 1-6 hit them too while this tab is open (M and C the two at the top: Background Music, a toggle, and Custom,
+                 a sound from the "custom" folder). Filled in by the script (CUSTOM_PADS, then SOUNDS). -->
             <div id="sound-section" class="w-full hidden">
                 <div class="flex items-center gap-2 mb-2 pb-1 px-2 border-b border-gray-600">
                     <h2 class="text-base font-bold">Sound Pad</h2>
@@ -839,7 +870,7 @@
             <!-- Custom…: the images in the "custom" folder, to pick the one to use (both Custom… options share it) -->
             <dialog id="custom-dialog">
                 <form method="dialog" class="flex flex-col gap-2">
-                    <h3 class="font-bold">Custom image</h3>
+                    <h3 id="custom-heading" class="font-bold">Custom image</h3>
                     <p id="custom-note" class="text-xs opacity-75"></p>
                     <div id="custom-list" class="custom-list"></div>
                     <button type="button" class="py-2 rounded bg-gray-600 text-white font-bold" onclick="$('custom-file').click()" title="Pick the image yourself (it has to be in the custom folder for the display to show it)"><span data-icon="file"></span> Choose a file…</button>
@@ -850,7 +881,7 @@
             <!-- Content TV… and Content Full…: the pictures and videos in the "content" folder, to pick the one to show -->
             <dialog id="content-dialog">
                 <form method="dialog" class="flex flex-col gap-2">
-                    <h3 class="font-bold">Content</h3>
+                    <h3 id="content-heading" class="font-bold">Content</h3>
                     <p id="content-note" class="text-xs opacity-75"></p>
                     <div id="content-list" class="custom-list"></div>
                     <button type="button" class="py-2 rounded bg-gray-600 text-white font-bold" onclick="$('content-file').click()" title="Pick it yourself (it has to be in the content folder for the display to show it)"><span data-icon="file"></span> Choose a file…</button>
@@ -1346,6 +1377,12 @@
                         <div class="tv-stand"><i class="tv-neck"></i><i class="tv-foot"></i></div>
                     </div>
                 </div>
+                <!-- Visualizer (contentViz): bars and a waveform, drawn on the canvas, that move to a sound file from the
+                     "content" folder, with its name underneath -->
+                <div id="content-viz">
+                    <canvas id="viz-canvas"></canvas>
+                    <p id="viz-title"></p>
+                </div>
             </div>
         </div>
     </div>
@@ -1364,7 +1401,7 @@
            3.  Small helpers
            4.  Animations
            5.  Display: lower third
-           6.  Display: canvas effects (Color Wave, Confetti, Fall, Snow, Fire, Underwater, St. Patrick's, Retro VHS, Sports, Storm, Static, Fireworks, Medical)
+           6.  Display: canvas effects (Color Wave, Confetti, Fall, Snow, Fire, Underwater, St. Patrick's, Retro VHS, Sports, Weather, Static, Fireworks, Medical, America, Custom)
            7.  Display: fullscreen overlays (and Content, on #content)
            8.  Display: message router
            9.  Connection to the server
@@ -1433,6 +1470,9 @@
         //   sport:   true = shows the Sport picker (Football, Basketball, Baseball, Soccer)
         //   emoji:   true = shows the Emoji picker (LOL, Ugh, Angry, Sad)
         //   xmas:    true = shows the Xmas picker (Wrapper, Trees, Ornaments)
+        //   weather: true = shows the Weather picker (Storm, Sunshine, Clouds)
+        //   logo:    true = uses its own picture from the "custom" folder (the Custom stinger), sent as logo
+        //   audio:   true = Content that plays a sound file from the "content" folder (the Visualizer)
         //   social:  true = shows the Socials picker (YouTube, Facebook, Twitter, Instagram, LinkedIn, GitHub, Web)
         //   caption: one optional line of text, with this as the default (Hot Take; '' = blank by default, Coffee)
         //   max:     the most characters that text can have (default 40)
@@ -1482,6 +1522,9 @@
             contentPhone: { label: 'Content Phone', text: false, dur: 15, content: true, backdrop: true, lead: 1.1, effect: null, animIn: '', animOut: 'anim-tvOff' },
             // The same picture or video, full screen (no TV), dissolving in and out
             contentFull: { label: 'Content Full', text: false, dur: 15, content: true, lead: 0.6, effect: null, animIn: 'anim-fade', animOut: 'anim-hide' },
+            // Visualizer: a sound file from the content folder plays, and bars and a waveform move to it (on #content,
+            // drawn on its own canvas: see startViz). Behind it: its own dark backdrop, or Clear (only the bars, over the stream)
+            contentViz: { label: 'Visualizer', text: false, dur: 15, content: true, audio: true, backdrop: true, lead: 0.6, effect: null, animIn: 'anim-fade', animOut: 'anim-hide' },
             // Stingers: CSS stinger lengths are read from styles.css, so the speed is only set there
             stinger:   { label: 'Standard', text: false, effect: null, animIn: '', animOut: '', cover: [0.34, 0.66],
                          get length() { return cssSeconds('stinger', '--stinger-time', 2); } },
@@ -1495,7 +1538,9 @@
                          cover: { wrapper: [0.36, 0.66], trees: [0.24, 0.76], ornaments: [0.24, 0.76] },
                          get length() { return cssSeconds('xmas', '--xmas-time', 1.8); } },
             // Drawn on the canvas, so their lengths are set here
-            storm:     { label: 'Storm',  text: false, effect: 'storm',    animIn: '', animOut: '', length: 2.8, cover: [0.24, 0.76] },
+            // Weather (it was Storm, which is one of its three now, so saved Storms still play): Storm, Sunshine or Clouds
+            storm:     { label: 'Weather', text: false, weather: true, effect: 'storm', animIn: '', animOut: '', length: 2.8,
+                         cover: { storm: [0.24, 0.76], sunshine: [0.15, 0.66], clouds: [0.24, 0.76] } },
             tvstatic:  { label: 'Static', text: false, effect: 'tvstatic', animIn: '', animOut: '', length: 1.8, cover: [0.13, 0.78] },
             sportsfx:  { label: 'Sports', text: false, sport: true, effect: 'sports', animIn: '', animOut: '', length: 2.6,
                          cover: { football: [0.24, 0.76], basketball: [0.33, 0.67], baseball: [0.15, 0.85], soccer: [0.42, 0.57] } },
@@ -1508,6 +1553,9 @@
             cat:       { label: 'Cat',     text: false, effect: 'cat',      animIn: '', animOut: '', length: 2.8, cover: [0.17, 0.76] },
             curtains:  { label: 'Curtains', text: false, effect: 'curtains', animIn: '', animOut: '', length: 3, cover: [0.19, 0.53] },
             coffee:    { label: 'Coffee',  text: false, caption: '', max: 14, effect: 'coffee', animIn: '', animOut: '', length: 3.4, cover: [0.39, 0.79] },
+            america:   { label: 'America', text: false, effect: 'america',  animIn: '', animOut: '', length: 3, cover: [0.29, 0.7] },
+            // A background swoops in and the picture picked from the "custom" folder (logo) fades in and out over it
+            customStinger: { label: 'Custom', text: false, logo: true, effect: 'customstinger', animIn: '', animOut: '', length: 3, cover: [0.25, 0.73] },
         };
 
         // The Hearts stinger was replaced by Lubbock: graphics saved as Hearts play Lubbock
@@ -1558,25 +1606,39 @@
             { key: 'censor',   label: 'Censor Beep',  file: 'censorBeep.mp3', icon: '🤐', c1: '#ff4b3e', c2: '#b3001b' },
         ];
         const soundPath = (s) => `./assets/sounds/${encodeURIComponent(s.file)}`;
+        // Two more pads, above those. hot: its key.
+        //   Background Music: assets/sounds/background.mp3, going round until it's tapped again (a toggle).
+        //   Custom: a sound file picked from the "custom" folder (remembered), played once, like the six.
+        const CUSTOM_PADS = [
+            { key: 'music',  label: 'Background Music', file: 'background.mp3', icon: '🎵', c1: '#22c55e', c2: '#0e7490', hot: 'm', loop: true },
+            { key: 'custom', label: 'Custom',           icon: '🎧', c1: '#f472b6', c2: '#7c3aed', hot: 'c', pick: 'sound' },
+        ];
 
         // Sports stinger choices
         const SPORTS ={ football: 'Football', basketball: 'Basketball', baseball: 'Baseball', soccer: 'Soccer' };
         // Xmas stinger choices: the Wrapper is the candy-cane band (styles.css); the others are drawn on the canvas
         const XMAS_STYLES = { wrapper: 'Wrapper', trees: 'Trees', ornaments: 'Ornaments' };
         const xmasCanvas = (data) => OVERLAYS[data.overlay]?.xmas && (data.xmas === 'trees' || data.xmas === 'ornaments');
+        // Weather stinger choices, and the canvas effect each one plays. One saved as Storm, before the others, is the Storm.
+        const WEATHER = { storm: 'Storm', sunshine: 'Sunshine', clouds: 'Clouds' };
+        const WEATHER_FX = { storm: 'storm', sunshine: 'sunshine', clouds: 'cloudsfx' };
+        const weatherOf = (data) => (WEATHER[data?.weather] ? data.weather : 'storm');
         // Emoji overlay choices (the word on its tag is this, in capitals)
         const EMOJIS = { lol: 'LOL', ugh: 'Ugh', angry: 'Angry', sad: 'Sad' };
 
         // Lower third font styles (must match the classes in styles.css)
         const FONT_CLASSES = ['font-default', 'font-script', 'font-fun', 'font-modern', 'font-classic', 'font-accent'];
         // Lower third backgrounds: each one plays assets/<name>.webm behind the text
-        const BG_VIDEOS = ['blue', 'green', 'black', 'red', 'space', 'clouds', 'fantasy', 'code', 'tech', 'finance', 'sports', 'politics', 'holiday', 'cafe'];
+        const BG_VIDEOS = ['blue', 'green', 'black', 'red', 'space', 'clouds', 'fantasy', 'medical', 'tech', 'finance', 'sports', 'politics', 'holiday', 'cafe'];
         const bgVideoPath = (name) => `./assets/${name}.webm`;
+        // Backgrounds that were replaced: graphics saved with the old one play the new one (Code became Medical)
+        const BG_RENAMED = { code: 'medical' };
+        const l3Bg = (name) => BG_RENAMED[name] || name;
 
         // Colored left edge on saved buttons: lower thirds by background, overlays by type
         const ACCENTS = {
             blue: 'border-blue-500', green: 'border-green-500', black: 'border-gray-300', red: 'border-red-500',
-            space: 'border-purple-400', clouds: 'border-sky-300', fantasy: 'border-indigo-400', code: 'border-lime-400',
+            space: 'border-purple-400', clouds: 'border-sky-300', fantasy: 'border-lime-400',
             tech: 'border-teal-300', finance: 'border-emerald-500',
             sports: 'border-orange-400', politics: 'border-rose-500', holiday: 'border-red-400', cafe: 'border-amber-600', custom: 'border-fuchsia-300',
             l3Large: 'border-violet-400', kamc: 'border-blue-600', l3LargeAlt: 'border-emerald-400', l3Gif: 'border-fuchsia-400', l3Custom: 'border-pink-300',
@@ -1591,7 +1653,10 @@
             techfx: 'border-cyan-400', emoji: 'border-yellow-300',
             comic: 'border-yellow-400', disco: 'border-fuchsia-400', pixel: 'border-lime-400', cat: 'border-orange-400',
             curtains: 'border-red-600', coffee: 'border-amber-600', content: 'border-sky-300', contentPhone: 'border-sky-400', contentFull: 'border-sky-500',
+            contentViz: 'border-fuchsia-400', america: 'border-red-500', customStinger: 'border-fuchsia-300',
         };
+        // Lower third backgrounds that share a name with an overlay (the Medical stinger) have their edge color here
+        const L3_ACCENTS = { medical: 'border-sky-300' };
 
 
         /* =========================================================
@@ -1650,6 +1715,10 @@
         // Where a Content file is (a picture, or a video: MP4 or WebM)
         const contentPath = (file) => `${CONTENT_FOLDER}/${encodeURIComponent(file)}`;
         const VIDEO_FILE = /\.(mp4|webm)$/i;
+        // Sound files: the Visualizer's (in the content folder), and the Sound Pad's Background Music and Custom (in the custom folder)
+        const AUDIO_FILE = /\.(mp3|wav|ogg|m4a|aac|flac)$/i;
+        // A video or a sound: it has a length, plays to its end, and can be muted and paused
+        const timedFile = (file) => VIDEO_FILE.test(file || '') || AUDIO_FILE.test(file || '');
         // A video's Duration so all of it plays: its length, after the overlay's lead-in, rounded up
         const wholeVideoSecs = (cfg, length) => Math.ceil(length + (cfg?.lead || 0) + 0.3);
 
@@ -1769,8 +1838,8 @@
         // it comes up under them as they meet, and they blink away in a scatter to show it. They're a layer of their own
         // over the box (the box's slanted edge would cut off anything coming in from outside it). Then it fades out.
         const L3_BIT_COLORS = {
-            blue: '#1e63d6', green: '#1f9d55', black: '#3a3a44', red: '#c62828', space: '#4b2fa0', clouds: '#4aa3e0', fantasy: '#6a4bc7',
-            code: '#1f9e4a', tech: '#1499a8', finance: '#178a5c', sports: '#e0701a', politics: '#b3243a', holiday: '#c22d2d', cafe: '#8a5a2b',
+            blue: '#1e63d6', green: '#1f9d55', black: '#3a3a44', red: '#c62828', space: '#4b2fa0', clouds: '#4aa3e0', fantasy: '#8c7355',
+            medical: '#1e7fe0', tech: '#1499a8', finance: '#178a5c', sports: '#e0701a', politics: '#b3243a', holiday: '#c22d2d', cafe: '#8a5a2b',
         };
         const blendHex = (a, b, k) => {
             const x = parseInt(a.slice(1), 16), y = parseInt(b.slice(1), 16);
@@ -1835,7 +1904,7 @@
             // (css/custom/...), not from this page, and the image never shows.
             box.style.removeProperty('--l3-bg');
             if (data.bgStyle === 'custom' && data.customBg) box.style.setProperty('--l3-bg', `url("${new URL(customPath(data.customBg), location.href).href}")`);
-            setL3Video(BG_VIDEOS.includes(data.bgStyle) ? data.bgStyle : null);
+            setL3Video(BG_VIDEOS.includes(l3Bg(data.bgStyle)) ? l3Bg(data.bgStyle) : null);
 
             // Position. On the right side of the screen the slanted edge is on the left, so it faces the middle.
             const loc = LOCATION_MAP[data.location];
@@ -1851,7 +1920,7 @@
             const anim = l3Anim(data.animationStyle);
             l3Out = L3_OUT[anim] || 'anim-hide';
             playIn(box, anim || 'anim-slideUp');
-            if (anim === 'anim-8bit') showL3Bits(box, data.bgStyle);
+            if (anim === 'anim-8bit') showL3Bits(box, l3Bg(data.bgStyle));
             // Toggled graphics (hold) stay up until hidden
             if (!data.hold) l3Timeout = setTimeout(hideLowerThird, (Number(data.duration) || 5) * 1000);
         };
@@ -2528,6 +2597,291 @@
                         st.branches.forEach(br => line(br, 2 * s));
                         ctx.restore();
                     }
+                },
+            };
+
+            // ---------- Weather stinger, Sunshine: the sun comes up from the bottom of the screen and a bright, warm sky
+            // opens out from it until it fills the screen, its rays turning. Then the sun flares and burns through:
+            // the sky opens from the middle outward to show what's behind. ----------
+            const SUN_GLOW = glowSprite('#fff1a8', 0.2, 256);
+            const sunshine = {
+                detail: 0.75, // a full-screen sky and rays (see "detail" above)
+                init(durationSec) {
+                    this.T = durationSec;
+                    this.spin = rand(0, Math.PI);
+                },
+                frame(dt, t) {
+                    const s = H / 1080, p = clamp01(t / this.T);
+                    const kin = EASE.out3(clamp01(p / 0.34)), kout = EASE.in3(clamp01((p - 0.66) / 0.34));
+                    const cx = W / 2, cy = lerp(H * 1.2, H * 0.46, kin); // the sun
+                    const far = Math.hypot(W / 2, H * 0.62) * 1.06;      // from where it stops to the far corners
+                    const R = kin * far * 1.25, hole = kout * far * 1.04;
+                    ctx.clearRect(0, 0, W, H);
+                    if (R <= 0 || kout >= 1) return;
+                    // The whole sky is drawn, then what isn't in it yet (outside its circle), or has burned through
+                    // (the hole), is cut away. (Drawing it through a round mask instead cost a hitch each time the
+                    // mask changed kind, on the graphics chip, and was slower without it.)
+                    // The sky: blue at the top, warming to gold toward the bottom
+                    stampLayer('sunshine-sky', (x) => {
+                        const g = x.createLinearGradient(0, 0, 0, H);
+                        g.addColorStop(0, '#2f9be8'); g.addColorStop(0.45, '#8fd0f7'); g.addColorStop(0.8, '#ffe9a6'); g.addColorStop(1, '#ffc95c');
+                        x.fillStyle = g; x.fillRect(0, 0, W, H);
+                    });
+                    // Its rays, turning slowly
+                    const n = 14, a0 = this.spin + t * 0.35, len = far * 1.5, w = Math.PI / n * 0.5;
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                    ctx.beginPath();
+                    for (let i = 0; i < n; i++) {
+                        const a = a0 + i * Math.PI * 2 / n;
+                        ctx.moveTo(cx, cy);
+                        ctx.lineTo(cx + Math.cos(a - w) * len, cy + Math.sin(a - w) * len);
+                        ctx.lineTo(cx + Math.cos(a + w) * len, cy + Math.sin(a + w) * len);
+                        ctx.closePath();
+                    }
+                    ctx.fill();
+                    // The sun and its glow (the glow swells as it flares)
+                    const gr = (520 + 40 * Math.sin(t * 5)) * s * (1 + kout * 2.5);
+                    ctx.drawImage(SUN_GLOW, cx - gr, cy - gr, gr * 2, gr * 2);
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, (150 + 5 * Math.sin(t * 5)) * s, 0, Math.PI * 2);
+                    ctx.fillStyle = '#fffbe6';
+                    ctx.fill();
+                    ctx.lineWidth = 10 * s;
+                    ctx.strokeStyle = '#ffd75a';
+                    ctx.stroke();
+                    if (kin < 1 || hole > 0) {
+                        ctx.globalCompositeOperation = 'destination-out';
+                        ctx.fillStyle = '#000';
+                        ctx.beginPath();
+                        if (kin < 1) { ctx.rect(-4, -4, W + 8, H + 8); ctx.arc(cx, cy, R, 0, Math.PI * 2); } // everything outside the circle
+                        else ctx.arc(cx, cy, hole, 0, Math.PI * 2);                                           // the hole
+                        ctx.fill('evenodd');
+                        ctx.globalCompositeOperation = 'source-over';
+                    }
+                    // A golden rim on the sky's edge as it opens out, and a white-hot one where it burns through
+                    ctx.lineWidth = 14 * s;
+                    if (kin < 1) { ctx.strokeStyle = 'rgba(255, 214, 90, 0.9)'; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke(); }
+                    if (hole > 0) { ctx.strokeStyle = 'rgba(255, 250, 220, 0.95)'; ctx.beginPath(); ctx.arc(cx, cy, hole, 0, Math.PI * 2); ctx.stroke(); }
+                },
+            };
+
+            // ---------- Weather stinger, Clouds: two banks of fluffy white clouds drift in from the sides over a little
+            // blue sky, meet in the middle and fill the screen, then part again. Each bank is solid behind (so the
+            // screen is really covered), with puffs on top for its lumpy leading edge and its texture.
+            // Each bank is drawn once, as one picture, and only slid across after that: drawing its 28 puffs
+            // every frame took 32 ms a frame without the graphics chip; two plain copies take a fraction of it. ----------
+            // A puff: white, shading to blue-grey around its rim, most of all underneath (its bright middle sits high)
+            const FAIR_CLOUD = (() => {
+                const c = Object.assign(document.createElement('canvas'), { width: 160, height: 160 });
+                const x = c.getContext('2d');
+                const g = x.createRadialGradient(80, 66, 0, 80, 80, 80);
+                g.addColorStop(0, '#ffffff'); g.addColorStop(0.5, '#fbfdff'); g.addColorStop(0.74, '#dfe9f3'); g.addColorStop(0.86, '#c3d4e6'); g.addColorStop(1, 'rgba(195, 212, 230, 0)');
+                x.fillStyle = g; x.fillRect(0, 0, 160, 160);
+                return c;
+            })();
+            const cloudsfx = {
+                // (Full resolution: a frame is two plain copies, and the browser has no stretching to do after)
+                init(durationSec) {
+                    this.T = durationSec;
+                    const key = `${canvas.width}x${canvas.height}`;
+                    if (this.key === key) return; // the banks are kept from the last time
+                    this.key = key;
+                    const s = H / 1080, px = canvas.width / W;
+                    // A bank, in its own space: its leading edge is `lead` from its front, and it's deep enough behind
+                    // that to cover its half of the screen and a little more. A little taller than the screen, to bob.
+                    this.lead = 320 * s;
+                    this.depth = W * 0.56 + 150 * s;
+                    const wide = this.depth + this.lead, tall = H + 24 * s;
+                    const bank = (dir) => { // dir 1: from the left (its front on its right); -1: from the right
+                        const c = Object.assign(document.createElement('canvas'), { width: Math.ceil(wide * px), height: Math.ceil(tall * px) });
+                        const x = c.getContext('2d');
+                        x.scale(px, px);
+                        const at = (ox) => (dir > 0 ? this.depth - ox : this.lead + ox); // ox: how far behind the leading edge
+                        const g = x.createLinearGradient(0, 0, 0, tall);
+                        g.addColorStop(0, '#ffffff'); g.addColorStop(0.55, '#eef4fa'); g.addColorStop(1, '#cfdeec');
+                        x.fillStyle = g;
+                        if (dir > 0) x.fillRect(0, 0, at(150 * s), tall); else x.fillRect(at(150 * s), 0, wide, tall); // its solid part, under the edge puffs
+                        const puffs = [];
+                        for (let i = 0; i < 24; i++) puffs.push({ ox: rand(230 * s, W * 0.58), y: rand(-0.05, 1.05) * tall, r: rand(170, 300) * s }); // texture inside it
+                        for (let i = 0; i < 12; i++) puffs.push({ ox: rand(60, 100) * s, y: (i / 11) * tall + rand(-25, 25) * s, r: rand(200, 270) * s }); // the lumpy leading edge
+                        // From the top down, so each puff's white top sits over the shaded underside of the one above
+                        for (const pf of puffs.sort((p, q) => p.y - q.y)) x.drawImage(FAIR_CLOUD, at(pf.ox) - pf.r, pf.y - pf.r, pf.r * 2, pf.r * 2);
+                        return c;
+                    };
+                    this.left = bank(1);
+                    this.right = bank(-1);
+                },
+                frame(dt, t) {
+                    const s = H / 1080, p = clamp01(t / this.T), px = canvas.width / W;
+                    const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+                    const k = p < 0.36 ? ease(p / 0.36) : p < 0.64 ? 1 : ease(Math.max(0, 1 - (p - 0.64) / 0.36));
+                    ctx.clearRect(0, 0, W, H);
+                    if (k <= 0) return;
+                    // A little blue sky ahead of the clouds
+                    ctx.fillStyle = `rgba(110, 185, 240, ${0.32 * k})`;
+                    ctx.fillRect(0, 0, W, H);
+                    const reach = -300 * s + k * (this.depth + 300 * s); // each bank's leading edge, from off its side of the screen
+                    // The banks, copied pixel for pixel (whole pixels, so the browser has nothing to work out), bobbing a little
+                    ctx.save();
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    const bob = (ph) => Math.round((-12 * s + Math.sin(t * 0.9 + ph) * 8 * s) * px);
+                    ctx.drawImage(this.left, Math.round((reach - this.depth) * px), bob(0));
+                    ctx.drawImage(this.right, Math.round((W - reach - this.lead) * px), bob(2));
+                    ctx.restore();
+                },
+            };
+
+            // ---------- America stinger: an American flag sweeps in from the left, waving, until it fills the screen,
+            // flies for a moment, then sweeps off to the right. The flag is drawn once (taller than the screen, so its
+            // waves never show an edge) and copied each frame in upright strips, each a little higher or lower than
+            // the last. Its light and shade (lit on the rises, shaded in the dips) is one more picture, a wave wide,
+            // slid along over the strips. Everything is copied pixel for pixel, on whole pixels, and the slanted edges
+            // are cut out afterward: stretched copies, a tint per strip and a slanted clip took 40 ms a frame without
+            // the graphics chip. ----------
+            const america = {
+                detail: 0.75, // a full-screen flag (see "detail" above)
+                init(durationSec) {
+                    this.T = durationSec;
+                    const fw = canvas.width, fh = Math.round(canvas.height * 1.16);
+                    if (this.flag && this.flag.width === fw && this.flag.height === fh) return;
+                    const c = this.flag = Object.assign(document.createElement('canvas'), { width: fw, height: fh });
+                    const x = c.getContext('2d');
+                    const stripe = fh / 13, flagW = fh * 1.9; // its true shape: the far end is off the right of the screen
+                    for (let i = 0; i < 13; i++) {
+                        x.fillStyle = i % 2 ? '#ffffff' : '#b22234';
+                        x.fillRect(0, Math.floor(i * stripe), fw, Math.ceil(stripe) + 1);
+                    }
+                    const cw = flagW * 0.4, ch = stripe * 7;
+                    x.fillStyle = '#3c3b6e';
+                    x.fillRect(0, 0, cw, ch);
+                    // 50 stars: nine rows, six and five in turn
+                    x.fillStyle = '#ffffff';
+                    const r = fh * 0.0308;
+                    for (let row = 0; row < 9; row++) {
+                        for (let col = 0; col < 11; col++) {
+                            if ((row + col) % 2) continue;
+                            const sx = cw * (col + 1) / 12, sy = ch * (row + 1) / 10;
+                            x.beginPath();
+                            for (let i = 0; i < 10; i++) {
+                                const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.382 : r;
+                                x.lineTo(sx + Math.cos(a) * rr, sy + Math.sin(a) * rr);
+                            }
+                            x.closePath();
+                            x.fill();
+                        }
+                    }
+                    // The light and shade of one wave, a column at a time: white on the rises, dark in the dips
+                    this.wave = 2 * Math.PI * (H / 1080) * (canvas.width / W) / 0.0052; // a wave's length, in canvas pixels
+                    const shade = this.shade = Object.assign(document.createElement('canvas'), { width: Math.max(8, Math.round(this.wave)), height: canvas.height });
+                    const sx2 = shade.getContext('2d');
+                    for (let col = 0; col < shade.width; col++) {
+                        const slope = Math.cos(col / shade.width * 2 * Math.PI);
+                        sx2.fillStyle = slope > 0 ? `rgba(255, 255, 255, ${(slope * 0.1).toFixed(3)})` : `rgba(0, 0, 20, ${(-slope * 0.24).toFixed(3)})`;
+                        sx2.fillRect(col, 0, 1, shade.height);
+                    }
+                },
+                frame(dt, t) {
+                    const s = H / 1080, p = clamp01(t / this.T), px = canvas.width / W;
+                    const skew = 0.07 * W, span = W + 2 * skew;
+                    const head = -skew + EASE.out3(clamp01(p / 0.3)) * span;         // its leading edge
+                    const tail = -skew + EASE.in3(clamp01((p - 0.7) / 0.3)) * span;   // the edge it leaves behind
+                    ctx.clearRect(0, 0, W, H);
+                    if (head <= tail || tail >= W + skew) return;
+                    const cw = canvas.width, chh = canvas.height, lam = this.shade.width, turn = t * 5.2; // how far along its wave it is
+                    ctx.save();
+                    ctx.setTransform(1, 0, 0, 1, 0, 0); // in the canvas's own pixels from here
+                    const sw = Math.ceil(cw / 64), top = -Math.round(chh * 0.08);
+                    const from = Math.max(0, Math.floor((tail - skew) * px / sw)), to = Math.min(Math.ceil(cw / sw) - 1, Math.floor((head + skew) * px / sw));
+                    for (let i = from; i <= to; i++) {
+                        const x = i * sw, ph = x / lam * 2 * Math.PI - turn;
+                        const dy = Math.round((10 + 26 * (x / cw)) * s * px * Math.sin(ph));
+                        ctx.drawImage(this.flag, x, 0, sw, this.flag.height, x, top + dy, sw, this.flag.height);
+                    }
+                    // Its light and shade, moving along with the wave
+                    for (let x = Math.round(((turn / (2 * Math.PI)) % 1) * lam) - lam; x < cw; x += lam) ctx.drawImage(this.shade, x, 0);
+                    // Its slanted edges: what's ahead of its leading edge, and behind the one it leaves, is cut away
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.fillStyle = '#000';
+                    ctx.beginPath();
+                    const hx = head * px, tx = tail * px, k = skew * px;
+                    ctx.moveTo(hx + k, 0); ctx.lineTo(cw + 2, 0); ctx.lineTo(cw + 2, chh); ctx.lineTo(hx - k, chh); ctx.closePath();
+                    ctx.moveTo(tx + k, 0); ctx.lineTo(-2, 0); ctx.lineTo(-2, chh); ctx.lineTo(tx - k, chh); ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                    ctx.globalCompositeOperation = 'source-over';
+                    // A bright rim on both edges
+                    ctx.lineWidth = 12 * s;
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.92)';
+                    ctx.beginPath();
+                    ctx.moveTo(head + skew, 0); ctx.lineTo(head - skew, H);
+                    ctx.moveTo(tail + skew, 0); ctx.lineTo(tail - skew, H);
+                    ctx.stroke();
+                },
+            };
+
+            // ---------- Custom stinger: a background swoops in from the left (a gold band, a blue band, then a deep
+            // blue panel), the picture picked from the "custom" folder fades in over it, holds and fades out, and the
+            // background swoops off to the right. The picture is fitted to the screen once, when it loads; with none
+            // (or one that's gone) the background plays by itself. ----------
+            const CUSTOM_LOGOS = {}; // file -> { img, fit (the picture at the size it's drawn), key (the screen size that's for) }
+            const customstinger = {
+                // The picture is read and scaled to the size it's shown (at most 62% of the screen each way) off to
+                // the side while the background swoops in, so a big file never holds up a frame
+                init(durationSec, opts = {}) {
+                    this.T = durationSec;
+                    this.logo = null;
+                    const file = opts.logo;
+                    if (!file) return;
+                    const entry = this.logo = CUSTOM_LOGOS[file] || (CUSTOM_LOGOS[file] = { img: Object.assign(new Image(), { src: customPath(file) }), fit: null, key: '' });
+                    const key = `${canvas.width}x${canvas.height}`, cw = canvas.width, ch = canvas.height;
+                    if (entry.key === key) return;
+                    entry.key = key;
+                    entry.fit = null;
+                    entry.img.decode().then(() => {
+                        const k = Math.min(cw * 0.62 / entry.img.naturalWidth, ch * 0.62 / entry.img.naturalHeight);
+                        return createImageBitmap(entry.img, { resizeWidth: Math.max(1, Math.round(entry.img.naturalWidth * k)),
+                            resizeHeight: Math.max(1, Math.round(entry.img.naturalHeight * k)), resizeQuality: 'high' });
+                    }).then(bitmap => { if (entry.key === key) entry.fit = bitmap; })
+                      .catch(() => { entry.key = ''; }); // gone from the folder, or not a picture: the background plays by itself
+                },
+                band(head, tail, skew) {
+                    ctx.beginPath();
+                    ctx.moveTo(tail + skew, 0); ctx.lineTo(head + skew, 0); ctx.lineTo(head - skew, H); ctx.lineTo(tail - skew, H);
+                    ctx.closePath();
+                },
+                frame(dt, t) {
+                    const s = H / 1080, p = clamp01(t / this.T);
+                    const skew = 0.09 * W, span = W + 2 * skew;
+                    ctx.clearRect(0, 0, W, H);
+                    // Three layers, each a little behind the last on the way in and on the way out: [color, delay]
+                    const layers = [['#e0b92f', 0], ['#2f7fe0', 0.045], [null, 0.09]];
+                    for (const [color, delay] of layers) {
+                        const head = -skew + EASE.out3(clamp01((p - delay) / 0.26)) * span;
+                        const tail = -skew + EASE.in3(clamp01((p - 0.74 + delay) / 0.26)) * span; // (the panel leaves first, the bands trail it)
+                        if (head <= tail) continue;
+                        this.band(head, tail, skew);
+                        if (color) { ctx.fillStyle = color; ctx.fill(); continue; }
+                        ctx.save();
+                        ctx.clip();
+                        stampLayer('custom-stinger', (x) => {
+                            const g = x.createLinearGradient(0, 0, W, H);
+                            g.addColorStop(0, '#0f3d8c'); g.addColorStop(0.5, '#0a2a66'); g.addColorStop(1, '#07173d');
+                            x.fillStyle = g; x.fillRect(0, 0, W, H);
+                            const glow = x.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, H * 0.75); // a soft light behind the picture
+                            glow.addColorStop(0, 'rgba(96, 165, 250, 0.42)'); glow.addColorStop(1, 'rgba(96, 165, 250, 0)');
+                            x.fillStyle = glow; x.fillRect(0, 0, W, H);
+                        });
+                        ctx.restore();
+                    }
+                    // The picture: fades in (growing a touch), holds, fades out
+                    const a = Math.min(clamp01((p - 0.3) / 0.12), 1 - clamp01((p - 0.53) / 0.11));
+                    const pic = a > 0 && this.logo ? this.logo.fit : null;
+                    if (!pic) return;
+                    const k = (0.94 + 0.06 * EASE.out3(clamp01((p - 0.3) / 0.3))) * W / canvas.width;
+                    const w = pic.width * k, h = pic.height * k;
+                    ctx.globalAlpha = a;
+                    ctx.drawImage(pic, (W - w) / 2, (H - h) / 2, w, h);
+                    ctx.globalAlpha = 1;
                 },
             };
 
@@ -6649,7 +7003,8 @@
             };
 
             const EFFECTS = { confetti, colorwave, leaves, snow, fire, underwater, arrested, hottake, sports, spring, storm, tvstatic,
-                fireworks, medical, stpatricks, vhs, vday, rain, firestinger, pixel, cat, curtains, coffee, comic, disco, tech, lubbock, emoji, xmasfx };
+                fireworks, medical, stpatricks, vhs, vday, rain, firestinger, pixel, cat, curtains, coffee, comic, disco, tech, lubbock, emoji, xmasfx,
+                sunshine, cloudsfx, america, customstinger };
 
             // Runs every frame while an effect is playing
             const loop = () => {
@@ -6761,9 +7116,9 @@
                 document.fonts.load('italic 700 82px "Barlow Condensed"').then(fit); // fit again once the font has loaded
             }
 
-            // Canvas effect (Color Wave, Confetti, Fall, Snow, Fire, Underwater, and the Storm, Static, Sports and Spring stingers).
+            // Canvas effect (Color Wave, Confetti, Fall, Snow, Fire, Underwater, and the Weather, Static, Sports and Spring stingers...).
             // Xmas's Trees and Ornaments are drawn on it too, in place of the Wrapper's band.
-            const effect = xmasCanvas(data) ? 'xmasfx' : cfg.effect;
+            const effect = xmasCanvas(data) ? 'xmasfx' : cfg.weather ? WEATHER_FX[weatherOf(data)] : cfg.effect;
             box.classList.toggle('xmas-canvas', effect === 'xmasfx');
             if (effect) FX.start(effect, hold ? Infinity : duration, { ...data, layer });
             else FX.stop();
@@ -6847,7 +7202,13 @@
             box.classList.toggle('clear-back', !!data.clear && !!cfg.backdrop); // Clear: the stream isn't dimmed behind it
             currentContent = data.overlay;
             contentPrepped = null; // (the panel asks again for the one after this)
-            setContent(data.content, cfg.lead, !!data.muted);
+            if (cfg.audio) { // the Visualizer: its sound, and its bars
+                setContent(null);
+                startViz(data.content, cfg.lead, !!data.muted, data.label);
+            } else {
+                stopViz();
+                setContent(data.content, cfg.lead, !!data.muted);
+            }
             // The phone's status bar shows the time now (like 9:41), kept up to date while it's up
             clearInterval(phoneClock);
             if (data.overlay === 'contentPhone') {
@@ -6876,6 +7237,7 @@
                 clearTimeout(contentTimeout);
                 clearTimeout(contentPlay); // still coming up: it doesn't start until ▶
                 video.pause();
+                pauseViz(true); // (the Visualizer's sound, and its bars, hold too)
             } else if (!on && contentPausedLeft !== null) {
                 const left = contentPausedLeft;
                 contentPausedLeft = null;
@@ -6883,11 +7245,13 @@
                 if (left !== Infinity) contentTimeout = setTimeout(hideContent, left);
                 // A video that has played to its end holds its last frame (play() would start it over)
                 if (!video.hidden && video.hasAttribute('src') && !video.ended) video.play().catch(() => { video.muted = true; video.play().catch(() => {}); });
+                pauseViz(false);
             }
         };
         // 🔇 (the content clock, or the toggle on a rundown item): the video up now, muted or with its sound
         const muteContent = (muted) => {
             const video = $('content-video');
+            muteViz(!!muted);
             video.muted = !!muted;
             // A browser that won't play sound by itself pauses it: back to muted, so the picture keeps going
             if (!muted && video.paused && contentPausedLeft === null && !video.ended && video.hasAttribute('src') && video.currentTime > 0) {
@@ -6906,6 +7270,7 @@
             contentCleanup = setTimeout(() => {
                 box.style.visibility = 'hidden';
                 setContent(null); // a video stops once the TV has gone
+                stopViz();
                 clearInterval(phoneClock);
                 if (contentPrepped) prepContent(contentPrepped); // the next video, asked for while this one was up
             }, out === 'anim-hide' ? 600 : 900);
@@ -6926,6 +7291,184 @@
             if (video.getAttribute('src') === src && !video.error) return; // ready already
             video.onerror = null; // (a file that's gone says No signal when it's taken)
             video.src = src;
+        };
+
+        // ---------- Visualizer (contentViz) ----------
+        // A sound file from the content folder plays, and bars (low notes in the middle, high ones out to the sides, with
+        // their reflection) and a waveform move to it, over a soft glow that swells with the bass.
+        // To hear what's in the sound, the page has to play it from its own copy: a page opened from a file isn't
+        // allowed to listen in on a sound it plays straight from another file (the browser hands it silence). So it
+        // asks the server for the file (contentData) and plays those bytes, through an analyser on the way to the
+        // speakers. With no answer (an older server, or none), or if the browser won't let it listen, the sound
+        // still plays, straight from the file, and the bars move by themselves.
+        // Only what moves is drawn on the canvas; the backdrop is styles.css. Nothing runs once it's gone.
+        const VIZ = { on: false, token: 0, play: null, raf: null, audio: null, plain: null, heard: false, url: null, muted: false,
+                      ctx: null, node: null, analyser: null, gain: null, freq: null, wave: null, levels: new Float32Array(48), bass: 0, glow: null };
+        // The player it can listen to, joined up once: player -> analyser -> volume (for 🔇) -> speakers
+        const vizGraph = () => {
+            if (VIZ.ctx) return true;
+            try {
+                VIZ.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                VIZ.node = new Audio();
+                VIZ.analyser = VIZ.ctx.createAnalyser();
+                VIZ.analyser.fftSize = 2048;
+                VIZ.analyser.smoothingTimeConstant = 0.78;
+                VIZ.gain = VIZ.ctx.createGain();
+                VIZ.ctx.createMediaElementSource(VIZ.node).connect(VIZ.analyser);
+                VIZ.analyser.connect(VIZ.gain);
+                VIZ.gain.connect(VIZ.ctx.destination);
+                VIZ.freq = new Uint8Array(VIZ.analyser.frequencyBinCount);
+                VIZ.wave = new Uint8Array(VIZ.analyser.fftSize);
+                return true;
+            } catch (err) { console.warn('Visualizer: no audio analyser', err); VIZ.ctx = null; return false; }
+        };
+        const startViz = async (file, lead = 0, muted = false, label = '') => {
+            stopViz();
+            const token = ++VIZ.token, started = performance.now();
+            VIZ.on = true;
+            VIZ.muted = muted;
+            $('viz-title').textContent = label || file.replace(/\.[^.]+$/, '');
+            const canvas = $('viz-canvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            VIZ.levels.fill(0);
+            VIZ.bass = 0;
+            VIZ.raf = requestAnimationFrame(drawViz);
+            // Its own copy of the sound, to listen to
+            let src = contentPath(file);
+            VIZ.heard = false;
+            const reply = await serverRequest({ mode: 'contentData', file }, 'contentData', 3000);
+            if (token !== VIZ.token) return; // taken down, or another taken, while it loaded
+            if (reply?.ok && typeof reply.data === 'string' && vizGraph()) {
+                const running = VIZ.ctx.state === 'running' || await Promise.race([VIZ.ctx.resume().then(() => true, () => false), new Promise(r => setTimeout(() => r(false), 400))]);
+                if (token !== VIZ.token) return;
+                if (running) {
+                    // Unpacked by the browser, off to the side (doing it here held the page up for a tenth of a second)
+                    const type = /^audio\/[\w.+-]+$/.test(reply.type || '') ? reply.type : 'audio/mpeg';
+                    const blob = await fetch(`data:${type};base64,${reply.data}`).then(r => r.blob()).catch(() => null);
+                    if (token !== VIZ.token) return;
+                    if (blob && blob.size) {
+                        VIZ.url = URL.createObjectURL(blob);
+                        src = VIZ.url;
+                        VIZ.heard = true;
+                    }
+                }
+            }
+            const audio = VIZ.audio = VIZ.heard ? VIZ.node : (VIZ.plain = new Audio());
+            audio.preload = 'auto';
+            audio.loop = false;
+            audio.src = src;
+            muteViz(muted);
+            // Once it's fully up (its lead), unless ⏸ is holding it
+            VIZ.play = setTimeout(() => { if (contentPausedLeft === null) playViz(); }, Math.max(0, lead * 1000 - (performance.now() - started)));
+        };
+        const playViz = () => {
+            const audio = VIZ.audio;
+            if (!audio || audio.ended) return;
+            audio.play().catch(err => { // a browser that won't play sound by itself: muted, so the bars still move
+                if (err.name !== 'NotAllowedError') return;
+                muteViz(true);
+                audio.muted = true;
+                audio.play().catch(() => {});
+            });
+        };
+        const pauseViz = (on) => {
+            if (!VIZ.on) return;
+            clearTimeout(VIZ.play);
+            if (on) VIZ.audio?.pause(); else playViz();
+        };
+        // 🔇: quiet, but still heard by the bars (the volume comes after the analyser)
+        const muteViz = (muted) => {
+            VIZ.muted = muted;
+            if (VIZ.gain) VIZ.gain.gain.value = muted ? 0 : 1;
+            if (VIZ.plain) VIZ.plain.muted = muted;
+        };
+        const stopViz = () => {
+            if (!VIZ.on && !VIZ.audio) return;
+            VIZ.on = false;
+            VIZ.token++;
+            clearTimeout(VIZ.play);
+            cancelAnimationFrame(VIZ.raf);
+            VIZ.raf = null;
+            for (const a of [VIZ.node, VIZ.plain]) if (a && a.hasAttribute('src')) { a.pause(); a.removeAttribute('src'); a.load(); }
+            if (VIZ.url) URL.revokeObjectURL(VIZ.url);
+            VIZ.url = VIZ.audio = VIZ.plain = null;
+            const canvas = $('viz-canvas');
+            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        };
+        // One frame. The bars rise at once and fall back gently; while it's paused they hold.
+        const drawViz = (now) => {
+            VIZ.raf = requestAnimationFrame(drawViz);
+            const audio = VIZ.audio, playing = !!audio && !audio.paused && !audio.ended;
+            if (audio && audio.paused && !audio.ended && audio.currentTime > 0) return; // ⏸: the picture holds
+            const canvas = $('viz-canvas'), x = canvas.getContext('2d'), W = canvas.width, H = canvas.height, s = H / 1080, t = now / 1000;
+            const n = VIZ.levels.length, heard = VIZ.heard && playing;
+            if (heard) { VIZ.analyser.getByteFrequencyData(VIZ.freq); VIZ.analyser.getByteTimeDomainData(VIZ.wave); }
+            // Each bar's band: evenly spaced by pitch from about 40 Hz to 14 kHz (low notes get as many bars as high ones)
+            const perBin = heard ? VIZ.ctx.sampleRate / VIZ.analyser.fftSize : 0;
+            let bass = 0;
+            for (let i = 0; i < n; i++) {
+                let target = 0;
+                if (heard) {
+                    const lo = Math.max(1, Math.floor(40 * Math.pow(350, i / n) / perBin)), hi = Math.max(lo + 1, Math.ceil(40 * Math.pow(350, (i + 1) / n) / perBin));
+                    let sum = 0;
+                    for (let b = lo; b < hi && b < VIZ.freq.length; b++) sum += VIZ.freq[b];
+                    target = Math.pow(sum / (hi - lo) / 255, 1.5) * (1 + i / n * 0.7); // (the high bands are quieter: a little help)
+                } else if (playing) { // playing, but not heard: they move by themselves
+                    target = 0.18 + 0.2 * (0.5 + 0.5 * Math.sin(t * 3.1 + i * 0.55)) * (0.5 + 0.5 * Math.sin(t * 1.3 - i * 0.21)) + 0.12 * Math.max(0, Math.sin(t * 7.5 - i * 0.9)) * (1 - i / n);
+                }
+                target = Math.min(1, target);
+                VIZ.levels[i] = target > VIZ.levels[i] ? target : Math.max(target, VIZ.levels[i] - 0.03);
+                if (i < 6) bass += VIZ.levels[i] / 6;
+            }
+            VIZ.bass += (bass - VIZ.bass) * 0.3;
+            x.clearRect(0, 0, W, H);
+            const cy = H * 0.5;
+            // The glow behind, swelling with the bass (a picture made once, stretched)
+            if (!VIZ.glow) {
+                VIZ.glow = Object.assign(document.createElement('canvas'), { width: 256, height: 256 });
+                const g = VIZ.glow.getContext('2d'), grad = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+                grad.addColorStop(0, 'rgba(168, 85, 247, 0.55)'); grad.addColorStop(0.5, 'rgba(99, 102, 241, 0.2)'); grad.addColorStop(1, 'rgba(99, 102, 241, 0)');
+                g.fillStyle = grad; g.fillRect(0, 0, 256, 256);
+            }
+            const gw = W * (0.5 + 0.35 * VIZ.bass), gh = H * (0.55 + 0.4 * VIZ.bass);
+            x.globalAlpha = 0.35 + 0.65 * VIZ.bass;
+            x.drawImage(VIZ.glow, W / 2 - gw / 2, cy - gh / 2, gw, gh);
+            x.globalAlpha = 1;
+            // The bars: band 0 either side of the middle, out to the highest at the sides; above the line, and reflected below
+            const span = W * 0.84, step = span / (n * 2), bw = step * 0.62, maxH = H * 0.33;
+            if (!VIZ.fill || VIZ.fillW !== W) {
+                VIZ.fillW = W;
+                VIZ.fill = x.createLinearGradient(W / 2 - span / 2, 0, W / 2 + span / 2, 0);
+                [[0, '#f472b6'], [0.25, '#a78bfa'], [0.5, '#22d3ee'], [0.75, '#a78bfa'], [1, '#f472b6']].forEach(([at, c]) => VIZ.fill.addColorStop(at, c));
+            }
+            x.fillStyle = VIZ.fill;
+            for (const [dir, alpha, scale] of [[-1, 1, 1], [1, 0.3, 0.6]]) { // up, then its reflection
+                x.globalAlpha = alpha;
+                x.beginPath();
+                for (let i = 0; i < n; i++) {
+                    const h = Math.max(4 * s, VIZ.levels[i] * maxH * scale), y = dir < 0 ? cy - 6 * s - h : cy + 6 * s;
+                    for (const side of [-1, 1]) {
+                        const bx = W / 2 + side * (i + 0.5) * step - bw / 2;
+                        if (x.roundRect) x.roundRect(bx, y, bw, h, bw / 2); else x.rect(bx, y, bw, h);
+                    }
+                }
+                x.fill();
+            }
+            x.globalAlpha = 1;
+            // The waveform, along the middle line
+            x.beginPath();
+            const pts = 180, amp = H * 0.11;
+            for (let i = 0; i <= pts; i++) {
+                const v = heard ? (VIZ.wave[Math.floor(i / pts * (VIZ.wave.length - 1))] - 128) / 128
+                    : playing ? 0.25 * Math.sin(i * 0.21 + t * 6) * Math.sin(i * 0.035 + t * 1.7) : 0;
+                const px = W / 2 - span / 2 + (i / pts) * span, py = cy + v * amp;
+                if (i) x.lineTo(px, py); else x.moveTo(px, py);
+            }
+            x.lineJoin = 'round';
+            x.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+            x.lineWidth = 3 * s;
+            x.stroke();
         };
 
         // Content: the file on the TV's screen, or full screen (null = none). A video waits on its first frame until
@@ -7009,7 +7552,7 @@
             // #content shows Content and nothing else; the other pages leave Content to it
             if (isContentPage) { contentMessage(data); return; }
             // Sounds play on #display only (the underlay is another browser source; it would play them twice)
-            if (data.mode === 'sound' || data.mode === 'soundStop') { if (!isUnderlay) soundMessage(data); return; }
+            if (data.mode === 'sound' || data.mode === 'soundStop' || data.mode === 'soundVolume') { if (!isUnderlay) soundMessage(data); return; }
             if (data.mode === 'clear') { hideLowerThird(); hideOverlay(); if (!isUnderlay) stopAllSounds(); return; }
             if (data.mode === 'hide') { // TOGGLE OFF, OFF
                 if (data.layer === 'overlay') hideOverlay();
@@ -7036,6 +7579,7 @@
             else if (data.mode === 'contentPause') pauseContent(!!data.paused);
             else if (data.mode === 'contentMute') muteContent(!!data.muted);
             else if (data.mode === 'contentPrep') prepContent(data.content);
+            else if (replyWaiters[data.mode]) replyWaiters[data.mode](data); // the server's answer to this page (the Visualizer's sound)
             else if (data.mode === 'overlay' && OVERLAYS[data.overlay]?.content) showContent(data);
         };
 
@@ -7193,7 +7737,7 @@
         const contentSent = (p) => {
             if (p.mode === 'clear' || (p.mode === 'hide' && p.layer === 'content')) stopContentClock();
             else if (p.mode === 'overlay' && OVERLAYS[p.overlay]?.content) {
-                const secs = Number(p.duration) || 5, now = Date.now(), video = VIDEO_FILE.test(p.content || '');
+                const secs = Number(p.duration) || 5, now = Date.now(), video = timedFile(p.content); // (a sound can be muted too)
                 contentClock = {
                     kind: OVERLAYS[p.overlay].label, name: p.label || p.content || '', video, muted: !!p.muted && video, sid: p.sid || null,
                     start: now, ends: p.hold ? Infinity : now + secs * 1000, secs, pausedAt: null,
@@ -7315,6 +7859,8 @@
             $('sport-field').classList.toggle('hidden', !cfg?.sport);
             $('emoji-field').classList.toggle('hidden', !cfg?.emoji);
             $('xmas-field').classList.toggle('hidden', !cfg?.xmas);
+            $('weather-field').classList.toggle('hidden', !cfg?.weather);
+            renderContentName(); // (the Visualizer has its own pick)
             $('vhs-field').classList.toggle('hidden', !cfg?.stamp);
             $('backdrop-field').classList.toggle('hidden', !cfg?.backdrop);
             // Stingers: the duration box shows their fixed length, locked
@@ -7419,7 +7965,7 @@
         const fillDuration = () => {
             const mode = checked('mode');
             const cfg = OVERLAYS[checked('overlayStyle')];
-            const video = cfg?.content && contentLengths[contentFile];
+            const video = cfg?.content && contentLengths[contentPickOf(cfg)]; // (or a sound, for the Visualizer)
             if (mode === 'l3') $('duration-input').value = l3Duration;
             else if (mode === 'overlay' && cfg?.length === undefined) $('duration-input').value = video ? wholeVideoSecs(cfg, video) : cfg?.dur ?? 8;
         };
@@ -7452,8 +7998,12 @@
                 } else if (input.dataset.custom) {
                     out.textContent = customFile ? `Custom: ${customFile}` : 'Custom (no image found)';
                 } else if (input.dataset.content) {
-                    const name = OVERLAYS[input.value].label;
-                    out.textContent = contentFile ? `${name}: ${contentFile}` : `${name} (nothing picked)`;
+                    const name = OVERLAYS[input.value].label, file = contentPickOf(OVERLAYS[input.value]);
+                    out.textContent = file ? `${name}: ${file}` : `${name} (nothing picked)`;
+                } else if (input.dataset.logo) {
+                    out.textContent = logoFile ? `Custom: ${logoFile}` : 'Custom (no picture picked)';
+                } else if (OVERLAYS[input.value]?.weather && input.name === 'overlayStyle') {
+                    out.textContent = `Weather: ${WEATHER[checked('weatherStyle')] || WEATHER.storm}`;
                 } else {
                     out.textContent = d.dataset.show === 'value' ? input.value : label.textContent.trim();
                 }
@@ -7547,15 +8097,19 @@
                 const text = oneBox ? $('paragraph-input').value.trim() : label;
                 if ((cfg.text || cfg.place) && !text) { flash(cfg.place ? 'Enter the location' : oneBox ? 'Enter some text' : 'Enter a name', true); return null; }
                 if (cfg.custom && !customFile) { flash(`Put a PNG, JPG or GIF in the "${CUSTOM_FOLDER}" folder, then tap Custom…`, true); return null; }
-                if (cfg.content && !contentFile) { flash(`Put a picture or video in the "${CONTENT_FOLDER}" folder, then tap ${cfg.label}…`, true); return null; }
+                const file = cfg.content ? contentPickOf(cfg) : '';
+                if (cfg.content && !file) { flash(`Put a ${cfg.audio ? 'sound file (MP3, WAV, OGG, M4A)' : 'picture or video'} in the "${CONTENT_FOLDER}" folder, then tap ${cfg.label}…`, true); return null; }
+                if (cfg.logo && !logoFile) { flash(`Put a PNG in the "${CUSTOM_FOLDER}" folder, then tap Custom… under Stingers`, true); return null; }
                 return {
                     mode: 'overlay',
                     overlay,
                     // Content is named after its file (like "interview"), so its cards and rundown rows tell them apart
-                    label: oneBox || cfg.text ? text : cfg.content ? contentFile.replace(/\.[^.]+$/, '') : '',
+                    label: oneBox || cfg.text ? text : cfg.content ? file.replace(/\.[^.]+$/, '') : '',
                     title: cfg.text && !oneBox ? title : '',
                     ...(cfg.custom && { customBg: customFile }),
-                    ...(cfg.content && { content: contentFile }),
+                    ...(cfg.content && { content: file }),
+                    ...(cfg.logo && { logo: logoFile }),
+                    ...(cfg.weather && { weather: checked('weatherStyle') || 'storm' }),
                     ...(cfg.sport && { sport: checked('sportStyle') }),
                     ...(cfg.emoji && { emoji: checked('emojiStyle') || 'lol' }),
                     ...(cfg.xmas && { xmas: checked('xmasStyle') || 'wrapper' }),
@@ -7680,7 +8234,8 @@
             const existing = new Set(b.filter(d => isOverlayItem(d) && OVERLAYS[d.overlay]?.content).map(keyOf));
             const added = [];
             let dupes = 0, outside = 0;
-            for (const picked of names.filter(n => CONTENT_FILE.test(n))) {
+            const wanted = OVERLAYS[overlay].audio ? AUDIO_FILE : VISUAL_FILE; // the Visualizer takes sounds, the others pictures and videos
+            for (const picked of names.filter(n => wanted.test(n))) {
                 // As the folder spells it (the server's list), or as picked if the server can't say
                 const name = contentFolderFiles ? contentFolderFiles.find(f => f.toLowerCase() === picked.toLowerCase()) : picked;
                 if (!name) { outside++; continue; }
@@ -7693,10 +8248,10 @@
                 if (length) item.duration = wholeVideoSecs(OVERLAYS[overlay], length);
                 added.push(item);
             }
-            const other = names.length - names.filter(n => CONTENT_FILE.test(n)).length;
+            const other = names.length - names.filter(n => wanted.test(n)).length;
             if (added.length) saveButtonsToStorage([...added, ...b]); // new ones go at the top, in file order
             const skipped = [dupes && `${dupes} already saved`, outside && `${outside} not in the ${CONTENT_FOLDER} folder`,
-                other && `${other} not a picture or video`].filter(Boolean).join(', ');
+                other && `${other} not a ${OVERLAYS[overlay].audio ? 'sound file' : 'picture or video'}`].filter(Boolean).join(', ');
             flash(`Imported ${added.length} as ${OVERLAYS[overlay].label}`, !added.length, skipped && `skipped ${skipped}`);
         };
 
@@ -7718,11 +8273,11 @@
             const cl3 = data.mode === 'cl3';
             const sub = cl3 ? `Complex scene | ${cl3Steps(data).length} in a row`
                 : isOverlay
-                ? (data.source && holdsOn(data) ? `${data.source} | toggle` : data.source || `${kind} | ${OVERLAYS[ovKey]?.label || ovKey}${data.customBg ? `: ${data.customBg}` : ''}${data.content ? `: ${data.content}${data.clear ? ' (clear)' : ''}` : ''}${data.sport ? `: ${SPORTS[data.sport] || data.sport}` : ''}${data.emoji ? `: ${EMOJIS[data.emoji] || data.emoji}` : ''}${data.xmas ? `: ${XMAS_STYLES[data.xmas] || data.xmas}` : ''}${data.tapeDate || data.tapeTime ? `: ${tapeLabel(data)}` : ''}`)
-                : `${data.bgStyle === 'custom' ? `custom: ${data.customBg}` : data.bgStyle} | ${data.fontStyle?.replace('font-', '')}`;
+                ? (data.source && holdsOn(data) ? `${data.source} | toggle` : data.source || `${kind} | ${OVERLAYS[ovKey]?.label || ovKey}${data.customBg ? `: ${data.customBg}` : ''}${data.content ? `: ${data.content}${data.clear ? ' (clear)' : ''}` : ''}${data.sport ? `: ${SPORTS[data.sport] || data.sport}` : ''}${data.emoji ? `: ${EMOJIS[data.emoji] || data.emoji}` : ''}${data.xmas ? `: ${XMAS_STYLES[data.xmas] || data.xmas}` : ''}${OVERLAYS[ovKey]?.weather ? `: ${WEATHER[weatherOf(data)]}` : ''}${data.logo ? `: ${data.logo}` : ''}${data.tapeDate || data.tapeTime ? `: ${tapeLabel(data)}` : ''}`)
+                : `${data.bgStyle === 'custom' ? `custom: ${data.customBg}` : l3Bg(data.bgStyle)} | ${data.fontStyle?.replace('font-', '')}`;
 
             const card = document.createElement('div');
-            card.className = `saved-card relative rounded-lg overflow-hidden border-l-4 ${cl3 ? 'border-amber-400' : ACCENTS[isOverlay ? ovKey : data.bgStyle] || 'border-gray-400'} bg-gradient-to-br ${cl3 ? 'from-[#3a2f14] to-zinc-800' : isOverlay ? 'from-[#26253a] to-zinc-800' : 'from-zinc-700 to-zinc-800'} shadow-md`;
+            card.className = `saved-card relative rounded-lg overflow-hidden border-l-4 ${cl3 ? 'border-amber-400' : (isOverlay ? ACCENTS[ovKey] : L3_ACCENTS[l3Bg(data.bgStyle)] || ACCENTS[l3Bg(data.bgStyle)]) || 'border-gray-400'} bg-gradient-to-br ${cl3 ? 'from-[#3a2f14] to-zinc-800' : isOverlay ? 'from-[#26253a] to-zinc-800' : 'from-zinc-700 to-zinc-800'} shadow-md`;
 
             const take = document.createElement('button');
             take.className = 'card-take w-full h-16 px-2 flex flex-col justify-center text-left text-white hover:bg-white/10 active:bg-white/20 active:scale-[0.97] transition';
@@ -7734,7 +8289,9 @@
             const inFolder = (files, file) => !files || files.some(f => f.toLowerCase() === file.toLowerCase());
             const usesCustom = isOverlay ? OVERLAYS[ovKey]?.custom : data.bgStyle === 'custom';
             const usesContent = isOverlay && OVERLAYS[ovKey]?.content;
+            const usesLogo = isOverlay && OVERLAYS[ovKey]?.logo; // the Custom stinger's picture
             const missing = usesCustom ? (!data.customBg ? 'No custom image picked' : !inFolder(customFolderFiles, data.customBg) && `${data.customBg} isn't in the ${CUSTOM_FOLDER} folder`)
+                : usesLogo ? (!data.logo ? 'No picture picked: the background plays by itself' : !inFolder(customFolderFiles, data.logo) && `${data.logo} isn't in the ${CUSTOM_FOLDER} folder`)
                 : usesContent ? (!data.content ? 'No content picked' : !inFolder(contentFolderFiles, data.content) && `${data.content} isn't in the ${CONTENT_FOLDER} folder`)
                 : '';
             if (missing) {
@@ -7805,7 +8362,7 @@
             renderButtons(loadButtonsFromStorage());
             if (open) $('saved-search').focus();
         };
-        const savedSearchText = (d) => [d.label, d.title, d.source, d.customBg, d.content, d.bgStyle, OVERLAYS[d.overlay]?.label,
+        const savedSearchText = (d) => [d.label, d.title, d.source, d.customBg, d.logo, d.content, d.bgStyle, OVERLAYS[d.overlay]?.label, OVERLAYS[d.overlay]?.weather && WEATHER[weatherOf(d)],
             ...Object.values(d.socials || {})].filter(Boolean).join(' ').toLowerCase();
 
         const toggleSavedOpen = () => {
@@ -7962,7 +8519,7 @@
         const cueSeconds = (d) => Number(d.duration) || OVERLAYS[cueContentStyle(d)].dur;
         // Whether a video plays muted: with its sound unless its 🔇 toggle in the rundown is on (muted: true or false).
         // A Clip's starts on (in case it has background noise); a SOT's, and Content's (a CD), start off.
-        const playsMuted = (d) => VIDEO_FILE.test(d.content || '') && (typeof d.muted === 'boolean' ? d.muted : d.cue === 'clip');
+        const playsMuted = (d) => timedFile(d.content) && (typeof d.muted === 'boolean' ? d.muted : d.cue === 'clip');
         // The Content graphic it takes. It keeps the cue's sid (so its row shows it's on screen), and its cue and
         // text (so the log names it the way the rundown does), and its OBS scenes (see contentScenes).
         const cueGraphic = (d) => ({
@@ -7984,7 +8541,7 @@
         const coverOf = (d) => {
             const cfg = d && !d.cue && isOverlayItem(d) ? OVERLAYS[d.overlay] : null;
             if (!cfg?.cover) return null;
-            const c = Array.isArray(cfg.cover) ? cfg.cover : cfg.sport ? cfg.cover[SPORTS[d.sport] ? d.sport : 'football'] : cfg.cover[xmasCanvas(d) ? d.xmas : 'wrapper'];
+            const c = Array.isArray(cfg.cover) ? cfg.cover : cfg.sport ? cfg.cover[SPORTS[d.sport] ? d.sport : 'football'] : cfg.weather ? cfg.cover[weatherOf(d)] : cfg.cover[xmasCanvas(d) ? d.xmas : 'wrapper'];
             return c ? [c[0] * cfg.length, c[1] * cfg.length] : null;
         };
         const stingerScene = (d) => (d.coverScene && coverOf(d) ? d.coverScene : '');
@@ -8703,7 +9260,7 @@
         // ---------- The mute toggle (🔊 / 🔇) on a rundown item that plays a video ----------
         // A CD, or a Clip, SOT or PIC with a video: whether it plays with its sound (see playsMuted). Tapping it while
         // the item is on screen mutes it (or turns its sound on) right away, too. Works with Set Show on or off.
-        const hasSound = (d) => playsContent(d) && VIDEO_FILE.test(d.content || '');
+        const hasSound = (d) => playsContent(d) && timedFile(d.content);
         const muteToggle = (data, cls) => {
             const btn = document.createElement('button'), muted = playsMuted(data);
             btn.type = 'button';
@@ -9269,7 +9826,7 @@
             renderCueContent();
         };
         const renderCueContent = () => {
-            const files = contentFolderFiles, want = cueContent.file;
+            const files = contentFolderFiles && contentFolderFiles.filter(f => !AUDIO_FILE.test(f)), want = cueContent.file; // (sounds are the Visualizer's)
             const sel = $('edit-content'), typed = $('edit-content-text');
             sel.classList.toggle('hidden', files === null);
             typed.classList.toggle('hidden', files !== null);
@@ -9755,7 +10312,7 @@
         const stepName = (d) => d.label || OVERLAYS[isOverlayItem(d) ? d.overlay || 'l3Large' : '']?.label || 'Graphic';
         // What a step is, under its name: "L3 | blue", "Fullscreen L3 | L3 PNG", "Overlay | Snow", "Stinger | Storm"
         const stepKind = (d) => {
-            if (!isOverlayItem(d)) return `L3 | ${d.bgStyle || ''}`;
+            if (!isOverlayItem(d)) return `L3 | ${l3Bg(d.bgStyle) || ''}`;
             const cfg = OVERLAYS[d.overlay || 'l3Large'];
             const kind = cfg?.length !== undefined ? 'Stinger' : itemType(d) === 'L3' ? 'Fullscreen L3' : 'Overlay';
             return `${kind} | ${cfg?.label || d.overlay}${d.content ? `: ${d.content}` : ''}`;
@@ -10025,6 +10582,7 @@
                 $(id).textContent = customFile ? `${CUSTOM_FOLDER}/${customFile}` : `No image in the ${CUSTOM_FOLDER} folder`;
                 $(id).classList.toggle('hidden', false);
             });
+            $('logo-name').textContent = logoFile ? `${CUSTOM_FOLDER}/${logoFile}` : '';
             updateSummaries();
         };
 
@@ -10033,18 +10591,38 @@
             localStorage.setItem(CUSTOM_KEY, name);
             showCustomNames();
         };
+        // The Custom stinger's picture: a pick of its own (a logo, say, while the Custom background stays a texture)
+        const LOGO_KEY = 'fx_stinger_file';
+        let logoFile = localStorage.getItem(LOGO_KEY) || '';
+        const setLogoFile = (name) => {
+            logoFile = name;
+            localStorage.setItem(LOGO_KEY, name);
+            showCustomNames();
+        };
+        // What the window is picking, each with its own remembered file: the Custom background and Fullscreen L3's image
+        // (shared), the Custom stinger's picture, or the sound for the Sound Pad's Custom pad
+        const CUSTOM_PICKS = {
+            image: { title: 'Custom image', test: IMAGE_FILE, said: 'Custom image', kinds: 'PNG, JPG or GIF', get: () => customFile, set: (f) => setCustomFile(f) },
+            logo:  { title: 'Custom stinger picture', test: IMAGE_FILE, said: 'Stinger picture', kinds: 'PNG, JPG or GIF', get: () => logoFile, set: (f) => setLogoFile(f) },
+            sound: { title: 'Custom sound', test: AUDIO_FILE, said: 'Custom sound', kinds: 'sound file (MP3, WAV, OGG, M4A, AAC or FLAC)', get: () => padFile('custom'), set: (f) => setPadFile('custom', f) },
+        };
+        let customPickFor = 'image';
+        const customPick = () => CUSTOM_PICKS[customPickFor];
 
         // Asks the server what's in the custom folder (the answer comes to gotCustomList)
         const askCustomList = () => {
             clearTimeout(customListTimer);
             const open = $('custom-dialog').open;
-            const noList = () => { if ($('custom-dialog').open) $('custom-note').textContent = 'The server can\'t list the custom folder (not connected, or an older server). Use Choose a file… and pick the image from the custom folder.'; };
+            const noList = () => { if ($('custom-dialog').open) $('custom-note').textContent = 'The server can\'t list the custom folder (not connected, or an older server). Use Choose a file… and pick it from the custom folder.'; };
             if (!ws || ws.readyState !== WebSocket.OPEN) { if (open) noList(); return; }
             ws.send(JSON.stringify({ mode: 'customList' }));
             if (open) customListTimer = setTimeout(noList, 1500); // no answer means an older server
         };
-        // Custom…: the window of images in the custom folder
-        const pickCustom = () => {
+        // Custom…: the window of images (or sounds) in the custom folder. kind: what it's picking (see CUSTOM_PICKS)
+        const pickCustom = (kind) => {
+            customPickFor = CUSTOM_PICKS[kind] ? kind : 'image'; // (a button's click hands over its event: the image)
+            $('custom-heading').textContent = customPick().title;
+            $('custom-file').accept = customPick().test === AUDIO_FILE ? 'audio/*,.mp3,.wav,.ogg,.m4a,.aac,.flac' : 'image/*';
             $('custom-note').textContent = 'Looking in the custom folder…';
             renderCustomList();
             if (!$('custom-dialog').open) $('custom-dialog').showModal();
@@ -10062,31 +10640,41 @@
             const images = files.filter(f => IMAGE_FILE.test(f));
             if (images.length && !images.some(f => f.toLowerCase() === customFile.toLowerCase())) setCustomFile(images[0]);
             if ($('custom-dialog').open) {
-                $('custom-note').textContent = images.length ? 'Tap the image to use.' : `No PNG, JPG or GIF in the "${CUSTOM_FOLDER}" folder yet. Put one there (next to "assets"), then open this again.`;
+                const pick = customPick(), sounds = pick.test === AUDIO_FILE;
+                $('custom-note').textContent = files.some(f => pick.test.test(f)) ? `Tap the ${sounds ? 'sound' : 'image'} to use.`
+                    : `No ${pick.kinds} in the "${CUSTOM_FOLDER}" folder yet. Put one there (next to "assets"), then open this again.${sounds ? ' If one\'s there already, the server is from before this: reload server.py in OBS (or restart server.js).' : ''}`;
                 renderCustomList();
             }
+            renderPadFiles(); // a pad whose sound is gone says so
         };
 
         // The window's list: a preview and the name of each image; the one in use is marked
         const renderCustomList = () => {
-            const box = $('custom-list');
+            const box = $('custom-list'), pick = customPick(), sounds = pick.test === AUDIO_FILE;
             box.innerHTML = '';
-            (customFolderFiles || []).filter(f => IMAGE_FILE.test(f)).forEach(name => {
+            (customFolderFiles || []).filter(f => pick.test.test(f)).forEach(name => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
-                btn.className = `custom-pick${name.toLowerCase() === customFile.toLowerCase() ? ' on' : ''}`;
+                btn.className = `custom-pick${name.toLowerCase() === pick.get().toLowerCase() ? ' on' : ''}`;
                 btn.title = `Use ${name}`;
-                const img = document.createElement('img');
-                img.src = customPath(name);
-                img.alt = '';
-                img.loading = 'lazy';
-                img.onerror = () => img.remove(); // a panel on another computer can't show the preview
                 const label = document.createElement('span');
                 label.textContent = name;
-                btn.append(img, label);
+                if (sounds) { // a note for its picture
+                    const tile = document.createElement('div');
+                    tile.className = 'audio-tile';
+                    tile.textContent = '♪';
+                    btn.append(tile, label);
+                } else {
+                    const img = document.createElement('img');
+                    img.src = customPath(name);
+                    img.alt = '';
+                    img.loading = 'lazy';
+                    img.onerror = () => img.remove(); // a panel on another computer can't show the preview
+                    btn.append(img, label);
+                }
                 btn.onclick = () => {
-                    setCustomFile(name);
-                    flash('Custom image', false, name);
+                    pick.set(name);
+                    flash(pick.said, false, name);
                     $('custom-dialog').close();
                 };
                 box.append(btn);
@@ -10095,9 +10683,11 @@
 
         // Choose a file…: checks the file really is in the custom folder
         const useCustomFile = (name) => {
-            if (!IMAGE_FILE.test(name)) { flash('Custom images must be PNG, JPG or GIF', true, name); return; }
-            const accept = () => { setCustomFile(name); flash('Custom image', false, name); if ($('custom-dialog').open) $('custom-dialog').close(); };
-            const img = new Image();
+            const pick = customPick(), sounds = pick.test === AUDIO_FILE;
+            if (!pick.test.test(name)) { flash(sounds ? 'It has to be a sound file (MP3, WAV, OGG, M4A, AAC, FLAC)' : 'Custom images must be PNG, JPG or GIF', true, name); return; }
+            const accept = () => { pick.set(name); flash(pick.said, false, name); if ($('custom-dialog').open) $('custom-dialog').close(); };
+            const img = sounds ? new Audio() : new Image();
+            if (sounds) { img.preload = 'metadata'; img.onloadedmetadata = accept; }
             img.onload = accept;
             img.onerror = () => {
                 // It can't be checked if this panel is on another device, so allow it after a warning
@@ -10111,21 +10701,33 @@
         // pictures (PNG, JPG, GIF, WebP) and videos (MP4, WebM), each with a preview; tap one to show it. The
         // pick is shared and remembered, and each saved Content overlay (and rundown card) keeps the file it was
         // saved with. A video's length is read here, so its Duration covers all of it.
+        // The Visualizer… has a pick of its own, from the same folder: a sound file (MP3, WAV, OGG, M4A, AAC, FLAC). Its
+        // window lists the folder's sounds, and the others' lists its pictures and videos.
         const CONTENT_KEY = 'fx_content_file';
-        const CONTENT_FILE = /\.(png|jpe?g|gif|webp|mp4|webm)$/i;
+        const AUDIO_KEY = 'fx_audio_file';
+        const VISUAL_FILE = /\.(png|jpe?g|gif|webp|mp4|webm)$/i;
+        const CONTENT_FILE = /\.(png|jpe?g|gif|webp|mp4|webm|mp3|wav|ogg|m4a|aac|flac)$/i;
         let contentFile = localStorage.getItem(CONTENT_KEY) || '';
-        const contentLengths = {}; // video lengths in seconds, by file (once read)
+        let audioFile = localStorage.getItem(AUDIO_KEY) || '';
+        let contentPickAudio = false; // the window is open on the folder's sounds (for the Visualizer)
+        const contentLengths = {}; // video and sound lengths in seconds, by file (once read)
+        // The file a Content overlay shows: the Visualizer's sound, or the picture or video the others share
+        const contentPickOf = (cfg) => (cfg?.audio ? audioFile : contentFile);
 
+        // The line under the Content buttons: the pick of the one that's selected
+        const renderContentName = () => {
+            const cfg = OVERLAYS[checked('overlayStyle')], file = contentPickOf(cfg), length = contentLengths[file];
+            $('content-name').textContent = !file ? (cfg?.audio ? `No sound picked from the ${CONTENT_FOLDER} folder` : `Nothing picked from the ${CONTENT_FOLDER} folder`)
+                : `${CONTENT_FOLDER}/${file}${length ? ` · ${AUDIO_FILE.test(file) ? 'sound' : 'video'} ${clock(Math.ceil(length))}, plays to the end` : ''}`;
+        };
         const showContentName = () => {
-            const length = contentLengths[contentFile];
-            $('content-name').textContent = !contentFile ? `Nothing picked from the ${CONTENT_FOLDER} folder`
-                : `${CONTENT_FOLDER}/${contentFile}${length ? ` · video ${clock(Math.ceil(length))}, plays to the end` : ''}`;
+            renderContentName();
             updateSummaries();
         };
         // A video's length in seconds, read from its file (next to this panel) and kept in contentLengths.
         // Null for a picture, or a file this panel can't reach.
         const videoLength = (name) => new Promise(resolve => {
-            if (!VIDEO_FILE.test(name)) { resolve(null); return; }
+            if (!timedFile(name)) { resolve(null); return; } // (a sound's length is read the same way)
             if (contentLengths[name]) { resolve(contentLengths[name]); return; }
             const probe = document.createElement('video');
             probe.preload = 'metadata';
@@ -10145,16 +10747,21 @@
         // Reads a video's length, then fills in the Duration if a Content overlay is picked. A panel that can't
         // reach the file keeps the usual 15 seconds.
         const readContentLength = (name) => videoLength(name).then(() => {
-            if (name !== contentFile) return;
+            if (name !== contentFile && name !== audioFile) return;
             showContentName();
             if (checked('mode') === 'overlay' && OVERLAYS[checked('overlayStyle')]?.content) fillDuration();
         });
         const setContentFile = (name) => {
-            contentFile = name;
-            localStorage.setItem(CONTENT_KEY, name);
+            if (AUDIO_FILE.test(name)) { // the Visualizer's
+                audioFile = name;
+                localStorage.setItem(AUDIO_KEY, name);
+            } else {
+                contentFile = name;
+                localStorage.setItem(CONTENT_KEY, name);
+                sendContentPrep(name); // picked to be taken: the Content source gets it ready
+            }
             showContentName();
             readContentLength(name);
-            sendContentPrep(name); // picked to be taken: the Content source gets it ready
         };
         // Asks the server what's in the content folder: for the window, and the red ! on cards whose file is gone
         const askContentList = async () => {
@@ -10167,12 +10774,18 @@
                 else if (changed) renderButtons(loadButtonsFromStorage());
             }
             if (!$('content-dialog').open) return;
+            const listed = contentFolderFiles.filter(f => AUDIO_FILE.test(f) === contentPickAudio).length;
             $('content-note').textContent = !reply ? 'The server can\'t list the content folder (not connected, or an older server). Use Choose a file… and pick it from the content folder.'
-                : contentFolderFiles.length ? 'Tap the picture or video to show (a video plays to the end).'
+                : listed ? (contentPickAudio ? 'Tap the sound to play (it plays to the end, and the bars move to it).' : 'Tap the picture or video to show (a video plays to the end).')
+                : contentPickAudio ? `No sound files in the "${CONTENT_FOLDER}" folder yet. Put one there (MP3, WAV, OGG, M4A, AAC or FLAC; next to "assets"), then open this again. If one's there already, the server is from before the Visualizer: reload server.py in OBS (or restart server.js).`
                 : `Nothing in the "${CONTENT_FOLDER}" folder yet. Put pictures (PNG, JPG, GIF, WebP) or videos (MP4, WebM) there (next to "assets"), then open this again.`;
             renderContentList();
         };
-        const pickContent = () => {
+        // Tapping Content TV…, Phone… or Full… opens it on the pictures and videos; Visualizer… on the sounds
+        const pickContent = (e) => {
+            contentPickAudio = !!OVERLAYS[e?.currentTarget?.value || checked('overlayStyle')]?.audio;
+            $('content-heading').textContent = contentPickAudio ? 'Visualizer sound' : 'Content';
+            $('content-file').accept = contentPickAudio ? 'audio/*,.mp3,.wav,.ogg,.m4a,.aac,.flac' : 'image/png,image/jpeg,image/gif,image/webp,video/mp4,video/webm';
             $('content-note').textContent = 'Looking in the content folder…';
             renderContentList();
             if (!$('content-dialog').open) $('content-dialog').showModal();
@@ -10197,16 +10810,21 @@
                 watcher.unobserve(e.target);
                 e.target.src = e.target.dataset.src;
             }), { root: box, rootMargin: '150px' });
-            (contentFolderFiles || []).forEach(name => {
-                const video = VIDEO_FILE.test(name);
+            const picked = contentPickAudio ? audioFile : contentFile;
+            (contentFolderFiles || []).filter(f => AUDIO_FILE.test(f) === contentPickAudio).forEach(name => {
+                const video = VIDEO_FILE.test(name), sound = AUDIO_FILE.test(name);
                 const btn = document.createElement('button');
                 btn.type = 'button';
-                btn.className = `custom-pick${name.toLowerCase() === contentFile.toLowerCase() ? ' on' : ''}`;
-                btn.title = `Show ${name}`;
-                const preview = document.createElement(video ? 'video' : 'img');
+                btn.className = `custom-pick${name.toLowerCase() === picked.toLowerCase() ? ' on' : ''}`;
+                btn.title = `${sound ? 'Play' : 'Show'} ${name}`;
+                const preview = document.createElement(video ? 'video' : sound ? 'div' : 'img');
                 const label = document.createElement('span');
                 label.textContent = `${video ? '▶ ' : ''}${name}`;
-                if (video) {
+                if (sound) { // a note for its picture, and its length after its name
+                    preview.className = 'audio-tile';
+                    preview.textContent = '♪';
+                    videoLength(name).then(length => { if (length && label.isConnected) label.textContent = `${name} · ${clock(Math.ceil(length))}`; });
+                } else if (video) {
                     preview.muted = true;
                     preview.preload = 'metadata';
                     preview.onloadedmetadata = () => { // its length, after the name
@@ -10225,7 +10843,7 @@
                 btn.append(preview, label);
                 btn.onclick = () => {
                     setContentFile(name);
-                    flash('Content', false, name);
+                    flash(sound ? 'Visualizer sound' : 'Content', false, name);
                     $('content-dialog').close();
                 };
                 box.append(btn);
@@ -10233,9 +10851,10 @@
         };
         // Choose a file…: checks the file really is in the content folder
         const useContentFile = (name) => {
-            if (!CONTENT_FILE.test(name)) { flash('Content must be a picture (PNG, JPG, GIF, WebP) or a video (MP4, WebM)', true, name); return; }
-            const accept = () => { setContentFile(name); flash('Content', false, name); if ($('content-dialog').open) $('content-dialog').close(); };
-            const video = VIDEO_FILE.test(name), probe = document.createElement(video ? 'video' : 'img');
+            if (contentPickAudio && !AUDIO_FILE.test(name)) { flash('The Visualizer plays a sound file (MP3, WAV, OGG, M4A, AAC, FLAC)', true, name); return; }
+            if (!contentPickAudio && !VISUAL_FILE.test(name)) { flash('Content must be a picture (PNG, JPG, GIF, WebP) or a video (MP4, WebM)', true, name); return; }
+            const accept = () => { setContentFile(name); flash(contentPickAudio ? 'Visualizer sound' : 'Content', false, name); if ($('content-dialog').open) $('content-dialog').close(); };
+            const video = timedFile(name), probe = document.createElement(video ? 'video' : 'img');
             probe[video ? 'onloadedmetadata' : 'onload'] = accept;
             probe.onerror = () => {
                 // It can't be checked if this panel is on another device, so allow it after a warning
@@ -11747,7 +12366,18 @@
 
         // ---------- Display: the players ----------
         const soundPlayers = {}; // key -> Audio, made the first time it's needed
-        const soundPlayer = (key) => {
+        const soundPlayer = (key, file) => {
+            const own = CUSTOM_PADS.find(p => p.key === key);
+            if (own && (own.file || file)) { // Background Music (its own file), or Custom (the file picked for it, from the custom folder)
+                const src = own.file ? soundPath(own) : customPath(file);
+                if (soundPlayers[key]?.dataset.src !== src) {
+                    soundPlayers[key]?.pause();
+                    soundPlayers[key] = new Audio(src);
+                    soundPlayers[key].dataset.src = src;
+                    soundPlayers[key].preload = 'auto';
+                }
+                return soundPlayers[key];
+            }
             const s = SOUNDS.find(x => x.key === key);
             if (!s) return null;
             if (!soundPlayers[key]) {
@@ -11758,10 +12388,17 @@
         };
         const stopAllSounds = () => Object.values(soundPlayers).forEach(a => { a.pause(); a.currentTime = 0; });
         const soundMessage = (data) => {
-            if (data.mode === 'soundStop') { stopAllSounds(); return; }
-            const a = soundPlayer(data.key);
+            const level = () => Math.min(Math.max(Number(data.volume ?? 1), 0), 1);
+            if (data.mode === 'soundStop') { // every sound, or just one pad's (Background Music toggled off)
+                if (data.key && soundPlayers[data.key]) { soundPlayers[data.key].pause(); soundPlayers[data.key].currentTime = 0; }
+                else if (!data.key) stopAllSounds();
+                return;
+            }
+            if (data.mode === 'soundVolume') { if (soundPlayers[data.key]) soundPlayers[data.key].volume = level(); return; } // the slider, while it plays
+            const a = soundPlayer(data.key, data.file);
             if (!a) { console.warn('Unknown sound:', data.key); return; }
-            a.volume = Math.min(Math.max(Number(data.volume ?? 1), 0), 1);
+            a.volume = level();
+            a.loop = !!data.loop; // Background Music goes round until it's toggled off
             a.currentTime = 0;
             a.play().catch(err => console.warn('Sound did not play:', err));
         };
@@ -11775,9 +12412,90 @@
         const soundLengths = {}; // key -> seconds, read from each file so a pad can show it playing
         const padTimers = {};
 
+        // ---------- Background Music and Custom ----------
+        // The Custom pad's sound: a file picked from the custom folder (the folder in its corner, or a tap while it has none)
+        const PAD_FILES_KEY = 'fx_sound_files'; // { custom: 'airhorn.mp3' }
+        const padFiles = () => { const f = readJson(PAD_FILES_KEY, {}); return f && typeof f === 'object' ? f : {}; };
+        const padFile = (key) => (typeof padFiles()[key] === 'string' ? padFiles()[key] : '');
+        const padOn = { music: false }; // Background Music is playing (toggled on)
+        const setPadFile = (key, name) => {
+            localStorage.setItem(PAD_FILES_KEY, JSON.stringify({ ...padFiles(), [key]: name }));
+            delete soundLengths[key];
+            renderPadFiles();
+        };
+        // Each of the two pads' second line and its length: Background Music says how it works; Custom names its file
+        // (red if it's gone from the folder), or says what to do
+        const renderPadFiles = () => CUSTOM_PADS.forEach(p => {
+            const pad = $(`pad-${p.key}`);
+            if (!pad) return;
+            const file = p.pick ? padFile(p.key) : p.file, line = pad.querySelector('.pad-file');
+            const gone = !!p.pick && !!file && !!customFolderFiles && !customFolderFiles.some(f => f.toLowerCase() === file.toLowerCase());
+            line.textContent = !p.pick ? (padOn[p.key] ? 'ON · tap to stop' : 'Tap to start · it loops') : file ? `${gone ? '! ' : ''}${file}` : 'Tap to pick a sound';
+            line.classList.toggle('gone', gone);
+            line.title = gone ? `${file} isn't in the ${CUSTOM_FOLDER} folder` : p.pick ? file : '';
+            if (!file || soundLengths[p.key]) return;
+            const probe = new Audio(); // its length, for the corner (and Custom's bar)
+            probe.preload = 'metadata';
+            probe.onloadedmetadata = () => {
+                if ((p.pick && padFile(p.key) !== file) || !Number.isFinite(probe.duration)) return;
+                soundLengths[p.key] = probe.duration;
+                pad.querySelector('.pad-time').textContent = probe.duration < 60 ? `${Math.round(probe.duration * 10) / 10}s` : clock(probe.duration);
+            };
+            probe.src = p.pick ? customPath(file) : soundPath(p);
+            pad.querySelector('.pad-time').textContent = '';
+        });
+        const startLoopPad = (key) => {
+            if (!sendPayload({ mode: 'sound', key, loop: true, volume: soundVolume() / 100 })) return false;
+            padOn[key] = true;
+            $(`pad-${key}`)?.classList.add('on');
+            renderPadFiles();
+            return true;
+        };
+        const stopLoopPad = (key, tell = true) => {
+            if (tell && !sendPayload({ mode: 'soundStop', key })) return;
+            padOn[key] = false;
+            $(`pad-${key}`)?.classList.remove('on');
+            renderPadFiles();
+        };
+        // Tapping one of the two. Background Music toggles; Custom plays once (with no sound picked yet: the window to pick it).
+        const hitCustomPad = (p) => {
+            if (p.loop) {
+                if (padOn[p.key]) { stopLoopPad(p.key); flash(`${p.label} off`); }
+                else if (startLoopPad(p.key)) flash(`${p.label} on`, false, 'until it is tapped again');
+                return;
+            }
+            if (!padFile(p.key)) { pickCustom(p.pick); return; }
+            if (!sendPayload({ mode: 'sound', key: p.key, file: padFile(p.key), volume: soundVolume() / 100 })) return;
+            markPad(p.key, true);
+            flash(`Sound: ${p.label}`, false, padFile(p.key));
+        };
+
         const renderSoundPads = () => {
             const wrap = $('sound-pads');
             wrap.innerHTML = '';
+            CUSTOM_PADS.forEach(p => {
+                const pad = document.createElement('button');
+                pad.type = 'button';
+                pad.className = 'pad pad-custom lay-leaf';
+                pad.id = `pad-${p.key}`;
+                pad.title = `${p.label} (key ${p.hot.toUpperCase()})${p.loop ? ': tap to start it, tap again to stop it' : ''}`;
+                pad.dataset.lay = `snd:${p.key}`; // can be hidden from the layout
+                pad.style.setProperty('--c1', p.c1);
+                pad.style.setProperty('--c2', p.c2);
+                pad.innerHTML = `<span class="pad-key">${p.hot.toUpperCase()}</span><span class="pad-time"></span>`
+                    + `<span class="pad-icon" aria-hidden="true">${p.icon}</span><span class="pad-label"></span><span class="pad-file"></span>`
+                    + `${p.pick ? `<span class="pad-pick" role="button" title="Pick its sound from the ${CUSTOM_FOLDER} folder">${icon('folder')}</span>` : ''}<span class="pad-bar"></span>`;
+                pad.querySelector('.pad-label').textContent = p.label;
+                // The folder in its corner picks the sound; anywhere else plays it (on the press, like the others)
+                pad.addEventListener('pointerdown', (e) => {
+                    if (e.button !== 0) return;
+                    e.preventDefault();
+                    if (p.pick && e.target.closest('.pad-pick')) pickCustom(p.pick); else hitCustomPad(p);
+                });
+                pad.addEventListener('click', (e) => { if (e.detail === 0) hitCustomPad(p); });
+                wrap.append(pad);
+            });
+            renderPadFiles();
             SOUNDS.forEach((s, i) => {
                 const pad = document.createElement('button');
                 pad.type = 'button';
@@ -11827,7 +12545,11 @@
             });
             padTimers[key] = setTimeout(() => pads.forEach(pad => pad.classList.remove('playing', 'hit')), (secs || 0.3) * 1000);
         };
-        const clearPads = () => SOUNDS.forEach(s => markPad(s.key, false));
+        // Every sound has stopped (STOP, Clear All): the pads go dark, Background Music too
+        const clearPads = () => {
+            [...SOUNDS, ...CUSTOM_PADS].forEach(s => markPad(s.key, false));
+            Object.keys(padOn).forEach(key => stopLoopPad(key, false));
+        };
 
         const hitPad = (key) => {
             if (!sendPayload({ mode: 'sound', key, volume: soundVolume() / 100 })) return;
@@ -11846,10 +12568,12 @@
             const simple = simpleState().on;
             if ((!simple && checked('mode') !== 'sound') || e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
             if (e.target.closest('input, textarea, select, [contenteditable]') || document.querySelector('dialog[open]')) return;
-            const s = simple ? SOUNDS.find(x => x.key === simpleTheme().sounds[Number(e.key) - 1]) : SOUNDS[Number(e.key) - 1];
+            // M and C: Background Music and Custom (on the Sound Pad tab)
+            const own = simple ? null : CUSTOM_PADS.find(p => p.hot === e.key.toLowerCase());
+            const s = own || (simple ? SOUNDS.find(x => x.key === simpleTheme().sounds[Number(e.key) - 1]) : SOUNDS[Number(e.key) - 1]);
             if (!s || (!simple && (layoutEditing || loadHidden().has(`snd:${s.key}`)))) return; // a pad hidden from the layout stays quiet
             e.preventDefault();
-            hitPad(s.key);
+            if (own) hitCustomPad(own); else hitPad(s.key);
         };
 
 
@@ -11860,7 +12584,7 @@
            was left, and a saved show brings them back too.
            ========================================================= */
         const PICKS_KEY = 'fx_picks';
-        const PICK_GROUPS = ['mode', 'bgStyle', 'fontStyle', 'fontColor', 'location', 'animationStyle', 'overlayStyle', 'sportStyle', 'emojiStyle', 'xmasStyle', 'contentBack'];
+        const PICK_GROUPS = ['mode', 'bgStyle', 'fontStyle', 'fontColor', 'location', 'animationStyle', 'overlayStyle', 'sportStyle', 'emojiStyle', 'xmasStyle', 'weatherStyle', 'contentBack'];
         const savePicks = () => {
             const picks = Object.fromEntries(PICK_GROUPS.map(name => [name, checked(name) ?? null]));
             try { localStorage.setItem(PICKS_KEY, JSON.stringify({ ...picks, l3Duration })); } catch { /* storage blocked */ }
@@ -11879,7 +12603,7 @@
         const loadPicks = () => {
             const picks = readJson(PICKS_KEY, {});
             if (!picks || typeof picks !== 'object') return;
-            PICK_GROUPS.forEach(name => { if (typeof picks[name] === 'string') pickOption(name, name === 'animationStyle' ? l3Anim(picks[name]) : picks[name]); });
+            PICK_GROUPS.forEach(name => { if (typeof picks[name] === 'string') pickOption(name, name === 'animationStyle' ? l3Anim(picks[name]) : name === 'bgStyle' ? l3Bg(picks[name]) : picks[name]); });
             if (Number(picks.l3Duration) > 0) l3Duration = Number(picks.l3Duration);
         };
 
@@ -12139,8 +12863,8 @@
                                 { name: 'L3 PNG', overlay: 'l3Large' }],
                         overlays: ['breaking', 'locpin', 'rain', 'social'], stingers: ['stinger', 'lubbock', 'medical', 'storm'], sounds: ['mystery', 'swish', 'censor'] },
             tech:     { label: 'Tech & Gaming', icon: '🎮', c1: '#65a30d', c2: '#14532d',
-                        looks: [{ name: 'Code', bgStyle: 'code', fontStyle: 'font-modern', fontColor: '', animationStyle: 'anim-glitch' },
-                                { name: 'Tech', bgStyle: 'tech', fontStyle: 'font-modern', fontColor: '', animationStyle: 'anim-8bit' },
+                        looks: [{ name: 'Terminal', bgStyle: 'black', fontStyle: 'font-modern', fontColor: '#2ECC71', animationStyle: 'anim-8bit' }, // (was Code, on the Code background)
+                                { name: 'Tech', bgStyle: 'tech', fontStyle: 'font-modern', fontColor: '', animationStyle: 'anim-glitch' },
                                 { name: 'Space', bgStyle: 'space', fontStyle: 'font-accent', fontColor: '#4FC3F7', animationStyle: 'anim-spinIn' }],
                         overlays: ['vhs', 'comic', 'emoji', 'colorwave'], stingers: ['techfx', 'pixel', 'tvstatic', 'colorbars'], sounds: ['victory', 'swish', 'trombone', 'comedy'] },
             comedy:   { label: 'Comedy',   icon: '😂', c1: '#ec4899', c2: '#7c3aed',
@@ -12279,6 +13003,8 @@
                 ...(cfg.sport && { sport: checked('sportStyle') || 'football' }),
                 ...(cfg.emoji && { emoji: checked('emojiStyle') || 'lol' }),
                 ...(cfg.xmas && { xmas: checked('xmasStyle') || 'wrapper' }),
+                ...(cfg.weather && { weather: checked('weatherStyle') || 'storm' }),
+                ...(cfg.logo && logoFile && { logo: logoFile }),
                 ...(cfg.social && { socials: currentSocials() }),
                 ...(cfg.depth && loadGsEffects().includes(key) && { gs: true }),
                 duration: cfg.dur ?? 8,
@@ -12603,6 +13329,8 @@
                 // Custom files: tapping either Custom… opens the file picker
                 $('bg-custom').addEventListener('click', pickCustom);
                 $('ov-l3Custom').addEventListener('click', pickCustom);
+                $('ov-customStinger').addEventListener('click', () => pickCustom('logo')); // the Custom stinger's picture
+                document.querySelectorAll('input[name="weatherStyle"]').forEach(r => r.addEventListener('change', updateSummaries));
                 $('custom-file').addEventListener('change', (e) => {
                     if (e.target.files.length) useCustomFile(e.target.files[0].name);
                     e.target.value = '';
@@ -12611,6 +13339,7 @@
                 $('ov-content').addEventListener('click', pickContent);
                 $('ov-contentPhone').addEventListener('click', pickContent);
                 $('ov-contentFull').addEventListener('click', pickContent);
+                $('ov-contentViz').addEventListener('click', pickContent);
                 $('content-dialog').addEventListener('close', clearContentList); // lets go of its video previews
                 $('content-file').addEventListener('change', (e) => {
                     if (e.target.files.length) useContentFile(e.target.files[0].name);
@@ -12624,6 +13353,8 @@
                 $('sound-volume').addEventListener('input', (e) => {
                     try { localStorage.setItem(SOUND_VOLUME_KEY, e.target.value); } catch { /* storage blocked */ }
                     $('sound-volume-value').textContent = `${e.target.value}%`;
+                    // Background Music follows the slider while it plays
+                    if (padOn.music && ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ mode: 'soundVolume', key: 'music', volume: Number(e.target.value) / 100 }));
                 });
                 // Saved list search
                 $('saved-search').addEventListener('input', (e) => { savedQuery = e.target.value.trim().toLowerCase(); renderButtons(loadButtonsFromStorage()); });
@@ -12708,6 +13439,7 @@
                 showContentName();
                 updateMode();
                 if (contentFile) readContentLength(contentFile); // a video picked last time: its length, for the Duration
+                if (audioFile) readContentLength(audioFile);     // and the Visualizer's sound
                 renderSimple();
                 finishShowOpen();
             }

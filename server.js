@@ -24,23 +24,43 @@ const CONTENT_DIR = path.join(__dirname, 'content');
 const RUNDOWN_DIR = path.join(__dirname, 'rundowns');
 const LOG_DIR = path.join(__dirname, 'logs');
 const SHOW_DIR = path.join(__dirname, 'shows');
+// Sound files: in the custom folder for the Sound Pad's Background Music and Custom pads, in the content folder for the Visualizer
+const AUDIO_TYPES = { '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.m4a': 'audio/mp4', '.aac': 'audio/aac', '.flac': 'audio/flac' };
+const CONTENT_DATA_MAX = 64 * 1024 * 1024; // the biggest sound file handed to the Visualizer (bigger ones still play, without moving the bars)
+// Image and sound files in the custom folder, sorted by name
 function customImages() {
     try {
         return fs.readdirSync(CUSTOM_DIR)
-            .filter(f => /\.(png|jpe?g|gif)$/i.test(f))
+            .filter(f => /\.(png|jpe?g|gif|mp3|wav|ogg|m4a|aac|flac)$/i.test(f))
             .sort((a, b) => (a.toLowerCase() < b.toLowerCase() ? -1 : 1));
     } catch (err) {
         return [];
     }
 }
-// Pictures and videos in the content folder, sorted by name
+// Pictures, videos and sound files in the content folder, sorted by name
 function contentFiles() {
     try {
         return fs.readdirSync(CONTENT_DIR)
-            .filter(f => /\.(png|jpe?g|gif|webp|mp4|webm)$/i.test(f))
+            .filter(f => /\.(png|jpe?g|gif|webp|mp4|webm|mp3|wav|ogg|m4a|aac|flac)$/i.test(f))
             .sort((a, b) => (a.toLowerCase() < b.toLowerCase() ? -1 : 1));
     } catch (err) {
         return [];
+    }
+}
+// A sound file from the content folder, for the Visualizer (base64). The Content page plays it from these bytes: a
+// page opened from a file isn't allowed to listen to a sound it plays straight from another file, so its bars
+// couldn't move to it. Only sound files that are in the content folder, by name.
+function contentData(request) {
+    const reply = { mode: 'contentData', file: request.file, ok: false };
+    const found = typeof request.file === 'string' ? contentFiles().find(f => f === request.file) : null;
+    const type = found ? AUDIO_TYPES[path.extname(found).toLowerCase()] : null;
+    if (!type) return { ...reply, error: 'Not a sound file in the content folder' };
+    try {
+        const file = path.join(CONTENT_DIR, found);
+        if (fs.statSync(file).size > CONTENT_DATA_MAX) return { ...reply, error: 'Too big' };
+        return { ...reply, ok: true, type, data: fs.readFileSync(file).toString('base64') };
+    } catch (err) {
+        return { ...reply, error: err.code || err.name };
     }
 }
 
@@ -111,6 +131,7 @@ function answerRequest(request) {
     if (!request || typeof request !== 'object') return null;
     if (request.mode === 'customList') return { mode: 'customFiles', files: customImages() };
     if (request.mode === 'contentList') return { mode: 'contentFiles', files: contentFiles() };
+    if (request.mode === 'contentData') return contentData(request);
     if (request.mode === 'rundownList') return { mode: 'rundownFiles', files: rundownFiles() };
     if (request.mode === 'showList') return { mode: 'showFiles', files: showFiles().map(({ file, ...f }) => f) };
     if (request.mode === 'showSave') return saveShowFile(request);
